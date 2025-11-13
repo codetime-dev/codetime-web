@@ -241,6 +241,32 @@ export const zhTW: Partial<Translation> = {
         },
       },
     },
+    profile: {
+      languages: {
+        title: '語言亮點',
+        topPercent: (percent: number) => `TOP ${percent}%`,
+      },
+      stats: {
+        title: '帳號概覽',
+        plan: '訂閱方案',
+        timezone: '所在時區',
+        timezoneUnset: '未設定',
+        joined: '加入時間',
+        updated: '最近更新',
+      },
+      bio: {
+        title: '個人簡介',
+        subtitle: '分享你的技術棧、興趣或正在進行的專案',
+        edit: '編輯簡介',
+        placeholder: '用幾句話介紹你的背景、語言偏好或想分享的故事…',
+        empty: '這位使用者還沒有填寫簡介。',
+        limitExceeded: '已超出限制',
+        save: '儲存',
+        saving: '儲存中…',
+        saveSuccess: '已更新簡介',
+        saveError: '儲存失敗，請稍後再試',
+      },
+    },
     badge: {
       preview: {
         title: '預覽',

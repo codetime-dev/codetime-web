@@ -184,6 +184,32 @@ export type Translation = {
         }
       }
     }
+    profile: {
+      languages: {
+        title: string
+        topPercent: (percent: number) => string
+      }
+      stats: {
+        title: string
+        plan: string
+        timezone: string
+        timezoneUnset: string
+        joined: string
+        updated: string
+      }
+      bio: {
+        title: string
+        subtitle: string
+        edit: string
+        placeholder: string
+        empty: string
+        limitExceeded: string
+        save: string
+        saving: string
+        saveSuccess: string
+        saveError: string
+      }
+    }
     badge: {
       preview: {
         title: string

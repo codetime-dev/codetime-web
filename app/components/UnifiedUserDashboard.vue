@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { refreshNuxtData } from '#app'
 import * as d3 from 'd3'
-import { v3GetUserByUserId, v3GetUserTopLanguagesRank } from '~/api/v3'
+import { v3GetUserByUserId, v3GetUserTopLanguagesRank, v3UpdateBio } from '~/api/v3'
 
 type UnifiedUserDashboardProps = {
   userId?: number
@@ -49,8 +50,10 @@ const startTime = computed(() => {
   return start
 })
 
+const BIO_MAX_LENGTH = 280
+
 // 用户信息获取（仅在显示用户信息时）
-const { data: userResult, error: userError } = await useAsyncData(`user-${targetUserId.value}`, async () => {
+const { data: userResult, error: userError, refresh: refreshUser } = await useAsyncData(`user-${targetUserId.value}`, async () => {
   if (!props.showUserInfo || !targetUserId.value) {
  return null
 }
@@ -86,9 +89,41 @@ const { data: userResult, error: userError } = await useAsyncData(`user-${target
   }
 })
 
-const user = computed(() => userResult.value?.user || null)
-const userHiddenData = computed(() => userResult.value?.isHidden || false)
-const userNotFound = computed(() => userResult.value?.notFound || false)
+const user = computed(() => {
+  if (props.showUserInfo) {
+    return userResult.value?.user || null
+  }
+  if (isOwnProfile.value) {
+    return currentUser.value
+  }
+  return null
+})
+const userHiddenData = computed(() => {
+  if (!props.showUserInfo) {
+    return false
+  }
+  return userResult.value?.isHidden || false
+})
+const userNotFound = computed(() => {
+  if (!props.showUserInfo) {
+    return false
+  }
+  return userResult.value?.notFound || false
+})
+const planBadgeLabel = computed(() => {
+  if (!user.value?.plan) {
+    return 'FREE'
+  }
+  return String(user.value.plan).toUpperCase()
+})
+
+const canEditBio = computed(() => isOwnProfile.value && !userHiddenData.value)
+const isEditingBio = ref(false)
+const bioDraft = ref('')
+const bioSaving = ref(false)
+const bioStatus = ref<'success' | 'error' | null>(null)
+const bioStatusMessage = ref('')
+const bioRemaining = computed(() => BIO_MAX_LENGTH - bioDraft.value.length)
 
 // 如果用户不存在，显示404错误
 if (props.showUserInfo && userNotFound.value && userError.value && !userHiddenData.value) {
@@ -163,6 +198,150 @@ const topLanguage = computed(() => {
   return null
 })
 
+const topLanguageHighlights = computed(() => {
+  return topLanguagesRanks.value.slice(0, 4)
+})
+
+type ProfileStat = {
+  label: string
+  value: string
+  icon: string
+}
+
+function formatDate(value?: string | Date | null): string | null {
+  if (!value) {
+    return null
+  }
+  const date = typeof value === 'string' ? new Date(value) : value
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+  return date.toLocaleDateString()
+}
+
+const profileStats = computed<ProfileStat[]>(() => {
+  if (!user.value) {
+    return []
+  }
+
+  const profileText = t.value.dashboard.profile
+
+  const stats: ProfileStat[] = [
+    {
+      label: profileText.stats.plan,
+      value: planBadgeLabel.value,
+      icon: 'i-tabler-crown',
+    },
+    {
+      label: profileText.stats.timezone,
+      value: user.value.timezone ?? profileText.stats.timezoneUnset,
+      icon: 'i-tabler-clock-hour-4',
+    },
+  ]
+
+  const joined = formatDate(user.value.createdAt)
+  if (joined) {
+    stats.push({
+      label: profileText.stats.joined,
+      value: joined,
+      icon: 'i-tabler-calendar-plus',
+    })
+  }
+
+  const updated = formatDate(user.value.updatedAt)
+  if (updated) {
+    stats.push({
+      label: profileText.stats.updated,
+      value: updated,
+      icon: 'i-tabler-refresh',
+    })
+  }
+
+  return stats
+})
+
+watch(() => user.value?.bio, (bio) => {
+  if (isEditingBio.value) {
+    return
+  }
+  bioDraft.value = bio ?? ''
+}, {
+  immediate: true,
+})
+
+watch(() => targetUserId.value, () => {
+  isEditingBio.value = false
+  bioStatus.value = null
+  bioStatusMessage.value = ''
+})
+
+watch(() => userHiddenData.value, (hidden) => {
+  if (hidden) {
+    isEditingBio.value = false
+    bioDraft.value = ''
+  }
+})
+
+function startBioEdit() {
+  if (!canEditBio.value) {
+    return
+  }
+  bioDraft.value = user.value?.bio ?? ''
+  bioStatus.value = null
+  bioStatusMessage.value = ''
+  isEditingBio.value = true
+}
+
+function cancelBioEdit() {
+  bioDraft.value = user.value?.bio ?? ''
+  isEditingBio.value = false
+  bioStatus.value = null
+  bioStatusMessage.value = ''
+}
+
+function updateBioDraft(value: string) {
+  bioDraft.value = value
+}
+
+async function saveBio() {
+  if (!canEditBio.value || bioSaving.value) {
+    return
+  }
+
+  bioSaving.value = true
+  bioStatus.value = null
+  bioStatusMessage.value = ''
+
+  try {
+    await v3UpdateBio({
+      body: {
+        bio: bioDraft.value.trim().length > 0 ? bioDraft.value.trim() : null,
+      },
+    })
+
+    const refreshTasks: Promise<unknown>[] = []
+    if (typeof refreshUser === 'function') {
+      refreshTasks.push(refreshUser())
+    }
+    refreshTasks.push(refreshNuxtData('user-self'))
+    await Promise.all(refreshTasks)
+
+    isEditingBio.value = false
+    bioStatus.value = 'success'
+    bioStatusMessage.value = t.value.dashboard.profile.bio.saveSuccess
+  }
+  catch (error: any) {
+    console.error('Failed to update bio', error)
+    bioStatus.value = 'error'
+    bioStatusMessage.value = typeof error?.message === 'string'
+      ? error.message
+      : t.value.dashboard.profile.bio.saveError
+  }
+  finally {
+    bioSaving.value = false
+  }
+}
+
 // SEO设置（仅在用户页面模式）
 watchEffect(() => {
   if (props.showUserInfo && user.value && !userHiddenData.value) {
@@ -202,43 +381,137 @@ watchEffect(() => {
       </div>
 
       <!-- User Header -->
-      <div class="flex flex-col items-center">
-        <div v-if="user?.avatar" class="mb-4">
-          <img
-            :src="user.avatar"
-            :alt="user.username"
-            class="border-surface-dimmed border-4 rounded-full h-24 w-24"
-          >
-        </div>
-        <div v-else class="mb-4">
-          <div class="border-surface-dimmed bg-surface-dim border-4 rounded-full flex h-24 w-24 items-center justify-center">
-            <i class="i-tabler-user text-4xl text-surface-dimmed" />
+      <template v-else>
+        <div class="gap-6 grid lg:grid-cols-[2fr,1fr]">
+          <div class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface space-y-6 md:p-8">
+            <div class="flex flex-col gap-6 md:flex-row md:items-center">
+              <div class="flex justify-center md:block">
+                <div v-if="user?.avatar" class="border-surface-dimmed/60 p-2 border-4 rounded-full">
+                  <img
+                    :src="user.avatar"
+                    :alt="user.username"
+                    class="rounded-full h-28 w-28 object-cover"
+                  >
+                </div>
+                <div v-else class="border-surface-dimmed/60 bg-surface-dim text-surface-dimmed border-4 rounded-full flex h-28 w-28 items-center justify-center">
+                  <i class="i-tabler-user text-4xl" />
+                </div>
+              </div>
+              <div class="text-center flex-1 space-y-3 md:text-left">
+                <div class="flex flex-wrap gap-3 items-center justify-center md:justify-between">
+                  <h1 class="text-3xl tracking-tight font-bold">
+                    {{ user?.username || `User ${targetUserId}` }}
+                  </h1>
+                  <span class="border-primary/30 bg-primary/10 text-xs text-primary tracking-[0.2em] font-semibold px-4 py-1 border rounded-full uppercase">
+                    {{ planBadgeLabel }}
+                  </span>
+                </div>
+                <div v-if="user?.email" class="text-sm text-surface-dimmed">
+                  {{ user.email }}
+                </div>
+                <div class="text-sm text-surface-dimmed flex flex-wrap gap-4 items-center justify-center md:justify-start">
+                  <div class="flex gap-1 items-center">
+                    <i class="i-tabler-hash" />
+                    <span>#{{ user?.id || targetUserId }}</span>
+                  </div>
+                  <div class="flex gap-1 items-center">
+                    <i class="i-tabler-clock-hour-4" />
+                    <span>{{ user?.timezone ?? t.dashboard.profile.stats.timezoneUnset }}</span>
+                  </div>
+                  <div v-if="formatDate(user?.createdAt)" class="flex gap-1 items-center">
+                    <i class="i-tabler-calendar-event" />
+                    <span>{{ t.dashboard.profile.stats.joined }} {{ formatDate(user?.createdAt) }}</span>
+                  </div>
+                </div>
+                <div v-if="formatDate(user?.updatedAt)" class="text-sm text-surface-dimmed flex gap-2 items-center justify-center md:justify-start">
+                  <i class="i-tabler-refresh" />
+                  <span>{{ t.dashboard.profile.stats.updated }} {{ formatDate(user?.updatedAt) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="topLanguageHighlights.length > 0" class="border-surface-dimmed/60 bg-surface-variant-1/40 p-4 border rounded-2xl">
+              <div class="text-xs text-surface-dimmed tracking-[0.3em] mb-3 uppercase">
+                {{ t.dashboard.profile.languages.title }}
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <div
+                  v-for="rank in topLanguageHighlights"
+                  :key="rank.language"
+                  class="border-primary/30 bg-primary/5 text-sm px-4 py-2 border rounded-full flex flex-wrap gap-2 items-center"
+                >
+                  <span class="font-semibold">
+                    {{ getLanguageName(rank.language || 'Unknown') }}
+                  </span>
+                  <span class="text-xs text-surface-dimmed">
+                    {{ getDurationString(rank.totalMinutes * 60 * 1000, ['hours', 'minutes']) }}
+                  </span>
+                  <span class="text-xs text-surface-dimmed">
+                    {{ t.dashboard.profile.languages.topPercent(Math.max(1, Math.round(rank.percentile * 100))) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="profileStats.length > 0" class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface md:p-8">
+            <div class="text-xs text-surface-dimmed tracking-[0.3em] uppercase">
+              {{ t.dashboard.profile.stats.title }}
+            </div>
+            <div class="mt-4 gap-4 grid">
+              <div
+                v-for="stat in profileStats"
+                :key="stat.label"
+                class="flex gap-3 items-center justify-between"
+              >
+                <div class="text-sm text-surface-dimmed flex gap-2 items-center">
+                  <i class="text-lg text-primary" :class="[stat.icon]" />
+                  <span>{{ stat.label }}</span>
+                </div>
+                <span class="text-sm text-surface font-medium text-right">
+                  {{ stat.value }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <h1 class="text-3xl font-bold text-center">
-          {{ user?.username || `User ${targetUserId}` }}
-        </h1>
+        <UserBioCard
+          class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface md:p-8"
+          :bio="user?.bio ?? null"
+          :can-edit="canEditBio"
+          :is-editing="isEditingBio"
+          :bio-draft="bioDraft"
+          :bio-remaining="bioRemaining"
+          :bio-saving="bioSaving"
+          :bio-status="bioStatus"
+          :bio-status-message="bioStatusMessage"
+          :max-length="BIO_MAX_LENGTH"
+          @start-edit="startBioEdit"
+          @cancel-edit="cancelBioEdit"
+          @save="saveBio"
+          @update:bio-draft="updateBioDraft"
+        />
+      </template>
+    </div>
 
-        <div v-if="user?.email" class="text-surface-dimmed">
-          {{ user.email }}
-        </div>
-
-        <div v-if="user?.bio" class="mt-2 text-center max-w-md">
-          {{ user.bio }}
-        </div>
-
-        <div class="text-sm text-surface-dimmed mt-2 flex gap-4">
-          <div v-if="user?.plan" class="flex gap-1 items-center">
-            <i class="i-tabler-crown" />
-            <span>{{ user.plan }}</span>
-          </div>
-          <div v-if="user?.createdAt" class="flex gap-1 items-center">
-            <i class="i-tabler-calendar" />
-            <span>{{ new Date(user.createdAt).toLocaleDateString() }}</span>
-          </div>
-        </div>
-      </div>
+    <div v-if="!showUserInfo && canEditBio && !userHiddenData" class="space-y-4">
+      <UserBioCard
+        class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface md:p-8"
+        :bio="user?.bio ?? null"
+        :can-edit="canEditBio"
+        :is-editing="isEditingBio"
+        :bio-draft="bioDraft"
+        :bio-remaining="bioRemaining"
+        :bio-saving="bioSaving"
+        :bio-status="bioStatus"
+        :bio-status-message="bioStatusMessage"
+        :max-length="BIO_MAX_LENGTH"
+        @start-edit="startBioEdit"
+        @cancel-edit="cancelBioEdit"
+        @save="saveBio"
+        @update:bio-draft="updateBioDraft"
+      />
     </div>
 
     <!-- 控制面板 (仅在启用时显示) -->

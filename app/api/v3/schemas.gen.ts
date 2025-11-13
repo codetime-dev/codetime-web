@@ -672,6 +672,24 @@ export const TotalMinutesResponseSchema = {
     title: 'TotalMinutesResponse'
 } as const;
 
+export const UserBioUpdateRequestSchema = {
+    properties: {
+        bio: {
+            oneOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: [],
+    title: 'UserBioUpdateRequest'
+} as const;
+
 export const UserCodingHistoryResponseSchema = {
     properties: {
         userId: {
@@ -945,7 +963,7 @@ export const WorkspaceEvaluationRequestSchema = {
 
 export const WorkspaceEvaluationResponseSchema = {
     properties: {
-        matching_tags: {
+        matchingTags: {
             items: {
                 '$ref': '#/components/schemas/TagResponse'
             },
@@ -953,7 +971,7 @@ export const WorkspaceEvaluationResponseSchema = {
         }
     },
     type: 'object',
-    required: ['matching_tags'],
+    required: ['matchingTags'],
     title: 'WorkspaceEvaluationResponse'
 } as const;
 

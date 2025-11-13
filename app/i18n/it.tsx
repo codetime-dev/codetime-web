@@ -495,6 +495,32 @@ export const it: Partial<Translation> = {
         statisticsTitle: (tagName: string) => `Statistiche di ${tagName}`,
       },
     },
+    profile: {
+      languages: {
+        title: 'Language Highlights',
+        topPercent: (percent: number) => `TOP ${percent}%`,
+      },
+      stats: {
+        title: 'Account Overview',
+        plan: 'Subscription',
+        timezone: 'Timezone',
+        timezoneUnset: 'Not set',
+        joined: 'Joined',
+        updated: 'Last updated',
+      },
+      bio: {
+        title: 'Bio',
+        subtitle: 'Share your stack, interests, or current focus.',
+        edit: 'Edit bio',
+        placeholder: 'Describe your background, favorite tools, or current projects…',
+        empty: 'This user has not written a bio yet.',
+        limitExceeded: 'Character limit exceeded',
+        save: 'Save',
+        saving: 'Saving…',
+        saveSuccess: 'Bio updated successfully',
+        saveError: 'Failed to save bio. Please try again.',
+      },
+    },
     pluginGuide: {
       title: 'Inizia con CodeTime',
       description: 'Installa il plugin CodeTime per tracciare automaticamente il tuo tempo di programmazione',

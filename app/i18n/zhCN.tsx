@@ -241,6 +241,32 @@ export const zhCN: Partial<Translation> = {
         },
       },
     },
+    profile: {
+      languages: {
+        title: '语言亮点',
+        topPercent: (percent: number) => `TOP ${percent}%`,
+      },
+      stats: {
+        title: '账号概览',
+        plan: '订阅计划',
+        timezone: '所在时区',
+        timezoneUnset: '未设置',
+        joined: '加入时间',
+        updated: '最近更新',
+      },
+      bio: {
+        title: '个人简介',
+        subtitle: '分享你的技术栈、兴趣或正在推进的项目',
+        edit: '编辑简介',
+        placeholder: '用几句话介绍你的背景、语言偏好或想分享的故事…',
+        empty: '这个用户还没有填写简介。',
+        limitExceeded: '已超出限制',
+        save: '保存',
+        saving: '保存中…',
+        saveSuccess: '已保存新的简介',
+        saveError: '保存失败，请稍后重试',
+      },
+    },
     pluginGuide: {
       title: '开始使用 CodeTime',
       description: '安装 CodeTime 插件，自动追踪您的编程时间',

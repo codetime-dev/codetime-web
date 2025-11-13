@@ -284,6 +284,13 @@ export type TotalMinutesResponse = {
 };
 
 /**
+ * UserBioUpdateRequest
+ */
+export type UserBioUpdateRequest = {
+    bio?: string | null;
+};
+
+/**
  * UserCodingHistoryResponse
  */
 export type UserCodingHistoryResponse = {
@@ -366,7 +373,7 @@ export type WorkspaceEvaluationRequest = {
  * WorkspaceEvaluationResponse
  */
 export type WorkspaceEvaluationResponse = {
-    matching_tags: Array<TagResponse>;
+    matchingTags: Array<TagResponse>;
 };
 
 /**
@@ -1216,6 +1223,35 @@ export type V3SearchWorkspacesResponses = {
 };
 
 export type V3SearchWorkspacesResponse = V3SearchWorkspacesResponses[keyof V3SearchWorkspacesResponses];
+
+export type V3UpdateBioData = {
+    body: UserBioUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/v3/users/self/bio';
+};
+
+export type V3UpdateBioErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | Array<unknown> | Array<unknown>;
+    };
+};
+
+export type V3UpdateBioError = V3UpdateBioErrors[keyof V3UpdateBioErrors];
+
+export type V3UpdateBioResponses = {
+    /**
+     * Document created, URL follows
+     */
+    201: UserSelfPublic;
+};
+
+export type V3UpdateBioResponse = V3UpdateBioResponses[keyof V3UpdateBioResponses];
 
 export type V3GetYearlyReportDataData = {
     body?: never;
