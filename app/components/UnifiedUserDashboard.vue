@@ -362,7 +362,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="mx-auto p-6 max-w-6xl space-y-8">
+  <div class="mx-auto px-4 py-6 max-w-6xl w-full space-y-8 lg:max-w-7xl">
     <!-- User Header (仅在用户模式显示) -->
     <div v-if="showUserInfo" class="space-y-6">
       <!-- Hidden Data Warning -->
@@ -493,25 +493,6 @@ watchEffect(() => {
           @update:bio-draft="updateBioDraft"
         />
       </template>
-    </div>
-
-    <div v-if="!showUserInfo && canEditBio && !userHiddenData" class="space-y-4">
-      <UserBioCard
-        class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface md:p-8"
-        :bio="user?.bio ?? null"
-        :can-edit="canEditBio"
-        :is-editing="isEditingBio"
-        :bio-draft="bioDraft"
-        :bio-remaining="bioRemaining"
-        :bio-saving="bioSaving"
-        :bio-status="bioStatus"
-        :bio-status-message="bioStatusMessage"
-        :max-length="BIO_MAX_LENGTH"
-        @start-edit="startBioEdit"
-        @cancel-edit="cancelBioEdit"
-        @save="saveBio"
-        @update:bio-draft="updateBioDraft"
-      />
     </div>
 
     <!-- 控制面板 (仅在启用时显示) -->
