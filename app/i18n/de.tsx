@@ -12,6 +12,8 @@ export const de: Partial<Translation> = {
     annualCodeTimeReport: (year: number | string) => `Jährlicher Codezeitbericht für ${year}`,
     weekendCodingTimeRatio: 'Verhältnis der Codezeit am Wochenende',
     averageDailyCodingTime: 'Durchschnittliche tägliche Codezeit',
+    activeDaysOfTheYear: 'Aktive Tage des Jahres',
+    longestStreakOfTheYear: 'Längste Serie des Jahres',
     busiestDayOfTheYear: 'Der geschäftigste Tag des Jahres',
     busiestMonthOfTheYear: 'Der geschäftigste Monat des Jahres',
     theMostProductiveHourOfTheYear: 'Die produktivste Stunde des Jahres',

@@ -1261,7 +1261,7 @@ export type V3GetYearlyReportDataData = {
         /**
          * Year to get report for
          */
-        year?: '2024';
+        year?: number;
         /**
          * Timezone for the report
          */

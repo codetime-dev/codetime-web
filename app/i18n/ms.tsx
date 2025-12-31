@@ -12,6 +12,8 @@ export const ms: Partial<Translation> = {
     annualCodeTimeReport: (year: number | string) => `Laporan Masa Kod Tahunan untuk ${year}`,
     weekendCodingTimeRatio: 'Nisbah Masa Pengekodan Hujung Minggu',
     averageDailyCodingTime: 'Purata Masa Pengekodan Harian',
+    activeDaysOfTheYear: 'Hari aktif sepanjang tahun',
+    longestStreakOfTheYear: 'Rentetan terpanjang tahun ini',
     busiestDayOfTheYear: 'Hari Paling Sibuk dalam Setahun',
     busiestMonthOfTheYear: 'Bulan Paling Sibuk dalam Setahun',
     theMostProductiveHourOfTheYear: 'Jam Paling Produktif dalam Setahun',

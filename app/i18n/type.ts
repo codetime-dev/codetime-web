@@ -8,6 +8,8 @@ export type Translation = {
     annualCodeTimeReport: (year: number | string) => string
     weekendCodingTimeRatio: string
     averageDailyCodingTime: string
+    activeDaysOfTheYear: string
+    longestStreakOfTheYear: string
     busiestDayOfTheYear: string
     busiestMonthOfTheYear: string
     theMostProductiveHourOfTheYear: string

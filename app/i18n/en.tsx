@@ -12,6 +12,8 @@ export const en: Translation = {
     annualCodeTimeReport: (year: number | string) => `Annual Code Time Report for ${year}`,
     weekendCodingTimeRatio: 'Weekend Coding Time Ratio',
     averageDailyCodingTime: 'Average Daily Coding Time',
+    activeDaysOfTheYear: 'Active Days of the Year',
+    longestStreakOfTheYear: 'Longest Streak of the Year',
     busiestDayOfTheYear: 'Busiest Day of the Year',
     busiestMonthOfTheYear: 'Busiest Month of the Year',
     theMostProductiveHourOfTheYear: 'The Most Productive Hour of the Year',

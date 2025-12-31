@@ -12,6 +12,8 @@ export const zhTW: Partial<Translation> = {
     annualCodeTimeReport: (year: number | string) => `${year} 年年度程式碼時間報告`,
     weekendCodingTimeRatio: '週末編程時間占比',
     averageDailyCodingTime: '平均每日編程時間',
+    activeDaysOfTheYear: '全年活躍天數',
+    longestStreakOfTheYear: '全年最長連續天數',
     busiestDayOfTheYear: '年度最忙碌的一天',
     busiestMonthOfTheYear: '年度最忙碌的一個月',
     theMostProductiveHourOfTheYear: '年度最高效的一小時',

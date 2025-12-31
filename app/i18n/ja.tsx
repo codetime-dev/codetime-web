@@ -12,6 +12,8 @@ export const ja: Partial<Translation> = {
     annualCodeTimeReport: (year: number | string) => `${year} 年の年間コーディング時間レポート`,
     weekendCodingTimeRatio: '週末のコーディング時間比率',
     averageDailyCodingTime: '1日あたりの平均コーディング時間',
+    activeDaysOfTheYear: '年間アクティブ日数',
+    longestStreakOfTheYear: '年間最長連続日数',
     busiestDayOfTheYear: '年間で最も忙しい日',
     busiestMonthOfTheYear: '年間で最も忙しい月',
     theMostProductiveHourOfTheYear: '年間で最も生産性の高い時間',
