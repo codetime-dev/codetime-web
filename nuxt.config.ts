@@ -51,11 +51,6 @@ export default defineNuxtConfig({
   ], '@sentry/nuxt'],
 
   sitemap: {
-    hostname: 'https://codetime.dev',
-    i18n: {
-      locales: ['en', 'zh-CN'],
-      defaultLocale: 'en',
-    },
     exclude: [
       '/[...slug]',
       '/**/dashboard/**',
@@ -67,7 +62,7 @@ export default defineNuxtConfig({
     },
     autoLastmod: false,
     urls: async () => {
-      // 只为主要页面生成 URL，用户页面通过动态路由处理
+      // Generate URLs only for main pages; user pages are handled by dynamic routes.
       return []
     },
   },

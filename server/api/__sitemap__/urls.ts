@@ -1,7 +1,8 @@
+import type { SitemapUrlInput } from '#sitemap/types'
 import { locales } from '~/i18n'
 
 export default defineSitemapEventHandler(async () => {
-  const urls = []
+  const urls: SitemapUrlInput[] = []
 
   // Add homepage for all locales
   for (const locale of locales) {

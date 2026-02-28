@@ -65,7 +65,7 @@ const t = useI18N()
 </script>
 
 <template>
-  <div class="stats-card px-8 py-12 flex flex-col gap-4 shadow-sm items-center relative overflow-hidden backdrop-blur-sm">
+  <div class="stats-card px-4 py-10 flex flex-col gap-4 shadow-sm items-center relative overflow-hidden backdrop-blur-sm sm:px-8 sm:py-12">
     <div class="opacity-20 inset-0 absolute">
       <div class="floating-circles">
         <div class="floating-circle" />
@@ -74,24 +74,27 @@ const t = useI18N()
       </div>
     </div>
 
-    <div class="flex flex-col gap-4 items-center relative z-10">
-      <span class="stats-subtitle text-sm tracking-wide font-medium inline-block">
+    <div class="flex flex-col gap-4 min-w-0 w-full items-center relative z-10">
+      <span class="stats-subtitle text-xs tracking-wide font-medium px-2 text-center inline-block sm:text-sm">
         {{ t.landing.alreadyStatistical }} ({{ t.landing.minutes }})
       </span>
 
-      <div v-if="status === 'success'" class="text-6xl flex gap-3 items-end">
+      <div
+        v-if="status === 'success'"
+        class="stats-number-wrap flex min-w-0 w-full items-end justify-center"
+      >
         <span
           key="b"
-          class="stats-number animate-pulse-glow font-bold font-mono"
+          class="stats-number animate-pulse-glow leading-none font-bold font-mono max-w-full"
         >
           {{ fomater.format(minutes) }}
         </span>
       </div>
 
-      <div v-else class="text-6xl flex gap-3 items-end">
+      <div v-else class="flex min-w-0 w-full items-end justify-center">
         <div
           key="a"
-          class="shimmer font-bold font-mono rounded-lg h-15 min-w-84 animate-pulse"
+          class="shimmer font-bold font-mono rounded-lg h-12 w-[min(21rem,80vw)] animate-pulse sm:h-15"
         />
       </div>
 
@@ -133,10 +136,18 @@ const t = useI18N()
 }
 
 .stats-number {
+  display: block;
+  font-size: clamp(2rem, 9vw, 3.75rem);
+  line-height: 1;
+  white-space: nowrap;
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+}
+
+.stats-number-wrap {
+  overflow: hidden;
 }
 
 [data-scheme="dark"] .stats-number {
