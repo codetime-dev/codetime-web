@@ -51,7 +51,7 @@ watchEffect(() => {
   <Select
     v-model="currentLocaleObj"
     aria-label="Language"
-    class="w-46"
+    class="max-w-full w-[min(11.5rem,calc(100vw-5.5rem))]"
     :options="languageOptions"
     @change="onChange"
   />

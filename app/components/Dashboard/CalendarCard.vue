@@ -24,10 +24,7 @@ const t = useI18N()
   >
     <div class="p-2 flex flex-col">
       <div
-        :style="{
-          flexWrap: 'nowrap',
-        }"
-        class="flex flex-wrap gap-2 children:flex-grow children:sm:flex-basis-[200px]"
+        class="flex flex-wrap gap-2 min-w-0 children:flex-grow sm:flex-nowrap children:sm:flex-basis-[200px]"
       >
         <DashboardDataBody
           :title="t.dashboard.overview.statistic.timeTotal"
