@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { TagResponse } from '~/api/v3/types.gen'
 import { Btn, ColorInput, Modal, Paper, TextField } from '@roku-ui/vue'
-import EmojiPicker from 'vue3-emoji-picker'
-import 'vue3-emoji-picker/css'
+import { defineAsyncComponent } from 'vue'
 
 type Props = {
   tag?: TagResponse | null
@@ -20,6 +19,19 @@ const emit = defineEmits<Emits>()
 const modelValue = defineModel<boolean>('modelValue', { required: true })
 
 const t = useI18N()
+
+const EmojiPicker = defineAsyncComponent(async () => {
+  if (import.meta.server) {
+    return { render: () => null }
+  }
+
+  const [{ default: Picker }] = await Promise.all([
+    import('vue3-emoji-picker'),
+    import('vue3-emoji-picker/css'),
+  ])
+
+  return Picker
+})
 
 const formData = reactive({
   name: props.tag?.name || '',
@@ -202,15 +214,17 @@ onMounted(() => {
                 </template>
               </Btn>
             </div>
-            <div v-if="showEmojiPicker" class="mt-2 absolute z-50">
-              <EmojiPicker
-                theme="auto"
-                :native="true"
-                :display-recent="true"
-                :disable-skin-tones="false"
-                @select="handleEmojiSelect"
-              />
-            </div>
+            <ClientOnly>
+              <div v-if="showEmojiPicker" class="mt-2 absolute z-50">
+                <EmojiPicker
+                  theme="auto"
+                  :native="true"
+                  :display-recent="true"
+                  :disable-skin-tones="false"
+                  @select="handleEmojiSelect"
+                />
+              </div>
+            </ClientOnly>
           </div>
         </div>
 

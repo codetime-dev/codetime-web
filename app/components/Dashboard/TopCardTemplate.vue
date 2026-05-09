@@ -88,14 +88,16 @@ const surfaceVariantCS = useContainerDefaultVariantCS()
                   :class="d.icon"
                   class="mb-0.5 mr-1 h-14px w-14px inline-block"
                 />
-                <NuxtImg
+                <img
                   v-else
-                  :src="`vscode-icons/vscode-icons_${d.icon.split('vscode-icons-')[1]}.svg`"
+                  :src="`/vscode-icons/vscode-icons_${d.icon.split('vscode-icons-')[1]}.svg`"
                   class="mb-0.5 mr-1 inline-block"
                   width="14"
                   height="14"
                   :alt="d.icon.split('vscode-icons-file-type-')[1]"
-                />
+                  loading="lazy"
+                  decoding="async"
+                >
               </template>
               {{ type === 'language' ? getLanguageName(d.field) : d.field }}
             </div>

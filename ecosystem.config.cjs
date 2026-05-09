@@ -3,6 +3,7 @@ module.exports = {
     {
       name: 'CodetimeWebV3',
       port: '3001',
+      cwd: __dirname,
       exec_mode: 'cluster',
       instances: 2,
       script: './.output/server/index.mjs',

@@ -33,12 +33,14 @@ useHead({
             <NuxtLink
               :to="`/${locale}`"
             >
-              <NuxtImg
+              <img
                 alt="Code Time"
                 src="/icon.svg"
                 width="26"
                 class="ml-2 mr-3"
-              />
+                loading="lazy"
+                decoding="async"
+              >
             </NuxtLink>
             <ClientOnly>
               <NuxtLink

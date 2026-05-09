@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useCS, useMergedCS } from '@roku-ui/vue'
+import { useCS } from '@roku-ui/vue'
+import { computed } from 'vue'
 
 defineProps<{
   title?: string
@@ -18,7 +19,13 @@ const containerCS = useCS({
   color: 'surface',
   index: { dark: 9, light: 1 },
 })
-const cs = useMergedCS(borderCS, containerCS)
+const cs = computed(() => ({
+  style: {
+    ...borderCS.value.style,
+    ...containerCS.value.style,
+  },
+  class: [borderCS.value.class, containerCS.value.class],
+}))
 </script>
 
 <template>

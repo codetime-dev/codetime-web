@@ -75,12 +75,14 @@ const showAnnualReport = computed(() => {
           <ClientOnly>
             <div class="flex gap-2 items-center">
               <NuxtLink :to="`/${locale}`">
-                <NuxtImg
+                <img
                   alt="Code Time"
                   src="/icon.svg"
                   width="26"
                   class="ml-2 mr-3"
-                />
+                  loading="lazy"
+                  decoding="async"
+                >
               </NuxtLink>
               <NuxtLink
                 v-if="user"
@@ -189,11 +191,13 @@ const showAnnualReport = computed(() => {
         class="py-16 op75 flex flex-col h-full items-center justify-center"
       >
         <div class="mb-8">
-          <NuxtImg
+          <img
             alt="Code Time"
             src="/icon.svg"
             width="64"
-          />
+            loading="lazy"
+            decoding="async"
+          >
         </div>
         <span class="text-sm pb-6 text-center max-w-2xl">
           {{ t.dashboard.loginRequired }}
