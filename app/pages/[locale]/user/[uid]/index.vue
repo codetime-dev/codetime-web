@@ -5,18 +5,11 @@ definePageMeta({
 
 const route = useRoute()
 
-const uid = computed(() => {
-  return Number(route.params.uid)
-})
+const uid = computed(() => Number(route.params.uid))
 </script>
 
 <template>
   <NuxtLayout name="user">
-    <UnifiedUserDashboard
-      :user-id="uid"
-      :show-user-info="true"
-      :show-controls="false"
-      layout="user"
-    />
+    <UserProfile :user-id="uid" />
   </NuxtLayout>
 </template>

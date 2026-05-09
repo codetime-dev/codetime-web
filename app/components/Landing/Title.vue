@@ -12,7 +12,7 @@
 }
 
 .gradient-text {
-  font-family: "Share Tech Mono", monospace;
+  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
   display: inline-block;
   max-width: 100%;
   background-clip: text;

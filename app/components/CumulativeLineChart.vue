@@ -98,7 +98,7 @@ const options = computed<PlotOptions>(() => ({
       stroke: colors.value.earlierColor,
       strokeWidth: 2,
       x1: quarterAverages.value.earlierData?.[0]?.date,
-      x2: quarterAverages.value.earlierData?.[quarterAverages.value.earlierData.length - 1]?.date,
+      x2: quarterAverages.value.earlierData?.at(-1)?.date,
     }),
 
     // Recent 1/4 period average (solid line)
@@ -106,7 +106,7 @@ const options = computed<PlotOptions>(() => ({
       stroke: colors.value.recentColor,
       strokeWidth: 2,
       x1: quarterAverages.value.recentData?.[0]?.date,
-      x2: quarterAverages.value.recentData?.[quarterAverages.value.recentData.length - 1]?.date,
+      x2: quarterAverages.value.recentData?.at(-1)?.date,
     }),
 
     // Percentage change text

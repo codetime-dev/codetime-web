@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { Image } from '@roku-ui/vue'
-
 const locale = useLocale()
-// const currentTab = useCurrentTab(headerTabs)
 const user = useUser()
 
 const pending = autoResetRef(false, 1000)
 pending.value = true
+
+const route = useRoute()
 
 useHead({
   htmlAttrs: {
@@ -20,77 +19,158 @@ useHead({
     },
   ],
 })
+
+const sectionLabel = computed(() => {
+  if (route.path.includes('/user/')) {
+    return 'PROFILE'
+  }
+  return 'USER'
+})
 </script>
 
 <template>
   <NuxtLayout name="default">
-    <RHeader class="bg-surface-low px-2 pt-2">
-      <div class="px-2 pt-2 flex flex-col gap-2 w-full">
-        <div
-          class="flex h-34px items-center justify-between"
-        >
-          <div class="flex gap-2 items-center">
-            <NuxtLink
-              :to="`/${locale}`"
+    <div class="layout-frame mx-auto max-w-7xl w-full">
+      <header class="layout-topbar relative">
+        <div class="px-5.5 py-3.5 flex flex-wrap gap-x-6 gap-y-3 items-center justify-between">
+          <NuxtLink :to="`/${locale}`" class="flex gap-3 items-center">
+            <img
+              alt="Code Time"
+              src="/icon.svg"
+              width="20"
+              height="20"
+              class="block"
+              loading="lazy"
+              decoding="async"
             >
-              <img
-                alt="Code Time"
-                src="/icon.svg"
-                width="26"
-                class="ml-2 mr-3"
-                loading="lazy"
-                decoding="async"
-              >
-            </NuxtLink>
+            <span class="text-[14px] text-surface tracking-[0.3em] font-mono font-semibold">CODE·TIME</span>
+            <span class="text-surface-dimmed/40 text-[12px] font-mono">/</span>
+            <span class="text-[12px] text-primary tracking-[0.24em] font-mono uppercase">{{ sectionLabel }}</span>
+          </NuxtLink>
+
+          <div class="flex gap-3 items-center">
             <ClientOnly>
               <NuxtLink
                 v-if="user"
-                class="text-sm flex gap-3 items-center"
                 :to="`/${locale}/dashboard`"
+                class="text-[12px] text-surface-dimmed tracking-[0.08em] font-mono inline-flex gap-2 uppercase transition-colors items-center hover:text-primary"
               >
-                <Image
+                <img
                   v-if="user.avatar"
                   :src="user.avatar"
-                  class="rounded-full h-7 w-7"
-                  height="28px"
-                  width="28px"
-                />
-                <div class="hidden sm:block">
-                  {{ user.username }}
-                </div>
-                <PlanTag
-                  :plan="user.plan"
-                />
+                  alt=""
+                  class="border-surface-dimmed/30 border h-5 w-5 object-cover"
+                >
+                <span class="hidden sm:inline">{{ user.username }}</span>
+                <span
+                  class="text-[10.5px] tracking-[0.16em] px-1.5 py-0.5 border"
+                  :class="String(user.plan).toLowerCase() === 'pro'
+                    ? 'border-primary/40 text-primary bg-primary/10'
+                    : 'border-surface-dimmed/30 text-surface-dimmed/70'"
+                >
+                  {{ String(user.plan ?? 'free').toUpperCase() }}
+                </span>
               </NuxtLink>
-              <div
-                v-else-if="pending "
-                class="text-sm flex gap-3 items-center"
-              >
-                <div
-                  class="rounded-full bg-surface-variant-1 bg-op50 h-7 w-7 animate-pulse"
-                />
-                <div class="rounded bg-surface-variant-1 bg-op50 h-1em w-16 animate-pulse" />
+              <div v-else-if="pending" class="flex gap-2 items-center">
+                <div class="bg-surface-variant-1/50 h-5 w-5 animate-pulse" />
+                <div class="bg-surface-variant-1/50 h-3 w-14 hidden animate-pulse sm:block" />
               </div>
+              <NuxtLink
+                v-else
+                :to="`/${locale}/login`"
+                class="text-[12px] text-surface-dimmed tracking-[0.08em] font-mono uppercase transition-colors hover:text-primary"
+              >
+                [ LOGIN ]
+              </NuxtLink>
             </ClientOnly>
-          </div>
-          <div class="gap-2 hidden items-center sm:flex">
-            <i class="i-tabler-language-hiragana h-6 w-6" />
+            <span class="text-surface-dimmed/30">·</span>
             <LanguageSelect />
           </div>
         </div>
-        <div class="mt-2 flex gap-2" />
-      </div>
-    </RHeader>
-    <div>
-      <slot />
+      </header>
+
+      <main class="relative">
+        <slot />
+      </main>
+
+      <footer class="layout-foot relative">
+        <div class="text-surface-dimmed/55 text-[11px] tracking-[0.18em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
+          <span>datreks · {{ new Date().getFullYear() }}</span>
+          <span class="text-surface-dimmed/25">·</span>
+          <NuxtLink
+            to="https://github.com/Jannchie/codetime-web-v3"
+            target="_blank"
+            class="inline-flex gap-1 transition-colors items-center hover:text-primary"
+          >
+            <i class="i-tabler-brand-github text-sm" />
+            <span class="hidden sm:inline">github</span>
+          </NuxtLink>
+          <span class="text-surface-dimmed/25">·</span>
+          <NuxtLink
+            to="https://discord.gg/WWEQrWCkkP"
+            target="_blank"
+            class="inline-flex gap-1 transition-colors items-center hover:text-primary"
+          >
+            <i class="i-tabler-brand-discord text-sm" />
+            <span class="hidden sm:inline">discord</span>
+          </NuxtLink>
+          <span class="text-surface-dimmed/25">·</span>
+          <span class="hidden sm:inline">vue · nuxt · plot</span>
+        </div>
+      </footer>
     </div>
-    <CodetimeFooter />
   </NuxtLayout>
 </template>
 
 <style scoped>
-.header-title {
-  font-family: "Share Tech Mono", monospace;
-  font-size: 1.2rem;
+.layout-frame {
+  position: relative;
+  min-height: 100vh;
+}
+
+.layout-frame::before,
+.layout-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--r-surface-border-color);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.layout-frame::before {
+  left: 0;
+}
+
+.layout-frame::after {
+  right: 0;
+}
+
+.layout-topbar::after,
+.layout-foot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  height: 1px;
+  background: var(--r-surface-border-color);
+  opacity: 0.4;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.layout-topbar::after {
+  bottom: 0;
+}
+
+.layout-foot::before {
+  top: 0;
+}
+
+.layout-foot {
+  background: var(--r-surface-background-variant-1-color);
+  background-color: rgb(var(--r-color-surface-7) / 0.18);
 }
 </style>

@@ -211,7 +211,7 @@ const showAnnualReport = computed(() => {
 
 <style scoped>
 .header-title {
-  font-family: "Share Tech Mono", monospace;
+  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
   font-size: 1.2rem;
 }
 </style>

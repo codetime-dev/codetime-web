@@ -133,14 +133,15 @@ if (props.showUserInfo && userNotFound.value && userError.value && !userHiddenDa
   })
 }
 
-// Dashboard数据获取（仅在dashboard模式或查看自己的资料时）
 const shouldFetchDashboardData = computed(() => {
   return props.layout === 'dashboard' || isOwnProfile.value
 })
 
-const allDataResp = shouldFetchDashboardData.value ? fetchStats(days, 'time', 'days') : { data: ref(null), status: ref('success') }
-const allLanguageDataResp = shouldFetchDashboardData.value ? fetchStats(days, 'language', 'days') : { data: ref(null), status: ref('success') }
-const allProjectDataResp = shouldFetchDashboardData.value ? fetchStats(days, 'workspace', 'days') : { data: ref(null), status: ref('success') }
+// Always initialize data fetching so that when isOwnProfile resolves after
+// the async user fetch (server: false), the data is already loading.
+const allDataResp = fetchStats(days, 'time', 'days')
+const allLanguageDataResp = fetchStats(days, 'language', 'days')
+const allProjectDataResp = fetchStats(days, 'workspace', 'days')
 
 const allLanguageData = computed(() => allLanguageDataResp.data.value?.data ?? [])
 const allProjectData = computed(() => allProjectDataResp.data.value?.data ?? [])
@@ -202,12 +203,6 @@ const topLanguageHighlights = computed(() => {
   return topLanguagesRanks.value.slice(0, 4)
 })
 
-type ProfileStat = {
-  label: string
-  value: string
-  icon: string
-}
-
 function formatDate(value?: string | Date | null): string | null {
   if (!value) {
     return null
@@ -218,47 +213,6 @@ function formatDate(value?: string | Date | null): string | null {
   }
   return date.toLocaleDateString()
 }
-
-const profileStats = computed<ProfileStat[]>(() => {
-  if (!user.value) {
-    return []
-  }
-
-  const profileText = t.value.dashboard.profile
-
-  const stats: ProfileStat[] = [
-    {
-      label: profileText.stats.plan,
-      value: planBadgeLabel.value,
-      icon: 'i-tabler-crown',
-    },
-    {
-      label: profileText.stats.timezone,
-      value: user.value.timezone ?? profileText.stats.timezoneUnset,
-      icon: 'i-tabler-clock-hour-4',
-    },
-  ]
-
-  const joined = formatDate(user.value.createdAt)
-  if (joined) {
-    stats.push({
-      label: profileText.stats.joined,
-      value: joined,
-      icon: 'i-tabler-calendar-plus',
-    })
-  }
-
-  const updated = formatDate(user.value.updatedAt)
-  if (updated) {
-    stats.push({
-      label: profileText.stats.updated,
-      value: updated,
-      icon: 'i-tabler-refresh',
-    })
-  }
-
-  return stats
-})
 
 watch(() => user.value?.bio, (bio) => {
   if (isEditingBio.value) {
@@ -312,19 +266,51 @@ async function saveBio() {
   bioStatus.value = null
   bioStatusMessage.value = ''
 
+  const newBio = bioDraft.value.trim().length > 0 ? bioDraft.value.trim() : null
+
   try {
-    await v3UpdateBio({
+    // Call the API and capture the response, which includes the updated UserSelfPublic
+    const response = await v3UpdateBio({
       body: {
-        bio: bioDraft.value.trim().length > 0 ? bioDraft.value.trim() : null,
+        bio: newBio,
       },
     })
 
+    // The hey-api client returns `{ data: UserSelfPublic }` (fields style).
+    // Use the response to immediately update local state so the UI
+    // reflects the change without waiting for refresh calls to complete.
+    const updatedUser = (response as any)?.data as { bio?: string | null } | undefined
+    if (updatedUser) {
+      // Update the userResult (used when showUserInfo is true, e.g. profile page)
+      if (userResult.value?.user) {
+        userResult.value = {
+          ...userResult.value,
+          user: {
+            ...userResult.value.user,
+            bio: updatedUser.bio ?? null,
+          },
+        }
+      }
+      // Update the injected global user ref (used by useUser() across the app)
+      if (currentUser.value) {
+        currentUser.value = {
+          ...currentUser.value,
+          bio: updatedUser.bio ?? null,
+        }
+      }
+    }
+
+    // Still refresh in the background to keep everything in sync,
+    // but do not block the UI update on these calls.
     const refreshTasks: Promise<unknown>[] = []
     if (typeof refreshUser === 'function') {
       refreshTasks.push(refreshUser())
     }
     refreshTasks.push(refreshNuxtData('user-self'))
-    await Promise.all(refreshTasks)
+    // Fire-and-forget: no need to await these for the UI to be correct
+    Promise.all(refreshTasks).catch((error) => {
+      console.warn('Background refresh after bio save failed:', error)
+    })
 
     isEditingBio.value = false
     bioStatus.value = 'success'
@@ -333,9 +319,12 @@ async function saveBio() {
   catch (error: any) {
     console.error('Failed to update bio', error)
     bioStatus.value = 'error'
-    bioStatusMessage.value = typeof error?.message === 'string'
-      ? error.message
-      : t.value.dashboard.profile.bio.saveError
+    // Extract a useful message from various error shapes (hey-api may throw
+    // objects with `detail`, `message`, or plain strings)
+    const detail = (error as { detail?: string })?.detail
+    const message = (error as { message?: string })?.message
+    const fallback = typeof error === 'string' ? error : ''
+    bioStatusMessage.value = detail || message || fallback || t.value.dashboard.profile.bio.saveError
   }
   finally {
     bioSaving.value = false
@@ -382,102 +371,70 @@ watchEffect(() => {
 
       <!-- User Header -->
       <template v-else>
-        <div class="gap-6 grid lg:grid-cols-[2fr,1fr]">
-          <div class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface space-y-6 md:p-8">
-            <div class="flex flex-col gap-6 md:flex-row md:items-center">
-              <div class="flex justify-center md:block">
-                <div v-if="user?.avatar" class="border-surface-dimmed/60 p-2 border-4 rounded-full">
+        <!-- Profile Card (avatar + identity only, no nested sections) -->
+        <div class="border-surface-dimmed/30 border rounded-2xl bg-surface relative overflow-hidden">
+          <div class="bg-primary/40 h-0.5 w-full left-0 top-0 absolute" />
+          <div class="p-5 sm:p-6">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <!-- Avatar -->
+              <div class="flex shrink-0 justify-center sm:block">
+                <div
+                  v-if="user?.avatar"
+                  class="from-primary/30 p-0.5 rounded-full to-transparent bg-gradient-to-br"
+                >
                   <img
                     :src="user.avatar"
                     :alt="user.username"
-                    class="rounded-full h-28 w-28 object-cover"
+                    class="border-surface-dimmed/20 border rounded-full h-20 w-20 object-cover sm:h-24 sm:w-24"
                   >
                 </div>
-                <div v-else class="border-surface-dimmed/60 bg-surface-dim text-surface-dimmed border-4 rounded-full flex h-28 w-28 items-center justify-center">
-                  <i class="i-tabler-user text-4xl" />
+                <div
+                  v-else
+                  class="border-surface-dimmed/30 bg-surface-variant-1/40 text-surface-dimmed/60 border rounded-full flex h-20 w-20 items-center justify-center sm:h-24 sm:w-24"
+                >
+                  <i class="i-tabler-user text-3xl" />
                 </div>
               </div>
-              <div class="text-center flex-1 space-y-3 md:text-left">
-                <div class="flex flex-wrap gap-3 items-center justify-center md:justify-between">
-                  <h1 class="text-3xl tracking-tight font-bold">
+
+              <!-- Identity Info -->
+              <div class="text-center flex-1 min-w-0 sm:text-left">
+                <div class="mb-1.5 flex flex-wrap gap-2 items-center justify-center sm:justify-start">
+                  <h1 class="text-2xl tracking-tight font-bold truncate sm:text-3xl">
                     {{ user?.username || `User ${targetUserId}` }}
                   </h1>
-                  <span class="border-primary/30 bg-primary/10 text-xs text-primary tracking-[0.2em] font-semibold px-4 py-1 border rounded-full uppercase">
+                  <span
+                    class="border-primary/30 bg-primary/10 text-[11px] text-primary tracking-[0.15em] font-semibold px-2.5 py-0.5 border rounded-full shrink-0 uppercase"
+                  >
                     {{ planBadgeLabel }}
                   </span>
                 </div>
-                <div v-if="user?.email" class="text-sm text-surface-dimmed">
+                <p v-if="user?.email" class="text-surface-dimmed/70 text-sm mb-2">
                   {{ user.email }}
-                </div>
-                <div class="text-sm text-surface-dimmed flex flex-wrap gap-4 items-center justify-center md:justify-start">
-                  <div class="flex gap-1 items-center">
-                    <i class="i-tabler-hash" />
-                    <span>#{{ user?.id || targetUserId }}</span>
-                  </div>
-                  <div class="flex gap-1 items-center">
-                    <i class="i-tabler-clock-hour-4" />
-                    <span>{{ user?.timezone ?? t.dashboard.profile.stats.timezoneUnset }}</span>
-                  </div>
-                  <div v-if="formatDate(user?.createdAt)" class="flex gap-1 items-center">
-                    <i class="i-tabler-calendar-event" />
-                    <span>{{ t.dashboard.profile.stats.joined }} {{ formatDate(user?.createdAt) }}</span>
-                  </div>
-                </div>
-                <div v-if="formatDate(user?.updatedAt)" class="text-sm text-surface-dimmed flex gap-2 items-center justify-center md:justify-start">
-                  <i class="i-tabler-refresh" />
-                  <span>{{ t.dashboard.profile.stats.updated }} {{ formatDate(user?.updatedAt) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div v-if="topLanguageHighlights.length > 0" class="border-surface-dimmed/60 bg-surface-variant-1/40 p-4 border rounded-2xl">
-              <div class="text-xs text-surface-dimmed tracking-[0.3em] mb-3 uppercase">
-                {{ t.dashboard.profile.languages.title }}
-              </div>
-              <div class="flex flex-wrap gap-3">
-                <div
-                  v-for="rank in topLanguageHighlights"
-                  :key="rank.language"
-                  class="border-primary/30 bg-primary/5 text-sm px-4 py-2 border rounded-full flex flex-wrap gap-2 items-center"
-                >
-                  <span class="font-semibold">
-                    {{ getLanguageName(rank.language || 'Unknown') }}
+                </p>
+                <!-- Stat Pills -->
+                <div class="flex flex-wrap gap-1.5 justify-center sm:justify-start">
+                  <span class="text-xs text-surface-dimmed inline-flex gap-1 items-center">
+                    <i class="i-tabler-hash text-sm" />
+                    {{ user?.id || targetUserId }}
                   </span>
-                  <span class="text-xs text-surface-dimmed">
-                    {{ getDurationString(rank.totalMinutes * 60 * 1000, ['hours', 'minutes']) }}
+                  <span v-if="user?.timezone" class="text-xs text-surface-dimmed inline-flex gap-1 items-center">
+                    <i class="i-tabler-point-filled text-[6px]" />
+                    <i class="i-tabler-world text-sm" />
+                    {{ user.timezone }}
                   </span>
-                  <span class="text-xs text-surface-dimmed">
-                    {{ t.dashboard.profile.languages.topPercent(Math.max(1, Math.round(rank.percentile * 100))) }}
+                  <span v-if="formatDate(user?.createdAt)" class="text-xs text-surface-dimmed inline-flex gap-1 items-center">
+                    <i class="i-tabler-point-filled text-[6px]" />
+                    <i class="i-tabler-calendar-plus text-sm" />
+                    {{ t.dashboard.profile.stats.joined }} {{ formatDate(user?.createdAt) }}
                   </span>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="profileStats.length > 0" class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface md:p-8">
-            <div class="text-xs text-surface-dimmed tracking-[0.3em] uppercase">
-              {{ t.dashboard.profile.stats.title }}
-            </div>
-            <div class="mt-4 gap-4 grid">
-              <div
-                v-for="stat in profileStats"
-                :key="stat.label"
-                class="flex gap-3 items-center justify-between"
-              >
-                <div class="text-sm text-surface-dimmed flex gap-2 items-center">
-                  <i class="text-lg text-primary" :class="[stat.icon]" />
-                  <span>{{ stat.label }}</span>
-                </div>
-                <span class="text-sm text-surface font-medium text-right">
-                  {{ stat.value }}
-                </span>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Bio Section (flat, outside the profile card) -->
         <UserBioCard
-          class="border-surface-dimmed/60 p-6 border rounded-3xl bg-surface md:p-8"
           :bio="user?.bio ?? null"
           :can-edit="canEditBio"
           :is-editing="isEditingBio"
@@ -639,42 +596,40 @@ watchEffect(() => {
     <div v-if="showUserInfo && !userHiddenData" class="space-y-8">
       <!-- Top Languages Ranking -->
       <div>
-        <h2 class="text-2xl font-bold mb-4">
+        <h2 class="text-lg text-surface-dimmed tracking-[0.15em] font-medium mb-4 uppercase">
           {{ t.dashboard.overview.top.language }}
         </h2>
 
         <!-- Loading State -->
-        <div v-if="languagesPending" class="space-y-3">
+        <div v-if="languagesPending" class="space-y-1">
           <div
             v-for="i in 3"
             :key="i"
-            class="border-surface-dimmed p-4 border rounded-lg animate-pulse"
+            class="py-3 flex gap-3 items-center animate-pulse"
           >
-            <div class="flex gap-3 items-center">
-              <div class="bg-surface-dimmed rounded h-8 w-8" />
-              <div class="bg-surface-dimmed rounded h-8 w-8" />
-              <div class="flex-1 space-y-2">
-                <div class="bg-surface-dimmed rounded h-4 w-24" />
-                <div class="bg-surface-dimmed rounded h-3 w-16" />
-              </div>
+            <div class="rounded bg-surface-variant-1 shrink-0 h-6 w-6" />
+            <div class="rounded-full bg-surface-variant-1 shrink-0 h-8 w-8" />
+            <div class="flex-1 space-y-1.5">
+              <div class="rounded bg-surface-variant-1 h-4 w-24" />
+              <div class="rounded bg-surface-variant-1 h-3 w-16" />
             </div>
           </div>
         </div>
 
         <!-- Data State -->
-        <div v-else-if="topLanguagesRanks && topLanguagesRanks.length > 0" class="space-y-3">
+        <div v-else-if="topLanguagesRanks && topLanguagesRanks.length > 0">
           <div
             v-for="(rank, index) in topLanguagesRanks"
             :key="rank.language"
-            class="border-surface-dimmed p-4 border rounded-lg flex items-center justify-between"
+            class="border-surface-dimmed/20 py-3 border-b flex items-center justify-between last:border-b-0"
           >
             <div class="flex gap-3 items-center">
-              <div class="text-2xl text-primary font-bold">
-                #{{ index + 1 }}
+              <div class="text-primary/60 text-sm font-mono text-right shrink-0 w-6">
+                {{ index + 1 }}
               </div>
               <VSCodeIcon
                 :language="rank.language || 'Unknown'"
-                class="h-8 w-8"
+                class="shrink-0 h-7 w-7"
               />
               <div>
                 <div class="font-semibold">
@@ -685,21 +640,16 @@ watchEffect(() => {
                 </div>
               </div>
             </div>
-            <div class="text-right">
-              <div class="text-sm text-surface-dimmed">
-                {{ (rank.percentile * 100).toFixed(1) }}%
-              </div>
-            </div>
+            <span class="text-[11px] text-emerald-600 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 shrink-0">
+              {{ t.dashboard.profile.languages.topPercent(Math.max(1, Math.round(rank.percentile * 100))) }}
+            </span>
           </div>
         </div>
 
         <!-- Empty State -->
-        <div v-else class="py-12 text-center">
-          <i class="i-tabler-chart-bar text-6xl text-surface-dimmed mx-auto mb-4 block" />
-          <h3 class="text-xl font-semibold mb-2">
-            {{ t.dashboard.overview.noData.notice.title }}
-          </h3>
-          <p class="text-surface-dimmed">
+        <div v-else class="text-surface-dimmed py-10 text-center">
+          <i class="i-tabler-chart-bar text-4xl mx-auto mb-3 opacity-30 block" />
+          <p class="text-sm">
             No programming language data available for this user yet.
           </p>
         </div>

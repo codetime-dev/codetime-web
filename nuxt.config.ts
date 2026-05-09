@@ -44,9 +44,7 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     {
       download: true,
-      families: {
-        'Share Tech Mono': true,
-      },
+      families: {},
     },
   ], '@sentry/nuxt'],
 

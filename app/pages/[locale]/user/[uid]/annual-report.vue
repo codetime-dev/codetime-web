@@ -181,7 +181,7 @@ const activeDays = computed(() => {
   if (!yearlyData.value) {
     return 0
   }
-  return yearlyData.value.dailyDistribution.filter((d) => d.minutes > 0).length
+  return yearlyData.value.dailyDistribution.filter(d => d.minutes > 0).length
 })
 const totalDaysInYear = computed(() => getDaysInYear(reportYear.value))
 const activeDaysLabel = computed(() => {
@@ -295,8 +295,8 @@ function parseYearParam(value: string | string[] | undefined): number | null {
 function getDefaultReportYear(timezone: string): number {
   const dateFormatter = new Intl.DateTimeFormat('en-US', { timeZone: timezone, year: 'numeric', month: 'numeric' })
   const parts = dateFormatter.formatToParts(new Date())
-  const yearPart = parts.find((part) => part.type === 'year')?.value
-  const monthPart = parts.find((part) => part.type === 'month')?.value
+  const yearPart = parts.find(part => part.type === 'year')?.value
+  const monthPart = parts.find(part => part.type === 'month')?.value
   const yearValue = yearPart ? Number.parseInt(yearPart, 10) : new Date().getFullYear()
   const monthValue = monthPart ? Number.parseInt(monthPart, 10) : new Date().getMonth() + 1
   return monthValue === 1 ? yearValue - 1 : yearValue
