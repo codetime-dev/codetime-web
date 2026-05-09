@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Btn, Modal, Paper } from '@roku-ui/vue'
+import { Modal, Paper } from '@roku-ui/vue'
 import * as d3 from 'd3'
 
 const days = defineModel<number>('days', { default: 28 })
@@ -39,76 +39,53 @@ function onNext() {
   }
   next()
 }
-useI18N()
 </script>
 
 <template>
   <Modal v-model="priceModal">
     <div class="flex flex-col gap-8 min-w-72">
       <Paper class="max-w-92">
-        <div class="text-xl font-bold">
+        <div class="text-[14px] tracking-[0.12em] font-mono uppercase">
           {{ t.plan.modal.title }}
         </div>
-        <div class="text-sm text-surface-dimmed mt-4 w-full children:py-1">
-          <p>
-            {{ t.plan.modal.p1 }}
-          </p>
-          <p>
-            {{ t.plan.modal.p2 }}
-          </p>
-          <p>
-            {{ t.plan.modal.p3 }}
-          </p>
-          <a href="mailto:admin@codetime.dev">admin@codetime.dev</a>
+        <div class="text-[12.5px] text-surface-dimmed font-mono mt-3 w-full space-y-1.5">
+          <p>{{ t.plan.modal.p1 }}</p>
+          <p>{{ t.plan.modal.p2 }}</p>
+          <p>{{ t.plan.modal.p3 }}</p>
+          <a href="mailto:admin@codetime.dev" class="text-primary">admin@codetime.dev</a>
         </div>
       </Paper>
       <div class="relative">
-        <ProPricePaper
-          variant="monthly"
-          class="min-h-500px"
-        />
+        <ProPricePaper variant="monthly" class="min-h-500px" />
       </div>
     </div>
   </Modal>
-  <div class="ml-4 mt-8">
-    <div class="flex gap-2">
-      <div>
-        <div class="flex gap-2 items-center">
-          <Btn
-            icon
-            size="sm"
-            @click="onPrev"
-          >
-            <i class="i-tabler-chevron-left" />
-          </Btn>
-          <div v-if="days !== 36500">
-            {{ t.dashboard.overview.dataRange.title(days) }}
-          </div>
-          <div v-else>
-            {{ t.dashboard.overview.dataRange.allTime }}
-          </div>
-          <Btn
-            size="sm"
-            icon
-            @click="onNext"
-          >
-            <i class="i-tabler-chevron-right" />
-          </Btn>
-        </div>
-        <div class="text-sm text-surface-dimmed">
-          <div v-if="days !== 36500">
-            <span>
-              {{ d3.timeFormat('%Y-%m-%d')(new Date(Date.now() - days * 24 * 60 * 60 * 1000)) }}
-            </span>
 
-            <span> ~ </span>
-
-            <span>
-              {{ d3.timeFormat('%Y-%m-%d')(new Date()) }}
-            </span>
-          </div>
-        </div>
+  <div class="bg-surface-variant-1/25 px-2.5 py-1.5 flex flex-wrap gap-2 items-center justify-between">
+    <div class="flex gap-1.5 items-center">
+      <button
+        type="button"
+        class="bg-surface-variant-1/40 hover:bg-surface-variant-1/70 text-[12px] text-surface-dimmed font-mono p-1 transition-colors hover:text-surface"
+        @click="onPrev"
+      >
+        <i class="i-tabler-chevron-left text-xs" />
+      </button>
+      <div class="text-[12px] text-surface tracking-[0.08em] font-mono px-1.5 uppercase tabular-nums">
+        <span v-if="days !== 36500">{{ t.dashboard.overview.dataRange.title(days) }}</span>
+        <span v-else>{{ t.dashboard.overview.dataRange.allTime }}</span>
       </div>
+      <button
+        type="button"
+        class="bg-surface-variant-1/40 hover:bg-surface-variant-1/70 text-[12px] text-surface-dimmed font-mono p-1 transition-colors hover:text-surface"
+        @click="onNext"
+      >
+        <i class="i-tabler-chevron-right text-xs" />
+      </button>
+    </div>
+    <div v-if="days !== 36500" class="text-surface-dimmed/80 text-[10.5px] tracking-[0.06em] font-mono tabular-nums">
+      {{ d3.timeFormat('%Y-%m-%d')(new Date(Date.now() - days * 24 * 60 * 60 * 1000)) }}
+      <span class="text-surface-dimmed/40 mx-1">~</span>
+      {{ d3.timeFormat('%Y-%m-%d')(new Date()) }}
     </div>
   </div>
 </template>

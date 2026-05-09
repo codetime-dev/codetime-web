@@ -6,11 +6,12 @@ import { v3GetActiveDiscounts } from '~/api/v3/sdk.gen'
 
 const props = defineProps<{
   variant: 'monthly' | 'annual' | 'one-time'
+  embedded?: boolean
 }>()
 const isAnuual = computed(() => props.variant === 'annual')
 const isOneTime = computed(() => props.variant === 'one-time')
-const annualGradientCls = 'bg-gradient-to-rb from-red-600 via-purple-600 to-purple-500 bg-purple-500 inline-block text-transparent bg-clip-text'
-const monthlyGradientCls = 'bg-gradient-to-r from-primary-800 via-primary-600 to-primary-500 inline-block text-transparent bg-clip-text bg-primary'
+const annualGradientCls = 'text-error'
+const monthlyGradientCls = 'text-primary'
 
 const user = useUser()
 
@@ -284,18 +285,68 @@ async function toCheckoutLink() {
 </script>
 
 <template>
+  <Teleport to="body">
+    <div
+      v-if="user && user.plan !== 'pro' && discountText"
+      ref="discountRef"
+      class="text-sm text-white px-1 py-2 bg-sky-900 flex min-h-2em w-full items-center justify-center relative z-110"
+    >
+      {{ discountText }}
+    </div>
+  </Teleport>
+
+  <!-- Embedded mode: just the CTA button (used inside PriceTable) -->
+  <template v-if="embedded">
+    <ClientOnly>
+      <div v-if="user && user.plan === 'pro'" class="flex gap-2">
+        <Btn
+          v-if="user.planStatus"
+          class="w-full"
+          variant="transparent"
+          disabled
+        >
+          <template #leftSection>
+            <i class="i-tabler-check" />
+          </template>
+          {{ t.plan.status(user.planStatus) }}
+        </Btn>
+      </div>
+      <div v-else-if="user && user.plan === 'free'">
+        <Btn
+          variant="filled"
+          class="lemonsqueezy-button w-full !text-[14px] !tracking-[0.02em] !rounded-xl !h-11"
+          color="primary"
+          @click="toCheckoutLink"
+        >
+          <template #leftSection>
+            <i class="i-tabler-credit-card" />
+            <i v-if="isOneTime" class="i-ant-design-alipay-circle-outlined" />
+            <i v-if="isOneTime" class="i-ant-design-wechat-filled" />
+            <i v-if="isOneTime" class="i-entypo-social-paypal" />
+          </template>
+          <div class="text-center">
+            {{ t.plan.pro.button }}
+          </div>
+        </Btn>
+      </div>
+      <div v-else>
+        <Btn
+          v-if="!user"
+          class="w-full !text-[14px] !rounded-xl !h-11"
+          variant="transparent"
+          @click="onLogin"
+        >
+          {{ t.plan.needLogin }}
+        </Btn>
+      </div>
+    </ClientOnly>
+  </template>
+
+  <!-- Full card mode (used standalone in modals, etc.) -->
   <Paper
+    v-else
     class="flex flex-col h-full min-h-600px w-full justify-between"
   >
-    <Teleport to="body">
-      <div
-        v-if="user && user.plan !== 'pro' && discountText"
-        ref="discountRef"
-        class="text-sm text-white px-1 py-2 bg-sky-900 flex min-h-2em w-full items-center justify-center relative z-110"
-      >
-        {{ discountText }}
-      </div>
-    </Teleport>
     <div
       v-bind="filledContainerCS"
       class="text-sm text-white px-4 py-1 rounded-full right-4 top-0 absolute -translate-y-50%"
@@ -306,9 +357,7 @@ async function toCheckoutLink() {
       <div class="text-base font-light">
         {{ t.plan.pro.title }}
       </div>
-      <div
-        class="font-light flex gap-2 items-end"
-      >
+      <div class="font-light flex gap-2 items-end">
         <div
           :class="{
             [monthlyGradientCls]: !isAnuual,
@@ -342,10 +391,7 @@ async function toCheckoutLink() {
     </div>
     <div>
       <ClientOnly>
-        <div
-          v-if="user && user.plan === 'pro'"
-          class="flex gap-2"
-        >
+        <div v-if="user && user.plan === 'pro'" class="flex gap-2">
           <Btn
             v-if="user.planStatus"
             class="w-full"
@@ -367,33 +413,17 @@ async function toCheckoutLink() {
           >
             <template #leftSection>
               <i class="i-tabler-credit-card" />
-              <i
-                v-if="isOneTime"
-                class="i-ant-design-alipay-circle-outlined"
-              />
-              <i
-                v-if="isOneTime"
-                class="i-ant-design-wechat-filled"
-              />
-              <i
-                v-if="isOneTime"
-                class="i-entypo-social-paypal"
-              />
+              <i v-if="isOneTime" class="i-ant-design-alipay-circle-outlined" />
+              <i v-if="isOneTime" class="i-ant-design-wechat-filled" />
+              <i v-if="isOneTime" class="i-entypo-social-paypal" />
             </template>
             <div class="text-center">
               {{ t.plan.pro.button }}
             </div>
           </Btn>
         </div>
-        <div
-          v-else
-        >
-          <Btn
-            v-if="!user"
-            class="w-full"
-            variant="transparent"
-            @click="onLogin"
-          >
+        <div v-else>
+          <Btn v-if="!user" class="w-full" variant="transparent" @click="onLogin">
             {{ t.plan.needLogin }}
           </Btn>
         </div>

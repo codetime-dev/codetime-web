@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Btn } from '@roku-ui/vue'
-
 const props = defineProps<{
   value: string
   size?: 'sm' | 'md' | 'lg'
@@ -17,35 +15,42 @@ function onClick() {
 </script>
 
 <template>
-  <Btn
-    hover-variant="filled"
-    :color="ok ? 'secondary' : 'primary'"
+  <button
+    type="button"
+    class="copy-btn"
+    :class="ok ? 'copy-btn-ok' : ''"
     @click="onClick"
   >
-    <template #leftSection>
-      <i
-        v-if="ok"
-        class="i-tabler-check"
-      />
-      <i
-        v-else
-        class="i-tabler-copy"
-      />
-    </template>
-
-    <div
-      v-if="ok"
-    >
-      <div>
-        {{ t.button.copy }}
-      </div>
-    </div>
-    <div
-      v-else
-    >
-      <div>
-        {{ t.button.copy }}
-      </div>
-    </div>
-  </Btn>
+    <i :class="ok ? 'i-tabler-check' : 'i-tabler-copy'" class="text-sm" />
+    <span>{{ t.button.copy }}</span>
+  </button>
 </template>
+
+<style scoped>
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-primary-1);
+  background-color: color-mix(in srgb, var(--color-primary-1) 12%, transparent);
+  border: 0;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background-color: color-mix(in srgb, var(--color-primary-1) 22%, transparent);
+}
+
+.copy-btn-ok {
+  color: var(--r-color-secondary-1, #10b981);
+  background-color: color-mix(in srgb, var(--r-color-secondary-1, #10b981) 18%, transparent);
+}
+</style>

@@ -93,7 +93,7 @@ function widthPct(minutes: number): number {
 
       <li v-else class="empty">
         <i class="i-tabler-chart-bar text-surface-dimmed/30 text-2xl mb-2 block" />
-        <span class="text-[12px] tracking-[0.04em] font-mono">// no language data yet</span>
+        <span class="text-[12px] tracking-[0.04em] font-mono">{{ t.dashboard.profile.languages.noData }}</span>
       </li>
     </ul>
   </div>

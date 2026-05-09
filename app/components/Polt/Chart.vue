@@ -8,9 +8,11 @@ const props = defineProps<{
 const chartWrapper = ref<HTMLElement | null>(null)
 const { width, height } = useElementBounding(chartWrapper)
 const op = computed(() => {
+  const w = width.value || 800
+  const h = height.value || 300
   return {
-    width: width.value,
-    height: height.value,
+    width: w,
+    height: h,
     ...props.options,
   }
 })
@@ -20,10 +22,16 @@ const op = computed(() => {
   <div
     ref="chartWrapper"
     data-allow-mismatch
-    class="flex-col h-full w-full overflow-y-auto"
+    class="polt-chart-wrapper w-full"
   >
     <PoltRenderer
       :options="op"
     />
   </div>
 </template>
+
+<style scoped>
+.polt-chart-wrapper {
+  min-height: 300px;
+}
+</style>

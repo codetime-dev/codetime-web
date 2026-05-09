@@ -58,7 +58,7 @@ const infoItems = computed(() => [
 <template>
   <div class="flex flex-col gap-5 items-start sm:flex-row sm:gap-7 sm:items-center">
     <div class="shrink-0">
-      <div class="border-surface-dimmed/25 border h-24 w-24 relative overflow-hidden">
+      <div class="border-surface-dimmed/25 border rounded-full h-24 w-24 relative overflow-hidden">
         <img
           v-if="avatar"
           :src="avatar"

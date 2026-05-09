@@ -2,7 +2,6 @@
 import type { PlotOptions } from '@observablehq/plot'
 import type { TagResponse } from '~/api/v3/types.gen'
 import * as Plot from '@observablehq/plot'
-import { Select } from '@roku-ui/vue'
 import * as d3 from 'd3'
 import { v3GetTagHistory } from '~/api/v3'
 import { getDurationString } from '~/utils/format'
@@ -16,23 +15,19 @@ const props = defineProps<Props>()
 
 const t = useI18N()
 
-// 时间范围选择
-const timeRange = ref('7d')
+const timeRange = ref<'7d' | '30d' | '90d'>('7d')
 const timeRangeOptions = computed(() => [
-  { label: t.value.dashboard.tags.timeRange.last7Days, id: '7d' },
-  { label: t.value.dashboard.tags.timeRange.last30Days, id: '30d' },
-  { label: t.value.dashboard.tags.timeRange.last90Days, id: '90d' },
+  { label: t.value.dashboard.tags.timeRange.last7Days, id: '7d' as const },
+  { label: t.value.dashboard.tags.timeRange.last30Days, id: '30d' as const },
+  { label: t.value.dashboard.tags.timeRange.last90Days, id: '90d' as const },
 ])
 
-// 先声明刷新函数，稍后赋值
 let refreshStats: (() => Promise<void>) | undefined
 
-// 暴露方法给父组件
 defineExpose({
   refreshStats: () => refreshStats?.(),
 })
 
-// 获取标签历史统计数据
 const { data: tagStats, pending: loadingStats, refresh } = await useAsyncData(
   `tag-stats-${props.tag.id}-${timeRange.value}`,
   async () => {
@@ -49,7 +44,6 @@ const { data: tagStats, pending: loadingStats, refresh } = await useAsyncData(
           end_datetime: endDate,
         },
       })
-
       return response.data
     }
     catch (error_) {
@@ -63,21 +57,17 @@ const { data: tagStats, pending: loadingStats, refresh } = await useAsyncData(
   },
 )
 
-// 给 refreshStats 赋值
 refreshStats = refresh
 
 const chart = ref()
 useElementBounding(chart)
 
-// 准备图表数据
 const chartData = computed(() => {
-  // 生成完整的日期范围
   const days = timeRange.value === '7d' ? 7 : (timeRange.value === '30d' ? 30 : 90)
   const endDate = new Date()
   const startDate = new Date()
-  startDate.setDate(endDate.getDate() - days + 1) // +1 是为了包含今天
+  startDate.setDate(endDate.getDate() - days + 1)
 
-  // 生成完整的日期序列
   const fullDateRange = []
   for (let i = 0; i < days; i++) {
     const currentDate = new Date(startDate)
@@ -85,7 +75,6 @@ const chartData = computed(() => {
     fullDateRange.push(currentDate)
   }
 
-  // 创建数据映射
   const dataMap = new Map()
   if (tagStats.value?.data) {
     for (const dataPoint of tagStats.value.data) {
@@ -94,33 +83,28 @@ const chartData = computed(() => {
     }
   }
 
-  // 为每个日期生成数据点
-  const result = fullDateRange.map((date) => {
+  return fullDateRange.map((date) => {
     const dateKey = date.toDateString()
     const dataPoint = dataMap.get(dateKey)
-
     return {
       date: new Date(date),
-      duration: dataPoint?.duration || 0, // 原始分钟数
-      minutes: dataPoint?.duration || 0, // duration 已经是分钟单位
-      hours: (dataPoint?.duration || 0) / 60, // 转换为小时用于Y轴显示
+      duration: dataPoint?.duration || 0,
+      minutes: dataPoint?.duration || 0,
+      hours: (dataPoint?.duration || 0) / 60,
     }
   })
-  return result
 })
 
-// 检查是否有实际数据
 const hasActualData = computed(() => {
   return chartData.value.some(d => d.duration > 0)
 })
 
-// 图表配置
 const chartOptions = computed<PlotOptions>(() => {
   const data = chartData.value
   const hasData = data.length > 0
   if (!hasData) {
     return {
-      height: 200,
+      height: 240,
       marks: [],
     }
   }
@@ -128,21 +112,16 @@ const chartOptions = computed<PlotOptions>(() => {
   const maxHours = Math.max(...data.map((d: any) => d.hours))
   const avgHours = data.reduce((sum: number, d: any) => sum + d.hours, 0) / data.length
 
-  // 计算时间范围
-  const days = timeRange.value === '7d' ? 7 : (timeRange.value === '30d' ? 30 : 90)
-  const endDate = new Date()
-  const startDate = new Date()
-  startDate.setDate(endDate.getDate() - days + 1)
   return {
     padding: 0,
-    marginLeft: 30,
-    marginRight: 20,
-    marginBottom: 40,
-    marginTop: 20,
-    height: 200,
+    marginLeft: 36,
+    marginRight: 16,
+    marginBottom: 32,
+    marginTop: 12,
+    height: 240,
     x: {
       label: t.value.plot.label.date,
-      paddingInner: 0.1,
+      paddingInner: 0.15,
       tickFormat: d3.timeFormat('%m/%d'),
       interval: d3.timeDay,
     },
@@ -154,166 +133,365 @@ const chartOptions = computed<PlotOptions>(() => {
       domain: [0, maxHours * 1.1],
     },
     marks: [
-      // 竖向柱状图
       Plot.barY(data, {
         x: 'date',
         y: 'hours',
         fill: props.tag.color,
-        fillOpacity: 0.8,
+        fillOpacity: 0.85,
         tip: true,
-        ry1: 8,
         title: (d: any) => {
           return `${d.date.toLocaleDateString()}\n${getDurationString(d.minutes * 60 * 1000, ['hours', 'minutes'])}`
         },
       }),
-      // 添加平均线
       ...(data.length > 1
         ? [
             Plot.ruleY([avgHours], {
               stroke: props.tag.color,
-              strokeDasharray: '4,4',
-              strokeOpacity: 0.8,
-              strokeWidth: 2,
+              strokeDasharray: '3,4',
+              strokeOpacity: 0.7,
+              strokeWidth: 1.5,
             }),
           ]
         : []),
     ],
   }
 })
+
+const periodDays = computed(() => {
+  if (!tagStats.value) {
+    return 0
+  }
+  return Math.ceil((new Date(tagStats.value.periodEnd).getTime() - new Date(tagStats.value.periodStart).getTime()) / (1000 * 60 * 60 * 24))
+})
+
+const dailyAvgMs = computed(() => {
+  if (!tagStats.value) {
+    return 0
+  }
+  return (tagStats.value.totalMinutes / Math.max(1, periodDays.value)) * 60 * 1000
+})
 </script>
 
 <template>
-  <CardBase class="h-103" :loading="loadingStats">
-    <div class="mb-4 flex items-center justify-between">
-      <div class="flex gap-3 items-center">
+  <PanelSection num="03" title="STATS" :meta="`TIME · DISTRIBUTION · ${timeRange.toUpperCase()}`" flush>
+    <template #icon>
+      <i class="i-tabler-chart-bar text-surface-dimmed/70 text-[15px]" />
+    </template>
+
+    <!-- Toolbar -->
+    <div class="stats-toolbar">
+      <div class="stats-tag">
         <div
-          class="text-sm font-medium rounded-full flex h-6 w-6 items-center justify-center"
-          :style="{ backgroundColor: tag.color, color: 'white' }"
+          class="stats-tag-glyph"
+          :style="{ backgroundColor: tag.color }"
         >
           {{ getTagDisplay(tag) }}
         </div>
-        <h3 class="text-lg font-medium">
+        <h3 class="stats-tag-title">
           {{ t.dashboard.tags.stats.statisticsTitle(tag.name) }}
         </h3>
       </div>
 
-      <!-- 时间范围选择 -->
-      <Select
-        v-model="timeRange"
-        :options="timeRangeOptions.map(opt => opt.id)"
-        :label-getter="opt => opt"
-      />
-    </div>
-
-    <div v-if="loadingStats" class="space-y-4">
-      <!-- 加载状态 -->
-      <div class="gap-4 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2">
-        <div v-for="i in 4" :key="i" class="space-y-2">
-          <div class="rounded bg-surface-variant-1 h-4 w-16 animate-pulse" />
-          <div class="rounded bg-surface-variant-1 h-6 w-20 animate-pulse" />
-        </div>
-      </div>
-      <div class="gap-4 grid grid-cols-1 lg:grid-cols-2">
-        <div v-for="i in 2" :key="i" class="space-y-3">
-          <div class="rounded bg-surface-variant-1 h-4 w-24 animate-pulse" />
-          <div class="space-y-2">
-            <div v-for="j in 3" :key="j" class="flex items-center justify-between">
-              <div class="rounded bg-surface-variant-1 h-4 w-32 animate-pulse" />
-              <div class="rounded bg-surface-variant-1 h-4 w-16 animate-pulse" />
-            </div>
-          </div>
-        </div>
+      <!-- Segmented time range -->
+      <div class="stats-range">
+        <button
+          v-for="opt in timeRangeOptions"
+          :key="opt.id"
+          type="button"
+          class="stats-range-btn"
+          :class="timeRange === opt.id ? 'stats-range-btn-active' : ''"
+          @click="timeRange = opt.id"
+        >
+          {{ opt.label }}
+        </button>
       </div>
     </div>
 
-    <div v-else-if="!tagStats" class="text-surface-dimmed py-8 text-center">
-      <i class="i-tabler-chart-bar-off text-2xl mb-2" />
-      <p class="text-sm">
+    <!-- LOADING -->
+    <div v-if="loadingStats" class="stats-cells">
+      <div v-for="i in 4" :key="i" class="stats-cell stats-cell-skel">
+        <div class="bg-surface-variant-1/40 h-2.5 w-16 animate-pulse" />
+        <div class="bg-surface-variant-1/55 h-5 w-24 animate-pulse" />
+      </div>
+    </div>
+
+    <!-- NO DATA -->
+    <div v-else-if="!tagStats" class="stats-empty">
+      <i class="i-tabler-chart-bar-off text-surface-dimmed/50 text-3xl" />
+      <p class="stats-empty-text">
         {{ t.dashboard.tags.stats.noData }}
       </p>
     </div>
 
-    <div v-else class="space-y-6">
-      <!-- 统计卡片 -->
-      <div class="gap-4 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2">
-        <div class="p-3 rounded-lg bg-surface-variant-1 flex gap-3 items-center">
-          <div class="bg-primary/10 p-2 rounded">
+    <!-- DATA -->
+    <template v-else>
+      <div class="stats-cells">
+        <div class="stats-cell">
+          <div class="stats-cell-label">
             <i class="i-tabler-clock text-sm text-primary" />
+            <span>{{ t.dashboard.tags.stats.totalDuration }}</span>
           </div>
-          <div>
-            <p class="text-xs text-surface-dimmed">
-              {{ t.dashboard.tags.stats.totalDuration }}
-            </p>
-            <p class="font-semibold">
-              {{ getDurationString(tagStats.totalMinutes * 60 * 1000) }}
-            </p>
+          <div class="stats-cell-value">
+            {{ getDurationString(tagStats.totalMinutes * 60 * 1000) }}
           </div>
         </div>
 
-        <div class="p-3 rounded-lg bg-surface-variant-1 flex gap-3 items-center">
-          <div class="bg-success/10 p-2 rounded">
-            <i class="text-success i-tabler-list text-sm" />
+        <div class="stats-cell">
+          <div class="stats-cell-label">
+            <i class="i-tabler-list text-sm text-primary" />
+            <span>{{ t.dashboard.tags.stats.recordCount }}</span>
           </div>
-          <div>
-            <p class="text-xs text-surface-dimmed">
-              {{ t.dashboard.tags.stats.recordCount }}
-            </p>
-            <p class="font-semibold">
-              {{ tagStats.data?.length || 0 }}
-            </p>
+          <div class="stats-cell-value tabular-nums">
+            {{ tagStats.data?.length || 0 }}
           </div>
         </div>
 
-        <div class="p-3 rounded-lg bg-surface-variant-1 flex gap-3 items-center">
-          <div class="bg-calendar/10 p-2 rounded">
-            <i class="text-calendar i-tabler-calendar text-sm" />
+        <div class="stats-cell">
+          <div class="stats-cell-label">
+            <i class="i-tabler-calendar text-sm text-primary" />
+            <span>{{ t.dashboard.tags.stats.timeRange }}</span>
           </div>
-          <div>
-            <p class="text-xs text-surface-dimmed">
-              {{ t.dashboard.tags.stats.timeRange }}
-            </p>
-            <p class="font-semibold">
-              {{ Math.ceil((new Date(tagStats.periodEnd).getTime() - new Date(tagStats.periodStart).getTime()) / (1000 * 60 * 60 * 24)) }} {{ t.dashboard.tags.stats.days }}
-            </p>
+          <div class="stats-cell-value tabular-nums">
+            {{ periodDays }} <span class="stats-cell-unit">{{ t.dashboard.tags.stats.days }}</span>
           </div>
         </div>
 
-        <div class="p-3 rounded-lg bg-surface-variant-1 flex gap-3 items-center">
-          <div class="bg-info/10 p-2 rounded">
-            <i class="text-info i-tabler-chart-line text-sm" />
+        <div class="stats-cell">
+          <div class="stats-cell-label">
+            <i class="i-tabler-chart-line text-sm text-primary" />
+            <span>{{ t.dashboard.tags.stats.dailyAverage }}</span>
           </div>
-          <div>
-            <p class="text-xs text-surface-dimmed">
-              {{ t.dashboard.tags.stats.dailyAverage }}
-            </p>
-            <p class="font-semibold">
-              {{ getDurationString((tagStats.totalMinutes / Math.max(1, Math.ceil((new Date(tagStats.periodEnd).getTime() - new Date(tagStats.periodStart).getTime()) / (1000 * 60 * 60 * 24)))) * 60 * 1000) }}
-            </p>
+          <div class="stats-cell-value">
+            {{ getDurationString(dailyAvgMs) }}
           </div>
         </div>
       </div>
 
-      <!-- 时间趋势图表 -->
-      <div v-if="!loadingStats && tagStats">
-        <h4 class="font-medium mb-3">
-          {{ t.dashboard.tags.stats.timeTrend }}
-        </h4>
-        <div v-if="hasActualData" :key="`chart-${props.tag.id}-${timeRange}`" class="h-52 w-full">
+      <!-- Chart -->
+      <div class="stats-chart-wrap">
+        <div class="stats-chart-eyebrow">
+          <span class="stats-chart-eyebrow-bracket">[</span>
+          <span class="stats-chart-eyebrow-num">→</span>
+          <span class="stats-chart-eyebrow-sep">/</span>
+          <span>{{ t.dashboard.tags.stats.timeTrend }}</span>
+          <span class="stats-chart-eyebrow-bracket">]</span>
+        </div>
+        <div v-if="hasActualData" :key="`chart-${props.tag.id}-${timeRange}`" class="stats-chart">
           <PoltChart
             ref="chart"
             :key="`plot-${props.tag.id}-${timeRange}`"
             :options="chartOptions"
           />
         </div>
-        <div v-else class="text-surface-dimmed flex h-52 items-center justify-center">
-          <div class="text-center">
-            <i class="i-tabler-chart-line-off text-2xl mb-2" />
-            <p class="text-sm">
-              {{ t.dashboard.tags.stats.noChartData }}
-            </p>
-          </div>
+        <div v-else class="stats-chart-empty">
+          <i class="i-tabler-chart-line-off text-surface-dimmed/50 text-2xl" />
+          <p class="stats-empty-text">
+            {{ t.dashboard.tags.stats.noChartData }}
+          </p>
         </div>
       </div>
-    </div>
-  </CardBase>
+    </template>
+  </PanelSection>
 </template>
+
+<style scoped>
+.stats-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+}
+
+.stats-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.stats-tag-glyph {
+  width: 1.85rem;
+  height: 1.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.stats-tag-title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Segmented range */
+.stats-range {
+  display: inline-flex;
+}
+
+.stats-range-btn {
+  height: 2rem;
+  padding: 0 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  background-color: transparent;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 25%, transparent);
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.stats-range-btn:first-child {
+  border-left: 0;
+}
+
+.stats-range-btn:hover {
+  color: var(--r-surface-text-color);
+  background-color: rgb(var(--r-color-surface-7) / 0.22);
+}
+
+.stats-range-btn-active {
+  color: var(--color-primary-1);
+  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
+}
+
+/* Cells */
+.stats-cells {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .stats-cells {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stats-cells > .stats-cell:nth-child(n+3) {
+    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  }
+  .stats-cells > .stats-cell:nth-child(2n) {
+    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-cells {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+  .stats-cells > .stats-cell:nth-child(n+3) {
+    border-top: 0;
+  }
+  .stats-cells > .stats-cell + .stats-cell {
+    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  }
+}
+
+@media (max-width: 639px) {
+  .stats-cells > .stats-cell + .stats-cell {
+    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  }
+}
+
+.stats-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+}
+
+.stats-cell-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+}
+
+.stats-cell-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--r-surface-text-color);
+}
+
+.stats-cell-unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  margin-left: 0.25rem;
+}
+
+.stats-cell-skel {
+  pointer-events: none;
+}
+
+/* Empty */
+.stats-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 3rem 1rem;
+}
+
+.stats-empty-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+}
+
+/* Chart */
+.stats-chart-wrap {
+  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.stats-chart-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-primary-1);
+  margin-bottom: 0.85rem;
+}
+
+.stats-chart-eyebrow-bracket,
+.stats-chart-eyebrow-sep {
+  opacity: 0.55;
+}
+
+.stats-chart-eyebrow-num {
+  color: var(--r-surface-text-color);
+  opacity: 0.85;
+}
+
+.stats-chart {
+  width: 100%;
+}
+
+.stats-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+}
+</style>

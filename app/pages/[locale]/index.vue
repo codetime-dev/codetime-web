@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import Auxlines from 'auxlines'
-import 'auxlines/style.css'
-
 definePageMeta({
   middleware: ['i18n'],
   layout: 'landing',
 })
 const t = useI18N()
 
-// Enhanced SEO meta tags
 watchEffect(() => {
   useSeoMeta({
     title: 'Code Time - Programming Time Analytics & Insights',
@@ -24,142 +20,464 @@ watchEffect(() => {
   })
 })
 
-// JSON-LD structured data for Organization
-// TODO: Add structured data when @nuxtjs/seo is properly configured
-// useSchemaOrg([
-//   defineOrganization({
-//     name: 'Code Time',
-//     url: 'https://codetime.dev',
-//     logo: 'https://codetime.dev/icon.png',
-//     description: 'Programming time analytics and insights platform',
-//     foundingDate: '2021',
-//     sameAs: [
-//       // Add social media URLs if available
-//     ],
-//     contactPoint: {
-//       '@type': 'ContactPoint',
-//       contactType: 'customer support',
-//       availableLanguage: ['English', '中文', 'Japanese', 'German', 'French', 'Spanish', 'Italian', 'Russian', 'Ukrainian', 'Malay', 'Portuguese']
-//     }
-//   }),
-//   defineWebSite({
-//     name: 'Code Time',
-//     url: 'https://codetime.dev',
-//     description: 'Programming time analytics and insights platform',
-//     inLanguage: locale.value,
-//     potentialAction: {
-//       '@type': 'SearchAction',
-//       target: 'https://codetime.dev/{locale}/dashboard?search={search_term_string}',
-//       'query-input': 'required name=search_term_string'
-//     }
-//   })
-// ])
+const currentYear = new Date().getFullYear()
 </script>
 
 <template>
-  <Auxlines
-    :min-deepth="1"
-    :max-deepth="4"
-  >
-    <div class="pb-8 pt-32 flex justify-center">
-      <div
-        class="px-8 flex flex-col max-w-4xl items-center space-y-6"
-      >
-        <LandingTitle />
-        <div class="text-lg text-surface leading-relaxed px-4 py-2 text-center max-w-2xl">
-          {{ t.landing.description }}
-        </div>
+  <!-- HERO -->
+  <section class="hero relative overflow-hidden">
+    <div class="hero-grid" aria-hidden="true" />
+    <div class="hero-scan" aria-hidden="true" />
+    <div class="hero-glow" aria-hidden="true" />
+    <div class="hero-vignette" aria-hidden="true" />
+
+    <div class="px-6 py-24 flex flex-col gap-10 items-center justify-center relative lg:py-40 sm:py-32">
+      <div class="text-[10.5px] text-primary tracking-[0.4em] font-mono inline-flex gap-3 uppercase items-center">
+        <span class="bg-primary/50 h-px w-10 inline-block" />
+        <span>v3 · analytics · {{ currentYear }}</span>
+        <span class="bg-primary/50 h-px w-10 inline-block" />
+      </div>
+
+      <LandingTitle />
+
+      <p class="text-[15px] text-surface-dimmed leading-[1.65] tracking-[0.01em] font-mono px-4 text-center max-w-xl sm:text-[16px]">
+        {{ t.landing.description }}
+      </p>
+
+      <div class="mt-2">
+        <LoginButton />
+      </div>
+
+      <div class="text-surface-dimmed/60 text-[10px] tracking-[0.28em] font-mono mt-6 inline-flex gap-2 uppercase items-center">
+        <i class="i-tabler-chevron-down text-sm animate-bounce" />
+        <span>{{ t.landing.scroll }}</span>
       </div>
     </div>
-  </Auxlines>
-  <div class="m-8 flex justify-center">
-    <LoginButton />
-  </div>
-  <div class="mt-32">
-    <LandingSumHours />
-  </div>
+  </section>
 
-  <div class="overflow-x-hidden children:px-2">
-    <div class="m-auto mt-12 px-4 py-6 max-w-6xl w-full sm:mt-16 sm:p-10">
-      <h2 class="text-2xl font-bold my-4 flex flex-col max-w-xl relative sm:text-3xl md:max-w-6xl">
-        {{ t.landing.features.visualization.title }}
-      </h2>
-      <div class="text-base mb-2 mt-4 sm:text-lg">
-        {{ t.landing.features.visualization.description }}
+  <!-- STATS · GLOBAL COUNTER -->
+  <section class="section-band">
+    <div class="px-6 py-24 flex flex-col gap-12 items-center sm:py-32">
+      <div class="eyebrow">
+        <span class="eyebrow-bracket">[</span>
+        <span class="eyebrow-num">00</span>
+        <span class="eyebrow-sep">/</span>
+        <span>{{ t.landing.sections.globalImpact }}</span>
+        <span class="eyebrow-bracket">]</span>
       </div>
-      <div class="my-6 flex flex-col gap-2 sm:my-8">
-        <div class="flex flex-col gap-2 lg:flex-row">
-          <div class="min-w-0 w-full overflow-x-hidden lg:shrink-0 lg:w-86">
+      <LandingSumHours />
+    </div>
+  </section>
+
+  <!-- VISUALIZATION SHOWCASE -->
+  <section>
+    <div class="mx-auto px-6 py-24 max-w-6xl sm:py-32">
+      <div class="mb-16 flex flex-col gap-3">
+        <div class="eyebrow">
+          <span class="eyebrow-bracket">[</span>
+          <span class="eyebrow-num">01</span>
+          <span class="eyebrow-sep">/</span>
+          <span>{{ t.landing.sections.visualization }}</span>
+          <span class="eyebrow-bracket">]</span>
+        </div>
+        <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold max-w-3xl">
+          {{ t.landing.features.visualization.title }}
+        </h2>
+        <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono mt-2 max-w-2xl">
+          {{ t.landing.features.visualization.description }}
+        </p>
+      </div>
+
+      <div class="gap-3 grid">
+        <div class="gap-3 grid grid-cols-1 lg:grid-cols-[22rem_1fr]">
+          <div class="showcase-tile">
             <DashboardTopCardTemplateDemo />
           </div>
-          <div class="min-w-0 w-full overflow-x-hidden">
-            <DashboardCalendarCardDemo
-              class="w-full"
-            />
+          <div class="showcase-tile">
+            <DashboardCalendarCardDemo class="w-full" />
           </div>
         </div>
-        <div class="pb-1 overscroll-x-contain min-w-0 overflow-x-auto">
+        <div class="showcase-tile showcase-scroll">
           <DashboardProjectYDotCardDemo />
         </div>
-        <div class="pb-1 overscroll-x-contain min-w-0 overflow-x-auto">
+        <div class="showcase-tile showcase-scroll">
           <PoltDailyDistributionTemplateDemo />
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="bg-surface-low my-20 py-24 relative overflow-hidden">
-      <div class="mx-auto px-6 text-center max-w-4xl relative">
-        <div class="mb-6 inline-block relative">
-          <h2 class="text-4xl font-bold md:text-5xl">
+  <!-- FEATURE PAIRS -->
+  <section class="section-band">
+    <div class="mx-auto px-6 py-24 max-w-6xl space-y-24 sm:py-32">
+      <!-- 02 SAVE -->
+      <div class="gap-10 grid items-center md:gap-16 md:grid-cols-[1fr_auto]">
+        <div class="space-y-3">
+          <div class="eyebrow">
+            <span class="eyebrow-bracket">[</span>
+            <span class="eyebrow-num">02</span>
+            <span class="eyebrow-sep">/</span>
+            <span>{{ t.landing.sections.alwaysSynced }}</span>
+            <span class="eyebrow-bracket">]</span>
+          </div>
+          <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.save.title }}
           </h2>
-          <i
-            class="i-line-md-calendar text-blue-500 opacity-20 h-16 w-16 rotate-12 absolute md:h-20 md:w-20 -right-16 -top-8"
-          />
+          <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono max-w-xl">
+            {{ t.landing.features.save.description }}
+          </p>
         </div>
-        <div class="text-xl text-surface-dimmed leading-relaxed mx-auto max-w-2xl">
-          {{ t.landing.features.save.description }}
+        <div class="feature-icon">
+          <i class="i-line-md-calendar" />
         </div>
       </div>
-    </div>
 
-    <div class="py-24 text-center relative overflow-hidden">
-      <div class="mx-auto px-6 max-w-4xl relative">
-        <div class="mb-6 inline-block relative">
-          <h2 class="text-4xl font-bold md:text-5xl">
+      <!-- 03 EXPORT -->
+      <div class="gap-10 grid items-center md:gap-16 md:grid-cols-[auto_1fr]">
+        <div class="feature-icon md:order-1">
+          <i class="i-line-md-cloud-down-twotone" />
+        </div>
+        <div class="space-y-3 md:order-2">
+          <div class="eyebrow">
+            <span class="eyebrow-bracket">[</span>
+            <span class="eyebrow-num">03</span>
+            <span class="eyebrow-sep">/</span>
+            <span>{{ t.landing.sections.openData }}</span>
+            <span class="eyebrow-bracket">]</span>
+          </div>
+          <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.export.title }}
           </h2>
-          <i
-            class="i-line-md-cloud-down-twotone text-purple-500 opacity-20 h-16 w-16 rotate-12 absolute md:h-20 md:w-20 -right-16 -top-8"
-          />
-        </div>
-        <div class="text-xl text-surface-dimmed leading-relaxed mx-auto max-w-2xl">
-          {{ t.landing.features.export.description }}
+          <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono max-w-xl">
+            {{ t.landing.features.export.description }}
+          </p>
         </div>
       </div>
-    </div>
 
-    <div class="bg-surface-low my-20 py-24 relative overflow-hidden">
-      <div class="mx-auto px-6 flex flex-col gap-12 max-w-6xl items-center justify-center relative lg:flex-row">
-        <div class="text-center flex-1 lg:text-left">
-          <h2 class="text-4xl font-bold mb-6 md:text-5xl">
+      <!-- 04 EDITOR -->
+      <div class="gap-10 grid items-center md:gap-16 md:grid-cols-[1fr_auto]">
+        <div class="space-y-3">
+          <div class="eyebrow">
+            <span class="eyebrow-bracket">[</span>
+            <span class="eyebrow-num">04</span>
+            <span class="eyebrow-sep">/</span>
+            <span>{{ t.landing.sections.editors }}</span>
+            <span class="eyebrow-bracket">]</span>
+          </div>
+          <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.editor.title }}
           </h2>
-          <div class="text-xl text-surface-dimmed leading-relaxed max-w-xl">
+          <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono max-w-xl">
             {{ t.landing.features.editor.description }}
-          </div>
+          </p>
         </div>
-        <div class="flex gap-8 items-center">
-          <div class="transform transition-all duration-300 hover:scale-110">
-            <i class="i-logos-visual-studio-code h-20 w-20 md:h-24 md:w-24" />
+        <div class="flex gap-4 items-center">
+          <div class="editor-tile">
+            <i class="i-logos-visual-studio-code h-14 w-14 md:h-16 md:w-16" />
           </div>
-          <div class="transform transition-all duration-300 hover:scale-110">
-            <i class="i-logos-jetbrains h-20 w-20 md:h-24 md:w-24" />
+          <div class="editor-tile">
+            <i class="i-logos-jetbrains h-14 w-14 md:h-16 md:w-16" />
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <PriceTable />
+  <!-- PRICING -->
+  <section>
+    <div class="mx-auto px-6 py-24 max-w-6xl sm:py-32">
+      <div class="mb-12 text-center flex flex-col gap-3 items-center">
+        <div class="eyebrow">
+          <span class="eyebrow-bracket">[</span>
+          <span class="eyebrow-num">05</span>
+          <span class="eyebrow-sep">/</span>
+          <span>{{ t.landing.sections.pricing }}</span>
+          <span class="eyebrow-bracket">]</span>
+        </div>
+        <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
+          {{ t.landing.pricing.heading }}
+        </h2>
+      </div>
+      <PriceTable />
+    </div>
+  </section>
+
+  <!-- CLOSING CTA -->
+  <section class="section-band">
+    <div class="px-6 py-24 text-center flex flex-col gap-8 items-center sm:py-32">
+      <div class="eyebrow">
+        <span class="eyebrow-bracket">[</span>
+        <span class="eyebrow-num">⇢</span>
+        <span class="eyebrow-sep">/</span>
+        <span>{{ t.landing.sections.startTracking }}</span>
+        <span class="eyebrow-bracket">]</span>
+      </div>
+      <h2 class="closing-heading text-surface leading-[1.05] font-mono font-semibold max-w-3xl">
+        {{ t.landing.closing.heading }}
+      </h2>
+      <LoginButton />
+    </div>
+  </section>
 </template>
+
+<style scoped>
+.section-heading {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  letter-spacing: -0.02em;
+}
+
+.closing-heading {
+  position: relative;
+  font-size: clamp(2.4rem, 6.5vw, 4.5rem);
+  letter-spacing: -0.025em;
+  background: linear-gradient(180deg,
+    var(--r-surface-text-color) 30%,
+    color-mix(in srgb, var(--color-primary-1) 75%, transparent) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Eyebrow */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--color-primary-1);
+}
+
+.eyebrow-bracket {
+  color: color-mix(in srgb, var(--color-primary-1) 55%, transparent);
+  font-weight: 400;
+}
+
+.eyebrow-num {
+  color: var(--r-surface-text-color);
+  opacity: 0.85;
+}
+
+.eyebrow-sep {
+  color: color-mix(in srgb, var(--color-primary-1) 45%, transparent);
+}
+
+/* Hero */
+.hero {
+  min-height: clamp(560px, 92vh, 900px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--r-surface-border-color) 80%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--r-surface-border-color) 80%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.2;
+  mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
+  pointer-events: none;
+  animation: grid-drift 40s linear infinite;
+}
+
+.hero-scan {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.012) 3px,
+    rgba(255, 255, 255, 0.012) 4px
+  );
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    transparent 50%,
+    color-mix(in srgb, var(--r-color-surface-9) 60%, transparent) 100%);
+  pointer-events: none;
+}
+
+@keyframes grid-drift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 64px 64px, 64px 64px; }
+}
+
+.hero-glow {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: min(80vw, 800px);
+  height: min(80vw, 800px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-primary-1) 26%, transparent) 0%, transparent 60%);
+  filter: blur(48px);
+  pointer-events: none;
+  opacity: 0.75;
+  animation: glow-pulse 8s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+/* Section band: subtle alternating bg */
+.section-band {
+  position: relative;
+  background-color: rgb(var(--r-color-surface-7) / 0.12);
+}
+
+.section-band::before,
+.section-band::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  height: 1px;
+  background: var(--r-surface-border-color);
+  opacity: 0.3;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.section-band::before {
+  top: 0;
+}
+
+.section-band::after {
+  bottom: 0;
+}
+
+/* Showcase tile — blueprint corner crosshairs */
+.showcase-tile {
+  background-color: transparent;
+  border: 1px solid color-mix(in srgb, var(--r-surface-border-color) 38%, transparent);
+  padding: 1rem;
+  position: relative;
+  transition: border-color 220ms ease, background-color 220ms ease;
+}
+
+.showcase-tile::before,
+.showcase-tile::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-primary-1) 70%, transparent);
+  pointer-events: none;
+  transition: opacity 220ms ease;
+  opacity: 0.55;
+}
+
+.showcase-tile::before {
+  top: -1px;
+  left: -1px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.showcase-tile::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.showcase-tile:hover {
+  border-color: color-mix(in srgb, var(--r-surface-border-color) 90%, transparent);
+  background-color: color-mix(in srgb, var(--color-primary-1) 3%, transparent);
+}
+
+.showcase-tile:hover::before,
+.showcase-tile:hover::after {
+  opacity: 1;
+}
+
+.showcase-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.showcase-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Feature icon */
+.feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(7rem, 16vw, 10rem);
+  height: clamp(7rem, 16vw, 10rem);
+  background-color: rgb(var(--r-color-surface-7) / 0.16);
+  position: relative;
+}
+
+.feature-icon::before,
+.feature-icon::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-primary-1);
+  opacity: 0.5;
+}
+
+.feature-icon::before {
+  top: -1px;
+  left: -1px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.feature-icon::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.feature-icon i {
+  font-size: clamp(3rem, 7vw, 4.5rem);
+  color: var(--color-primary-1);
+  opacity: 0.85;
+}
+
+/* Editor tile */
+.editor-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background-color: rgb(var(--r-color-surface-7) / 0.16);
+  border: 1px solid color-mix(in srgb, var(--r-surface-border-color) 35%, transparent);
+  transition: background-color 220ms ease, transform 220ms ease, border-color 220ms ease;
+}
+
+.editor-tile:hover {
+  background-color: rgb(var(--r-color-surface-7) / 0.32);
+  border-color: color-mix(in srgb, var(--color-primary-1) 50%, transparent);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-grid,
+  .hero-glow,
+  :deep(.title-code) {
+    animation: none;
+  }
+}
+</style>

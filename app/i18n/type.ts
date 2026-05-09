@@ -46,6 +46,17 @@ export type Translation = {
     loginWithGithub: string
     freeMessage: string
     demo: string
+    heroBadge: string
+    scroll: string
+    sections: {
+      globalImpact: string
+      visualization: string
+      alwaysSynced: string
+      openData: string
+      editors: string
+      pricing: string
+      startTracking: string
+    }
     features: {
       visualization: {
         title: string
@@ -65,8 +76,12 @@ export type Translation = {
       }
     }
     pricing: {
+      heading: string
       title: string
       description: string
+    }
+    closing: {
+      heading: string
     }
   }
   plan: {
@@ -189,6 +204,7 @@ export type Translation = {
     profile: {
       languages: {
         title: string
+        noData: string
         topPercent: (percent: number) => string
       }
       stats: {
@@ -292,9 +308,11 @@ export type Translation = {
       }
     }
     workspace: {
+      noData: string
       select: {
         placeholder: string
         none: string
+        prompt: string
       }
       flameGraph: {
         title: string

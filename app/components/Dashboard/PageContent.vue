@@ -1,8 +1,28 @@
 <template>
-  <div
-    style="width: -webkit-fill-available;"
-    class="mx-auto mt-8 px-3 flex flex-col gap-6 max-w-100vw w-full sm:px-4 md:max-w-7xl"
-  >
+  <div class="dash-page-frame mx-auto max-w-7xl w-full">
     <slot />
   </div>
 </template>
+
+<style scoped>
+.dash-page-frame {
+  position: relative;
+}
+.dash-page-frame::before,
+.dash-page-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--r-surface-border-color);
+  opacity: 0.3;
+  pointer-events: none;
+}
+.dash-page-frame::before {
+  left: 0;
+}
+.dash-page-frame::after {
+  right: 0;
+}
+</style>

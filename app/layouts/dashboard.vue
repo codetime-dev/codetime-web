@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Btn, Image, useContainerFilledCS, useCS } from '@roku-ui/vue'
 import { v3ListSelfLatestLogs } from '~/api/v3'
 import VSCodeIcon from '~/components/VSCodeIcon.vue'
 
@@ -32,17 +31,6 @@ useHead({
     },
   ],
 })
-const containerCS = useCS({
-  type: 'bg',
-  color: 'surface',
-  index: { dark: 9, light: 1 },
-})
-const hoverCS = useCS({
-  type: 'hover:bg',
-  color: 'surface',
-  index: { dark: 7, light: 3 },
-})
-const fillCS = useContainerFilledCS('primary')
 
 const resp = useAsyncData('user-latest-logs', async () => {
   const resp = await v3ListSelfLatestLogs({
@@ -55,7 +43,7 @@ const resp = useAsyncData('user-latest-logs', async () => {
   server: false,
 })
 
-// 如果日期是 12月 20日到 1月 15 日之间，则是年度报告展示周期
+// 12月 20日到 1月 15 日为年度报告展示周期
 const showAnnualReport = computed(() => {
   const now = new Date()
   const month = now.getMonth()
@@ -66,152 +54,236 @@ const showAnnualReport = computed(() => {
 
 <template>
   <NuxtLayout name="default">
-    <RHeader
-      class="px-2 pt-2"
-      v-bind="containerCS"
-    >
-      <div class="px-2 pt-2 flex flex-col gap-4 w-full">
-        <div class="flex h-34px items-center justify-between">
+    <div class="layout-frame mx-auto max-w-7xl w-full">
+      <header class="layout-topbar relative">
+        <div class="px-5.5 py-3.5 flex flex-wrap gap-x-6 gap-y-3 items-center justify-between">
           <ClientOnly>
-            <div class="flex gap-2 items-center">
-              <NuxtLink :to="`/${locale}`">
+            <div class="flex flex-wrap gap-3 items-center">
+              <NuxtLink :to="`/${locale}`" class="flex gap-3 items-center">
                 <img
                   alt="Code Time"
                   src="/icon.svg"
-                  width="26"
-                  class="ml-2 mr-3"
+                  width="20"
+                  height="20"
+                  class="block"
                   loading="lazy"
                   decoding="async"
                 >
+                <span class="text-[14px] text-surface tracking-[0.3em] font-mono font-semibold">CODE·TIME</span>
+                <span class="text-surface-dimmed/40 text-[12px] font-mono">/</span>
+                <span class="text-[12px] text-primary tracking-[0.24em] font-mono uppercase">DASHBOARD</span>
               </NuxtLink>
+
               <NuxtLink
                 v-if="user"
-                class="text-sm flex gap-3 items-center"
+                class="text-[12px] text-surface-dimmed tracking-[0.08em] font-mono inline-flex gap-2 uppercase transition-colors items-center hover:text-primary"
                 :to="`/${locale}/dashboard`"
               >
-                <Image
+                <img
                   v-if="user.avatar"
                   :src="user.avatar"
-                  class="rounded-full h-7 w-7"
-                  height="28px"
-                  width="28px"
-                />
-                <div class="hidden sm:block">
-                  {{ user.username }}
-                </div>
-                <PlanTag :plan="user.plan" />
+                  alt=""
+                  class="border-surface-dimmed/30 border rounded-full h-5 w-5 object-cover"
+                >
+                <span class="hidden sm:inline">{{ user.username }}</span>
+                <span
+                  class="text-[10px] tracking-[0.14em] font-mono px-2 py-0.5 border rounded-full"
+                  :class="String(user.plan).toLowerCase() === 'pro'
+                    ? 'border-primary/30 text-primary bg-primary/12'
+                    : 'border-surface-dimmed/25 text-surface-dimmed/60'"
+                >
+                  {{ String(user.plan ?? 'free').toUpperCase() }}
+                </span>
               </NuxtLink>
               <div
                 v-else-if="pending"
-                class="text-sm flex gap-3 items-center"
+                class="flex gap-2 items-center"
               >
-                <div class="rounded-full bg-op50 h-7 w-7 animate-pulse" />
-                <div class="rounded bg-op50 h-1em w-16 animate-pulse" />
+                <div class="bg-surface-variant-1/50 h-5 w-5 animate-pulse" />
+                <div class="bg-surface-variant-1/50 h-3 w-16 hidden animate-pulse sm:block" />
               </div>
 
               <NuxtLink
                 v-if="user && showAnnualReport"
                 :to="`/${locale}/user/${user.id}/annual-report`"
                 target="_blank"
+                class="bg-primary/10 hover:bg-primary/20 text-[11px] text-primary tracking-[0.14em] font-mono px-2 py-1 inline-flex gap-1 uppercase transition-colors items-center"
               >
-                <Btn
-                  variant="light"
-                  size="sm"
-                  color="primary"
-                >
-                  {{ t.annualReport.reviewAnnualReport }}
-                </Btn>
+                <i class="i-tabler-sparkles text-sm" />
+                <span class="hidden sm:inline">{{ t.annualReport.reviewAnnualReport }}</span>
               </NuxtLink>
 
               <div v-if="resp.status.value === 'pending'">
-                <div class="rounded-full bg-white bg-op50 h-4 w-20 animate-pulse" />
+                <div class="bg-surface-variant-1/50 h-3 w-24 animate-pulse" />
               </div>
               <div
                 v-else-if="resp.data.value"
-                class="text-xs flex gap-2 items-center"
+                class="text-[11px] text-surface-dimmed tracking-[0.04em] font-mono inline-flex gap-2 items-center"
               >
-                <div class="relative">
-                  <div class="rounded-full bg-primary h-3 w-3 animate-ping" />
-                  <div class="rounded-full bg-primary h-3 w-3 left-0 top-0 absolute" />
+                <div class="shrink-0 relative">
+                  <div class="rounded-full bg-primary h-2 w-2 animate-ping" />
+                  <div class="rounded-full bg-primary h-2 w-2 left-0 top-0 absolute" />
                 </div>
                 <VSCodeIcon
                   :language="resp.data.value.language"
-                  class="h-4 w-4"
+                  class="h-3.5 w-3.5"
                 />
-                <span class="truncate">
+                <span class="max-w-40 truncate">
                   {{ t.dashboard.pageHeader.userLatestEvent(resp.data.value.project) }}
                 </span>
               </div>
             </div>
           </ClientOnly>
 
-          <div class="gap-2 hidden items-center sm:flex">
-            <i class="i-tabler-language-hiragana h-6 w-6" />
+          <div class="flex gap-3 items-center">
             <LanguageSelect />
           </div>
         </div>
-        <div class="flex gap-2">
-          <div
+
+        <nav class="dash-tabs px-5.5 pb-0 flex flex-wrap gap-0">
+          <NuxtLink
             v-for="tab in headerTabs"
             :key="tab.id"
+            :to="`/${locale}${tab.path}`"
+            class="dash-tab text-[12px] tracking-[0.18em] font-mono px-3.5 py-2.5 uppercase transition-colors"
+            :class="tab === currentTab
+              ? 'dash-tab-active text-primary bg-surface-variant-1/35'
+              : 'text-surface-dimmed hover:text-surface hover:bg-surface-variant-1/20'"
           >
-            <NuxtLink
-              :to="`/${locale}${tab.path}`"
-              v-bind="hoverCS"
-              class="text-sm px-3 py-2 rounded"
-            >
-              {{ tab.label }}
-            </NuxtLink>
-
-            <div class="mt-2 min-h-0.5">
-              <div v-if="tab === currentTab">
-                <div
-                  v-bind="fillCS"
-                  class="h-0.5"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </RHeader>
-    <div v-if="pending">
-      <!-- loading -->
-      <div class="m-auto op75 h-full">
+            {{ tab.label }}
+          </NuxtLink>
+        </nav>
+      </header>
+      <div v-if="pending" class="layout-main">
         <DashboardPageTitle loading />
-        <div class="m-auto mt-8 w-6xl animate-pulse -px-6 md:max-w-6xl">
-          <div class="mt-2 rounded-2xl bg-surface-variant-1 h-32 w-full" />
-        </div>
+        <DashboardPageContent>
+          <div class="px-5.5 py-6">
+            <div class="bg-surface-variant-1/40 h-32 w-full animate-pulse" />
+          </div>
+        </DashboardPageContent>
       </div>
-    </div>
-    <div v-else>
-      <slot v-if="user" />
-      <div
-        v-else
-        class="py-16 op75 flex flex-col h-full items-center justify-center"
-      >
-        <div class="mb-8">
-          <img
-            alt="Code Time"
-            src="/icon.svg"
-            width="64"
-            loading="lazy"
-            decoding="async"
+      <main v-else class="layout-main relative">
+        <slot v-if="user" />
+        <div
+          v-else
+          class="py-16 op75 flex flex-col h-full items-center justify-center"
+        >
+          <div class="mb-8">
+            <img
+              alt="Code Time"
+              src="/icon.svg"
+              width="64"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <span class="text-[12.5px] tracking-[0.04em] font-mono px-4 pb-6 text-center max-w-2xl">
+            {{ t.dashboard.loginRequired }}
+          </span>
+          <LoginButton />
+        </div>
+      </main>
+      <footer class="layout-foot relative">
+        <div class="text-surface-dimmed/55 text-[11px] tracking-[0.18em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
+          <span>datreks · {{ new Date().getFullYear() }}</span>
+          <span class="text-surface-dimmed/25">·</span>
+          <NuxtLink
+            to="https://github.com/Jannchie/codetime-web-v3"
+            target="_blank"
+            class="inline-flex gap-1 transition-colors items-center hover:text-primary"
           >
+            <i class="i-tabler-brand-github text-sm" />
+            <span class="hidden sm:inline">github</span>
+          </NuxtLink>
+          <span class="text-surface-dimmed/25">·</span>
+          <NuxtLink
+            to="https://discord.gg/WWEQrWCkkP"
+            target="_blank"
+            class="inline-flex gap-1 transition-colors items-center hover:text-primary"
+          >
+            <i class="i-tabler-brand-discord text-sm" />
+            <span class="hidden sm:inline">discord</span>
+          </NuxtLink>
         </div>
-        <span class="text-sm pb-6 text-center max-w-2xl">
-          {{ t.dashboard.loginRequired }}
-        </span>
-        <LoginButton />
-      </div>
+      </footer>
     </div>
-    <CodetimeFooter />
   </NuxtLayout>
 </template>
 
 <style scoped>
-.header-title {
-  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
-  font-size: 1.2rem;
+.layout-frame {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-main {
+  flex: 1 0 auto;
+}
+
+.layout-foot {
+  margin-top: auto;
+}
+
+.layout-frame::before,
+.layout-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--r-surface-border-color);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.layout-frame::before {
+  left: 0;
+}
+
+.layout-frame::after {
+  right: 0;
+}
+
+.layout-topbar::after,
+.layout-foot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  height: 1px;
+  background: var(--r-surface-border-color);
+  opacity: 0.4;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.layout-topbar::after {
+  bottom: 0;
+}
+
+.layout-foot::before {
+  top: 0;
+}
+
+.layout-foot {
+  background-color: rgb(var(--r-color-surface-7) / 0.18);
+}
+
+.dash-tab-active {
+  position: relative;
+}
+
+.dash-tab-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--color-primary-1);
+  opacity: 0.85;
 }
 </style>

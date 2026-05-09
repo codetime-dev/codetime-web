@@ -1,20 +1,25 @@
 <script setup lang="ts">
-import { Paper } from '@roku-ui/vue'
-
 defineProps<{
   loading?: boolean
   withBorder?: boolean
+  sparse?: boolean
+  noPadding?: boolean
   color?: 'primary' | 'secondary' | 'surface' | 'error' | 'success' | 'warning'
 }>()
 </script>
 
 <template>
-  <Paper
-    :color="color"
-    :with-border="true"
-    :loading="loading"
-    rounded="lg"
+  <div
+    class="card-base bg-surface-variant-1/25 relative"
+    :class="[
+      noPadding ? '' : (sparse ? 'px-5 py-4' : 'px-4 py-3.5'),
+      loading ? 'pointer-events-none' : '',
+    ]"
   >
     <slot />
-  </Paper>
+    <div
+      v-if="loading"
+      class="bg-surface-variant-1/40 inset-0 absolute animate-pulse"
+    />
+  </div>
 </template>

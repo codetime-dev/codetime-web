@@ -65,8 +65,6 @@ const options = computed<Plot.PlotOptions>(() => {
       },
       label: t.value.plot.label.date,
     },
-    width: 1110,
-    height: 300,
     marks: [
       // Segmented data lines (lower opacity)
       ...(props.segmentedData.length > 0
@@ -128,16 +126,14 @@ const options = computed<Plot.PlotOptions>(() => {
 </script>
 
 <template>
-  <CardBase :loading="loading">
-    <div class="text-lg mb-4 flex gap-2 items-center">
-      <i class="i-carbon-chart-line-data" />
-      <div>
-        {{ t.dashboard.overview.dailyCodingDistributionTitle }}
-      </div>
-    </div>
+  <div class="px-3 py-3 relative">
     <PoltChart
       ref="chart"
       :options="options"
     />
-  </CardBase>
+    <div
+      v-if="loading"
+      class="bg-surface-variant-1/40 inset-0 absolute animate-pulse"
+    />
+  </div>
 </template>

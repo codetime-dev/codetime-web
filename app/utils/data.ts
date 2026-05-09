@@ -9,14 +9,26 @@ export function useMaxStreak(data: MaybeRef<{
     const dataVal = unref(data)
     let streak = 0
     let maxStreak = 0
-    const sortedData = [...dataVal].sort((a, b) => b.date.getTime() - a.date.getTime())
+    // Sort ascending (oldest → newest)
+    const sortedData = dataVal.toSorted((a, b) => a.date.getTime() - b.date.getTime())
+    let prevDate: Date | null = null
     for (const d of sortedData) {
+      // Check if this day is consecutive with the previous one (1 day apart)
+      if (prevDate) {
+        const dayDiff = Math.round((d.date.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24))
+        if (dayDiff !== 1) {
+          maxStreak = Math.max(maxStreak, streak)
+          streak = 0
+        }
+      }
       if (d.duration === 0) {
         maxStreak = Math.max(maxStreak, streak)
         streak = 0
-        continue
       }
-      streak++
+      else {
+        streak++
+      }
+      prevDate = d.date
     }
     return Math.max(maxStreak, streak)
   })
@@ -29,12 +41,22 @@ export function useCurrentStreak(data: MaybeRef<{
   return computed(() => {
     const dataVal = unref(data)
     let streak = 0
-    const sortedData = [...dataVal].sort((a, b) => b.date.getTime() - a.date.getTime())
+    // Sort descending (newest → oldest) to start from today
+    const sortedData = dataVal.toSorted((a, b) => b.date.getTime() - a.date.getTime())
+    let prevDate: Date | null = null
     for (const d of sortedData) {
+      // Check if this day is consecutive with the previous one (going backward: prev is newer)
+      if (prevDate) {
+        const dayDiff = Math.round((prevDate.getTime() - d.date.getTime()) / (1000 * 60 * 60 * 24))
+        if (dayDiff !== 1) {
+          break
+        }
+      }
       if (d.duration === 0) {
         break
       }
       streak++
+      prevDate = d.date
     }
     return streak
   })
@@ -47,8 +69,8 @@ export function useTodayMinutes(data: MaybeRef<{
 >) {
   return computed(() => {
     const dataVal = unref(data)
-    const today = new Date()
-    const todayString = today.toISOString().slice(0, 10)
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const todayString = new Date().toLocaleDateString('en-CA', { timeZone: tz })
     const todayData = dataVal.find(d => d.time.slice(0, 10) === todayString)
     return todayData?.duration ?? 0
   })
@@ -136,7 +158,7 @@ export function useProcessedData(data: MaybeRef<{
     }
 
     // get top by
-    const sortedBy = [...sumDurationBy.entries()].sort((a, b) => b[1] - a[1])
+    const sortedBy = [...sumDurationBy.entries()].toSorted((a, b) => b[1] - a[1])
     const topBy = sortedBy.slice(0, 5).map(d => d[0])
     const dataWithOther = dataVal.map((d) => {
       d = { ...d }
@@ -163,6 +185,6 @@ export function useProcessedData(data: MaybeRef<{
     return [...dataMap.entries()].map(([keyRaw, data]) => {
       const key = keyRaw.split(',')
       return { date: new Date(key[0] || ''), duration: data, by: key[1] || '' }
-    }).sort((a, b) => a.by.localeCompare(b.by)).sort((a, b) => a.date.getTime() - b.date.getTime())
+    }).toSorted((a, b) => a.by.localeCompare(b.by)).toSorted((a, b) => a.date.getTime() - b.date.getTime())
   })
 }

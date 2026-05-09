@@ -45,16 +45,25 @@ watchEffect(() => {
   background-color: var(--r-surface-background-base-color);
 }
 
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
+body {
+  margin-right: 0 !important;
+}
+
 input[type="password"] {
   font-family: "system-ui", "Segoe UI", sans-serif;
 }
 
 .plot {
-  --plot-background: var(--r-surface-background-color);
+  --plot-background: var(--r-surface-background-base-color);
   background: var(--plot-background) !important;
 }
 .y-dot-plot {
-  --plot-background: var(--r-surface-background-color);
+  --plot-background: var(--r-surface-background-base-color);
   background: var(--plot-background) !important;
 }
 
@@ -64,7 +73,7 @@ input[type="password"] {
 
 [aria-label="tip"] {
   color: var(--r-surface-text-color);
-  --plot-background: var(--r-surface-background-color);
+  --plot-background: var(--r-surface-background-base-color);
   background: var(--plot-background) !important;
   border: 1px solid var(--plot-background) !important;
   fill: var(--plot-background) !important;

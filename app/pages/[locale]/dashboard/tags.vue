@@ -129,6 +129,7 @@ async function handleRuleRefresh() {
 
 <template>
   <DashboardPageTitle
+    num="00"
     :title="t.dashboard.pageHeader.title.tags"
     :description="t.dashboard.pageHeader.description.tags"
   />

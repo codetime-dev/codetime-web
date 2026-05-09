@@ -18,34 +18,31 @@ const t = useI18N()
 </script>
 
 <template>
-  <CardBase
-    class="min-h-250px"
-    :loading="loading"
-  >
-    <div class="p-2 flex flex-col">
-      <div
-        class="flex flex-wrap gap-2 min-w-0 children:flex-grow sm:flex-nowrap children:sm:flex-basis-[200px]"
-      >
-        <DashboardDataBody
-          :title="t.dashboard.overview.statistic.timeTotal"
-          :value="getDurationString(totalMinutes * 60 * 1000)"
-        />
-        <DashboardDataBody
-          :title="t.dashboard.overview.statistic.timeToday"
-          :value="getDurationString(todayMinutes * 60 * 1000)"
-        />
-        <DashboardDataBody
-          :title="t.dashboard.overview.statistic.currentStreak"
-          :value="formateDays(currentStreak)"
-        />
-        <DashboardDataBody
-          :title="t.dashboard.overview.statistic.longestStreak"
-          :value="formateDays(maxStreak)"
-        />
-      </div>
-      <YearCalendarChart
-        :data="pAllData"
+  <div class="relative space-y-3">
+    <div class="gap-1.5 grid grid-cols-2 sm:grid-cols-4">
+      <DashboardDataBody
+        :title="t.dashboard.overview.statistic.timeTotal"
+        :value="getDurationString(totalMinutes * 60 * 1000)"
+      />
+      <DashboardDataBody
+        :title="t.dashboard.overview.statistic.timeToday"
+        :value="getDurationString(todayMinutes * 60 * 1000)"
+      />
+      <DashboardDataBody
+        :title="t.dashboard.overview.statistic.currentStreak"
+        :value="formateDays(currentStreak)"
+      />
+      <DashboardDataBody
+        :title="t.dashboard.overview.statistic.longestStreak"
+        :value="formateDays(maxStreak)"
       />
     </div>
-  </CardBase>
+    <div class="px-2 py-3">
+      <YearCalendarChart :data="pAllData" />
+    </div>
+    <div
+      v-if="loading"
+      class="bg-surface-variant-1/40 inset-0 absolute animate-pulse"
+    />
+  </div>
 </template>

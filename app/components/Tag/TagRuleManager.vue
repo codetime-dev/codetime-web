@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import type { TagResponse } from '~/api/v3/types.gen'
-import { Btn, Paper, Select, TextField } from '@roku-ui/vue'
 import { v3UpdateTag } from '~/api/v3'
 import { useUser } from '~/utils'
 import { getTagDisplay } from '~/utils/tag'
 
-// 定义规则相关的类型
 type RuleConditionType = 'CONTAINS' | 'EQUALS' | 'STARTS_WITH' | 'ENDS_WITH' | 'REGEX' | 'NOT_CONTAINS' | 'NOT_EQUALS' | 'NOT_STARTS_WITH' | 'NOT_ENDS_WITH' | 'NOT_REGEX'
 
 type RuleCondition = {
@@ -35,64 +33,52 @@ const user = useUser()
 
 const saving = ref(false)
 
-// OR 规则组管理 - 内部编辑状态类型
 type EditingRuleGroup = {
   id: string
   conditions: RuleCondition[]
 }
 
-// 编辑状态管理
 const isEditing = ref(false)
 const editingRuleGroups = ref<EditingRuleGroup[]>([])
 
-// 从 TagResponse.rules 获取规则结构
 const rules = computed(() => {
   return props.tag.rules as (RuleCondition | RuleGroup | null | undefined)
 })
 
-// hasGroupChanges 定义
 const hasGroupChanges = computed(() => {
   const originalGroups = convertRulesToEditingGroups(rules.value)
   return JSON.stringify(originalGroups) !== JSON.stringify(editingRuleGroups.value)
 })
 
 const hasChanges = computed(() => {
-  // 如果在编辑状态，允许保存（包括从无规则到有规则的情况）
   return isEditing.value && hasGroupChanges.value
 })
 
-// 将 API 规则结构转换为编辑状态的分组结构
 function convertRulesToEditingGroups(apiRules: RuleCondition | RuleGroup | null | undefined): EditingRuleGroup[] {
   if (!apiRules) {
     return []
   }
-
-  // 如果是单个条件，包装为一个组
   if ('field' in apiRules) {
     return [{
       id: `group-${Date.now()}`,
       conditions: [apiRules],
     }]
   }
-
-  // 如果是规则组，根据 operator 处理
   if ('operator' in apiRules) {
     if (apiRules.operator === 'OR') {
-      // OR 组：每个子条件/组成为独立的编辑组
       return apiRules.conditions.map((condition, index) =>
         'field' in condition
           ? {
               id: `group-${Date.now()}-${index}`,
               conditions: [condition],
             }
-          : convertRulesToEditingGroups(condition)[0] || { // 嵌套组，递归处理
+          : convertRulesToEditingGroups(condition)[0] || {
             id: `group-${Date.now()}-${index}`,
             conditions: [],
           },
       )
     }
     else if (apiRules.operator === 'AND') {
-      // AND 组：所有条件在一个编辑组中
       const conditions: RuleCondition[] = []
       for (const condition of apiRules.conditions) {
         if ('field' in condition) {
@@ -105,32 +91,25 @@ function convertRulesToEditingGroups(apiRules: RuleCondition | RuleGroup | null 
       }]
     }
   }
-
   return []
 }
 
-// 将编辑状态的分组结构转换为 API 规则结构
 function convertEditingGroupsToRules(groups: EditingRuleGroup[]): RuleCondition | RuleGroup | null {
   if (groups.length === 0) {
     return null
   }
-
   if (groups.length === 1) {
     const group = groups[0]
     if (group && group.conditions.length === 1) {
-      // 单条件直接返回
       return group.conditions[0] || null
     }
     else if (group && group.conditions.length > 1) {
-      // 多条件用 AND 连接
       return {
         operator: 'AND',
         conditions: group.conditions,
       }
     }
   }
-
-  // 多组用 OR 连接
   const orConditions: (RuleCondition | RuleGroup)[] = groups
     .filter(group => group && group.conditions.length > 0)
     .map(group => group.conditions.length === 1
@@ -148,11 +127,9 @@ function convertEditingGroupsToRules(groups: EditingRuleGroup[]): RuleCondition 
   }
 }
 
-// 检查用户是否为 free 用户以及规则数量限制
 const isFreeUser = computed(() => user.value?.plan === 'free')
 const maxRulesForFree = 1
 
-// 检查是否可以创建更多规则组
 const canCreateMoreRules = computed(() => {
   if (!isFreeUser.value) {
     return true
@@ -163,21 +140,18 @@ const canCreateMoreRules = computed(() => {
   return currentLength < maxRulesForFree
 })
 
-// 监听 rules 数据变化，同步到编辑状态
 watch(rules, (newRules) => {
   if (!isEditing.value) {
     editingRuleGroups.value = convertRulesToEditingGroups(newRules)
   }
 }, { immediate: true })
 
-// 监听 tag 变化，自动取消编辑状态
 watch(() => props.tag.id, () => {
   if (isEditing.value) {
     isEditing.value = false
   }
 })
 
-// 显示的规则组（编辑状态或实际规则）
 const displayRuleGroups = computed(() => {
   if (isEditing.value) {
     return editingRuleGroups.value
@@ -185,7 +159,6 @@ const displayRuleGroups = computed(() => {
   return convertRulesToEditingGroups(rules.value)
 })
 
-// 字段选项
 const fieldOptions = computed(() => [
   { label: t.value.dashboard.tags.fields.workspaceName, id: 'workspaceName' },
   { label: t.value.dashboard.tags.fields.language, id: 'language' },
@@ -199,7 +172,7 @@ const fieldOptions = computed(() => [
 const fieldDisplayMap = computed(() => {
   return Object.fromEntries(fieldOptions.value.map(f => [f.id, f.label]))
 })
-// 条件类型选项
+
 const conditionTypeOptions = computed(() => [
   { label: t.value.dashboard.tags.conditionTypes.CONTAINS, id: 'CONTAINS' },
   { label: t.value.dashboard.tags.conditionTypes.EQUALS, id: 'EQUALS' },
@@ -215,38 +188,32 @@ const conditionTypeOptions = computed(() => [
 const conditionTypeDisplayMap = computed(() => {
   return Object.fromEntries(conditionTypeOptions.value.map(c => [c.id, c.label]))
 })
-// 开始编辑
+
 function startEditing() {
   isEditing.value = true
   editingRuleGroups.value = rules.value ? convertRulesToEditingGroups(rules.value) : []
 }
 
-// 创建新 OR 规则组
 function createRuleGroup() {
   if (!isEditing.value) {
     startEditing()
   }
-
   const newCondition: RuleCondition = {
     field: 'workspaceName',
     conditionType: 'CONTAINS' as RuleConditionType,
     value: '',
   }
-
   const newGroup: EditingRuleGroup = {
     id: `temp-group-${Date.now()}`,
     conditions: [newCondition],
   }
-
   editingRuleGroups.value.push(newGroup)
 }
 
-// 更新条件
 function updateCondition(groupId: string, conditionIndex: number, field: string, conditionType: RuleConditionType, value: string) {
   if (!isEditing.value) {
     startEditing()
   }
-
   const group = editingRuleGroups.value.find(g => g.id === groupId)
   if (group && group.conditions[conditionIndex]) {
     group.conditions[conditionIndex] = {
@@ -258,12 +225,10 @@ function updateCondition(groupId: string, conditionIndex: number, field: string,
   }
 }
 
-// 添加 AND 条件到规则组
 function addConditionToGroup(groupId: string) {
   if (!isEditing.value) {
     startEditing()
   }
-
   const group = editingRuleGroups.value.find(g => g.id === groupId)
   if (group) {
     const newCondition: RuleCondition = {
@@ -275,27 +240,20 @@ function addConditionToGroup(groupId: string) {
   }
 }
 
-// 删除条件
 function removeCondition(groupId: string, conditionIndex: number) {
   if (!isEditing.value) {
     startEditing()
   }
-
   const group = editingRuleGroups.value.find(g => g.id === groupId)
   if (group && group.conditions.length > 1) {
     group.conditions.splice(conditionIndex, 1)
   }
 }
 
-// 保存更改
 async function saveChanges() {
   try {
     saving.value = true
-
-    // 将编辑状态转换为 API 格式
     const newRules = convertEditingGroupsToRules(editingRuleGroups.value)
-
-    // 使用 v3UpdateTag API 更新 tag 的 rules 字段
     await v3UpdateTag({
       path: { tag_id: props.tag.id },
       body: {
@@ -305,7 +263,6 @@ async function saveChanges() {
         rules: newRules as unknown,
       } as any,
     })
-
     emit('refresh')
     isEditing.value = false
   }
@@ -317,18 +274,15 @@ async function saveChanges() {
   }
 }
 
-// 取消编辑
 function cancelEditing() {
   isEditing.value = false
   editingRuleGroups.value = rules.value ? convertRulesToEditingGroups(rules.value) : []
 }
 
-// 删除规则组
 function removeRuleGroup(groupId: string) {
   if (!isEditing.value) {
     startEditing()
   }
-
   const groupIndex = editingRuleGroups.value.findIndex(g => g.id === groupId)
   if (groupIndex !== -1) {
     editingRuleGroups.value.splice(groupIndex, 1)
@@ -337,229 +291,467 @@ function removeRuleGroup(groupId: string) {
 </script>
 
 <template>
-  <Paper with-border class="rounded-xl flex flex-col h-full shadow-sm">
-    <div class="mb-6 flex items-center justify-between">
-      <div class="flex gap-3 items-center">
+  <PanelSection num="02" title="RULES" :meta="isEditing ? 'EDITING' : 'OR · AND · CONDITION'" flush>
+    <template #icon>
+      <i class="i-tabler-rules text-surface-dimmed/70 text-[15px]" />
+    </template>
+
+    <!-- Toolbar -->
+    <div class="rules-toolbar">
+      <div class="rules-tag">
         <div
-          class="text-sm font-medium rounded-full flex h-6 w-6 items-center justify-center"
-          :style="{ backgroundColor: tag.color, color: 'white' }"
+          class="rules-tag-glyph"
+          :style="{ backgroundColor: tag.color }"
         >
           {{ getTagDisplay(tag) }}
         </div>
-        <div>
-          <h3 class="text-lg font-medium">
+        <div class="rules-tag-meta">
+          <div class="rules-tag-name">
             {{ tag.name }}
-          </h3>
-          <p class="text-xs text-surface-dimmed">
+          </div>
+          <div class="rules-tag-hint">
             {{ isEditing ? t.dashboard.tags.common.editingMode : t.dashboard.tags.common.ruleRelationship }}
-          </p>
-          <p v-if="isFreeUser" class="text-xs text-surface-dimmed">
-            {{ t.dashboard.tags.tagRules.freeUserLimit }} {{ convertRulesToEditingGroups(rules || null).length }}/{{ maxRulesForFree }}
-          </p>
+            <span v-if="isFreeUser" class="rules-tag-quota">
+              · {{ convertRulesToEditingGroups(rules || null).length }}/{{ maxRulesForFree }}
+            </span>
+          </div>
         </div>
       </div>
-      <div class="flex flex-col gap-2 items-end">
-        <!-- 编辑模式的保存/取消按钮 -->
-        <div v-if="isEditing" class="flex gap-2">
-          <Btn
-            variant="light"
-            @click="cancelEditing"
-          >
+      <div class="rules-actions">
+        <template v-if="isEditing">
+          <button type="button" class="line-btn" @click="cancelEditing">
             {{ t.dashboard.tags.ruleForm.cancel }}
-          </Btn>
-          <Btn
-            variant="filled"
+          </button>
+          <button
+            type="button"
+            class="line-btn line-btn-primary"
             :disabled="!hasChanges || saving"
-            :loading="saving"
             @click="saveChanges"
           >
-            <template v-if="saving" #leftSection>
-              <i class="i-tabler-loader animate-spin" />
-            </template>
-            {{ t.dashboard.tags.ruleForm.save }}
-          </Btn>
-        </div>
-
-        <!-- 非编辑模式的编辑按钮 -->
-        <div v-else class="flex gap-2">
-          <Btn
-            variant="light"
-            @click="startEditing"
-          >
-            <template #leftSection>
-              <i class="i-tabler-edit text-xs" />
-            </template>
-            {{ t.dashboard.tags.tagRules.edit }}
-          </Btn>
-        </div>
-
-        <div v-if="!canCreateMoreRules && isFreeUser" class="text-xs text-surface-dimmed">
-          {{ t.dashboard.tags.tagRules.upgradeForMore }}
-        </div>
+            <i v-if="saving" class="i-tabler-loader text-sm animate-spin" />
+            <i v-else class="i-tabler-check text-sm" />
+            <span>{{ t.dashboard.tags.ruleForm.save }}</span>
+          </button>
+        </template>
+        <template v-else>
+          <button type="button" class="line-btn" @click="startEditing">
+            <i class="i-tabler-edit text-sm" />
+            <span>{{ t.dashboard.tags.tagRules.edit }}</span>
+          </button>
+        </template>
       </div>
     </div>
 
-    <div class="flex-1 space-y-2">
-      <!-- 空状态提示 -->
-      <div
-        v-if="displayRuleGroups.length === 0"
-        class="text-surface-dimmed py-12 text-center flex flex-col items-center justify-center"
+    <!-- Empty state -->
+    <div v-if="displayRuleGroups.length === 0" class="rules-empty">
+      <i class="i-tabler-rules-off text-surface-dimmed/50 text-3xl" />
+      <p class="rules-empty-text">
+        {{ t.dashboard.tags.tagRules.noRules }}
+      </p>
+      <p v-if="isFreeUser" class="rules-empty-hint">
+        {{ t.dashboard.tags.common.freeUserRuleLimit }}
+      </p>
+      <button
+        type="button"
+        class="line-btn line-btn-primary"
+        :disabled="!canCreateMoreRules"
+        @click="createRuleGroup"
       >
-        <div class="bg-surface-variant-highlight mb-4 p-4 rounded-full">
-          <i class="i-tabler-rules-off text-4xl text-surface-dimmed" />
-        </div>
-        <p class="mb-4">
-          {{ t.dashboard.tags.tagRules.noRules }}
-        </p>
-        <div v-if="isFreeUser" class="text-xs text-surface-dimmed mb-4">
-          {{ t.dashboard.tags.common.freeUserRuleLimit }}
-        </div>
-        <Btn
-          variant="light"
-          :disabled="!canCreateMoreRules"
-          @click="createRuleGroup"
-        >
-          <template #leftSection>
-            <i class="i-tabler-plus" />
-          </template>
-          {{ t.dashboard.tags.tagRules.createRule }}
-        </Btn>
-        <div v-if="!canCreateMoreRules && isFreeUser" class="text-xs text-surface-dimmed mt-2">
-          {{ t.dashboard.tags.common.upgradeForMoreRules }}
-        </div>
-      </div>
+        <i class="i-tabler-plus text-sm" />
+        <span>{{ t.dashboard.tags.tagRules.createRule }}</span>
+      </button>
+      <p v-if="!canCreateMoreRules && isFreeUser" class="rules-empty-hint">
+        {{ t.dashboard.tags.common.upgradeForMoreRules }}
+      </p>
+    </div>
 
-      <!-- OR 规则组列表 -->
+    <!-- Rule groups -->
+    <div v-else class="rules-list">
       <template v-for="(group, groupIndex) in displayRuleGroups" :key="group.id">
-        <!-- 规则组之间的 OR 连接符 -->
-        <div
-          v-if="groupIndex > 0"
-          class="flex items-center"
-        >
-          <span class="text-xs text-surface-dimmed font-medium font-mono px-2 py-1 rounded bg-surface-variant-2">OR</span>
+        <div v-if="groupIndex > 0" class="rules-or">
+          <span class="rules-or-line" />
+          <span class="rules-or-label">OR</span>
+          <span class="rules-or-line" />
         </div>
 
-        <!-- 遍历规则组 -->
-        <div class="border-surface-variant-1 p-2 border rounded bg-surface">
-          <!-- 条件行容器 -->
-          <div class="flex gap-2 items-center justify-between">
-            <!-- 左侧：条件列表 -->
-            <div class="flex flex-1 flex-wrap gap-1 w-full items-center">
-              <template v-for="(condition, conditionIndex) in group.conditions" :key="conditionIndex">
-                <div>
-                  <!-- 条件编辑/显示 -->
-                  <div class="flex gap-1 items-center">
-                    <template v-if="isEditing">
-                      <!-- 编辑模式：字段选择 -->
-                      <Select
-                        :model-value="condition.field"
-                        :options="fieldOptions.map(f => f.id)"
-                        :label-getter="f => fieldDisplayMap[f] ?? f"
-                        class="text-xs min-w-24"
-                        size="sm"
-                        @update:model-value="(value) => updateCondition(group.id, conditionIndex, value as string, condition.conditionType, condition.value)"
-                      />
+        <div class="rules-group">
+          <div class="rules-group-conditions">
+            <template v-for="(condition, conditionIndex) in group.conditions" :key="conditionIndex">
+              <div v-if="conditionIndex > 0" class="rules-and">
+                AND
+              </div>
 
-                      <!-- 操作符选择 -->
-                      <Select
-                        :model-value="condition.conditionType"
-                        :options="conditionTypeOptions.map(c => c.id)"
-                        :label-getter="c => conditionTypeDisplayMap[c] ?? c"
-                        class="text-xs min-w-20"
-                        size="sm"
-                        @update:model-value="(value) => updateCondition(group.id, conditionIndex, condition.field, value as RuleConditionType, condition.value)"
-                      />
-
-                      <!-- 值输入 -->
-                      <TextField
-                        :model-value="condition.value"
-                        :placeholder="t.dashboard.tags.ruleForm.valuePlaceholder"
-                        class="text-xs min-w-24"
-                        size="sm"
-                        @update:model-value="(value) => updateCondition(group.id, conditionIndex, condition.field, condition.conditionType, value as string)"
-                      />
-                    </template>
-
-                    <template v-else>
-                      <!-- 只读模式：文本显示 -->
-                      <span class="text-xs px-2 py-1 rounded bg-surface-variant-2">
-                        {{ fieldDisplayMap[condition.field] || condition.field }}
-                      </span>
-                      <span class="text-xs px-2 py-1 rounded bg-surface-variant-2">
-                        {{ conditionTypeDisplayMap[condition.conditionType] || condition.conditionType }}
-                      </span>
-                      <span class="text-xs font-mono px-2 py-1 rounded bg-surface-variant-2">
-                        "{{ condition.value }}"
-                      </span>
-                    </template>
-
-                    <!-- 条件之间的 AND 连接符 -->
-                    <span
-                      v-if="conditionIndex < group.conditions.length - 1"
-                      class="text-xs text-surface-dimmed font-medium font-mono px-2 py-1 rounded bg-surface-variant-2"
-                    >
-                      AND
-                    </span>
-                    <!-- 添加 AND 条件按钮（仅编辑模式） -->
-                    <Btn
-                      v-if="isEditing && conditionIndex === group.conditions.length - 1"
-                      variant="light"
-                      size="sm"
-                      @click="addConditionToGroup(group.id)"
-                    >
-                      <template #leftSection>
-                        <i class="i-tabler-plus text-xs" />
-                      </template>
-                      <span class="text-xs">AND</span>
-                    </Btn>
-                  </div>
-                </div>
-                <div v-if="isEditing">
-                  <!-- 删除单个条件按钮（仅在有多个条件时显示） -->
-                  <Btn
-                    v-if="group.conditions.length > 1"
-                    class="self-end"
-                    icon
-                    variant="light"
-                    size="sm"
-                    color="error"
-                    title="删除此条件"
-                    @click="removeCondition(group.id, conditionIndex)"
+              <div class="rules-condition">
+                <template v-if="isEditing">
+                  <select
+                    class="line-select"
+                    :value="condition.field"
+                    @change="(e) => updateCondition(group.id, conditionIndex, (e.target as HTMLSelectElement).value, condition.conditionType, condition.value)"
                   >
-                    <i class="i-tabler-x text-xs" />
-                  </Btn>
-                  <Btn
-                    v-if="group.conditions.length === 1"
-                    icon
-                    variant="light"
-                    size="sm"
-                    color="error"
-                    title="删除整个规则组"
-                    @click="removeRuleGroup(group.id)"
+                    <option v-for="f in fieldOptions" :key="f.id" :value="f.id">
+                      {{ f.label }}
+                    </option>
+                  </select>
+
+                  <select
+                    class="line-select"
+                    :value="condition.conditionType"
+                    @change="(e) => updateCondition(group.id, conditionIndex, condition.field, (e.target as HTMLSelectElement).value as RuleConditionType, condition.value)"
                   >
-                    <i class="i-tabler-x text-xs" />
-                  </Btn>
-                </div>
-              </template>
-            </div>
+                    <option v-for="c in conditionTypeOptions" :key="c.id" :value="c.id">
+                      {{ c.label }}
+                    </option>
+                  </select>
+
+                  <input
+                    type="text"
+                    class="line-input rules-value-input"
+                    :value="condition.value"
+                    :placeholder="t.dashboard.tags.ruleForm.valuePlaceholder"
+                    autocomplete="off"
+                    spellcheck="false"
+                    @input="(e) => updateCondition(group.id, conditionIndex, condition.field, condition.conditionType, (e.target as HTMLInputElement).value)"
+                  >
+
+                  <button
+                    type="button"
+                    class="rules-remove"
+                    :title="t.dashboard.tags.ruleForm.cancel"
+                    @click="group.conditions.length > 1 ? removeCondition(group.id, conditionIndex) : removeRuleGroup(group.id)"
+                  >
+                    <i class="i-tabler-x text-sm" />
+                  </button>
+                </template>
+                <template v-else>
+                  <span class="rules-pill rules-pill-field">{{ fieldDisplayMap[condition.field] || condition.field }}</span>
+                  <span class="rules-pill rules-pill-op">{{ conditionTypeDisplayMap[condition.conditionType] || condition.conditionType }}</span>
+                  <span class="rules-pill rules-pill-value">"{{ condition.value }}"</span>
+                </template>
+              </div>
+            </template>
+
+            <button
+              v-if="isEditing"
+              type="button"
+              class="line-btn line-btn-ghost rules-add-and"
+              @click="addConditionToGroup(group.id)"
+            >
+              <i class="i-tabler-plus text-sm" />
+              <span>AND</span>
+            </button>
           </div>
         </div>
       </template>
 
-      <!-- 添加新 OR 组按钮（仅编辑模式） -->
-      <div v-if="isEditing && editingRuleGroups.length > 0" class="pt-2 flex justify-left">
-        <Btn
-          variant="light"
+      <div v-if="isEditing && editingRuleGroups.length > 0" class="rules-add-or">
+        <button
+          type="button"
+          class="line-btn line-btn-ghost"
           :disabled="!canCreateMoreRules"
-          size="sm"
           @click="createRuleGroup"
         >
-          <template #leftSection>
-            <i class="i-tabler-plus" />
-          </template>
-          <span class="text-sm">OR</span>
-        </Btn>
+          <i class="i-tabler-plus text-sm" />
+          <span>OR</span>
+        </button>
       </div>
     </div>
-  </Paper>
+  </PanelSection>
 </template>
+
+<style scoped>
+.rules-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+}
+
+.rules-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.rules-tag-glyph {
+  width: 1.85rem;
+  height: 1.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.rules-tag-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.rules-tag-name {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rules-tag-hint {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+}
+
+.rules-tag-quota {
+  color: color-mix(in srgb, var(--color-primary-1) 80%, transparent);
+}
+
+.rules-actions {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+/* Empty */
+.rules-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 3rem 1rem;
+}
+
+.rules-empty-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+}
+
+.rules-empty-hint {
+  font-size: 11.5px;
+  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  text-align: center;
+}
+
+/* Group list */
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1.25rem 1rem;
+  gap: 0.5rem;
+}
+
+.rules-or {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+}
+
+.rules-or-line {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--r-surface-border-color) 35%, transparent);
+}
+
+.rules-or-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  color: var(--color-primary-1);
+}
+
+.rules-group {
+  padding: 0.85rem 1rem;
+  background-color: rgb(var(--r-color-surface-7) / 0.12);
+}
+
+.rules-group-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.rules-and {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  padding: 0 0.25rem;
+}
+
+.rules-condition {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.rules-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 1.85rem;
+  padding: 0 0.7rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  background-color: rgb(var(--r-color-surface-7) / 0.22);
+  color: var(--r-surface-text-color);
+}
+
+.rules-pill-op {
+  color: var(--color-primary-1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+}
+
+.rules-pill-value {
+  color: color-mix(in srgb, var(--r-surface-text-color) 90%, transparent);
+}
+
+/* Inputs */
+.line-input {
+  display: inline-block;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: var(--r-surface-text-color);
+  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  border: 0;
+  outline: 0;
+  transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.line-input:hover {
+  background-color: rgb(var(--r-color-surface-7) / 0.26);
+}
+
+.line-input:focus {
+  background-color: rgb(var(--r-color-surface-7) / 0.32);
+  box-shadow: inset 0 -1px 0 var(--color-primary-1);
+}
+
+.line-input::placeholder {
+  color: color-mix(in srgb, var(--r-surface-text-color) 35%, transparent);
+}
+
+.rules-value-input {
+  min-width: 10rem;
+  flex: 1;
+}
+
+.line-select {
+  height: 2.25rem;
+  padding: 0 1.85rem 0 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: var(--r-surface-text-color);
+  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 12px 12px;
+  transition: background-color 180ms ease;
+}
+
+.line-select:hover {
+  background-color: rgb(var(--r-color-surface-7) / 0.26);
+}
+
+/* Remove btn */
+.rules-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  border: 0;
+  cursor: pointer;
+  color: color-mix(in srgb, var(--r-surface-text-color) 60%, transparent);
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.rules-remove:hover {
+  color: var(--r-color-error-1, #ef4444);
+  background-color: color-mix(in srgb, var(--r-color-error-1, #ef4444) 18%, transparent);
+}
+
+.rules-add-and {
+  height: 1.85rem !important;
+  padding: 0 0.75rem !important;
+  font-size: 10.5px !important;
+}
+
+.rules-add-or {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Buttons */
+.line-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.25rem;
+  padding: 0 0.95rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--r-surface-text-color);
+  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  border: 0;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease, opacity 180ms ease;
+}
+
+.line-btn:hover:not(:disabled) {
+  background-color: rgb(var(--r-color-surface-7) / 0.32);
+}
+
+.line-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.line-btn-primary {
+  color: var(--color-primary-1);
+  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
+}
+
+.line-btn-primary:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--color-primary-1) 24%, transparent);
+}
+
+.line-btn-ghost {
+  background-color: transparent;
+  color: color-mix(in srgb, var(--r-surface-text-color) 60%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 30%, transparent);
+}
+
+.line-btn-ghost:hover:not(:disabled) {
+  color: var(--color-primary-1);
+  background-color: color-mix(in srgb, var(--color-primary-1) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary-1) 35%, transparent);
+}
+</style>

@@ -80,8 +80,6 @@ const options = computed<PlotOptions>(() => ({
   padding: 0,
   marginLeft: 8,
   marginRight: 22,
-  width: 1110,
-  height: 300,
   y: {
     grid: true,
     nice: true,
@@ -126,18 +124,14 @@ const options = computed<PlotOptions>(() => ({
 </script>
 
 <template>
-  <CardBase :loading="loading">
-    <div>
-      <div class="text-lg flex gap-2 items-center">
-        <i class="i-tabler-calendar-event" />
-        <div>
-          {{ t.dashboard.overview.codetimeTrendTitle }}
-        </div>
-      </div>
-    </div>
+  <div class="px-3 py-3 relative">
     <PoltChart
       ref="chart"
       :options="options"
     />
-  </CardBase>
+    <div
+      v-if="loading"
+      class="bg-surface-variant-1/40 inset-0 absolute animate-pulse"
+    />
+  </div>
 </template>

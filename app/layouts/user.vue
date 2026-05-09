@@ -59,14 +59,14 @@ const sectionLabel = computed(() => {
                   v-if="user.avatar"
                   :src="user.avatar"
                   alt=""
-                  class="border-surface-dimmed/30 border h-5 w-5 object-cover"
+                  class="border-surface-dimmed/30 border rounded-full h-5 w-5 object-cover"
                 >
                 <span class="hidden sm:inline">{{ user.username }}</span>
                 <span
-                  class="text-[10.5px] tracking-[0.16em] px-1.5 py-0.5 border"
+                  class="text-[10px] tracking-[0.14em] font-mono px-2 py-0.5 border rounded-full"
                   :class="String(user.plan).toLowerCase() === 'pro'
-                    ? 'border-primary/40 text-primary bg-primary/10'
-                    : 'border-surface-dimmed/30 text-surface-dimmed/70'"
+                    ? 'border-primary/30 text-primary bg-primary/12'
+                    : 'border-surface-dimmed/25 text-surface-dimmed/60'"
                 >
                   {{ String(user.plan ?? 'free').toUpperCase() }}
                 </span>
@@ -89,7 +89,7 @@ const sectionLabel = computed(() => {
         </div>
       </header>
 
-      <main class="relative">
+      <main class="layout-main relative">
         <slot />
       </main>
 
@@ -126,6 +126,16 @@ const sectionLabel = computed(() => {
 .layout-frame {
   position: relative;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-main {
+  flex: 1 0 auto;
+}
+
+.layout-foot {
+  margin-top: auto;
 }
 
 .layout-frame::before,

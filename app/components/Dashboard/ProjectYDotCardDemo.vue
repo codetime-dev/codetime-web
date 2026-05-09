@@ -124,18 +124,16 @@ const data = Array.from({ length: 30 }, (_, i) => {
 </script>
 
 <template>
-  <CardBase>
-    <div>
-      <div class="text-lg flex gap-2 items-center">
-        <i class="i-carbon-chart-line-data" />
-        <div>
-          {{ t.dashboard.overview.codetimeProjectTrendTitle }}
-        </div>
+  <div>
+    <div class="text-lg mb-2 flex gap-2 items-center">
+      <i class="i-carbon-chart-line-data" />
+      <div>
+        {{ t.dashboard.overview.codetimeProjectTrendTitle }}
       </div>
     </div>
     <PoltYDot
       :data="data"
       :y-label="t.plot.label.project"
     />
-  </CardBase>
+  </div>
 </template>

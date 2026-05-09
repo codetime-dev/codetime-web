@@ -78,8 +78,6 @@ const options = computed<Plot.PlotOptions>(() => {
       ticks: Math.max(3, Math.min(10, Math.floor(width.value / 120))),
       interval: 'day',
     },
-    width: 1110,
-    height: 300,
     r: { range: [0, maxR.value] },
     marks: [
       Plot.rect(
@@ -112,6 +110,7 @@ const options = computed<Plot.PlotOptions>(() => {
               y: false,
             },
           },
+          pointerEvents: 'auto',
         },
 
       ),
@@ -124,6 +123,12 @@ const options = computed<Plot.PlotOptions>(() => {
         tickFormat: (d: string) => getLanguageName(d),
         tickPadding: -8,
         tickSize: 4,
+      }),
+      Plot.axisY({
+        anchor: 'left',
+        tickSize: 0,
+        tickFormat: () => '',
+        label: null,
       }),
     ],
   }

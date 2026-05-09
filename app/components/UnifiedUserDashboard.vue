@@ -35,9 +35,8 @@ const isOwnProfile = computed(() => {
   return targetUserId.value === currentUser.value?.id
 })
 
-// 过滤器系统（仅在概览模式下使用）
-const filters = reactive<FilterItem[]>([])
-provide('filters', filters)
+// 过滤器功能已移除
+const filters: FilterItem[] = []
 
 // 日期范围控制
 const days = useLocalStorage('days', ref(currentUser.value?.plan === 'pro' ? 365 : 28))
@@ -351,9 +350,9 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="mx-auto px-4 py-6 max-w-6xl w-full space-y-8 lg:max-w-7xl">
+  <div class="mx-auto max-w-7xl w-full">
     <!-- User Header (仅在用户模式显示) -->
-    <div v-if="showUserInfo" class="space-y-6">
+    <div v-if="showUserInfo" class="px-4 py-6 space-y-6">
       <!-- Hidden Data Warning -->
       <div v-if="userHiddenData" :key="`hidden-${targetUserId}`" class="p-6 border border-amber-500/20 rounded-lg bg-amber-500/10">
         <div class="flex gap-3 items-center">
@@ -452,145 +451,158 @@ watchEffect(() => {
       </template>
     </div>
 
-    <!-- 控制面板 (仅在启用时显示) -->
-    <div v-if="showControls && !userHiddenData" class="space-y-4">
-      <DashboardDataRange v-model:days="days" />
-    </div>
+    <!-- Dashboard 主体 -->
+    <template v-if="!userHiddenData && shouldFetchDashboardData">
+      <!-- 插件指引 (无数据时) -->
+      <DashboardPluginGuide v-if="layout === 'dashboard' && allDataResp.status.value === 'success' && !hasData" />
 
-    <!-- 数据内容区域 -->
-    <div v-if="!userHiddenData" class="space-y-8">
-      <!-- Dashboard模式的内容 -->
-      <template v-if="shouldFetchDashboardData">
-        <!-- 插件指引 (当没有数据时，仅在 dashboard 模式下显示) -->
-        <DashboardPluginGuide v-if="layout === 'dashboard' && allDataResp.status.value === 'success' && !hasData" />
+      <template v-else>
+        <PanelSection
+          v-if="showControls"
+          num="01"
+          title="RANGE"
+          meta="TIME · WINDOW"
+          flush
+        >
+          <template #icon>
+            <i class="i-tabler-calendar text-surface-dimmed/70 text-[15px]" />
+          </template>
+          <DashboardDataRange v-model:days="days" />
+        </PanelSection>
 
-        <!-- Dashboard内容 (当有数据时) -->
-        <template v-else>
-          <!-- 活动日历 -->
+        <PanelSection
+          num="02"
+          title="ACTIVITY"
+          meta="ANNUAL · CALENDAR"
+        >
+          <template #icon>
+            <i class="i-tabler-activity text-surface-dimmed/70 text-[15px]" />
+          </template>
           <DashboardCalendarCard
             :loading="allDataResp.status.value !== 'success'"
             :data="allData"
           />
+        </PanelSection>
 
-          <!-- 过滤器 (仅在概览模式) -->
-          <DashboardFilterWrapper v-if="layout === 'dashboard'" />
-
-          <!-- Top卡片区域 -->
-          <div
-            v-if="hasData"
-            class="flex flex-basis-[100%] flex-col flex-wrap gap-2 sm:flex-row sm:children:flex-basis-[calc(100%/3-0.5rem*2/3)] sm:children:max-w-[calc(100%/3-0.5rem*2/3)]"
-          >
+        <PanelSection
+          v-if="hasData"
+          num="03"
+          title="TOP"
+          meta="LANGUAGE · WORKSPACE · PLATFORM"
+          flush
+        >
+          <template #icon>
+            <i class="i-tabler-medal text-surface-dimmed/70 text-[15px]" />
+          </template>
+          <div class="top-grid">
             <DashboardTopCard
+              flat
               icon="i-tabler-braces"
               type="language"
               :days="days"
-              :filters="filters"
               :title="t.dashboard.overview.top.language"
             />
             <DashboardTopCard
+              flat
               icon="i-tabler-app-window"
               type="workspace"
               :days="days"
-              :filters="filters"
               :title="t.dashboard.overview.top.workspace"
             />
             <DashboardTopCard
+              flat
               icon="i-tabler-terminal"
               type="platform"
               :days="days"
-              :filters="filters"
               :title="t.dashboard.overview.top.platform"
             />
           </div>
+        </PanelSection>
 
-          <!-- 累积线性图 -->
+        <PanelSection
+          num="04"
+          :title="t.dashboard.overview.codetimeTrendTitle"
+          meta="DAILY · TREND"
+          flush
+        >
+          <template #icon>
+            <i class="i-tabler-calendar-event text-surface-dimmed/70 text-[15px]" />
+          </template>
           <CumulativeLineChart
             v-if="allDataResp.status.value === 'success' && hasData"
             :loading="false"
             :data="filtedData"
           />
-          <CardBase v-else-if="allDataResp.status.value === 'pending'">
-            <div>
-              <div class="text-lg mb-4 flex gap-2 items-center">
-                <i class="i-tabler-calendar-event" />
-                <div>
-                  {{ t.dashboard.overview.codetimeTrendTitle }}
-                </div>
-              </div>
-            </div>
-            <div class="rounded-2xl bg-surface-variant-1 h-64 w-full animate-pulse" />
-          </CardBase>
+          <div
+            v-else
+            class="bg-surface-variant-1/40 h-64 w-full animate-pulse"
+          />
+        </PanelSection>
 
-          <!-- 语言趋势图 -->
-          <CardBase
-            v-if="allLanguageDataResp.status.value === 'success' && pAllLangData.length > 0"
-            :loading="false"
-          >
-            <div>
-              <div class="text-lg flex gap-2 items-center">
-                <i class="i-carbon-chart-line-data" />
-                <div>
-                  {{ t.dashboard.overview.codetimeLanguaeTrendTitle }}
-                </div>
-              </div>
-            </div>
+        <PanelSection
+          v-if="allLanguageDataResp.status.value === 'pending' || pAllLangData.length > 0"
+          num="05"
+          :title="t.dashboard.overview.codetimeLanguaeTrendTitle"
+          meta="LANGUAGE · DOTS"
+          flush
+        >
+          <template #icon>
+            <i class="i-carbon-chart-line-data text-surface-dimmed/70 text-[15px]" />
+          </template>
+          <div class="relative">
             <PoltYDot
+              v-if="allLanguageDataResp.status.value === 'success' && pAllLangData.length > 0"
               :data="pAllLangData"
               :y-label="t.plot.label.language"
             />
-          </CardBase>
-          <CardBase v-else-if="allLanguageDataResp.status.value === 'pending'" :loading="true">
-            <div>
-              <div class="text-lg mb-4 flex gap-2 items-center">
-                <i class="i-carbon-chart-line-data" />
-                <div>
-                  {{ t.dashboard.overview.codetimeLanguaeTrendTitle }}
-                </div>
-              </div>
-            </div>
-            <div class="rounded-2xl bg-surface-variant-1 h-64 w-full animate-pulse" />
-          </CardBase>
+            <div
+              v-else
+              class="bg-surface-variant-1/40 h-64 w-full animate-pulse"
+            />
+          </div>
+        </PanelSection>
 
-          <!-- 项目趋势图 -->
-          <CardBase
-            v-if="allProjectDataResp.status.value === 'success' && pAllProjectData.length > 0"
-            :loading="false"
-          >
-            <div>
-              <div class="text-lg flex gap-2 items-center">
-                <i class="i-carbon-chart-line-data" />
-                <div>
-                  {{ t.dashboard.overview.codetimeProjectTrendTitle }}
-                </div>
-              </div>
-            </div>
+        <PanelSection
+          v-if="allProjectDataResp.status.value === 'pending' || pAllProjectData.length > 0"
+          num="06"
+          :title="t.dashboard.overview.codetimeProjectTrendTitle"
+          meta="PROJECT · DOTS"
+          flush
+        >
+          <template #icon>
+            <i class="i-carbon-chart-line-data text-surface-dimmed/70 text-[15px]" />
+          </template>
+          <div class="relative">
             <PoltYDot
+              v-if="allProjectDataResp.status.value === 'success' && pAllProjectData.length > 0"
               :data="pAllProjectData"
               :y-label="t.plot.label.project"
             />
-          </CardBase>
-          <CardBase v-else-if="allProjectDataResp.status.value === 'pending'" :loading="true">
-            <div>
-              <div class="text-lg mb-4 flex gap-2 items-center">
-                <i class="i-carbon-chart-line-data" />
-                <div>
-                  {{ t.dashboard.overview.codetimeProjectTrendTitle }}
-                </div>
-              </div>
-            </div>
-            <div class="rounded-2xl bg-surface-variant-1 h-64 w-full animate-pulse" />
-          </CardBase>
+            <div
+              v-else
+              class="bg-surface-variant-1/40 h-64 w-full animate-pulse"
+            />
+          </div>
+        </PanelSection>
 
-          <!-- 每日分布图 -->
+        <PanelSection
+          v-if="hasData"
+          num="07"
+          :title="t.dashboard.overview.dailyCodingDistributionTitle"
+          meta="HOUR · DENSITY"
+          flush
+        >
+          <template #icon>
+            <i class="i-tabler-clock-hour-4 text-surface-dimmed/70 text-[15px]" />
+          </template>
           <PoltDailyDistribution
-            v-if="hasData"
             :start-time="startTime"
             :end-time="endTime"
             :segments="segments"
           />
-        </template>
+        </PanelSection>
       </template>
-    </div>
+    </template>
 
     <!-- 扩展信息区域 (仅在用户模式显示) -->
     <div v-if="showUserInfo && !userHiddenData" class="space-y-8">
@@ -657,3 +669,25 @@ watchEffect(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.top-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .top-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .top-grid > :where(:not(:first-child)) {
+    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 30%, transparent);
+  }
+}
+
+@media (max-width: 639px) {
+  .top-grid > :where(:not(:first-child)) {
+    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 30%, transparent);
+  }
+}
+</style>

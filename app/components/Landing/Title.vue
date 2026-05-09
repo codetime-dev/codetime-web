@@ -1,50 +1,56 @@
 <template>
-  <div class="landing-title font-bold text-center flex flex-wrap gap-x-4 gap-y-1 max-w-full min-w-0 justify-center">
-    <span class="gradient-text title-code transition-transform duration-300">Code</span>
-    <span class="gradient-text title-time transition-transform duration-300">Time</span>
-  </div>
+  <h1 class="landing-title leading-[0.92] font-mono text-center flex flex-col gap-1 items-center">
+    <span class="title-line">
+      <span class="title-code" data-text="CODE">CODE</span>
+    </span>
+    <span class="title-line">
+      <span class="title-time" data-text="TIME">TIME</span>
+    </span>
+  </h1>
 </template>
 
 <style scoped>
 .landing-title {
-  font-size: clamp(2.4rem, 12vw, 7.5rem);
-  line-height: 0.95;
+  font-size: clamp(4rem, 18vw, 11rem);
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-.gradient-text {
-  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
-  display: inline-block;
-  max-width: 100%;
-  background-clip: text;
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: spin 12s infinite;
-}
-
-@media (max-width: 380px) {
-  .landing-title {
-    gap: 0.25rem;
-  }
+.title-line {
+  display: inline-flex;
+  position: relative;
 }
 
 .title-code {
-  background-image: linear-gradient(-45deg, #0000 10%,  #2ad 50%);
+  position: relative;
+  background: linear-gradient(135deg, var(--color-primary-1) 0%, var(--color-primary-2) 55%, var(--color-primary-3) 100%);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: title-shimmer 9s ease-in-out infinite;
 }
 
 .title-time {
-  background-image: linear-gradient(135deg, #777 40%,  #0000 90%);
+  position: relative;
+  color: var(--r-surface-foreground-color);
+  opacity: 0.94;
 }
 
-@keyframes spin {
-  0% {
-    background-position: 100% 50%;
-  }
-  50% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
+.title-time::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--color-primary-1) 65%, transparent);
+  color: transparent;
+  transform: translate(0.06em, 0.06em);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+@keyframes title-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 </style>

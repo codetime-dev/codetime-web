@@ -50,6 +50,17 @@ export const en: Translation = {
     loginWithGithub: 'Login with GitHub',
     freeMessage: 'Currently completely free, no credit card required',
     demo: 'Demo',
+    heroBadge: 'v3 · analytics',
+    scroll: 'scroll',
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Data visualization',
@@ -69,8 +80,12 @@ export const en: Translation = {
       },
     },
     pricing: {
+      heading: 'Free to start. Pro when you need it.',
       title: 'Pricing',
       description: 'Choose the plan that suits you.',
+    },
+    closing: {
+      heading: 'Make every minute count.',
     },
   },
   plan: {
@@ -273,6 +288,7 @@ export const en: Translation = {
   profile: {
     languages: {
       title: 'Language Highlights',
+      noData: 'No language data available yet.',
       topPercent: (percent: number) => `TOP ${percent}%`,
     },
     stats: {
@@ -413,9 +429,11 @@ export const en: Translation = {
       },
     },
     workspace: {
+      noData: 'No data for this workspace.',
       select: {
         placeholder: 'Select a workspace',
         none: 'Input a workspace name',
+        prompt: 'Select a project to begin.',
       },
       flameGraph: {
         title: 'Flame Graph',
