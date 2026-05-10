@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useSchemeString } from '@roku-ui/vue'
-
 const props = defineProps<{
   theme?: string
 }>()

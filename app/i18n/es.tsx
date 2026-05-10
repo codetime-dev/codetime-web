@@ -159,6 +159,9 @@ export const es: Partial<Translation> = {
         item: {
           include: 'Incluye todas las funciones del plan Básico',
           browseAll: 'Navegar por todos los datos históricos',
+          workspace: 'Historial completo por espacio de trabajo',
+          widgetCustom: 'Estilo detallado del widget y colores personalizados',
+          widgetUnlimited: 'Sin límite de días e idiomas en widgets',
           rule: 'Procesamiento de datos basado en reglas',
           tag: 'Sistema de etiquetas',
         },

@@ -46,7 +46,7 @@ html.is-theme-switching *::after {
 
   /* Typography — sans baseline */
   --ct-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --ct-font-mono: 'Berkeley Mono', 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ct-font-mono: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --ct-text-xs:   12px;
   --ct-text-sm:   13px;

@@ -163,6 +163,9 @@ export const zhCN: Partial<Translation> = {
         item: {
           include: '包含 Basic 计划的所有功能',
           browseAll: '浏览所有历史数据',
+          workspace: '工作区全量历史数据',
+          widgetCustom: 'Widget 详细样式与自定义配色',
+          widgetUnlimited: '解除 Widget 天数与语言上限',
           rule: '基于规则的数据处理',
           tag: '标签系统',
         },

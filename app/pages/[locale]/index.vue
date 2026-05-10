@@ -7,16 +7,16 @@ const t = useI18N()
 
 watchEffect(() => {
   useSeoMeta({
-    title: 'Code Time - Programming Time Analytics & Insights',
-    description: 'Track your programming time, analyze coding patterns, and get insights into your development productivity. Compatible with VS Code, JetBrains IDEs, and more.',
-    keywords: 'programming time tracker, coding analytics, developer productivity, code metrics, programming insights, VS Code extension, JetBrains plugin',
-    ogTitle: 'Code Time - Programming Time Analytics & Insights',
-    ogDescription: 'Track your programming time, analyze coding patterns, and get insights into your development productivity. Compatible with VS Code, JetBrains IDEs, and more.',
+    title: 'Code Time — Coding Analytics for VS Code & JetBrains',
+    description: 'Automatically track how long you spend coding, visualise habits by language and project, and export your raw editor data. Free plugins for VS Code, Cursor, Windsurf and every JetBrains IDE.',
+    keywords: 'coding analytics, programming tracker, developer productivity, code metrics, VS Code extension, JetBrains plugin, Cursor, Windsurf',
+    ogTitle: 'Code Time — Coding Analytics for VS Code & JetBrains',
+    ogDescription: 'Automatically track how long you spend coding, visualise habits by language and project, and export your raw editor data. Free plugins for VS Code, Cursor, Windsurf and every JetBrains IDE.',
     ogType: 'website',
     ogImage: '/icon.png',
     twitterCard: 'summary_large_image',
-    twitterTitle: 'Code Time - Programming Time Analytics & Insights',
-    twitterDescription: 'Track your programming time, analyze coding patterns, and get insights into your development productivity.',
+    twitterTitle: 'Code Time — Coding Analytics for VS Code & JetBrains',
+    twitterDescription: 'Automatically track coding time, visualise habits by language and project, export raw editor data. Free plugins for VS Code and JetBrains.',
   })
 })
 
@@ -128,7 +128,7 @@ const jsonLd = computed(() => ({
       '@type': 'WebPage',
       '@id': 'https://codetime.dev/#homepage',
       'url': 'https://codetime.dev',
-      'name': 'Code Time — Programming Time Analytics & Insights',
+      'name': 'Code Time — Coding Analytics for VS Code & JetBrains',
       'speakable': {
         '@type': 'SpeakableSpecification',
         'cssSelector': ['h1.landing-title', '.agent-friendly-summary p'],
@@ -166,10 +166,6 @@ useHead({
       </div>
 
       <LandingTitle />
-
-      <p class="hero-desc">
-        {{ t.landing.description }}
-      </p>
 
       <div class="mt-2 flex flex-col gap-4 items-center">
         <LoginButton />
@@ -241,22 +237,29 @@ useHead({
         </p>
       </div>
 
-      <div class="showcase-frame">
-        <div class="showcase-grid">
-          <div class="showcase-cell showcase-cell--top">
-            <DashboardTopCardTemplateDemo />
+      <!--
+        The four dashboard previews pull in Observable Plot + d3 (~600KB of
+        JS). Defer them until the user scrolls into range so the landing
+        first paint ships with none of that on the critical path.
+      -->
+      <OnVisible min-height="640px" root-margin="400px">
+        <div class="showcase-frame">
+          <div class="showcase-grid">
+            <div class="showcase-cell showcase-cell--top">
+              <LazyDashboardTopCardTemplateDemo />
+            </div>
+            <div class="showcase-cell showcase-cell--cal">
+              <LazyDashboardCalendarCardDemo class="w-full" />
+            </div>
           </div>
-          <div class="showcase-cell showcase-cell--cal">
-            <DashboardCalendarCardDemo class="w-full" />
+          <div class="showcase-cell showcase-scroll">
+            <LazyDashboardProjectYDotCardDemo />
+          </div>
+          <div class="showcase-cell showcase-scroll">
+            <LazyPoltDailyDistributionTemplateDemo />
           </div>
         </div>
-        <div class="showcase-cell showcase-scroll">
-          <DashboardProjectYDotCardDemo />
-        </div>
-        <div class="showcase-cell showcase-scroll">
-          <PoltDailyDistributionTemplateDemo />
-        </div>
-      </div>
+      </OnVisible>
     </div>
   </section>
 
@@ -415,7 +418,9 @@ useHead({
           {{ t.landing.pricing.description }}
         </p>
       </div>
-      <PriceTable />
+      <OnVisible min-height="420px" root-margin="300px">
+        <LazyPriceTable />
+      </OnVisible>
     </div>
   </section>
 

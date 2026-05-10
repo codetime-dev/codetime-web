@@ -159,6 +159,9 @@ export const zhTW: Partial<Translation> = {
         item: {
           include: '包含 Basic 方案的所有功能',
           browseAll: '瀏覽所有歷史數據',
+          workspace: '工作區全量歷史數據',
+          widgetCustom: 'Widget 詳細樣式與自訂配色',
+          widgetUnlimited: '解除 Widget 天數與語言上限',
           rule: '基於規則的數據處理',
           tag: '標籤系統',
         },

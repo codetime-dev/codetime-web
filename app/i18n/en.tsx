@@ -162,6 +162,9 @@ export const en: Translation = {
         item: {
           include: 'Includes all features of the Basic plan',
           browseAll: 'Browse all historical data',
+          workspace: 'Full historical data per workspace',
+          widgetCustom: 'Detailed widget style and custom colors',
+          widgetUnlimited: 'Unlimited widget days and languages',
           rule: 'Rule-based data processing',
           tag: 'Tag system',
         },

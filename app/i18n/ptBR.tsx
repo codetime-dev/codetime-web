@@ -159,6 +159,9 @@ export const ptBR: Partial<Translation> = {
         item: {
           include: 'Inclui todos os recursos do plano Básico',
           browseAll: 'Navegue por todos os dados históricos',
+          workspace: 'Histórico completo por espaço de trabalho',
+          widgetCustom: 'Estilo detalhado de widget e cores personalizadas',
+          widgetUnlimited: 'Sem limite de dias e idiomas em widgets',
           rule: 'Processamento de dados baseado em regras',
           tag: 'Sistema de tags',
         },

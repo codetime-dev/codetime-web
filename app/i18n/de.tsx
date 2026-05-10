@@ -159,6 +159,9 @@ export const de: Partial<Translation> = {
         item: {
           include: 'Enthält alle Funktionen des Basic-Plans',
           browseAll: 'Durchsuchen Sie alle historischen Daten',
+          workspace: 'Vollständige historische Daten pro Arbeitsbereich',
+          widgetCustom: 'Detaillierter Widget-Stil und benutzerdefinierte Farben',
+          widgetUnlimited: 'Unbegrenzte Widget-Tage und -Sprachen',
           rule: 'Regelbasierte Datenverarbeitung',
           tag: 'Tag-System',
         },

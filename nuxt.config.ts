@@ -12,7 +12,7 @@ export default defineNuxtConfig({
       apiHost: 'https://api.codetime.dev',
       githubClientId: process.env.NUXT_PUBLIC_GITHUB_CLIENT_ID || '978fe1a6f0c5d12f5beb',
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '1020029657488-f66ubcmj6qqg4h4ptjk505ljmkv55jkv.apps.googleusercontent.com',
-      sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || 'https://3682972d2ab3f65b115e618182c7fa35@o4509038403911680.ingest.us.sentry.io/4509768911486976',
+      sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || '',
     },
   },
   site: {
@@ -41,6 +41,15 @@ export default defineNuxtConfig({
     },
   },
 
+  // Silences "Unresolvable optimizeDeps.include entries" warnings for the
+  // devtools packages — Vite tries to pre-bundle them but the resolved files
+  // are virtual modules. Empty array tells Vite not to attempt prebundle.
+  vite: {
+    optimizeDeps: {
+      exclude: ['@vue/devtools-kit', '@vue/devtools-core'],
+    },
+  },
+
   imports: {
     dirs: [
       'composables/**',
@@ -49,13 +58,18 @@ export default defineNuxtConfig({
     ],
   },
 
+  // @sentry/nuxt removed: no sentry.client.config.ts existed and no app code
+  // referenced it, but the module still bundled ~50KB of browser SDK
+  // (browserTracing + replay scaffolding) into the landing entry. If
+  // server-side error tracking is needed, re-add with `client: { enabled:
+  // false }` and a sentry.server.config.ts so the public bundle stays clean.
   modules: ['@unocss/nuxt', '@vueuse/nuxt', '@nuxtjs/sitemap', 'nuxt-og-image', '@nuxt/image', 'nuxt-gtag', [
     '@nuxtjs/google-fonts',
     {
       download: true,
       families: {},
     },
-  ], '@sentry/nuxt', '@nuxt/fonts'],
+  ], '@nuxt/fonts'],
 
   // Preload Inter (body copy). The mono LCP font (Berkeley Mono) is
   // self-hosted via @font-face in app.vue and preloaded explicitly in
@@ -76,6 +90,23 @@ export default defineNuxtConfig({
         'cdn-cache-control': 'public, max-age=600',
       },
     },
+    // Landing pages are pure marketing content — no per-user data is rendered
+    // server-side (fetchUser runs client-only). Stale-while-revalidate keeps
+    // TTFB at edge-cache speed (was 2s on cold SSR) while still picking up
+    // copy/i18n changes within the SWR window.
+    '/': { swr: 600 },
+    '/en': { swr: 600 },
+    '/zh-CN': { swr: 600 },
+    '/zh-TW': { swr: 600 },
+    '/ja': { swr: 600 },
+    '/de': { swr: 600 },
+    '/es': { swr: 600 },
+    '/fr': { swr: 600 },
+    '/it': { swr: 600 },
+    '/ru': { swr: 600 },
+    '/ua': { swr: 600 },
+    '/ms': { swr: 600 },
+    '/pt-BR': { swr: 600 },
   },
 
   sitemap: {
@@ -95,17 +126,8 @@ export default defineNuxtConfig({
     },
   },
 
-  sentry: {
-    dsn: process.env.NUXT_PUBLIC_SENTRY_DSN || 'https://3682972d2ab3f65b115e618182c7fa35@o4509038403911680.ingest.us.sentry.io/4509768911486976',
-    environment: process.env.NODE_ENV || 'development',
-    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1,
-    // Replay SDK adds ~50KB of client JS and noticeably hurts LCP on the
-    // landing page. Disable it for now; re-enable per-route if needed.
-    integrations: {
-      browserTracing: true,
-      replay: false,
-    },
-  },
+  // sentry block intentionally removed alongside the @sentry/nuxt module.
+  // To bring it back server-only, add a sentry.server.config.ts with init().
 
   compatibilityDate: '2024-10-13',
 })

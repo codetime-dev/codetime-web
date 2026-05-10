@@ -1,24 +1,53 @@
+<script setup lang="ts">
+const t = useI18N()
+</script>
+
 <template>
   <h1 class="landing-title font-mono">
-    <span class="title-code font-mono">CODE</span>
-    <span class="title-time font-mono">TIME</span>
+    <span class="title-mark">
+      <span class="title-code font-mono">CODE</span>
+      <span class="title-time font-mono">TIME</span>
+    </span>
+    <span class="title-tagline font-mono">
+      {{ t.landing.description }}
+    </span>
   </h1>
 </template>
 
 <style scoped>
 .landing-title {
   font-family: var(--ct-font-mono);
-  font-size: clamp(3.5rem, 14vw, 8.5rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 0.95;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+  text-transform: none;
+  margin: 0;
+}
+.title-mark {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 0.22em;
   align-items: baseline;
   justify-content: center;
+  font-size: clamp(3.5rem, 14vw, 8.5rem);
   text-transform: uppercase;
+  line-height: 0.95;
+}
+.title-tagline {
+  font-family: var(--ct-font-mono);
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--ct-fg-muted);
+  text-transform: none;
+  max-width: 38rem;
+  padding: 0 16px;
 }
 .title-code {
   background: linear-gradient(

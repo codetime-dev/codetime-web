@@ -38,28 +38,81 @@ const fomater = computed(() => {
   })
 })
 
-onMounted(() => {
-  const interval = setInterval(() => {
+// Tick once per second (was 5×/s) and pause entirely when the tab is hidden
+// or the counter is scrolled off screen. The counter only changes by ~1
+// every few seconds anyway, so 200ms ticks were pure CPU/battery burn —
+// painful for low-power devices and users with JS JIT disabled.
+let interval: ReturnType<typeof setInterval> | null = null
+function start() {
+  if (interval !== null) {
+ return
+}
+  interval = setInterval(() => {
     currentTime.value = Date.now()
-  }, 200)
+  }, 1000)
+}
+function stop() {
+  if (interval === null) {
+ return
+}
+  clearInterval(interval)
+  interval = null
+}
 
-  onUnmounted(() => {
-    clearInterval(interval)
-  })
+const counterRoot = ref<HTMLElement | null>(null)
+let io: IntersectionObserver | null = null
+
+function onVisibilityChange() {
+  if (document.hidden) {
+ stop()
+}
+  else {
+ start()
+}
+}
+
+onMounted(() => {
+  if (counterRoot.value && typeof IntersectionObserver !== 'undefined') {
+    io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+ start()
+}
+        else {
+ stop()
+}
+      }
+    }, { rootMargin: '100px' })
+    io.observe(counterRoot.value)
+  }
+  else {
+    start()
+  }
+  document.addEventListener('visibilitychange', onVisibilityChange)
+})
+
+onUnmounted(() => {
+  stop()
+  io?.disconnect()
+  document.removeEventListener('visibilitychange', onVisibilityChange)
 })
 
 const t = useI18N()
 </script>
 
 <template>
-  <div class="flex flex-col gap-6 items-center">
-    <span
-      v-if="status === 'success'"
-      class="sum-number text-ct-fg leading-none font-mono font-semibold tabular-nums"
-    >
-      {{ fomater.format(minutes) }}
-    </span>
-    <div v-else class="sum-skel" />
+  <div ref="counterRoot" class="flex flex-col gap-6 items-center">
+    <!-- Reserve the LCP-text height so the skeleton → number swap does not
+         trigger a layout shift (was the dominant CLS source on /). -->
+    <div class="sum-number-slot">
+      <span
+        v-if="status === 'success'"
+        class="sum-number text-ct-fg leading-none font-mono font-semibold tabular-nums"
+      >
+        {{ fomater.format(minutes) }}
+      </span>
+      <div v-else class="sum-skel" aria-hidden="true" />
+    </div>
 
     <div class="sum-caption">
       <span class="sum-rule" />
@@ -69,18 +122,30 @@ const t = useI18N()
       <span class="sum-rule" />
     </div>
 
+    <!-- Always-mounted slot keeps layout stable; visibility flips when ready. -->
     <div
-      v-if="status === 'success' && data?.last24HMinutes"
       class="sum-delta"
+      :class="{ 'sum-delta--ready': status === 'success' && data?.last24HMinutes }"
     >
       <span class="sum-delta-arrow">↑</span>
-      <span class="sum-delta-num tabular-nums">{{ fomater.format(data.last24HMinutes) }}</span>
+      <span class="sum-delta-num tabular-nums">
+        {{ status === 'success' && data?.last24HMinutes ? fomater.format(data.last24HMinutes) : '0' }}
+      </span>
       <span class="sum-delta-label">last 24h</span>
     </div>
   </div>
 </template>
 
 <style scoped>
+.sum-number-slot {
+  /* Pin the slot to the rendered text height so the skeleton occupies the
+     same vertical space the number will after the API call resolves. */
+  height: clamp(3rem, 11vw, 6.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
 .sum-number {
   position: relative;
   font-size: clamp(3rem, 11vw, 6.5rem);
@@ -90,7 +155,7 @@ const t = useI18N()
   text-shadow: 0 0 60px color-mix(in srgb, var(--ct-primary) 25%, transparent);
 }
 .sum-skel {
-  height: clamp(3rem, 9vw, 5rem);
+  height: 70%;
   width: min(24rem, 80vw);
   background: var(--ct-surface-2);
   animation: sum-pulse 1.4s ease-in-out infinite;
@@ -127,7 +192,10 @@ const t = useI18N()
   color: var(--ct-fg-muted);
   background: color-mix(in srgb, var(--ct-primary) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--ct-primary) 25%, transparent);
+  /* Mounted but invisible until data arrives — keeps reserved space, no CLS. */
+  visibility: hidden;
 }
+.sum-delta--ready { visibility: visible; }
 .sum-delta-arrow {
   color: var(--ct-primary);
   font-weight: var(--ct-weight-semibold);

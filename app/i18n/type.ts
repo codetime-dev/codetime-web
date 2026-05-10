@@ -131,6 +131,9 @@ export type Translation = {
         item: {
           include: string
           browseAll: string
+          workspace: string
+          widgetCustom: string
+          widgetUnlimited: string
           rule: string
           tag: string
         }

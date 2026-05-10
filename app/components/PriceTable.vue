@@ -84,12 +84,11 @@ const t = useI18N()
           <div class="flex-1 space-y-3">
             <FeatureItem>{{ t.plan.pro.features.item.include }}</FeatureItem>
             <FeatureItem>{{ t.plan.pro.features.item.browseAll }}</FeatureItem>
-            <FeatureItem not-yet>
-              {{ t.plan.pro.features.item.rule }}
-            </FeatureItem>
-            <FeatureItem not-yet>
-              {{ t.plan.pro.features.item.tag }}
-            </FeatureItem>
+            <FeatureItem>{{ t.plan.pro.features.item.workspace }}</FeatureItem>
+            <FeatureItem>{{ t.plan.pro.features.item.tag }}</FeatureItem>
+            <FeatureItem>{{ t.plan.pro.features.item.rule }}</FeatureItem>
+            <FeatureItem>{{ t.plan.pro.features.item.widgetCustom }}</FeatureItem>
+            <FeatureItem>{{ t.plan.pro.features.item.widgetUnlimited }}</FeatureItem>
           </div>
 
           <div class="mt-8">

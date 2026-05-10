@@ -44,12 +44,34 @@ watchEffect(() => {
       </main>
 
       <footer class="layout-foot relative">
+        <nav class="lp-foot-nav" aria-label="Site">
+          <NuxtLink :to="`/${locale}/dashboard`" class="lp-foot-link">
+            Dashboard
+          </NuxtLink>
+          <span class="lp-foot-sep">·</span>
+          <NuxtLink :to="`/${locale}/demo`" class="lp-foot-link">
+            Live demo
+          </NuxtLink>
+          <span class="lp-foot-sep">·</span>
+          <NuxtLink :to="`/${locale}/dashboard/badge`" class="lp-foot-link">
+            Badges
+          </NuxtLink>
+          <span class="lp-foot-sep">·</span>
+          <NuxtLink :to="`/${locale}/dashboard/widget`" class="lp-foot-link">
+            Widgets
+          </NuxtLink>
+          <span class="lp-foot-sep">·</span>
+          <NuxtLink :to="`/${locale}/dashboard/leaderboard`" class="lp-foot-link">
+            Leaderboard
+          </NuxtLink>
+        </nav>
         <div class="lp-foot">
           <span>Datreks · {{ new Date().getFullYear() }}</span>
           <span class="lp-foot-sep">·</span>
           <NuxtLink
             to="https://github.com/Jannchie/codetime-web-v3"
             target="_blank"
+            rel="noopener"
             class="lp-foot-link"
           >
             <i class="i-tabler-brand-github" />
@@ -59,6 +81,7 @@ watchEffect(() => {
           <NuxtLink
             to="https://discord.gg/WWEQrWCkkP"
             target="_blank"
+            rel="noopener"
             class="lp-foot-link"
           >
             <i class="i-tabler-brand-discord" />
@@ -138,12 +161,22 @@ watchEffect(() => {
   letter-spacing: var(--ct-tracking-tight);
 }
 
+.lp-foot-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 24px 6px;
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-muted);
+}
 .lp-foot {
   display: flex;
   gap: 10px;
   align-items: center;
   justify-content: center;
-  padding: 14px 24px;
+  padding: 6px 24px 14px;
   font-size: var(--ct-text-xs);
   color: var(--ct-fg-subtle);
 }

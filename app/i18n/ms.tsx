@@ -159,6 +159,9 @@ export const ms: Partial<Translation> = {
         item: {
           include: 'Termasuk semua ciri-ciri rancangan Asas',
           browseAll: 'Lihat semua data sejarah',
+          workspace: 'Sejarah penuh setiap ruang kerja',
+          widgetCustom: 'Gaya widget terperinci dan warna tersuai',
+          widgetUnlimited: 'Tiada had hari dan bahasa pada widget',
           rule: 'Pemprosesan data berdasarkan peraturan',
           tag: 'Sistem tag',
         },

@@ -56,11 +56,24 @@ useHead({
   font-display: swap;
 }
 
+/* Metric-matched fallback: while Berkeley Mono is loading, system monospace
+   takes its place at the same effective size. Eliminates the layout shift
+   that previously moved the LCP title and the live-counter row when the
+   webfont swapped in (was the dominant CLS contributor on /). */
+@font-face {
+  font-family: 'Berkeley Mono Fallback';
+  src: local('SFMono-Regular'), local('Menlo'), local('Consolas'), local('Liberation Mono');
+  ascent-override: 80%;
+  descent-override: 20%;
+  line-gap-override: 0%;
+  size-adjust: 96%;
+}
+
 :root {
   /* CJK glyphs fall through Berkeley Mono (no CJK coverage) and land on
      a UI-friendly sans-serif display font — CJK ideographs are naturally
      equal-width so we don't need a monospace font for them. */
-  --font-mono: 'Berkeley Mono', 'Share Tech Mono', monospace;
+  --font-mono: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', monospace;
   --font-mono-cjk-sc: 'HarmonyOS Sans SC', 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans SC', sans-serif;
   --font-mono-cjk-tc: 'PingFang TC', 'Microsoft JhengHei UI', 'Noto Sans TC', sans-serif;
   --font-mono-cjk-ja: 'HarmonyOS Sans JP', 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
@@ -71,13 +84,13 @@ useHead({
 }
 
 [lang="ja"] .font-mono {
-  font-family: 'Berkeley Mono', 'Share Tech Mono', var(--font-mono-cjk-ja), monospace;
+  font-family: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', var(--font-mono-cjk-ja), monospace;
 }
 [lang="zh-CN"] .font-mono {
-  font-family: 'Berkeley Mono', 'Share Tech Mono', var(--font-mono-cjk-sc), monospace;
+  font-family: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', var(--font-mono-cjk-sc), monospace;
 }
 [lang="zh-TW"] .font-mono {
-  font-family: 'Berkeley Mono', 'Share Tech Mono', var(--font-mono-cjk-tc), monospace;
+  font-family: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', var(--font-mono-cjk-tc), monospace;
 }
 
 [lang="ja"] *:not(.font-mono) {

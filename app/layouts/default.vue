@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { RokuProvider } from '@roku-ui/vue'
-
 const t = useI18N()
 
 const route = useRoute()
@@ -36,9 +34,9 @@ defineOgImage('NuxtSeo', {
     color="var(--color-primary-1)"
     :height="1"
   />
-  <RokuProvider class="flex flex-col min-h-100vh">
+  <div class="flex flex-col min-h-100vh">
     <slot />
-  </RokuProvider>
+  </div>
 </template>
 
 <style>

@@ -159,6 +159,9 @@ export const ja: Partial<Translation> = {
         item: {
           include: '基本プランのすべての機能を含む',
           browseAll: 'すべての履歴データを閲覧',
+          workspace: 'ワークスペースごとの全履歴データ',
+          widgetCustom: 'ウィジェットの詳細スタイルとカスタムカラー',
+          widgetUnlimited: 'ウィジェットの日数と言語の上限を解除',
           rule: 'ルールベースのデータ処理',
           tag: 'タグシステム',
         },

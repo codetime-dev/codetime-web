@@ -6,8 +6,9 @@ export default defineNuxtPlugin(() => {
 
   let started = false
   const start = () => {
-    if (started)
-      return
+    if (started) {
+ return
+}
     started = true
     initialize()
     cleanup()
@@ -16,14 +17,16 @@ export default defineNuxtPlugin(() => {
   const events = ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const
   const opts = { passive: true, once: true } as AddEventListenerOptions
   const cleanup = () => {
-    for (const ev of events) window.removeEventListener(ev, start)
+    for (const ev of events) globalThis.removeEventListener(ev, start)
   }
 
-  for (const ev of events) window.addEventListener(ev, start, opts)
+  for (const ev of events) globalThis.addEventListener(ev, start, opts)
 
   // Fallback: load when the browser is idle, capped at 5s.
-  if ('requestIdleCallback' in window)
-    (window as any).requestIdleCallback(start, { timeout: 5000 })
-  else
-    setTimeout(start, 4000)
+  if ('requestIdleCallback' in globalThis) {
+ (globalThis as any).requestIdleCallback(start, { timeout: 5000 })
+}
+  else {
+ setTimeout(start, 4000)
+}
 })
