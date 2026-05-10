@@ -46,89 +46,76 @@ const completeData = computed(() => {
   return result
 })
 const chart = ref()
-const { width, height } = useElementBounding(chart)
-const maxR = computed(() => {
-  const dateCount = differentLabel.value.differentDates.size
-  const languageCount = differentLabel.value.differentLanguages.size
-  const widthFactor = (width.value - 100) / dateCount * 1.25
-  const heightFactor = height.value / languageCount
-  const calculatedValue = Math.min(widthFactor, heightFactor) * 0.5
-  return calculatedValue > 0 ? calculatedValue : 20
-})
+const { width } = useElementBounding(chart)
 
 const options = computed<Plot.PlotOptions>(() => {
   const o: Plot.PlotOptions = {
     className: 'y-dot-plot',
-    color: {
-      range: ['#5AF2', '#2AF'],
-      interpolate: 'hcl',
+    opacity: {
+      type: 'sqrt',
+      range: [0.08, 1],
     },
+    marginTop: 12,
     marginRight: 24,
+    marginLeft: 8,
+    marginBottom: 28,
     y: {
-      grid: true,
       ariaLabel: props.yLabel,
-      label: props.yLabel,
+      label: null,
       axis: false,
+      padding: 0.18,
     },
     x: {
       tickSize: 4,
-      insetRight: maxR.value,
-      insetLeft: maxR.value,
-      label: t.value.plot.label.date,
+      label: null,
       ticks: Math.max(3, Math.min(10, Math.floor(width.value / 120))),
       interval: 'day',
     },
-    r: { range: [0, maxR.value] },
     marks: [
-      Plot.rect(
-        completeData.value,
-        {
-          x: 'date',
-          y: 'by',
-          fill: 'duration',
-          r: 999,
-          tip: {
-            stroke: '#404040',
-            channels: {
-              by: {
-                label: props.yLabel,
-                value: d => getLanguageName(d.by),
-              },
-              duration: {
-                label: t.value.plot.label.duration,
-                value: d => getDurationString(d.duration * 60 * 1000),
-              },
-              date: {
-                label: t.value.plot.label.date,
-                value: d => d.date.toISOString().slice(0, 10),
-              },
+      // Heatmap cells — equal-sized rectangles, color encodes duration.
+      // Empty cells — flat surface tint so missing days remain visible.
+      Plot.cell(completeData.value, {
+        x: 'date',
+        y: 'by',
+        fill: 'var(--ct-surface-2)',
+        inset: 1.5,
+      }),
+      Plot.cell(completeData.value.filter(d => d.duration > 0), {
+        x: 'date',
+        y: 'by',
+        fill: 'var(--ct-primary)',
+        fillOpacity: 'duration',
+        inset: 1.5,
+        tip: {
+          fontSize: 12,
+          channels: {
+            by: {
+              label: props.yLabel,
+              value: d => getLanguageName(d.by),
             },
-            format: {
-              fill: false,
-              r: false,
-              x: false,
-              y: false,
+            duration: {
+              label: t.value.plot.label.duration,
+              value: d => getDurationString(d.duration * 60 * 1000),
+            },
+            date: {
+              label: t.value.plot.label.date,
+              value: d => d.date.toISOString().slice(0, 10),
             },
           },
-          pointerEvents: 'auto',
+          format: { fill: false, x: false, y: false },
         },
-
-      ),
+      }),
+      // Right-anchored labels with surface-colored halo so they read
+      // cleanly when overlapping cells.
       Plot.axisY({
         anchor: 'right',
         textAnchor: 'end',
-        textStroke: 'var(--r-surface-background-color)',
+        textStroke: 'var(--ct-surface)',
         textStrokeWidth: 4,
-        ariaLabel: t.value.plot.label.language,
+        ariaLabel: props.yLabel,
         tickFormat: (d: string) => getLanguageName(d),
         tickPadding: -8,
-        tickSize: 4,
-      }),
-      Plot.axisY({
-        anchor: 'left',
         tickSize: 0,
-        tickFormat: () => '',
-        label: null,
       }),
     ],
   }

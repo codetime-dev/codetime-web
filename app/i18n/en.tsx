@@ -184,6 +184,7 @@ export const en: Translation = {
       title: {
         overview: 'Overview',
         badge: 'Badges',
+        widget: 'Widgets',
         settings: 'Settings',
         leaderboard: 'Leaderboard',
         workspace: 'Workspace',
@@ -192,6 +193,7 @@ export const en: Translation = {
       description: {
         overview: 'View all your CodeTime data.',
         badge: 'Display your coding time in your projects with concise, consistent, and clear badges.',
+        widget: 'Embeddable badges, charts, and live status cards for your README or personal site.',
         settings: 'Manage your CodeTime settings, including appearance, language, data, etc.',
         leaderboard: 'View the CodeTime leaderboard of all users.',
         workspace: 'View your workspace details.',
@@ -345,6 +347,32 @@ export const en: Translation = {
         days: 'Days',
         project: 'Project',
         color: 'Color',
+      },
+    },
+    widget: {
+      tab: {
+        badge: 'Badge',
+        donut: 'Languages',
+        status: 'Status',
+      },
+      theme: {
+        label: 'Theme',
+        light: 'Light',
+        dark: 'Dark',
+      },
+      donut: {
+        title: 'Top languages',
+        days: 'Days',
+        limit: 'Languages',
+      },
+      status: {
+        title: 'Currently coding',
+      },
+      limit: {
+        upgrade: 'Upgrade',
+        donutFree: 'Free plan: up to 30 days and 5 languages. Pro removes the cap.',
+        donutExceeds: 'Free plan caps the chart at 30 days and 5 languages — values will be clamped.',
+        statusFree: 'Free plan hides the active project name. Pro shows the full status.',
       },
     },
     settings: {

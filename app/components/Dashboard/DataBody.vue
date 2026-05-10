@@ -22,8 +22,6 @@ defineProps<{
 <style scoped>
 .db {
   padding: 12px 14px;
-  background: var(--ct-surface-1);
-  border: 1px solid var(--ct-border-subtle);
 }
 .db-title {
   font-size: var(--ct-text-xs);

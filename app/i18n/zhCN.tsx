@@ -185,6 +185,7 @@ export const zhCN: Partial<Translation> = {
       title: {
         overview: '概览',
         badge: '徽章',
+        widget: '小部件',
         settings: '设置',
         leaderboard: '排行榜',
         workspace: '工作区',
@@ -193,6 +194,7 @@ export const zhCN: Partial<Translation> = {
       description: {
         overview: '查看您的所有 CodeTime 数据。',
         badge: '在你的项目中用简明、一致、清晰的徽章展示你的编程时间。',
+        widget: '生成可嵌入到 README、个人网站等的徽章、图表与状态卡片。',
         settings: '管理您的 CodeTime 设置，包含外观、语言、数据等。',
         leaderboard: '查看 CodeTime 用户的排行榜。',
         workspace: '查看特定工作区的数据。',
@@ -346,6 +348,32 @@ export const zhCN: Partial<Translation> = {
         days: '天数',
         project: '项目',
         color: '颜色',
+      },
+    },
+    widget: {
+      tab: {
+        badge: '徽章',
+        donut: '语言占比',
+        status: '编码状态',
+      },
+      theme: {
+        label: '主题',
+        light: '亮色',
+        dark: '暗色',
+      },
+      donut: {
+        title: '语言占比',
+        days: '统计天数',
+        limit: '语言数量',
+      },
+      status: {
+        title: '正在编码',
+      },
+      limit: {
+        upgrade: '升级 Pro',
+        donutFree: '免费计划：最多 30 天与 5 种语言。升级 Pro 解锁完整范围。',
+        donutExceeds: '当前选择超出免费计划上限（30 天 / 5 种语言），将自动回退到上限。',
+        statusFree: '免费计划隐藏当前项目名称。Pro 显示完整状态。',
       },
     },
     settings: {

@@ -43,82 +43,111 @@ const currentTimeLabel = computed(() => {
 const chart = ref()
 const { width, height } = useElementBounding(chart)
 
+const smoothing = computed(() => Math.max(1, Math.round(60 / props.interval)))
+
 const options = computed<Plot.PlotOptions>(() => {
   return {
     w: width.value,
     h: height.value,
     className: 'y-dot-plot',
-    color: {
-      scheme: 'Warm',
+    marginTop: 16,
+    marginRight: 28,
+    marginLeft: 28,
+    marginBottom: 28,
+    style: {
+      background: 'transparent',
     },
-    marginRight: 24,
     y: {
       grid: true,
       axis: 'right',
-      domain: [0, 1],
+      domain: [0, 1.05],
+      ticks: 4,
+      tickFormat: (d: number) => `${Math.round(d * 100)}%`,
+      label: null,
     },
     x: {
       tickFormat: (d: number) => {
         const hour = Math.floor(d / 60)
-        const minute = d % 60
-        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+        return `${hour.toString().padStart(2, '0')}:00`
       },
-      label: t.value.plot.label.date,
+      ticks: 6,
+      label: null,
+      domain: [0, 1440],
     },
     marks: [
-      // Segmented data lines (lower opacity)
+      // Historical periods: thin monochrome ladder, fading into background.
       ...(props.segmentedData.length > 0
         ? props.segmentedData.flatMap(segment => [
-            Plot.lineY(segment.data, Plot.windowY(60 / props.interval, {
+            Plot.lineY(segment.data, Plot.windowY(smoothing.value, {
               x: 'time',
               y: 'ratio',
-              stroke: 'var(--color-primary-1)',
-              opacity: segment.opacity,
-              strokeWidth: 1.5,
+              stroke: 'var(--ct-fg-subtle)',
+              opacity: segment.opacity * 0.45,
+              strokeWidth: 1,
+              curve: 'monotone-x',
             })),
           ])
         : []
       ),
-      // Summary data line (success color, more prominent)
+      // Summary: soft tinted area + crisp primary line.
       ...(props.summaryData.length > 0
         ? [
-            Plot.lineY(props.summaryData, Plot.windowY(60 / props.interval, {
+            Plot.areaY(props.summaryData, Plot.windowY(smoothing.value, {
               x: 'time',
               y: 'ratio',
-              stroke: 'var(--color-success-1)',
-              strokeWidth: 4,
-              opacity: 1,
+              fill: 'var(--ct-primary)',
+              fillOpacity: 0.08,
+              curve: 'monotone-x',
+            })),
+            Plot.lineY(props.summaryData, Plot.windowY(smoothing.value, {
+              x: 'time',
+              y: 'ratio',
+              stroke: 'var(--ct-primary)',
+              strokeWidth: 2,
+              strokeLinecap: 'round',
+              curve: 'monotone-x',
             })),
           ]
         : []
       ),
-      // Fallback to original display (if no segmented data)
+      // Fallback display when no aggregated data is available.
       ...(props.segmentedData.length === 0 && props.summaryData.length === 0
         ? [
-            Plot.dot(props.fallbackData, {
+            Plot.areaY(props.fallbackData, Plot.windowY(smoothing.value, {
               x: 'time',
               y: 'ratio',
-              opacity: 0.1,
-            }),
-            Plot.lineY(props.fallbackData, Plot.windowY(60 / props.interval, { x: 'time', y: 'ratio', stroke: 'var(--color-primary-1)' })),
+              fill: 'var(--ct-primary)',
+              fillOpacity: 0.06,
+              curve: 'monotone-x',
+            })),
+            Plot.lineY(props.fallbackData, Plot.windowY(smoothing.value, {
+              x: 'time',
+              y: 'ratio',
+              stroke: 'var(--ct-primary)',
+              strokeWidth: 1.75,
+              curve: 'monotone-x',
+            })),
           ]
         : []
       ),
-      // Current time marker
+      // Current-time marker — dashed hairline with quiet label.
       Plot.ruleX([currentTime.value], {
-        stroke: 'var(--color-error-1)',
-        strokeWidth: 2,
-        opacity: 0.8,
+        stroke: 'var(--ct-fg-muted)',
+        strokeWidth: 1,
+        strokeDasharray: '3 3',
+        opacity: 0.7,
       }),
-      Plot.text([{ x: currentTime.value, y: 0.95, label: `${t.value.plot.label.currentTime} (${currentTimeLabel.value})` }], {
+      Plot.text([{ x: currentTime.value, y: 1.02, label: currentTimeLabel.value }], {
         x: 'x',
         y: 'y',
         text: 'label',
-        fill: 'var(--color-error-1)',
-        stroke: 'var(--r-surface-background-color)',
-        fontSize: 12,
-        dx: currentTime.value < 600 ? 5 : -5,
-        textAnchor: currentTime.value < 600 ? 'start' : 'end',
+        fill: 'var(--ct-fg-muted)',
+        stroke: 'var(--ct-surface)',
+        strokeWidth: 4,
+        fontSize: 11,
+        fontVariant: 'tabular-nums',
+        dx: currentTime.value < 720 ? 6 : -6,
+        textAnchor: currentTime.value < 720 ? 'start' : 'end',
       }),
     ],
   }

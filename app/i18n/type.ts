@@ -151,6 +151,7 @@ export type Translation = {
       title: {
         overview: string
         badge: string
+        widget?: string
         settings: string
         leaderboard: string
         workspace: string
@@ -159,6 +160,7 @@ export type Translation = {
       description: {
         overview: string
         badge: string
+        widget?: string
         settings: string
         leaderboard: string
         workspace: string
@@ -261,6 +263,32 @@ export type Translation = {
         days: string
         project: string
         color: string
+      }
+    }
+    widget?: {
+      tab: {
+        badge: string
+        donut: string
+        status: string
+      }
+      theme: {
+        label: string
+        light: string
+        dark: string
+      }
+      donut: {
+        title: string
+        days: string
+        limit: string
+      }
+      status: {
+        title: string
+      }
+      limit: {
+        upgrade: string
+        donutFree: string
+        donutExceeds: string
+        statusFree: string
       }
     }
     settings: {

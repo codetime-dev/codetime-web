@@ -286,3 +286,33 @@ html, body {
 .ct-rounded       { border-radius: var(--ct-radius-md); }
 .ct-rounded-lg    { border-radius: var(--ct-radius-lg); }
 .ct-shadow        { box-shadow: var(--ct-shadow-md); }
+
+/* Observable Plot — restrained defaults. Plot emits inline SVG with a
+   `.plot` className; we override axis/grid styling so charts inherit the
+   design-token palette instead of the library defaults. */
+.plot {
+  font-family: var(--ct-font-sans);
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+  background: transparent;
+  overflow: visible;
+}
+.plot [aria-label$="-axis tick"] line,
+.plot [aria-label$="-axis"] path.domain {
+  stroke: var(--ct-border);
+}
+.plot [aria-label$="-grid"] line {
+  stroke: var(--ct-border-subtle);
+  stroke-opacity: 0.8;
+}
+.plot [aria-label$="-axis tick label"],
+.plot [aria-label$="-axis label"] {
+  fill: var(--ct-fg);
+}
+.plot [aria-label="tip"] path {
+  fill: var(--ct-surface);
+  stroke: var(--ct-border-strong);
+}
+.plot [aria-label="tip"] text {
+  fill: var(--ct-fg);
+}

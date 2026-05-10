@@ -23,36 +23,49 @@ const maxR = computed(() => {
   return v === 0 ? 20 : v
 })
 const options = computed<Plot.PlotOptions>(() => ({
-  marginRight: 80,
+  marginTop: 12,
+  marginRight: 96,
+  marginLeft: 16,
+  marginBottom: 28,
   color: {
-    scheme: 'Warm',
+    type: 'sqrt',
+    range: ['#bae6fd', '#0284c7'],
   },
   y: {
-    label: t.value.plot.label.language,
+    label: null,
     grid: true,
     axis: 'right',
     ariaLabel: t.value.plot.label.language,
     tickFormat: (d: string) => getLanguageName(d),
-    paddingOuter: 0.2,
+    paddingOuter: 0.4,
   },
   x: {
     insetRight: maxR.value,
-    label: t.value.plot.label.date,
+    insetLeft: maxR.value / 2,
+    label: null,
     paddingOuter: 0.2,
+    ticks: 6,
   },
-  width: 1110,
-  height: 300,
   r: { range: [0, maxR.value] },
   marks: [
-    Plot.dot(props.data, Plot.pointer({
+    Plot.dot(props.data, {
       x: 'date',
       y: 'by',
       r: 'duration',
       fill: 'duration',
-      fillOpacity: 0.25,
-      marginRight: 80,
+      fillOpacity: 0.85,
+      stroke: 'var(--ct-surface)',
+      strokeWidth: 1,
+    }),
+    Plot.dot(props.data, Plot.pointer({
+      x: 'date',
+      y: 'by',
+      r: 'duration',
+      fill: 'transparent',
+      stroke: 'var(--ct-fg)',
+      strokeWidth: 1.25,
       tip: {
-        stroke: '#404040',
+        fontSize: 12,
         channels: {
           by: {
             label: t.value.plot.label.language,
@@ -67,21 +80,9 @@ const options = computed<Plot.PlotOptions>(() => ({
             value: d => d.date.toISOString().slice(0, 10),
           },
         },
-        format: {
-          fill: false,
-          x: false,
-          y: false,
-        },
+        format: { fill: false, r: false, x: false, y: false },
       },
     })),
-    Plot.dot(props.data, {
-      x: 'date',
-      y: 'by',
-      r: 'duration',
-      fill: 'duration',
-      fillOpacity: 0.25,
-      stroke: 'duration',
-    }),
   ],
 }))
 </script>
