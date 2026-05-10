@@ -317,6 +317,49 @@ export const zhTW: Partial<Translation> = {
         color: '顏色',
       },
     },
+    widget: {
+      tab: {
+        badge: '徽章',
+        donut: '語言佔比',
+        status: '編碼狀態',
+      },
+      theme: {
+        label: '主題',
+        light: '亮色',
+        dark: '暗色',
+      },
+      donut: {
+        title: '語言佔比',
+        days: '統計天數',
+        limit: '語言數量',
+      },
+      status: {
+        title: '正在編碼',
+        primary: '主區域',
+        secondary: '副區域',
+        style: '樣式',
+        color: '強調色',
+        colorDefault: '預設',
+        background: '背景色',
+        fields: {
+          project: '專案名稱',
+          language: '語言',
+          editor: '編輯器',
+          none: '不顯示',
+        },
+        styles: {
+          minimal: '極簡',
+          detailed: '詳細',
+        },
+      },
+      limit: {
+        upgrade: '升級 Pro',
+        donutFree: '免費方案：最多 30 天與 5 種語言。升級 Pro 解鎖完整範圍。',
+        donutExceeds: '目前選擇超出免費方案上限（30 天 / 5 種語言），將自動回退到上限。',
+        statusFree: '免費方案：專案名稱與語言僅能擇一顯示。Pro 可同時顯示。',
+        statusFreeStyle: '免費方案：僅可使用極簡樣式與預設配色。Pro 解鎖詳細樣式與自訂強調色、背景色。',
+      },
+    },
     settings: {
       token: {
         title: '令牌Token',

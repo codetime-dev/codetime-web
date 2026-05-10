@@ -284,6 +284,49 @@ export const ptBR: Partial<Translation> = {
         color: 'Cor',
       },
     },
+    widget: {
+      tab: {
+        badge: 'Selo',
+        donut: 'Linguagens',
+        status: 'Status',
+      },
+      theme: {
+        label: 'Tema',
+        light: 'Claro',
+        dark: 'Escuro',
+      },
+      donut: {
+        title: 'Principais linguagens',
+        days: 'Dias',
+        limit: 'Linguagens',
+      },
+      status: {
+        title: 'Programando agora',
+        primary: 'Área principal',
+        secondary: 'Área secundária',
+        style: 'Estilo',
+        color: 'Cor de destaque',
+        colorDefault: 'Padrão',
+        background: 'Fundo',
+        fields: {
+          project: 'Projeto',
+          language: 'Linguagem',
+          editor: 'Editor',
+          none: 'Nenhum',
+        },
+        styles: {
+          minimal: 'Mínimo',
+          detailed: 'Detalhado',
+        },
+      },
+      limit: {
+        upgrade: 'Fazer upgrade',
+        donutFree: 'Plano gratuito: até 30 dias e 5 linguagens. Pro remove o limite.',
+        donutExceeds: 'O plano gratuito limita a 30 dias e 5 linguagens — os valores serão ajustados.',
+        statusFree: 'Plano gratuito: escolha nome do projeto OU linguagem. Pro mostra ambos.',
+        statusFreeStyle: 'Plano gratuito: apenas estilo mínimo com cores padrão. Pro desbloqueia o estilo detalhado e cores de destaque / fundo personalizadas.',
+      },
+    },
     settings: {
       token: {
         title: 'Token',

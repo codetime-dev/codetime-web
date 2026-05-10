@@ -317,6 +317,49 @@ export const ja: Partial<Translation> = {
         color: '色',
       },
     },
+    widget: {
+      tab: {
+        badge: 'バッジ',
+        donut: '言語比率',
+        status: 'コーディング状態',
+      },
+      theme: {
+        label: 'テーマ',
+        light: 'ライト',
+        dark: 'ダーク',
+      },
+      donut: {
+        title: '主要言語',
+        days: '日数',
+        limit: '言語数',
+      },
+      status: {
+        title: 'コーディング中',
+        primary: 'メイン枠',
+        secondary: 'サブ枠',
+        style: 'スタイル',
+        color: 'アクセントカラー',
+        colorDefault: 'デフォルト',
+        background: '背景色',
+        fields: {
+          project: 'プロジェクト',
+          language: '言語',
+          editor: 'エディタ',
+          none: '非表示',
+        },
+        styles: {
+          minimal: 'ミニマル',
+          detailed: '詳細',
+        },
+      },
+      limit: {
+        upgrade: 'Pro にアップグレード',
+        donutFree: '無料プラン：最大 30 日 / 5 言語。Pro で上限解除。',
+        donutExceeds: '無料プランは 30 日・5 言語が上限で自動的に丸められます。',
+        statusFree: '無料プラン：プロジェクト名と言語はどちらか一方のみ表示可能。Pro は両方表示できます。',
+        statusFreeStyle: '無料プラン：ミニマルスタイル＋既定色のみ。Pro で詳細スタイルおよびアクセント／背景色のカスタマイズが解放されます。',
+      },
+    },
     settings: {
       token: {
         title: 'トークン',

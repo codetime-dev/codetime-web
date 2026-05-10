@@ -284,6 +284,49 @@ export const es: Partial<Translation> = {
         color: 'Color',
       },
     },
+    widget: {
+      tab: {
+        badge: 'Insignia',
+        donut: 'Lenguajes',
+        status: 'Estado',
+      },
+      theme: {
+        label: 'Tema',
+        light: 'Claro',
+        dark: 'Oscuro',
+      },
+      donut: {
+        title: 'Lenguajes principales',
+        days: 'Días',
+        limit: 'Lenguajes',
+      },
+      status: {
+        title: 'Programando ahora',
+        primary: 'Campo principal',
+        secondary: 'Campo secundario',
+        style: 'Estilo',
+        color: 'Color de acento',
+        colorDefault: 'Predeterminado',
+        background: 'Fondo',
+        fields: {
+          project: 'Proyecto',
+          language: 'Lenguaje',
+          editor: 'Editor',
+          none: 'Ninguno',
+        },
+        styles: {
+          minimal: 'Mínimo',
+          detailed: 'Detallado',
+        },
+      },
+      limit: {
+        upgrade: 'Mejorar',
+        donutFree: 'Plan gratuito: hasta 30 días y 5 lenguajes. Pro elimina el límite.',
+        donutExceeds: 'El plan gratuito limita a 30 días y 5 lenguajes — los valores se ajustarán.',
+        statusFree: 'Plan gratuito: elige nombre de proyecto O lenguaje. Pro muestra ambos.',
+        statusFreeStyle: 'Plan gratuito: solo estilo mínimo con colores predeterminados. Pro desbloquea el estilo detallado y colores de acento / fondo personalizados.',
+      },
+    },
     settings: {
       token: {
         title: 'Token',

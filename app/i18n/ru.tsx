@@ -305,6 +305,49 @@ export const ru: Partial<Translation> = {
         color: 'Цвет',
       },
     },
+    widget: {
+      tab: {
+        badge: 'Бейдж',
+        donut: 'Языки',
+        status: 'Статус',
+      },
+      theme: {
+        label: 'Тема',
+        light: 'Светлая',
+        dark: 'Тёмная',
+      },
+      donut: {
+        title: 'Топ языков',
+        days: 'Дней',
+        limit: 'Языков',
+      },
+      status: {
+        title: 'Сейчас кодит',
+        primary: 'Основная зона',
+        secondary: 'Дополнительная зона',
+        style: 'Стиль',
+        color: 'Акцентный цвет',
+        colorDefault: 'По умолчанию',
+        background: 'Фон',
+        fields: {
+          project: 'Проект',
+          language: 'Язык',
+          editor: 'Редактор',
+          none: 'Нет',
+        },
+        styles: {
+          minimal: 'Минимальный',
+          detailed: 'Детальный',
+        },
+      },
+      limit: {
+        upgrade: 'Перейти на Pro',
+        donutFree: 'Бесплатный план: до 30 дней и 5 языков. Pro снимает ограничение.',
+        donutExceeds: 'Бесплатный план ограничен 30 днями и 5 языками — значения будут урезаны.',
+        statusFree: 'Бесплатный план: выберите имя проекта ИЛИ язык. Pro показывает оба.',
+        statusFreeStyle: 'Бесплатный план: только минимальный стиль и цвета по умолчанию. Pro открывает детальный стиль и пользовательские акцентный / фоновый цвета.',
+      },
+    },
     settings: {
       token: {
         title: 'Токен',

@@ -317,6 +317,49 @@ export const ms: Partial<Translation> = {
         color: 'Warna',
       },
     },
+    widget: {
+      tab: {
+        badge: 'Lencana',
+        donut: 'Bahasa',
+        status: 'Status',
+      },
+      theme: {
+        label: 'Tema',
+        light: 'Cerah',
+        dark: 'Gelap',
+      },
+      donut: {
+        title: 'Bahasa teratas',
+        days: 'Hari',
+        limit: 'Bahasa',
+      },
+      status: {
+        title: 'Sedang mengekod',
+        primary: 'Bahagian utama',
+        secondary: 'Bahagian sekunder',
+        style: 'Gaya',
+        color: 'Warna aksen',
+        colorDefault: 'Lalai',
+        background: 'Latar belakang',
+        fields: {
+          project: 'Projek',
+          language: 'Bahasa',
+          editor: 'Penyunting',
+          none: 'Tiada',
+        },
+        styles: {
+          minimal: 'Minimal',
+          detailed: 'Terperinci',
+        },
+      },
+      limit: {
+        upgrade: 'Naik taraf',
+        donutFree: 'Pelan percuma: sehingga 30 hari dan 5 bahasa. Pro membuka had.',
+        donutExceeds: 'Pelan percuma mengehadkan 30 hari dan 5 bahasa — nilai akan dipotong.',
+        statusFree: 'Pelan percuma: pilih nama projek ATAU bahasa. Pro memaparkan kedua-duanya.',
+        statusFreeStyle: 'Pelan percuma: hanya gaya minimal dengan warna lalai. Pro membuka gaya terperinci serta warna aksen / latar belakang tersuai.',
+      },
+    },
     settings: {
       token: {
         title: 'Token',
