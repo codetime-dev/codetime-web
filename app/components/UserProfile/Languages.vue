@@ -63,14 +63,14 @@ function widthPct(minutes: number): number {
 
       <template v-else-if="entries.length > 0">
         <li v-for="(entry, index) in entries" :key="entry.language || `lang-${index}`" class="lang-row">
-          <span class="text-surface-dimmed/55 text-[12px] font-mono tabular-nums">{{ String(index + 1).padStart(2, '0') }}</span>
+          <span class="text-surface-dimmed/55 text-[13px] font-mono tabular-nums">{{ String(index + 1).padStart(2, '0') }}</span>
 
           <span class="flex gap-2.5 min-w-0 items-center">
             <VSCodeIcon
               :language="entry.language || 'Unknown'"
               class="shrink-0 h-4.5 w-4.5"
             />
-            <span class="text-[13px] text-surface font-mono truncate">
+            <span class="text-[14px] text-surface font-mono truncate">
               {{ getLanguageName(entry.language || 'Unknown') }}
             </span>
           </span>
@@ -79,13 +79,13 @@ function widthPct(minutes: number): number {
             <span class="bar" :style="{ width: `${widthPct(entry.totalMinutes)}%` }" />
           </span>
 
-          <span class="num text-[12.5px] text-primary font-mono tabular-nums">
+          <span class="num text-[13px] text-primary font-mono tabular-nums">
             {{ fmtHours(entry.totalMinutes) }}<span class="text-surface-dimmed/60">h</span>
           </span>
-          <span class="num text-[12px] text-surface-dimmed font-mono tabular-nums">
+          <span class="num text-[13px] text-surface-dimmed font-mono tabular-nums">
             {{ sharePct(entry.totalMinutes).toFixed(1) }}%
           </span>
-          <span class="num text-[11px] text-emerald-500 tracking-[0.06em] font-mono tabular-nums">
+          <span class="num text-[12px] text-emerald-500 tracking-[0.04em] font-mono tabular-nums">
             {{ t.dashboard.profile.languages.topPercent(Math.max(1, Math.round(entry.percentile * 100))) }}
           </span>
         </li>
@@ -131,8 +131,8 @@ function widthPct(minutes: number): number {
 
 .hcell {
   font-family: var(--font-mono, monospace);
-  font-size: 11.5px;
-  letter-spacing: 0.18em;
+  font-size: 12px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--r-surface-text-dimmed-color);
 }

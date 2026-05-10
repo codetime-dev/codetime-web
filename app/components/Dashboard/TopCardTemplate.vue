@@ -74,7 +74,7 @@ const maxMinutes = computed(() => {
           >
             <div class="text-[12.5px] font-mono mb-1 flex gap-2 items-center justify-between">
               <span class="inline-flex gap-2 min-w-0 truncate items-center">
-                <span class="text-surface-dimmed/60 text-[10px] text-right w-3 tabular-nums">{{ String(i + 1).padStart(2, '0') }}</span>
+                <span class="text-surface-dimmed/60 text-[12px] text-right w-3 tabular-nums">{{ String(i + 1).padStart(2, '0') }}</span>
                 <template v-if="d.icon">
                   <i
                     v-if="!d.icon.startsWith('i-vscode-icons')"

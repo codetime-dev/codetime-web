@@ -53,7 +53,7 @@ const sectionLabel = computed(() => {
               <NuxtLink
                 v-if="user"
                 :to="`/${locale}/dashboard`"
-                class="text-[12px] text-surface-dimmed tracking-[0.08em] font-mono inline-flex gap-2 uppercase transition-colors items-center hover:text-primary"
+                class="text-[13px] text-surface-dimmed tracking-[0.08em] font-mono inline-flex gap-2 transition-colors items-center hover:text-primary"
               >
                 <img
                   v-if="user.avatar"
@@ -63,7 +63,7 @@ const sectionLabel = computed(() => {
                 >
                 <span class="hidden sm:inline">{{ user.username }}</span>
                 <span
-                  class="text-[10px] tracking-[0.14em] font-mono px-2 py-0.5 border rounded-full"
+                  class="text-[11px] tracking-[0.14em] font-mono px-2 py-0.5 border rounded-full"
                   :class="String(user.plan).toLowerCase() === 'pro'
                     ? 'border-primary/30 text-primary bg-primary/12'
                     : 'border-surface-dimmed/25 text-surface-dimmed/60'"
@@ -78,7 +78,7 @@ const sectionLabel = computed(() => {
               <NuxtLink
                 v-else
                 :to="`/${locale}/login`"
-                class="text-[12px] text-surface-dimmed tracking-[0.08em] font-mono uppercase transition-colors hover:text-primary"
+                class="text-[13px] text-surface-dimmed tracking-[0.08em] font-mono transition-colors hover:text-primary"
               >
                 [ LOGIN ]
               </NuxtLink>
@@ -94,7 +94,7 @@ const sectionLabel = computed(() => {
       </main>
 
       <footer class="layout-foot relative">
-        <div class="text-surface-dimmed/55 text-[11px] tracking-[0.18em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
+        <div class="text-surface-dimmed/55 text-[12px] tracking-[0.12em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
           <span>datreks · {{ new Date().getFullYear() }}</span>
           <span class="text-surface-dimmed/25">·</span>
           <NuxtLink
@@ -182,5 +182,10 @@ const sectionLabel = computed(() => {
 .layout-foot {
   background: var(--r-surface-background-variant-1-color);
   background-color: rgb(var(--r-color-surface-7) / 0.18);
+}
+
+[data-scheme="light"] .layout-foot {
+  background: none;
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 4%, transparent);
 }
 </style>

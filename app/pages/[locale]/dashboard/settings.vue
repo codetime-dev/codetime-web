@@ -279,6 +279,14 @@ const t = useI18N()
   background-color: rgb(var(--r-color-surface-7) / 0.24);
 }
 
+[data-scheme="light"] .token-bar {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
+}
+
+[data-scheme="light"] .token-bar:hover {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 8%, transparent);
+}
+
 .token-tag {
   display: inline-flex;
   align-items: center;
@@ -414,7 +422,7 @@ const t = useI18N()
 }
 
 .line-btn-danger {
-  color: var(--r-color-error-1, #ef4444);
-  background-color: color-mix(in srgb, var(--r-color-error-1, #ef4444) 16%, transparent);
+  color: #ef4444 !important;
+  background-color: rgb(239 68 68 / 0.16) !important;
 }
 </style>

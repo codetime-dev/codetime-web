@@ -74,4 +74,42 @@ provide('user-pending', status.value === 'pending')
 *:not(.font-mono) {
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
+
+/* Light-mode surface tint overrides.
+   The shared recipe `rgb(var(--r-color-surface-7) / X)` reads muddy on white.
+   We swap it for an ink-tinted overlay derived from the text color, which
+   stays clean across schemes. The `html[...]` prefix wins over Vue scoped
+   selectors (`.cls[data-v-...]`). */
+html[data-scheme="light"] .line-btn,
+html[data-scheme="light"] .line-input,
+html[data-scheme="light"] .token-bar,
+html[data-scheme="light"] .lang-trigger,
+html[data-scheme="light"] .acc-avatar,
+html[data-scheme="light"] .layout-foot,
+html[data-scheme="light"] .badge-style-btn:hover {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
+}
+
+html[data-scheme="light"] .line-btn:hover,
+html[data-scheme="light"] .line-input:hover,
+html[data-scheme="light"] .token-bar:hover,
+html[data-scheme="light"] .lang-trigger:hover,
+html[data-scheme="light"] .lang-trigger-open {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 9%, transparent);
+}
+
+html[data-scheme="light"] .line-input:focus {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 11%, transparent);
+}
+
+/* Pill markers (e.g. FREE / PRO badge in account settings). */
+html[data-scheme="light"] .acc-pill {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 8%, transparent);
+  color: color-mix(in srgb, var(--r-surface-text-color) 85%, transparent);
+}
+
+html[data-scheme="light"] .acc-pill-primary {
+  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
+  color: var(--color-primary-1);
+}
 </style>

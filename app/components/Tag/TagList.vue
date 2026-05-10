@@ -437,13 +437,13 @@ function cancelDelete() {
   background-color: color-mix(in srgb, var(--color-primary-1) 24%, transparent);
 }
 
-.line-btn-danger {
-  color: var(--r-color-error-1, #ef4444);
-  background-color: color-mix(in srgb, var(--r-color-error-1, #ef4444) 14%, transparent);
+.line-btn.line-btn-danger {
+  color: #ef4444 !important;
+  background-color: rgb(239 68 68 / 0.14) !important;
 }
 
-.line-btn-danger:hover {
-  background-color: color-mix(in srgb, var(--r-color-error-1, #ef4444) 24%, transparent);
+.line-btn.line-btn-danger:hover {
+  background-color: rgb(239 68 68 / 0.24) !important;
 }
 
 /* Confirm modal */

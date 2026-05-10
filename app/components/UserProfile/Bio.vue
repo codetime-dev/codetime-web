@@ -37,7 +37,7 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
     <!-- View mode -->
     <div v-if="!isEditing" class="space-y-3">
       <div v-if="bio" class="bg-surface-variant-1/25 px-4 py-3.5">
-        <p class="text-[13px] text-surface leading-[1.65] font-mono whitespace-pre-wrap break-words">
+        <p class="text-[14px] text-surface leading-[1.65] font-mono whitespace-pre-wrap break-words">
           {{ bio }}
         </p>
       </div>
@@ -63,10 +63,10 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
           v-model="bioDraftModel"
           :maxlength="maxLength"
           rows="4"
-          class="placeholder:text-surface-dimmed/40 text-[13px] text-surface leading-[1.65] font-mono p-3.5 pb-8 outline-none bg-transparent w-full block resize-none"
+          class="placeholder:text-surface-dimmed/40 text-[14px] text-surface leading-[1.65] font-mono p-3.5 pb-8 outline-none bg-transparent w-full block resize-none"
           :placeholder="t.dashboard.profile.bio.placeholder"
         />
-        <div class="text-[11px] tracking-widest font-mono flex gap-1 bottom-2 right-3 absolute tabular-nums">
+        <div class="text-[12px] tracking-widest font-mono flex gap-1 bottom-2 right-3 absolute tabular-nums">
           <span
             :class="{
               'text-rose-500': overLimit,
@@ -81,7 +81,7 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
       </div>
 
       <div class="flex flex-wrap gap-2 items-center justify-end">
-        <span v-if="overLimit" class="text-[11px] text-rose-500 tracking-[0.08em] font-mono mr-auto inline-flex gap-1 uppercase items-center">
+        <span v-if="overLimit" class="text-[12px] text-rose-500 tracking-[0.08em] font-mono mr-auto inline-flex gap-1 uppercase items-center">
           <i class="i-tabler-alert-triangle text-sm" />
           {{ t.dashboard.profile.bio.limitExceeded }}
         </span>

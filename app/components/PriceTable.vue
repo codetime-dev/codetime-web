@@ -18,12 +18,12 @@ const t = useI18N()
       <!-- Basic Plan -->
       <div class="price-col px-7 py-8 flex flex-col h-full relative">
         <div class="mb-6">
-          <span class="text-[11px] text-surface-dimmed tracking-[0.16em] font-mono uppercase">{{ t.plan.basic.title }}</span>
+          <span class="text-[13px] text-surface-dimmed tracking-[0.12em] font-mono uppercase">{{ t.plan.basic.title }}</span>
           <div class="mt-3 flex gap-1.5 items-end">
             <span class="text-5xl text-surface tracking-tight font-light">$0</span>
             <span class="text-sm text-surface-dimmed mb-1.5">{{ t.plan.basic.forever }}</span>
           </div>
-          <p class="text-[13px] text-surface-dimmed leading-relaxed mt-2">
+          <p class="text-[14px] text-surface-dimmed leading-relaxed mt-2">
             {{ t.landing.pricing.description }}
           </p>
         </div>
@@ -45,7 +45,7 @@ const t = useI18N()
         </div>
 
         <div class="mt-8">
-          <div class="bg-surface-variant-1/20 text-surface-dimmed/70 text-[13px] tracking-[0.04em] font-mono py-2.5 text-center rounded-xl">
+          <div class="bg-surface-variant-1/20 text-surface-dimmed/70 text-[14px] tracking-[0.04em] font-mono py-2.5 text-center rounded-xl">
             {{ t.plan.basic.button }}
           </div>
         </div>
@@ -57,9 +57,9 @@ const t = useI18N()
         <div class="px-7 py-8 flex flex-col h-full relative">
           <div class="mb-6">
             <div class="flex gap-3 items-center justify-between">
-              <span class="text-[11px] text-surface-dimmed tracking-[0.16em] font-mono uppercase">{{ t.plan.pro.title }}</span>
+              <span class="text-[13px] text-surface-dimmed tracking-[0.12em] font-mono uppercase">{{ t.plan.pro.title }}</span>
               <span
-                class="text-[10px] text-white tracking-[0.14em] font-mono px-2.5 py-0.5 rounded-full uppercase"
+                class="text-[11px] text-white tracking-[0.12em] font-mono px-2.5 py-0.5 rounded-full uppercase"
                 :class="isAnuual ? 'bg-error' : 'bg-primary'"
               >
                 {{ !isAnuual ? t.plan.mostPopular : t.plan.bestValue }}
@@ -74,7 +74,7 @@ const t = useI18N()
               </span>
               <span class="text-sm text-surface-dimmed mb-1.5">{{ isAnuual ? t.plan.pro.preYear : t.plan.pro.preMonth }}</span>
             </div>
-            <p class="text-[13px] text-surface-dimmed leading-relaxed mt-2">
+            <p class="text-[14px] text-surface-dimmed leading-relaxed mt-2">
               {{ t.landing.pricing.description }}
             </p>
           </div>

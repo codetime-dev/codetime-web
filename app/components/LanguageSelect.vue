@@ -121,6 +121,15 @@ watchEffect(() => {
   background-color: rgb(var(--r-color-surface-7) / 0.32);
 }
 
+[data-scheme="light"] .lang-trigger {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
+}
+
+[data-scheme="light"] .lang-trigger:hover,
+[data-scheme="light"] .lang-trigger-open {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 10%, transparent);
+}
+
 .lang-trigger > span:nth-child(2) {
   letter-spacing: 0;
   text-transform: none;

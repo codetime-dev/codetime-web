@@ -22,18 +22,18 @@ defineProps<{
       class="kpi-cell"
     >
       <div class="flex gap-2 items-center">
-        <span class="text-surface-dimmed/55 text-[11.5px] tracking-[0.18em] font-mono tabular-nums">{{ kpi.index }}</span>
+        <span class="text-surface-dimmed/55 text-[12px] tracking-[0.14em] font-mono tabular-nums">{{ kpi.index }}</span>
         <i v-if="kpi.icon" :class="kpi.icon" class="text-surface-dimmed/55 text-sm shrink-0" />
-        <span class="text-[12px] text-surface-dimmed tracking-[0.18em] font-mono uppercase">{{ kpi.label }}</span>
+        <span class="text-[13px] text-surface-dimmed tracking-[0.14em] font-mono uppercase">{{ kpi.label }}</span>
       </div>
       <div class="flex gap-1 items-baseline">
         <span
-          class="text-[26px] leading-none font-mono tabular-nums"
+          class="text-[28px] leading-none font-mono tabular-nums"
           :class="kpi.accent ? 'text-primary' : 'text-surface'"
         >{{ kpi.value }}</span>
-        <span v-if="kpi.unit" class="text-surface-dimmed/80 text-[12.5px] font-mono">{{ kpi.unit }}</span>
+        <span v-if="kpi.unit" class="text-surface-dimmed/80 text-[13px] font-mono">{{ kpi.unit }}</span>
       </div>
-      <div v-if="kpi.caption" class="text-surface-dimmed/65 text-[11.5px] font-mono truncate">
+      <div v-if="kpi.caption" class="text-surface-dimmed/65 text-[12px] font-mono truncate">
         {{ kpi.caption }}
       </div>
     </div>

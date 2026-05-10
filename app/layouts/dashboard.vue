@@ -70,13 +70,11 @@ const showAnnualReport = computed(() => {
                   decoding="async"
                 >
                 <span class="text-[14px] text-surface tracking-[0.3em] font-mono font-semibold">CODE·TIME</span>
-                <span class="text-surface-dimmed/40 text-[12px] font-mono">/</span>
-                <span class="text-[12px] text-primary tracking-[0.24em] font-mono uppercase">DASHBOARD</span>
               </NuxtLink>
 
               <NuxtLink
                 v-if="user"
-                class="text-[12px] text-surface-dimmed tracking-[0.08em] font-mono inline-flex gap-2 uppercase transition-colors items-center hover:text-primary"
+                class="text-[13px] text-surface-dimmed tracking-[0.08em] font-mono inline-flex gap-2 transition-colors items-center hover:text-primary"
                 :to="`/${locale}/dashboard`"
               >
                 <img
@@ -87,7 +85,7 @@ const showAnnualReport = computed(() => {
                 >
                 <span class="hidden sm:inline">{{ user.username }}</span>
                 <span
-                  class="text-[10px] tracking-[0.14em] font-mono px-2 py-0.5 border rounded-full"
+                  class="text-[11px] tracking-[0.14em] font-mono px-2 py-0.5 border rounded-full"
                   :class="String(user.plan).toLowerCase() === 'pro'
                     ? 'border-primary/30 text-primary bg-primary/12'
                     : 'border-surface-dimmed/25 text-surface-dimmed/60'"
@@ -107,7 +105,7 @@ const showAnnualReport = computed(() => {
                 v-if="user && showAnnualReport"
                 :to="`/${locale}/user/${user.id}/annual-report`"
                 target="_blank"
-                class="bg-primary/10 hover:bg-primary/20 text-[11px] text-primary tracking-[0.14em] font-mono px-2 py-1 inline-flex gap-1 uppercase transition-colors items-center"
+                class="bg-primary/10 hover:bg-primary/20 text-[12px] text-primary tracking-[0.14em] font-mono px-2 py-1 inline-flex gap-1 uppercase transition-colors items-center"
               >
                 <i class="i-tabler-sparkles text-sm" />
                 <span class="hidden sm:inline">{{ t.annualReport.reviewAnnualReport }}</span>
@@ -118,7 +116,7 @@ const showAnnualReport = computed(() => {
               </div>
               <div
                 v-else-if="resp.data.value"
-                class="text-[11px] text-surface-dimmed tracking-[0.04em] font-mono inline-flex gap-2 items-center"
+                class="text-[12px] text-surface-dimmed tracking-[0.04em] font-mono inline-flex gap-2 items-center"
               >
                 <div class="shrink-0 relative">
                   <div class="rounded-full bg-primary h-2 w-2 animate-ping" />
@@ -145,7 +143,7 @@ const showAnnualReport = computed(() => {
             v-for="tab in headerTabs"
             :key="tab.id"
             :to="`/${locale}${tab.path}`"
-            class="dash-tab text-[12px] tracking-[0.18em] font-mono px-3.5 py-2.5 transition-colors"
+            class="dash-tab text-[13px] tracking-[0.12em] font-mono px-3.5 py-2.5 transition-colors"
             :class="tab === currentTab
               ? 'dash-tab-active text-primary bg-surface-variant-1/35'
               : 'text-surface-dimmed hover:text-surface hover:bg-surface-variant-1/20'"
@@ -184,7 +182,7 @@ const showAnnualReport = computed(() => {
         </div>
       </main>
       <footer class="layout-foot relative">
-        <div class="text-surface-dimmed/55 text-[11px] tracking-[0.18em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
+        <div class="text-surface-dimmed/55 text-[12px] tracking-[0.12em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
           <span>datreks · {{ new Date().getFullYear() }}</span>
           <span class="text-surface-dimmed/25">·</span>
           <NuxtLink
@@ -270,6 +268,10 @@ const showAnnualReport = computed(() => {
 
 .layout-foot {
   background-color: rgb(var(--r-color-surface-7) / 0.18);
+}
+
+[data-scheme="light"] .layout-foot {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 4%, transparent);
 }
 
 .dash-tab-active {

@@ -257,6 +257,29 @@ onClickOutside(root, () => {
   background-color: color-mix(in srgb, var(--color-primary-1) 12%, transparent);
 }
 
+[data-scheme="light"] .line-input {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
+}
+
+[data-scheme="light"] .line-input:hover {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 8%, transparent);
+}
+
+[data-scheme="light"] .line-input:focus {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 11%, transparent);
+}
+
+[data-scheme="light"] .proj-popover {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--r-surface-text-color) 12%, transparent),
+    0 12px 28px -10px rgb(0 0 0 / 0.18);
+}
+
+[data-scheme="light"] .proj-option-active,
+[data-scheme="light"] .proj-option:hover {
+  background-color: color-mix(in srgb, var(--color-primary-1) 18%, transparent);
+}
+
 .proj-empty {
   padding: 0.85rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;

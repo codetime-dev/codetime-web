@@ -13,12 +13,12 @@ defineProps<{
       <span class="up-section-divider-fill" />
     </div>
     <header class="up-section-header bg-surface-variant-1/30 px-5.5 py-3 flex flex-wrap gap-3.5 items-center sm:flex-nowrap sm:gap-3.5">
-      <span class="up-section-num text-[12px] tracking-[0.18em] font-mono tabular-nums">{{ num }}</span>
+      <span class="up-section-num text-[13px] tracking-[0.14em] font-mono tabular-nums">{{ num }}</span>
       <slot name="icon" />
-      <span class="text-[13px] text-surface tracking-[0.22em] font-medium">{{ title }}</span>
+      <span class="text-[14px] text-surface tracking-[0.16em] font-medium">{{ title }}</span>
       <span
         v-if="meta"
-        class="text-surface-dimmed/80 text-[12px] tracking-[0.04em] font-mono ml-0 ml-auto text-left text-right flex-basis-full min-w-0 break-words tabular-nums sm:ml-auto sm:text-right sm:flex-none"
+        class="text-surface-dimmed/80 text-[13px] tracking-[0.04em] font-mono ml-0 ml-auto text-left text-right flex-basis-full min-w-0 break-words tabular-nums sm:ml-auto sm:text-right sm:flex-none"
       >{{ meta }}</span>
     </header>
     <div :class="flush ? '' : 'px-5.5 py-4.5'">

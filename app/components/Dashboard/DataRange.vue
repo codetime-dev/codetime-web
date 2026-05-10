@@ -65,24 +65,24 @@ function onNext() {
     <div class="flex gap-1.5 items-center">
       <button
         type="button"
-        class="bg-surface-variant-1/40 hover:bg-surface-variant-1/70 text-[12px] text-surface-dimmed font-mono p-1 transition-colors hover:text-surface"
+        class="bg-surface-variant-1/40 hover:bg-surface-variant-1/70 text-[13px] text-surface-dimmed font-mono p-1 transition-colors hover:text-surface"
         @click="onPrev"
       >
-        <i class="i-tabler-chevron-left text-xs" />
+        <i class="i-tabler-chevron-left text-sm" />
       </button>
-      <div class="text-[12px] text-surface tracking-[0.08em] font-mono px-1.5 uppercase tabular-nums">
+      <div class="text-[13px] text-surface tracking-[0.06em] font-mono px-1.5 uppercase tabular-nums">
         <span v-if="days !== 36500">{{ t.dashboard.overview.dataRange.title(days) }}</span>
         <span v-else>{{ t.dashboard.overview.dataRange.allTime }}</span>
       </div>
       <button
         type="button"
-        class="bg-surface-variant-1/40 hover:bg-surface-variant-1/70 text-[12px] text-surface-dimmed font-mono p-1 transition-colors hover:text-surface"
+        class="bg-surface-variant-1/40 hover:bg-surface-variant-1/70 text-[13px] text-surface-dimmed font-mono p-1 transition-colors hover:text-surface"
         @click="onNext"
       >
-        <i class="i-tabler-chevron-right text-xs" />
+        <i class="i-tabler-chevron-right text-sm" />
       </button>
     </div>
-    <div v-if="days !== 36500" class="text-surface-dimmed/80 text-[10.5px] tracking-[0.06em] font-mono tabular-nums">
+    <div v-if="days !== 36500" class="text-surface-dimmed/80 text-[12px] tracking-[0.04em] font-mono tabular-nums">
       {{ d3.timeFormat('%Y-%m-%d')(new Date(Date.now() - days * 24 * 60 * 60 * 1000)) }}
       <span class="text-surface-dimmed/40 mx-1">~</span>
       {{ d3.timeFormat('%Y-%m-%d')(new Date()) }}

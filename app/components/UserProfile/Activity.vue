@@ -119,8 +119,8 @@ const hasHistory = computed(() => processed.value.some(d => d.duration > 0))
     <!-- Calendar -->
     <div>
       <div class="mb-2.5 flex gap-2 items-baseline justify-between">
-        <span class="text-surface-dimmed/60 text-[11px] tracking-[0.18em] font-mono uppercase">365D · CALENDAR</span>
-        <div class="text-surface-dimmed/60 text-[10.5px] tracking-[0.1em] font-mono flex gap-1.5 uppercase items-center">
+        <span class="text-surface-dimmed/60 text-[12px] tracking-[0.12em] font-mono uppercase">365D · CALENDAR</span>
+        <div class="text-surface-dimmed/60 text-[12px] tracking-[0.08em] font-mono flex gap-1.5 uppercase items-center">
           <span>less</span>
           <span class="bg-surface-variant-1 h-2.5 w-2.5 inline-block" />
           <span class="bg-primary/30 h-2.5 w-2.5 inline-block" />
@@ -138,7 +138,7 @@ const hasHistory = computed(() => processed.value.some(d => d.duration > 0))
     <!-- Trend -->
     <div v-if="hasHistory">
       <div class="mb-2.5 flex gap-2 items-baseline">
-        <span class="text-surface-dimmed/60 text-[11px] tracking-[0.18em] font-mono uppercase">DAILY · TREND · 7D-AVG</span>
+        <span class="text-surface-dimmed/60 text-[12px] tracking-[0.12em] font-mono uppercase">DAILY · TREND · 7D-AVG</span>
       </div>
       <div class="h-65 w-full">
         <PoltChart :options="trendOptions" />

@@ -243,12 +243,12 @@ function closeModal() {
   cursor: not-allowed;
 }
 
-.line-btn-danger {
-  color: var(--r-color-error-1, #ef4444);
-  background-color: color-mix(in srgb, var(--r-color-error-1, #ef4444) 18%, transparent);
+.line-btn.line-btn-danger {
+  color: #ef4444 !important;
+  background-color: rgb(239 68 68 / 0.18) !important;
 }
 
-.line-btn-danger:hover {
-  background-color: color-mix(in srgb, var(--r-color-error-1, #ef4444) 28%, transparent);
+.line-btn.line-btn-danger:hover {
+  background-color: rgb(239 68 68 / 0.28) !important;
 }
 </style>

@@ -32,8 +32,6 @@ watchEffect(() => {
               decoding="async"
             >
             <span class="text-[14px] text-surface tracking-[0.3em] font-mono font-semibold">CODE·TIME</span>
-            <span class="text-surface-dimmed/40 text-[12px] font-mono">/</span>
-            <span class="text-[12px] text-primary tracking-[0.24em] font-mono uppercase">LANDING</span>
           </NuxtLink>
           <div class="flex gap-3 items-center">
             <LanguageSelect />
@@ -46,7 +44,7 @@ watchEffect(() => {
       </main>
 
       <footer class="layout-foot relative">
-        <div class="text-surface-dimmed/55 text-[11px] tracking-[0.18em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
+        <div class="text-surface-dimmed/55 text-[12px] tracking-[0.12em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
           <span>datreks · {{ new Date().getFullYear() }}</span>
           <span class="text-surface-dimmed/25">·</span>
           <NuxtLink
@@ -131,6 +129,10 @@ watchEffect(() => {
 
 .layout-foot {
   background-color: rgb(var(--r-color-surface-7) / 0.18);
+}
+
+[data-scheme="light"] .layout-foot {
+  background-color: color-mix(in srgb, var(--r-surface-text-color) 4%, transparent);
 }
 </style>
 
