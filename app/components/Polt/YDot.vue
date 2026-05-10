@@ -110,6 +110,7 @@ const options = computed<Plot.PlotOptions>(() => {
       Plot.axisY({
         anchor: 'right',
         textAnchor: 'end',
+        fill: 'var(--ct-fg)',
         textStroke: 'var(--ct-surface)',
         textStrokeWidth: 4,
         ariaLabel: props.yLabel,

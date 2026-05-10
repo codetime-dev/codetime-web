@@ -134,14 +134,7 @@ const link = computed(() => {
               <div class="badge-filter-label">
                 language
               </div>
-              <input
-                v-model="language"
-                class="line-input"
-                type="text"
-                :placeholder="t.dashboard.badge.placeholder.language"
-                autocomplete="off"
-                spellcheck="false"
-              >
+              <EventLanguageSelect v-model="language" />
             </div>
             <div class="badge-filter-cell">
               <div class="badge-filter-label">

@@ -51,18 +51,16 @@ const options = computed<Plot.PlotOptions>(() => {
     h: height.value,
     className: 'y-dot-plot',
     marginTop: 16,
-    marginRight: 28,
-    marginLeft: 28,
+    marginRight: 12,
+    marginLeft: 12,
     marginBottom: 28,
     style: {
       background: 'transparent',
     },
     y: {
       grid: true,
-      axis: 'right',
+      axis: null,
       domain: [0, 1.05],
-      ticks: 4,
-      tickFormat: (d: number) => `${Math.round(d * 100)}%`,
       label: null,
     },
     x: {

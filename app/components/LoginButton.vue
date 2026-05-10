@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { UserSelfPublic } from '~/api/v3'
-import UButton from '~/components/U/Button.vue'
 import NuxtLink from '~/i18n/NuxtLink'
 
 const locale = useRoute().params.locale as string
@@ -71,7 +70,7 @@ async function handleGitHubLogin() {
               key="demo"
               aria-label="demo"
               :to="`/${locale}/dashboard`"
-              class="border-surface-border-low hover:bg-surface-low px-4 py-3 border rounded-xl bg-surface-base bg-transparent hidden transition-all"
+              class="border-surface-border-low hover:bg-surface-low bg-surface-base px-4 py-3 border rounded-xl bg-transparent hidden transition-all"
             >
               <div class="text-sm flex gap-2 items-center">
                 <i class="i-eva-bar-chart-outline h-4 w-4" />

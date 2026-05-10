@@ -7,11 +7,10 @@ import {
   v3GetUserTopLanguagesRank,
   v3UpdateBio,
 } from '~/api/v3'
-import Activity from './UserProfile/Activity.vue'
+import ActivityCalendar from './UserProfile/ActivityCalendar.vue'
+import ActivityTrend from './UserProfile/ActivityTrend.vue'
 import Bio from './UserProfile/Bio.vue'
-import Identity from './UserProfile/Identity.vue'
 import Languages from './UserProfile/Languages.vue'
-import Section from './UserProfile/Section.vue'
 import Stats from './UserProfile/Stats.vue'
 
 const props = defineProps<{
@@ -331,6 +330,18 @@ watchEffect(() => {
   }
 })
 
+const headerDescription = computed(() => {
+  const planLabel = String(user.value?.plan ?? 'free').toUpperCase()
+  const parts = [`#${props.userId}`, planLabel]
+  if (user.value?.timezone) {
+    parts.push(user.value.timezone)
+  }
+  if (user.value?.email) {
+    parts.push(user.value.email)
+  }
+  return parts.join(' · ')
+})
+
 const lastUpdatedLabel = computed(() => {
   const updated = overallRank.value?.updatedAt
   if (!updated) {
@@ -345,7 +356,11 @@ const lastUpdatedLabel = computed(() => {
 </script>
 
 <template>
-  <div class="user-profile-frame mx-auto max-w-7xl w-full">
+  <DashboardPageTitle
+    :title="user?.username || `User #${props.userId}`"
+    :description="headerDescription"
+  />
+  <DashboardPageContent>
     <!-- Hidden state -->
     <div v-if="userHidden" class="px-5.5 py-12 text-center space-y-3">
       <div class="text-[12px] text-amber-500 tracking-[0.2em] font-mono px-3 py-1.5 border border-amber-500/40 bg-amber-500/5 inline-flex gap-2 uppercase items-center justify-center">
@@ -361,24 +376,8 @@ const lastUpdatedLabel = computed(() => {
     </div>
 
     <template v-else>
-      <Section num="01" :title="t.dashboard.profile.identity.title" :meta="`user · #${userId}`">
-        <template #icon>
-          <i class="i-tabler-user-circle text-[15px] text-ct-fg-muted" />
-        </template>
-        <Identity
-          :username="user?.username"
-          :avatar="user?.avatar"
-          :email="user?.email"
-          :plan="user?.plan"
-          :timezone="user?.timezone"
-          :user-id="userId"
-          :created-at="user?.createdAt"
-          :updated-at="user?.updatedAt"
-        />
-      </Section>
-
-      <Section
-        num="02"
+      <PanelSection
+        num="01"
         :title="t.dashboard.profile.bio.title"
         :meta="canEditBio ? 'editable · owner' : 'read only'"
       >
@@ -400,10 +399,10 @@ const lastUpdatedLabel = computed(() => {
           @save="saveBio"
           @update:bio-draft="updateBioDraft"
         />
-      </Section>
+      </PanelSection>
 
-      <Section
-        num="03"
+      <PanelSection
+        num="02"
         :title="t.dashboard.profile.stats.title"
         :meta="lastUpdatedLabel ? `updated ${lastUpdatedLabel}` : `${HISTORY_DAYS}d window`"
         :flush="true"
@@ -412,10 +411,10 @@ const lastUpdatedLabel = computed(() => {
           <i class="i-tabler-chart-bar text-[15px] text-ct-fg-muted" />
         </template>
         <Stats :kpis="kpis" />
-      </Section>
+      </PanelSection>
 
-      <Section
-        num="04"
+      <PanelSection
+        num="03"
         :title="t.dashboard.profile.languages.title"
         :meta="`${topLanguages.length} tracked`"
       >
@@ -423,25 +422,29 @@ const lastUpdatedLabel = computed(() => {
           <i class="i-tabler-braces text-[15px] text-ct-fg-muted" />
         </template>
         <Languages :entries="topLanguages" :pending="languagesPending" />
-      </Section>
+      </PanelSection>
 
-      <Section
-        num="05"
+      <PanelSection
+        num="04"
         :title="t.dashboard.profile.activity.title"
-        :meta="`${HISTORY_DAYS}d · ${activeDays} active`"
+        meta="365d · calendar"
       >
         <template #icon>
           <i class="i-tabler-activity text-[15px] text-ct-fg-muted" />
         </template>
-        <Activity :history="codingHistory" :pending="historyPending" />
-      </Section>
-    </template>
-  </div>
-</template>
+        <ActivityCalendar :history="codingHistory" :pending="historyPending" />
+      </PanelSection>
 
-<style scoped>
-.user-profile-frame {
-  position: relative;
-  min-height: calc(100vh - 200px);
-}
-</style>
+      <PanelSection
+        num="05"
+        :title="t.dashboard.profile.activity.title"
+        :meta="`${HISTORY_DAYS}d · ${activeDays} active · trend`"
+      >
+        <template #icon>
+          <i class="i-tabler-chart-line text-[15px] text-ct-fg-muted" />
+        </template>
+        <ActivityTrend :history="codingHistory" :pending="historyPending" />
+      </PanelSection>
+    </template>
+  </DashboardPageContent>
+</template>

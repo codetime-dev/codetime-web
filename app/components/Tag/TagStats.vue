@@ -228,7 +228,7 @@ const dailyAvgMs = computed(() => {
       <div class="stats-cells">
         <div class="stats-cell">
           <div class="stats-cell-label">
-            <i class="i-tabler-clock text-sm text-primary" />
+            <i class="i-tabler-clock text-primary text-sm" />
             <span>{{ t.dashboard.tags.stats.totalDuration }}</span>
           </div>
           <div class="stats-cell-value">
@@ -238,7 +238,7 @@ const dailyAvgMs = computed(() => {
 
         <div class="stats-cell">
           <div class="stats-cell-label">
-            <i class="i-tabler-list text-sm text-primary" />
+            <i class="i-tabler-list text-primary text-sm" />
             <span>{{ t.dashboard.tags.stats.recordCount }}</span>
           </div>
           <div class="stats-cell-value tabular-nums">
@@ -248,7 +248,7 @@ const dailyAvgMs = computed(() => {
 
         <div class="stats-cell">
           <div class="stats-cell-label">
-            <i class="i-tabler-calendar text-sm text-primary" />
+            <i class="i-tabler-calendar text-primary text-sm" />
             <span>{{ t.dashboard.tags.stats.timeRange }}</span>
           </div>
           <div class="stats-cell-value tabular-nums">
@@ -258,7 +258,7 @@ const dailyAvgMs = computed(() => {
 
         <div class="stats-cell">
           <div class="stats-cell-label">
-            <i class="i-tabler-chart-line text-sm text-primary" />
+            <i class="i-tabler-chart-line text-primary text-sm" />
             <span>{{ t.dashboard.tags.stats.dailyAverage }}</span>
           </div>
           <div class="stats-cell-value">

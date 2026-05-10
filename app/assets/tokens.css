@@ -1,5 +1,16 @@
 /* Codetime design tokens. Independent of @roku-ui; both schemes mapped here. */
 
+/* Suppress all transitions/animations while the color scheme is being switched
+   so dual-tone interpolations don't flash through ugly intermediate colors. */
+html.is-theme-switching,
+html.is-theme-switching *,
+html.is-theme-switching *::before,
+html.is-theme-switching *::after {
+  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
 :root {
   /* Brand */
   --ct-brand-50:  #f0f9ff;
@@ -75,7 +86,10 @@
   --ct-z-toast: 60;
 }
 
-/* Light scheme (default — also covers prefers-color-scheme: light) */
+/* Light scheme (default — also covers prefers-color-scheme: light)
+   Soft, slightly cool slate palette inspired by Linear / Vercel / GitHub
+   Primer. Page bg sits one notch below pure white so card surfaces float;
+   text is near-black slate (#1a1d24) instead of #000 for a softer read. */
 :root,
 html[data-scheme="light"] {
   /* Brand alias */
@@ -84,30 +98,31 @@ html[data-scheme="light"] {
   --ct-primary-active: var(--ct-brand-800);
   --ct-on-primary:     #ffffff;
 
-  /* Surface */
-  --ct-bg:           #ffffff;
-  --ct-surface:      #ffffff;
-  --ct-surface-1:    #fafafa;
-  --ct-surface-2:    #f4f4f5;
-  --ct-surface-3:    #e4e4e7;
+  /* Surface — bg muted, surface (cards/inputs) lifts to off-white,
+     never pure #fff so buttons and fields don't glare on the page. */
+  --ct-bg:           #f1f2f5;
+  --ct-surface:      #fbfbfd;
+  --ct-surface-1:    #ebecf0;
+  --ct-surface-2:    #e1e3e8;
+  --ct-surface-3:    #d2d5dc;
 
-  /* Border */
-  --ct-border:        #e5e7eb;
-  --ct-border-strong: #d4d4d8;
-  --ct-border-subtle: #f1f1f3;
+  /* Border — slate, calibrated to remain visible at 0.3–0.5 opacity */
+  --ct-border:        #d4d8e0;
+  --ct-border-strong: #b4bac6;
+  --ct-border-subtle: #e2e4ea;
 
-  /* Text */
-  --ct-fg:           #18181b;
-  --ct-fg-muted:     #52525b;
-  --ct-fg-subtle:    #71717a;
-  --ct-fg-disabled:  #a1a1aa;
+  /* Text — softened from pure black */
+  --ct-fg:           #1a1d24;
+  --ct-fg-muted:     #525a6b;
+  --ct-fg-subtle:    #6e7689;
+  --ct-fg-disabled:  #a3a9b6;
   --ct-fg-on-brand:  #ffffff;
 
-  /* Semantic */
-  --ct-success: #059669;
-  --ct-warning: #d97706;
-  --ct-danger:  #dc2626;
-  --ct-info:    var(--ct-brand-600);
+  /* Semantic — slightly deeper for readability on light bg */
+  --ct-success: #047857;
+  --ct-warning: #b45309;
+  --ct-danger:  #b91c1c;
+  --ct-info:    var(--ct-brand-700);
 
   /* Soft tints */
   --ct-primary-soft: color-mix(in srgb, var(--ct-primary) 12%, transparent);
@@ -115,10 +130,14 @@ html[data-scheme="light"] {
   --ct-warning-soft: color-mix(in srgb, var(--ct-warning) 14%, transparent);
   --ct-danger-soft:  color-mix(in srgb, var(--ct-danger) 12%, transparent);
 
-  /* Shadow */
-  --ct-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
-  --ct-shadow-md: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.06);
-  --ct-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.08);
+  /* Shadow — cool-tinted, layered */
+  --ct-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04);
+  --ct-shadow-md: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 12px rgb(15 23 42 / 0.06);
+  --ct-shadow-lg: 0 12px 32px rgb(15 23 42 / 0.08);
+
+  /* Calendar heatmap */
+  --ct-cal-empty:  #e0e2e8;
+  --ct-cal-stroke: #f1f2f5;
 
   color-scheme: light;
 }
@@ -160,6 +179,10 @@ html[data-scheme="dark"] {
   --ct-shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.45);
   --ct-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.55);
 
+  /* Calendar heatmap */
+  --ct-cal-empty:  #1c1d20;
+  --ct-cal-stroke: #0a0a0b;
+
   color-scheme: dark;
 }
 
@@ -198,6 +221,9 @@ html[data-scheme="dark"] {
     --ct-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
     --ct-shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.45);
     --ct-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.55);
+
+    --ct-cal-empty:  #1c1d20;
+    --ct-cal-stroke: #0a0a0b;
 
     color-scheme: dark;
   }
@@ -251,7 +277,7 @@ html, body {
   height: 22px;
   width: 100%;
   background-color: var(--ct-border);
-  opacity: 0.5;
+  opacity: 0.8;
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");
           mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");
   -webkit-mask-size: 8px 8px;
@@ -307,7 +333,7 @@ html, body {
 }
 .plot [aria-label$="-axis tick label"],
 .plot [aria-label$="-axis label"] {
-  fill: var(--ct-fg);
+  fill: var(--ct-fg-muted);
 }
 .plot [aria-label="tip"] path {
   fill: var(--ct-surface);

@@ -30,6 +30,17 @@
           background-clip: text;
   color: transparent;
 }
+/* Light scheme: fade-to-transparent collapses against the soft-gray bg.
+   Use a darker→primary in-hue ramp so the type stays grounded. */
+html[data-scheme="light"] .title-code {
+  background: linear-gradient(
+    180deg,
+    var(--ct-brand-700) 0%,
+    var(--ct-brand-500) 100%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+}
 .title-time {
   color: var(--ct-fg);
 }

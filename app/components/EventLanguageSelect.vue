@@ -1,77 +1,52 @@
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core'
-import { v3RecentWorkspaces, v3SearchWorkspaces } from '~/api/v3'
+import { v3RecentLanguages } from '~/api/v3'
 
-type ProjectOption = { label: string, id: string }
-
-const modelValue = defineModel<ProjectOption | null>()
+const modelValue = defineModel<string>({ default: '' })
 const t = useI18N()
 
 const root = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLInputElement | null>(null)
 const open = ref(false)
-const query = ref(modelValue.value?.label ?? '')
-const debounced = refDebounced(query, 250)
+const query = ref(modelValue.value ?? '')
 const activeIdx = ref(0)
 
-const { data } = await useAsyncData('project-search', async () => {
-  if (!debounced.value) {
-    return null
-  }
-  const resp = await v3SearchWorkspaces({
-    query: {
-      limit: 10,
-      q: debounced.value,
-    },
-  })
-  return resp.data
-}, {
-  server: false,
-  watch: [debounced],
-})
-
-const { data: recentData } = await useAsyncData('project-recent', async () => {
-  const resp = await v3RecentWorkspaces({
+const { data: recentData } = await useAsyncData('event-language-recent', async () => {
+  const resp = await v3RecentLanguages({
     query: { limit: 15 },
   })
-  return resp.data ?? null
+  return resp.data ?? []
 }, {
   server: false,
+  default: () => [] as string[],
 })
 
-const recentOptions = computed<ProjectOption[]>(() => {
-  return (recentData.value?.results ?? []).map(r => ({
-    label: r.workspaceName,
-    id: r.workspaceName,
-  }))
-})
+const recentList = computed<string[]>(() => recentData.value ?? [])
 
-const options = computed<ProjectOption[]>(() => {
-  if (!debounced.value) {
-    return recentOptions.value
+const options = computed<string[]>(() => {
+  const q = query.value.trim().toLowerCase()
+  if (!q) {
+    return recentList.value
   }
-  return (data.value?.results ?? []).map(item => ({
-    label: item.workspaceName,
-    id: item.workspaceName,
-  }))
+  return recentList.value.filter(l => l.toLowerCase().includes(q))
 })
 
-const isShowingRecent = computed(() => !debounced.value && recentOptions.value.length > 0)
+const isShowingRecent = computed(() => !query.value.trim())
 
 watch(modelValue, (v) => {
-  if (v) {
-    query.value = v.label
+  if (v !== query.value) {
+    query.value = v ?? ''
   }
 })
 
-function selectOption(opt: ProjectOption) {
+function selectOption(opt: string) {
   modelValue.value = opt
-  query.value = opt.label
+  query.value = opt
   open.value = false
 }
 
 function clearSelection() {
-  modelValue.value = null
+  modelValue.value = ''
   query.value = ''
   open.value = true
   inputEl.value?.focus()
@@ -80,11 +55,9 @@ function clearSelection() {
 function onInput(e: Event) {
   const v = (e.target as HTMLInputElement).value
   query.value = v
+  modelValue.value = v
   open.value = true
   activeIdx.value = 0
-  if (modelValue.value && modelValue.value.label !== v) {
-    modelValue.value = null
-  }
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -129,13 +102,13 @@ onClickOutside(root, () => {
 </script>
 
 <template>
-  <div ref="root" class="proj-select">
+  <div ref="root" class="ev-lang-select">
     <input
       ref="inputEl"
       :value="query"
       type="text"
       class="line-input"
-      :placeholder="t.dashboard.badge.placeholder.project"
+      :placeholder="t.dashboard.badge.placeholder.language"
       autocomplete="off"
       spellcheck="false"
       @input="onInput"
@@ -145,37 +118,34 @@ onClickOutside(root, () => {
     <button
       v-if="query"
       type="button"
-      class="proj-clear"
+      class="ev-lang-clear"
       aria-label="clear"
       @click="clearSelection"
     >
       <i class="i-tabler-x" />
     </button>
-    <i v-else class="i-tabler-chevron-down proj-caret" />
+    <i v-else class="i-tabler-chevron-down ev-lang-caret" />
 
-    <div v-if="open && options.length > 0" class="proj-popover">
+    <div v-if="open && options.length > 0" class="ev-lang-popover">
       <button
         v-for="(opt, idx) in options"
-        :key="opt.id"
+        :key="opt"
         type="button"
-        class="proj-option"
-        :class="idx === activeIdx ? 'proj-option-active' : ''"
+        class="ev-lang-option"
+        :class="idx === activeIdx ? 'ev-lang-option-active' : ''"
         @mouseenter="activeIdx = idx"
         @click="selectOption(opt)"
       >
-        <i v-if="isShowingRecent" class="i-tabler-history proj-option-icon" />
-        <span class="proj-option-label">{{ opt.label }}</span>
-        <i v-if="modelValue?.id === opt.id" class="i-tabler-check text-primary text-sm" />
+        <i v-if="isShowingRecent" class="i-tabler-history ev-lang-option-icon" />
+        <span class="ev-lang-option-label">{{ opt }}</span>
+        <i v-if="modelValue === opt" class="i-tabler-check text-primary text-sm" />
       </button>
-    </div>
-    <div v-else-if="open && debounced && options.length === 0" class="proj-popover proj-empty">
-      {{ t.dashboard.projectSelector.noneText }}
     </div>
   </div>
 </template>
 
 <style scoped>
-.proj-select { position: relative; width: 100%; }
+.ev-lang-select { position: relative; width: 100%; }
 
 .line-input {
   display: block;
@@ -198,16 +168,16 @@ onClickOutside(root, () => {
 }
 .line-input::placeholder { color: var(--ct-fg-subtle); }
 
-.proj-clear,
-.proj-caret {
+.ev-lang-clear,
+.ev-lang-caret {
   position: absolute;
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
   color: var(--ct-fg-subtle);
 }
-.proj-caret { pointer-events: none; }
-.proj-clear {
+.ev-lang-caret { pointer-events: none; }
+.ev-lang-clear {
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -220,9 +190,9 @@ onClickOutside(root, () => {
   transition: color var(--ct-duration-fast) var(--ct-ease),
               background-color var(--ct-duration-fast) var(--ct-ease);
 }
-.proj-clear:hover { color: var(--ct-fg); background: var(--ct-surface-2); }
+.ev-lang-clear:hover { color: var(--ct-fg); background: var(--ct-surface-2); }
 
-.proj-popover {
+.ev-lang-popover {
   position: absolute;
   left: 0;
   right: 0;
@@ -236,10 +206,9 @@ onClickOutside(root, () => {
   box-shadow: var(--ct-shadow-lg);
   padding: 4px;
 }
-.proj-option {
+.ev-lang-option {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   width: 100%;
   padding: 8px 10px;
@@ -252,21 +221,15 @@ onClickOutside(root, () => {
   text-align: left;
   transition: background-color var(--ct-duration-fast) var(--ct-ease);
 }
-.proj-option-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0; }
-.proj-option-icon { color: var(--ct-fg-subtle); font-size: 14px; flex-shrink: 0; }
-.proj-option:hover { background: var(--ct-surface-1); color: var(--ct-fg); }
-.proj-option-active {
+.ev-lang-option-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0; }
+.ev-lang-option-icon { color: var(--ct-fg-subtle); font-size: 14px; flex-shrink: 0; }
+.ev-lang-option:hover { background: var(--ct-surface-1); color: var(--ct-fg); }
+.ev-lang-option-active {
   background: var(--ct-primary-soft);
   color: var(--ct-primary);
 }
-.proj-option-active:hover {
+.ev-lang-option-active:hover {
   background: color-mix(in srgb, var(--ct-primary) 18%, transparent);
   color: var(--ct-primary);
-}
-
-.proj-empty {
-  padding: 14px;
-  font-size: var(--ct-text-sm);
-  color: var(--ct-fg-subtle);
 }
 </style>

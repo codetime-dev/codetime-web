@@ -49,6 +49,18 @@ export default defineNuxtConfig({
     },
   ], '@sentry/nuxt'],
 
+  routeRules: {
+    // Widget SVG endpoints set their own cache headers in the handler. Override
+    // any CDN page-cache defaults so an occasional SPA-fallback HTML response
+    // (e.g. during a deploy) is not pinned at the edge for hours.
+    '/api/widgets/**': {
+      headers: {
+        'cache-control': 'public, max-age=60, s-maxage=600',
+        'cdn-cache-control': 'public, max-age=600',
+      },
+    },
+  },
+
   sitemap: {
     exclude: [
       '/[...slug]',

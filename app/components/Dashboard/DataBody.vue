@@ -34,9 +34,9 @@ defineProps<{
   font-size: var(--ct-text-lg);
   font-weight: var(--ct-weight-semibold);
   color: var(--ct-fg);
-  font-family: var(--ct-font-mono);
   white-space: nowrap;
-  letter-spacing: var(--ct-tracking-tight);
+  letter-spacing: var(--ct-tracking-normal);
+  font-feature-settings: "tnum" 1;
 }
 .db-empty {
   margin-top: 4px;

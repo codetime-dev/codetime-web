@@ -14,9 +14,18 @@ const currentScheme = computed({
     return 'light'
   },
   set(value: string) {
-    if (globalThis.window !== undefined) {
-      document.documentElement.dataset.scheme = value
+    if (globalThis.window === undefined) {
+      return
     }
+    const root = document.documentElement
+    root.classList.add('is-theme-switching')
+    root.dataset.scheme = value
+    // Double rAF: let the new scheme paint, then drop the override.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        root.classList.remove('is-theme-switching')
+      })
+    })
   },
 })
 const scheme = useSchemeString()

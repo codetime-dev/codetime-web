@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import SurfaceButton from './SurfaceButton.vue'
 
 const props = defineProps<{
   bio?: string | null
@@ -49,10 +48,14 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
         <span>{{ t.dashboard.profile.bio.empty }}</span>
       </div>
       <div v-if="canEdit" class="flex justify-end">
-        <SurfaceButton @click="emit('startEdit')">
-          <i class="i-tabler-edit text-sm" />
-          <span>{{ bio ? t.dashboard.profile.bio.edit : '+ BIO' }}</span>
-        </SurfaceButton>
+        <UButton
+          variant="secondary"
+          size="md"
+          icon-left="i-tabler-edit"
+          @click="emit('startEdit')"
+        >
+          {{ bio ? t.dashboard.profile.bio.edit : '+ BIO' }}
+        </UButton>
       </div>
     </div>
 
@@ -85,18 +88,19 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
           <i class="i-tabler-alert-triangle text-sm" />
           {{ t.dashboard.profile.bio.limitExceeded }}
         </span>
-        <SurfaceButton variant="ghost" @click="emit('cancelEdit')">
+        <UButton variant="ghost" size="md" @click="emit('cancelEdit')">
           {{ t.general.cancel }}
-        </SurfaceButton>
-        <SurfaceButton
+        </UButton>
+        <UButton
           variant="primary"
-          :disabled="bioSaving || overLimit"
+          size="md"
+          :loading="bioSaving"
+          :disabled="overLimit"
+          icon-left="i-tabler-device-floppy"
           @click="emit('save')"
         >
-          <i v-if="bioSaving" class="i-tabler-loader text-sm animate-spin" />
-          <i v-else class="i-tabler-device-floppy text-sm" />
-          <span>{{ bioSaving ? t.dashboard.profile.bio.saving : t.dashboard.profile.bio.save }}</span>
-        </SurfaceButton>
+          {{ bioSaving ? t.dashboard.profile.bio.saving : t.dashboard.profile.bio.save }}
+        </UButton>
       </div>
     </div>
 

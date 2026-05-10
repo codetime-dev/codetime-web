@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { refreshNuxtData } from '#app'
 import * as d3 from 'd3'
+import { refreshNuxtData } from '#app'
 import { v3GetUserByUserId, v3GetUserTopLanguagesRank, v3UpdateBio } from '~/api/v3'
 
 type UnifiedUserDashboardProps = {
@@ -364,7 +364,7 @@ watchEffect(() => {
       <!-- User Header -->
       <template v-else>
         <!-- Profile Card (avatar + identity only, no nested sections) -->
-        <div class="border border-ct-border rounded-2xl bg-surface relative overflow-hidden">
+        <div class="bg-surface border border-ct-border rounded-2xl relative overflow-hidden">
           <div class="bg-primary/40 h-0.5 w-full left-0 top-0 absolute" />
           <div class="p-5 sm:p-6">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -395,7 +395,7 @@ watchEffect(() => {
                     {{ user?.username || `User ${targetUserId}` }}
                   </h1>
                   <span
-                    class="border-primary/30 bg-ct-primary-soft text-[11px] text-primary tracking-[0.15em] font-semibold px-2.5 py-0.5 border rounded-full shrink-0 uppercase"
+                    class="border-primary/30 bg-ct-primary-soft text-primary text-[11px] tracking-[0.15em] font-semibold px-2.5 py-0.5 border rounded-full shrink-0 uppercase"
                   >
                     {{ planBadgeLabel }}
                   </span>

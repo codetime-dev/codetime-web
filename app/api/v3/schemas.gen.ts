@@ -10,7 +10,10 @@ export const CheckoutRequestSchema = {
         }
     },
     type: 'object',
-    required: ['product', 'type'],
+    required: [
+        'product',
+        'type'
+    ],
     title: 'CheckoutRequest'
 } as const;
 
@@ -25,7 +28,10 @@ export const CheckoutResponseSchema = {
         }
     },
     type: 'object',
-    required: ['checkoutUrl', 'expiresAt'],
+    required: [
+        'checkoutUrl',
+        'expiresAt'
+    ],
     title: 'CheckoutResponse'
 } as const;
 
@@ -75,7 +81,15 @@ export const DiscountPublicSchema = {
         }
     },
     type: 'object',
-    required: ['amount', 'amountType', 'code', 'duration', 'id', 'name', 'status'],
+    required: [
+        'amount',
+        'amountType',
+        'code',
+        'duration',
+        'id',
+        'name',
+        'status'
+    ],
     title: 'DiscountPublic'
 } as const;
 
@@ -110,7 +124,17 @@ export const EventLogPublicSchema = {
         }
     },
     type: 'object',
-    required: ['absoluteFile', 'editor', 'eventTime', 'gitBranch', 'gitOrigin', 'language', 'platform', 'project', 'relativeFile'],
+    required: [
+        'absoluteFile',
+        'editor',
+        'eventTime',
+        'gitBranch',
+        'gitOrigin',
+        'language',
+        'platform',
+        'project',
+        'relativeFile'
+    ],
     title: 'EventLogPublic'
 } as const;
 
@@ -166,14 +190,21 @@ export const EventLogRequestSchema = {
         }
     },
     type: 'object',
-    required: ['editor', 'eventTime', 'language', 'platform', 'project', 'relativeFile'],
+    required: [
+        'editor',
+        'eventTime',
+        'language',
+        'platform',
+        'project',
+        'relativeFile'
+    ],
     title: 'EventLogRequest'
 } as const;
 
 export const LanguageRankingEntrySchema = {
     properties: {
         user: {
-            '$ref': '#/components/schemas/src_dto_UserPublic'
+            $ref: '#/components/schemas/src_dto_UserPublic'
         },
         totalMinutes: {
             type: 'integer'
@@ -186,7 +217,12 @@ export const LanguageRankingEntrySchema = {
         }
     },
     type: 'object',
-    required: ['percentile', 'rank', 'totalMinutes', 'user'],
+    required: [
+        'percentile',
+        'rank',
+        'totalMinutes',
+        'user'
+    ],
     title: 'LanguageRankingEntry'
 } as const;
 
@@ -194,7 +230,7 @@ export const LanguageRankingResponseSchema = {
     properties: {
         entries: {
             items: {
-                '$ref': '#/components/schemas/LanguageRankingEntry'
+                $ref: '#/components/schemas/LanguageRankingEntry'
             },
             type: 'array'
         },
@@ -220,14 +256,19 @@ export const LanguageRankingResponseSchema = {
         }
     },
     type: 'object',
-    required: ['entries', 'language', 'totalUsers', 'updatedAt'],
+    required: [
+        'entries',
+        'language',
+        'totalUsers',
+        'updatedAt'
+    ],
     title: 'LanguageRankingResponse'
 } as const;
 
 export const LeaderboardEntrySchema = {
     properties: {
         user: {
-            '$ref': '#/components/schemas/src_dto_UserPublic'
+            $ref: '#/components/schemas/src_dto_UserPublic'
         },
         totalMinutes: {
             type: 'integer'
@@ -237,7 +278,11 @@ export const LeaderboardEntrySchema = {
         }
     },
     type: 'object',
-    required: ['rank', 'totalMinutes', 'user'],
+    required: [
+        'rank',
+        'totalMinutes',
+        'user'
+    ],
     title: 'LeaderboardEntry'
 } as const;
 
@@ -245,7 +290,7 @@ export const LeaderboardResponseSchema = {
     properties: {
         entries: {
             items: {
-                '$ref': '#/components/schemas/LeaderboardEntry'
+                $ref: '#/components/schemas/LeaderboardEntry'
             },
             type: 'array'
         },
@@ -258,13 +303,26 @@ export const LeaderboardResponseSchema = {
         }
     },
     type: 'object',
-    required: ['entries', 'totalUsers', 'updatedAt'],
+    required: [
+        'entries',
+        'totalUsers',
+        'updatedAt'
+    ],
     title: 'LeaderboardResponse'
 } as const;
 
 export const PlanStatusSchema = {
     type: 'string',
-    enum: ['active', 'cancelled', 'expired', 'on_trial', 'paused', 'past_due', 'unpaid', ''],
+    enum: [
+        'active',
+        'cancelled',
+        'expired',
+        'on_trial',
+        'paused',
+        'past_due',
+        'unpaid',
+        ''
+    ],
     title: 'PlanStatus'
 } as const;
 
@@ -290,7 +348,10 @@ export const PrivacySettingsResponseSchema = {
         }
     },
     type: 'object',
-    required: ['showEmail', 'showGithub'],
+    required: [
+        'showEmail',
+        'showGithub'
+    ],
     title: 'PrivacySettingsResponse'
 } as const;
 
@@ -323,7 +384,13 @@ export const ProductPublicSchema = {
         }
     },
     type: 'object',
-    required: ['currency', 'description', 'id', 'name', 'price'],
+    required: [
+        'currency',
+        'description',
+        'id',
+        'name',
+        'price'
+    ],
     title: 'ProductPublic'
 } as const;
 
@@ -337,8 +404,84 @@ export const RootResponseSchema = {
         }
     },
     type: 'object',
-    required: ['documentUrl', 'message'],
+    required: [
+        'documentUrl',
+        'message'
+    ],
     title: 'RootResponse'
+} as const;
+
+export const RuleConditionSchema = {
+    properties: {
+        type: {
+            type: 'string',
+            default: 'condition'
+        },
+        field: {
+            type: 'string'
+        },
+        conditionType: {
+            $ref: '#/components/schemas/RuleConditionType'
+        },
+        value: {
+            type: 'string'
+        }
+    },
+    type: 'object',
+    required: [
+        'conditionType',
+        'field',
+        'value'
+    ],
+    title: 'RuleCondition'
+} as const;
+
+export const RuleConditionTypeSchema = {
+    type: 'string',
+    enum: [
+        'CONTAINS',
+        'EQUALS',
+        'STARTS_WITH',
+        'ENDS_WITH',
+        'REGEX',
+        'NOT_CONTAINS',
+        'NOT_EQUALS',
+        'NOT_STARTS_WITH',
+        'NOT_ENDS_WITH',
+        'NOT_REGEX'
+    ],
+    title: 'RuleConditionType'
+} as const;
+
+export const RuleGroupSchema = {
+    properties: {
+        type: {
+            type: 'string',
+            default: 'group'
+        },
+        operator: {
+            type: 'string'
+        },
+        conditions: {
+            items: {
+                oneOf: [
+                    {
+                        $ref: '#/components/schemas/RuleCondition'
+                    },
+                    {
+                        $ref: '#/components/schemas/RuleGroup'
+                    }
+                ]
+            },
+            type: 'array'
+        }
+    },
+    type: 'object',
+    required: [
+        'conditions',
+        'operator'
+    ],
+    title: 'RuleGroup'
 } as const;
 
 export const ShieldResponseSchema = {
@@ -368,7 +511,11 @@ export const ShieldResponseSchema = {
         }
     },
     type: 'object',
-    required: ['color', 'label', 'message'],
+    required: [
+        'color',
+        'label',
+        'message'
+    ],
     title: 'ShieldResponse'
 } as const;
 
@@ -379,7 +526,9 @@ export const SimpleMinutesSchema = {
         }
     },
     type: 'object',
-    required: ['minutes'],
+    required: [
+        'minutes'
+    ],
     title: 'SimpleMinutes'
 } as const;
 
@@ -396,7 +545,11 @@ export const StatsDataSchema = {
         }
     },
     type: 'object',
-    required: ['by', 'duration', 'time'],
+    required: [
+        'by',
+        'duration',
+        'time'
+    ],
     title: 'StatsData'
 } as const;
 
@@ -404,13 +557,15 @@ export const StatsResponseSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/StatsData'
+                $ref: '#/components/schemas/StatsData'
             },
             type: 'array'
         }
     },
     type: 'object',
-    required: ['data'],
+    required: [
+        'data'
+    ],
     title: 'StatsResponse'
 } as const;
 
@@ -418,13 +573,15 @@ export const StatsTimeResponseSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/dto_StatsTimeData'
+                $ref: '#/components/schemas/dto_StatsTimeData'
             },
             type: 'array'
         }
     },
     type: 'object',
-    required: ['data'],
+    required: [
+        'data'
+    ],
     title: 'StatsTimeResponse'
 } as const;
 
@@ -448,18 +605,21 @@ export const TagCreateRequestSchema = {
         }
     },
     type: 'object',
-    required: ['color', 'name'],
+    required: [
+        'color',
+        'name'
+    ],
     title: 'TagCreateRequest'
 } as const;
 
 export const TagHistoryResponseSchema = {
     properties: {
         tag: {
-            '$ref': '#/components/schemas/TagResponse'
+            $ref: '#/components/schemas/TagResponse'
         },
         data: {
             items: {
-                '$ref': '#/components/schemas/dto_StatsTimeData'
+                $ref: '#/components/schemas/dto_StatsTimeData'
             },
             type: 'array'
         },
@@ -476,7 +636,13 @@ export const TagHistoryResponseSchema = {
         }
     },
     type: 'object',
-    required: ['data', 'periodEnd', 'periodStart', 'tag', 'totalMinutes'],
+    required: [
+        'data',
+        'periodEnd',
+        'periodStart',
+        'tag',
+        'totalMinutes'
+    ],
     title: 'TagHistoryResponse'
 } as const;
 
@@ -510,24 +676,45 @@ export const TagResponseSchema = {
             type: 'string',
             format: 'date-time'
         },
-        rules: {}
+        rules: {
+            oneOf: [
+                {
+                    $ref: '#/components/schemas/RuleCondition'
+                },
+                {
+                    $ref: '#/components/schemas/RuleGroup'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
     },
     type: 'object',
-    required: ['color', 'createdAt', 'id', 'name', 'rules', 'updatedAt'],
+    required: [
+        'color',
+        'createdAt',
+        'id',
+        'name',
+        'updatedAt'
+    ],
     title: 'TagResponse'
 } as const;
 
 export const TagTimeDataSchema = {
     properties: {
         tag: {
-            '$ref': '#/components/schemas/TagResponse'
+            $ref: '#/components/schemas/TagResponse'
         },
         totalMinutes: {
             type: 'integer'
         }
     },
     type: 'object',
-    required: ['tag', 'totalMinutes'],
+    required: [
+        'tag',
+        'totalMinutes'
+    ],
     title: 'TagTimeData'
 } as const;
 
@@ -535,7 +722,7 @@ export const TagTimeStatsResponseSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/TagTimeData'
+                $ref: '#/components/schemas/TagTimeData'
             },
             type: 'array'
         },
@@ -552,7 +739,12 @@ export const TagTimeStatsResponseSchema = {
         }
     },
     type: 'object',
-    required: ['data', 'periodEnd', 'periodStart', 'totalMinutes'],
+    required: [
+        'data',
+        'periodEnd',
+        'periodStart',
+        'totalMinutes'
+    ],
     title: 'TagTimeStatsResponse'
 } as const;
 
@@ -591,7 +783,9 @@ export const TagUpdateRequestSchema = {
         rules: {}
     },
     type: 'object',
-    required: ['rules'],
+    required: [
+        'rules'
+    ],
     title: 'TagUpdateRequest'
 } as const;
 
@@ -608,7 +802,11 @@ export const TimeDistributionDataSchema = {
         }
     },
     type: 'object',
-    required: ['count', 'hour', 'minute'],
+    required: [
+        'count',
+        'hour',
+        'minute'
+    ],
     title: 'TimeDistributionData'
 } as const;
 
@@ -616,13 +814,15 @@ export const TimeDistributionResponseSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/TimeDistributionData'
+                $ref: '#/components/schemas/TimeDistributionData'
             },
             type: 'array'
         }
     },
     type: 'object',
-    required: ['data'],
+    required: [
+        'data'
+    ],
     title: 'TimeDistributionResponse'
 } as const;
 
@@ -636,7 +836,10 @@ export const TokenRefreshResponseSchema = {
         }
     },
     type: 'object',
-    required: ['token', 'tokenV1'],
+    required: [
+        'token',
+        'tokenV1'
+    ],
     title: 'TokenRefreshResponse'
 } as const;
 
@@ -650,7 +853,10 @@ export const TopPublicSchema = {
         }
     },
     type: 'object',
-    required: ['field', 'minutes'],
+    required: [
+        'field',
+        'minutes'
+    ],
     title: 'TopPublic'
 } as const;
 
@@ -668,7 +874,11 @@ export const TotalMinutesResponseSchema = {
         }
     },
     type: 'object',
-    required: ['cacheTimestamp', 'last24HMinutes', 'totalMinutes'],
+    required: [
+        'cacheTimestamp',
+        'last24HMinutes',
+        'totalMinutes'
+    ],
     title: 'TotalMinutesResponse'
 } as const;
 
@@ -703,7 +913,7 @@ export const UserCodingHistoryResponseSchema = {
         },
         data: {
             items: {
-                '$ref': '#/components/schemas/src_dto_StatsTimeData'
+                $ref: '#/components/schemas/src_dto_StatsTimeData'
             },
             type: 'array'
         },
@@ -724,7 +934,16 @@ export const UserCodingHistoryResponseSchema = {
         }
     },
     type: 'object',
-    required: ['data', 'periodEnd', 'periodStart', 'timeRangeDays', 'totalMinutes', 'updatedAt', 'userId', 'username'],
+    required: [
+        'data',
+        'periodEnd',
+        'periodStart',
+        'timeRangeDays',
+        'totalMinutes',
+        'updatedAt',
+        'userId',
+        'username'
+    ],
     title: 'UserCodingHistoryResponse'
 } as const;
 
@@ -738,7 +957,10 @@ export const UserDeleteResponseSchema = {
         }
     },
     type: 'object',
-    required: ['message', 'success'],
+    required: [
+        'message',
+        'success'
+    ],
     title: 'UserDeleteResponse'
 } as const;
 
@@ -781,7 +1003,16 @@ export const UserLanguageRankResponseSchema = {
         }
     },
     type: 'object',
-    required: ['language', 'percentile', 'rank', 'totalMinutes', 'totalUsers', 'updatedAt', 'userId', 'username'],
+    required: [
+        'language',
+        'percentile',
+        'rank',
+        'totalMinutes',
+        'totalUsers',
+        'updatedAt',
+        'userId',
+        'username'
+    ],
     title: 'UserLanguageRankResponse'
 } as const;
 
@@ -873,7 +1104,7 @@ export const UserSelfPublicSchema = {
         planStatus: {
             oneOf: [
                 {
-                    '$ref': '#/components/schemas/PlanStatus'
+                    $ref: '#/components/schemas/PlanStatus'
                 },
                 {
                     type: 'null'
@@ -890,7 +1121,14 @@ export const UserSelfPublicSchema = {
         }
     },
     type: 'object',
-    required: ['createdAt', 'id', 'plan', 'updatedAt', 'uploadToken', 'username'],
+    required: [
+        'createdAt',
+        'id',
+        'plan',
+        'updatedAt',
+        'uploadToken',
+        'username'
+    ],
     title: 'UserSelfPublic'
 } as const;
 
@@ -904,8 +1142,104 @@ export const WebhookResponseSchema = {
         }
     },
     type: 'object',
-    required: ['message', 'success'],
+    required: [
+        'message',
+        'success'
+    ],
     title: 'WebhookResponse'
+} as const;
+
+export const WidgetStatusResponseSchema = {
+    properties: {
+        username: {
+            type: 'string'
+        },
+        plan: {
+            type: 'string',
+            default: 'free'
+        },
+        project: {
+            oneOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        language: {
+            oneOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        editor: {
+            oneOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        lastActiveAt: {
+            oneOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        todayMinutes: {
+            type: 'integer',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: [
+        'username'
+    ],
+    title: 'WidgetStatusResponse'
+} as const;
+
+export const WidgetTopLanguagesResponseSchema = {
+    properties: {
+        plan: {
+            type: 'string',
+            default: 'free'
+        },
+        days: {
+            type: 'integer',
+            default: 30
+        },
+        limit: {
+            type: 'integer',
+            default: 5
+        },
+        capped: {
+            type: 'boolean',
+            default: false
+        },
+        items: {
+            items: {
+                $ref: '#/components/schemas/TopPublic'
+            },
+            type: 'array'
+        }
+    },
+    type: 'object',
+    required: [
+        'items'
+    ],
+    title: 'WidgetTopLanguagesResponse'
 } as const;
 
 export const WorkspaceEvaluationRequestSchema = {
@@ -957,7 +1291,13 @@ export const WorkspaceEvaluationRequestSchema = {
         }
     },
     type: 'object',
-    required: ['editor', 'language', 'platform', 'relativeFile', 'workspaceName'],
+    required: [
+        'editor',
+        'language',
+        'platform',
+        'relativeFile',
+        'workspaceName'
+    ],
     title: 'WorkspaceEvaluationRequest'
 } as const;
 
@@ -965,13 +1305,15 @@ export const WorkspaceEvaluationResponseSchema = {
     properties: {
         matchingTags: {
             items: {
-                '$ref': '#/components/schemas/TagResponse'
+                $ref: '#/components/schemas/TagResponse'
             },
             type: 'array'
         }
     },
     type: 'object',
-    required: ['matchingTags'],
+    required: [
+        'matchingTags'
+    ],
     title: 'WorkspaceEvaluationResponse'
 } as const;
 
@@ -991,7 +1333,12 @@ export const WorkspaceFileActivitySchema = {
         }
     },
     type: 'object',
-    required: ['gitBranch', 'language', 'minutes', 'relativeFile'],
+    required: [
+        'gitBranch',
+        'language',
+        'minutes',
+        'relativeFile'
+    ],
     title: 'WorkspaceFileActivity'
 } as const;
 
@@ -999,7 +1346,7 @@ export const WorkspaceSearchResponseSchema = {
     properties: {
         results: {
             items: {
-                '$ref': '#/components/schemas/WorkspaceSearchResult'
+                $ref: '#/components/schemas/WorkspaceSearchResult'
             },
             type: 'array'
         },
@@ -1008,7 +1355,10 @@ export const WorkspaceSearchResponseSchema = {
         }
     },
     type: 'object',
-    required: ['results', 'totalResults'],
+    required: [
+        'results',
+        'totalResults'
+    ],
     title: 'WorkspaceSearchResponse'
 } as const;
 
@@ -1019,7 +1369,9 @@ export const WorkspaceSearchResultSchema = {
         }
     },
     type: 'object',
-    required: ['workspaceName'],
+    required: [
+        'workspaceName'
+    ],
     title: 'WorkspaceSearchResult'
 } as const;
 
@@ -1027,25 +1379,29 @@ export const YearlyReportDataPublicSchema = {
     properties: {
         topLanguages: {
             items: {
-                '$ref': '#/components/schemas/TopPublic'
+                $ref: '#/components/schemas/TopPublic'
             },
             type: 'array'
         },
         hourlyDistribution: {
             items: {
-                '$ref': '#/components/schemas/TopPublic'
+                $ref: '#/components/schemas/TopPublic'
             },
             type: 'array'
         },
         dailyDistribution: {
             items: {
-                '$ref': '#/components/schemas/TopPublic'
+                $ref: '#/components/schemas/TopPublic'
             },
             type: 'array'
         }
     },
     type: 'object',
-    required: ['dailyDistribution', 'hourlyDistribution', 'topLanguages'],
+    required: [
+        'dailyDistribution',
+        'hourlyDistribution',
+        'topLanguages'
+    ],
     title: 'YearlyReportDataPublic'
 } as const;
 
@@ -1059,7 +1415,10 @@ export const dto_StatsTimeDataSchema = {
         }
     },
     type: 'object',
-    required: ['duration', 'time'],
+    required: [
+        'duration',
+        'time'
+    ],
     title: 'StatsTimeData'
 } as const;
 
@@ -1093,7 +1452,13 @@ export const dto_UserOverallRankResponseSchema = {
         }
     },
     type: 'object',
-    required: ['percentile', 'totalMinutes', 'updatedAt', 'userId', 'username'],
+    required: [
+        'percentile',
+        'totalMinutes',
+        'updatedAt',
+        'userId',
+        'username'
+    ],
     title: 'UserOverallRankResponse'
 } as const;
 
@@ -1178,7 +1543,13 @@ export const dto_UserPublicSchema = {
         }
     },
     type: 'object',
-    required: ['createdAt', 'id', 'plan', 'updatedAt', 'username'],
+    required: [
+        'createdAt',
+        'id',
+        'plan',
+        'updatedAt',
+        'username'
+    ],
     title: 'UserPublic'
 } as const;
 
@@ -1195,7 +1566,11 @@ export const dto_UserTopLanguageRankEntrySchema = {
         }
     },
     type: 'object',
-    required: ['language', 'percentile', 'totalMinutes'],
+    required: [
+        'language',
+        'percentile',
+        'totalMinutes'
+    ],
     title: 'UserTopLanguageRankEntry'
 } as const;
 
@@ -1209,7 +1584,7 @@ export const dto_UserTopLanguagesRankResponseSchema = {
         },
         entries: {
             items: {
-                '$ref': '#/components/schemas/dto_UserTopLanguageRankEntry'
+                $ref: '#/components/schemas/dto_UserTopLanguageRankEntry'
             },
             type: 'array'
         },
@@ -1229,7 +1604,12 @@ export const dto_UserTopLanguagesRankResponseSchema = {
         }
     },
     type: 'object',
-    required: ['entries', 'updatedAt', 'userId', 'username'],
+    required: [
+        'entries',
+        'updatedAt',
+        'userId',
+        'username'
+    ],
     title: 'UserTopLanguagesRankResponse'
 } as const;
 
@@ -1243,7 +1623,10 @@ export const src_dto_StatsTimeDataSchema = {
         }
     },
     type: 'object',
-    required: ['duration', 'time'],
+    required: [
+        'duration',
+        'time'
+    ],
     title: 'StatsTimeData'
 } as const;
 
@@ -1277,7 +1660,13 @@ export const src_dto_UserOverallRankResponseSchema = {
         }
     },
     type: 'object',
-    required: ['percentile', 'totalMinutes', 'updatedAt', 'userId', 'username'],
+    required: [
+        'percentile',
+        'totalMinutes',
+        'updatedAt',
+        'userId',
+        'username'
+    ],
     title: 'UserOverallRankResponse'
 } as const;
 
@@ -1362,7 +1751,13 @@ export const src_dto_UserPublicSchema = {
         }
     },
     type: 'object',
-    required: ['createdAt', 'id', 'plan', 'updatedAt', 'username'],
+    required: [
+        'createdAt',
+        'id',
+        'plan',
+        'updatedAt',
+        'username'
+    ],
     title: 'UserPublic'
 } as const;
 
@@ -1379,7 +1774,11 @@ export const src_dto_UserTopLanguageRankEntrySchema = {
         }
     },
     type: 'object',
-    required: ['language', 'percentile', 'totalMinutes'],
+    required: [
+        'language',
+        'percentile',
+        'totalMinutes'
+    ],
     title: 'UserTopLanguageRankEntry'
 } as const;
 
@@ -1393,7 +1792,7 @@ export const src_dto_UserTopLanguagesRankResponseSchema = {
         },
         entries: {
             items: {
-                '$ref': '#/components/schemas/src_dto_UserTopLanguageRankEntry'
+                $ref: '#/components/schemas/src_dto_UserTopLanguageRankEntry'
             },
             type: 'array'
         },
@@ -1413,6 +1812,11 @@ export const src_dto_UserTopLanguagesRankResponseSchema = {
         }
     },
     type: 'object',
-    required: ['entries', 'updatedAt', 'userId', 'username'],
+    required: [
+        'entries',
+        'updatedAt',
+        'userId',
+        'username'
+    ],
     title: 'UserTopLanguagesRankResponse'
 } as const;

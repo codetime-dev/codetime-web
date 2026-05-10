@@ -104,14 +104,16 @@ const height = 26
       </template>
       <ProjectSelect v-model="project" />
       <div v-if="historyWorkspaceNameList.length > 0" class="ws-history">
-        <PanelButton
+        <UButton
           v-for="name in historyWorkspaceNameList"
           :key="name"
+          variant="secondary"
+          size="md"
+          icon-left="i-tabler-history"
           @click="project = { label: name ?? '', id: name ?? '' }"
         >
-          <i class="i-tabler-history" />
-          <span>{{ name }}</span>
-        </PanelButton>
+          {{ name }}
+        </UButton>
       </div>
     </PanelSection>
 

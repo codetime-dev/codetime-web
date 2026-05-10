@@ -7,6 +7,7 @@
 <style scoped>
 .dash-page-frame {
   position: relative;
+  padding-bottom: 48px;
 }
 .dash-page-frame::before,
 .dash-page-frame::after {
@@ -16,7 +17,7 @@
   bottom: 0;
   width: 1px;
   background: var(--ct-border);
-  opacity: 0.3;
+  opacity: 0.7;
   pointer-events: none;
 }
 .dash-page-frame::before {

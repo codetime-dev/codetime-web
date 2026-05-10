@@ -30,8 +30,8 @@ const i18NMap = new Map<string, Partial<Translation>>([
 function mergeI18N(a: any, b: any): Translation {
   const result: any = { ...a }
   for (const key in b) {
-    if (Object.prototype.hasOwnProperty.call(b, key)) {
-      if (Object.prototype.hasOwnProperty.call(result, key)) {
+    if (Object.hasOwn(b, key)) {
+      if (Object.hasOwn(result, key)) {
         if (typeof result[key] === 'object' && typeof b[key] === 'object') {
           result[key] = mergeI18N(result[key], b[key])
         }

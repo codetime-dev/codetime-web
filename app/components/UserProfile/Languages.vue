@@ -2,7 +2,7 @@
 type LanguageEntry = {
   language?: string | null
   totalMinutes: number
-  percentile: number
+  percentile?: number | null
 }
 
 const props = defineProps<{
@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const totalMinutes = computed(() => props.entries.reduce((acc, e) => acc + e.totalMinutes, 0))
 const maxMinutes = computed(() => Math.max(1, ...props.entries.map(e => e.totalMinutes)))
+const hasPercentile = computed(() => props.entries.some(e => e.percentile != null))
 
 const t = useI18N()
 
@@ -47,7 +48,7 @@ function widthPct(minutes: number): number {
         <span />
         <span class="hcell num">HOURS</span>
         <span class="hcell num">SHARE</span>
-        <span class="hcell num">RANK</span>
+        <span v-if="hasPercentile" class="hcell num">RANK</span>
       </li>
 
       <template v-if="pending">
@@ -57,7 +58,7 @@ function widthPct(minutes: number): number {
           <span class="bg-ct-surface-2 h-2 w-full animate-pulse" />
           <span class="bg-ct-surface-2 h-3 w-12 justify-self-end animate-pulse" />
           <span class="bg-ct-surface-2 h-3 w-10 justify-self-end animate-pulse" />
-          <span class="bg-ct-surface-2 h-3 w-12 justify-self-end animate-pulse" />
+          <span v-if="hasPercentile" class="bg-ct-surface-2 h-3 w-12 justify-self-end animate-pulse" />
         </li>
       </template>
 
@@ -79,13 +80,13 @@ function widthPct(minutes: number): number {
             <span class="bar" :style="{ width: `${widthPct(entry.totalMinutes)}%` }" />
           </span>
 
-          <span class="num text-[13px] text-primary font-mono tabular-nums">
+          <span class="num text-primary text-[13px] font-mono tabular-nums">
             {{ fmtHours(entry.totalMinutes) }}<span class="text-ct-fg-muted">h</span>
           </span>
           <span class="num text-[13px] text-ct-fg-muted font-mono tabular-nums">
             {{ sharePct(entry.totalMinutes).toFixed(1) }}%
           </span>
-          <span class="num text-[12px] text-emerald-500 tracking-[0.04em] font-mono tabular-nums">
+          <span v-if="hasPercentile && entry.percentile != null" class="num text-[12px] text-emerald-500 tracking-[0.04em] font-mono tabular-nums">
             {{ t.dashboard.profile.languages.topPercent(Math.max(1, Math.round(entry.percentile * 100))) }}
           </span>
         </li>

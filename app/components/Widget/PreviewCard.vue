@@ -29,7 +29,7 @@ const loaded = ref(false)
         alt="CodeTime Widget"
         @load="loaded = true"
         @error="loaded = true"
-      />
+      >
     </div>
   </PanelSection>
 </template>

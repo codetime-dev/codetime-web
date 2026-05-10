@@ -52,7 +52,7 @@ defineProps<{
   position: absolute;
   inset: 1px 0;
   background-color: var(--ct-border);
-  opacity: 0.55;
+  opacity: 0.85;
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");
           mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");
   -webkit-mask-size: 8px 8px;
@@ -68,8 +68,8 @@ defineProps<{
   align-items: center;
   gap: 12px;
   padding: 12px 18px;
-  background: transparent;
-  border-bottom: 1px solid var(--ct-border-subtle);
+  background: var(--ct-surface-1);
+  border-bottom: 1px solid var(--ct-border);
 }
 @media (min-width: 640px) {
   .up-section-header { flex-wrap: nowrap; }

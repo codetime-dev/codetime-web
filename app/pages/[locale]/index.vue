@@ -179,7 +179,6 @@ useHead({
           <span class="hero-meta-rule" />
         </div>
       </div>
-
     </div>
   </section>
 
@@ -628,7 +627,7 @@ useHead({
     linear-gradient(to right, var(--ct-border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--ct-border) 1px, transparent 1px);
   background-size: 32px 32px;
-  opacity: 0.35;
+  opacity: 0.55;
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
 }
@@ -809,7 +808,7 @@ useHead({
     linear-gradient(to right, var(--ct-border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--ct-border) 1px, transparent 1px);
   background-size: 72px 72px;
-  opacity: 0.35;
+  opacity: 0.55;
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
   pointer-events: none;
@@ -827,6 +826,15 @@ useHead({
   pointer-events: none;
   opacity: 0.85;
 }
+/* Light scheme: a strong blue blur muddies the hero on a soft-gray bg.
+   Fall back to a tighter, lower-opacity halo so the grid carries focus. */
+html[data-scheme="light"] .hero-glow {
+  width: min(55vw, 520px);
+  height: min(55vw, 520px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--ct-primary) 8%, transparent) 0%, transparent 70%);
+  filter: blur(42px);
+  opacity: 0.6;
+}
 
 /* Section band: subtle alternating bg */
 .section-band {
@@ -842,7 +850,7 @@ useHead({
   width: 100vw;
   height: 1px;
   background: var(--ct-border);
-  opacity: 0.3;
+  opacity: 0.7;
   transform: translateX(-50%);
   pointer-events: none;
 }

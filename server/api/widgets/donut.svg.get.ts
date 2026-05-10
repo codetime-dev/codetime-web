@@ -58,8 +58,8 @@ export default defineEventHandler(async (event) => {
     const raw = await fetchWidgetJson<DonutResponse>(event, `/v3/users/${uid}/public/top-languages?days=${days}&limit=${limit}`)
     payload = Array.isArray(raw) ? { items: raw } : raw
   }
-  catch (e: unknown) {
-    const err = e as { statusCode?: number }
+  catch (error: unknown) {
+    const err = error as { statusCode?: number }
     if (err?.statusCode === 403) {
       return sendSvg(event, renderEmpty(theme, 'Widget disabled'), { cacheSeconds: 60 })
     }

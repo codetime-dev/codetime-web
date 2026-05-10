@@ -79,11 +79,11 @@ withDefaults(defineProps<{
 .u-btn-primary:active:not(:disabled){ background: var(--ct-primary-active); border-color: var(--ct-primary-active); }
 
 .u-btn-secondary {
-  background: var(--ct-surface);
+  background: var(--ct-surface-1);
   color: var(--ct-fg);
   border-color: var(--ct-border);
 }
-.u-btn-secondary:hover:not(:disabled) { background: var(--ct-surface-1); border-color: var(--ct-border-strong); }
+.u-btn-secondary:hover:not(:disabled) { background: var(--ct-surface-2); border-color: var(--ct-border-strong); }
 
 .u-btn-ghost {
   background: transparent;

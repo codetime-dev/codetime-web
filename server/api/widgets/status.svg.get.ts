@@ -53,8 +53,8 @@ export default defineEventHandler(async (event) => {
   try {
     data = await fetchWidgetJson<StatusPayload>(event, `/v3/users/${uid}/public/status`)
   }
-  catch (e: unknown) {
-    const err = e as { statusCode?: number }
+  catch (error: unknown) {
+    const err = error as { statusCode?: number }
     const msg = err?.statusCode === 403 ? 'Widget disabled' : err?.statusCode === 404 ? 'User not found' : 'No data'
     return sendSvg(event, renderEmpty(theme, msg), { cacheSeconds: 60 })
   }

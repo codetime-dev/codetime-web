@@ -21,7 +21,7 @@ const t = useI18N()
           <div class="mb-7">
             <span class="text-[12px] text-ct-fg-muted tracking-[0.14em] font-mono uppercase">{{ t.plan.basic.title }}</span>
             <div class="mt-4 flex gap-2 items-end">
-              <span class="text-5xl text-ct-fg tracking-tight font-light leading-none">$0</span>
+              <span class="text-5xl text-ct-fg leading-none tracking-tight font-light">$0</span>
               <span class="text-sm text-ct-fg-muted mb-1">{{ t.plan.basic.forever }}</span>
             </div>
             <p class="text-[14px] text-ct-fg-muted leading-relaxed mt-3">
@@ -69,7 +69,7 @@ const t = useI18N()
             </div>
             <div class="mt-4 flex gap-2 items-end">
               <span
-                class="text-5xl tracking-tight font-light leading-none"
+                class="text-5xl leading-none tracking-tight font-light"
                 :class="isAnuual ? 'text-error' : 'text-primary'"
               >
                 {{ isAnuual ? '$36' : '$4' }}

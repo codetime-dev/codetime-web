@@ -1,6 +1,4 @@
 <script setup lang="ts">
-const open = defineModel<boolean>('open', { default: false })
-
 withDefaults(defineProps<{
   reason?: string
   variant?: 'monthly' | 'yearly'
@@ -9,6 +7,8 @@ withDefaults(defineProps<{
   variant: 'monthly',
   width: '720px',
 })
+
+const open = defineModel<boolean>('open', { default: false })
 
 const t = useI18N()
 </script>
