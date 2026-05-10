@@ -22,7 +22,7 @@ if (!user) {
 const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 const reportTimezone = resolveTimezone(user.timezone ?? browserTimezone, browserTimezone)
 const reportYear = computed(() => {
-  return parseYearParam(route.query.year) ?? getDefaultReportYear(reportTimezone)
+  return parseYearParam((route.query.year as string | undefined) ?? undefined) ?? getDefaultReportYear(reportTimezone)
 })
 watchEffect(() => {
   useSeoMeta({
@@ -109,7 +109,7 @@ const hourlyDistribution = computed(() => {
         field: d.field,
         minutes: d.minutes,
       }
-    }).sort((a, b) => {
+    }).toSorted((a, b) => {
       if (a.field >= '06' && b.field < '06') {
         return -1
       }
@@ -203,6 +203,9 @@ const busiestDay = computed(() => {
     return null
   }
   let maxDay = yearlyData.value.dailyDistribution[0]
+  if (!maxDay) {
+    return null
+  }
   for (const cur of yearlyData.value.dailyDistribution) {
     if (cur.minutes > maxDay.minutes) {
       maxDay = cur
@@ -235,7 +238,7 @@ const monthlyMinutes = computed(() => {
       field: monthStr,
       minutes: resp[key],
     }
-  }).sort((a, b) => a.month - b.month)
+  }).toSorted((a, b) => a.month - b.month)
 })
 const allMonths = computed(() => {
   const yearValue = reportYear.value

@@ -161,6 +161,9 @@ export type Translation = {
       }
     }
     overview: {
+      rangeTitle: string
+      activityTitle: string
+      topTitle: string
       codetimeTrendTitle: string
       codetimeLanguaeTrendTitle: string
       codetimeProjectTrendTitle: string
@@ -202,6 +205,12 @@ export type Translation = {
       }
     }
     profile: {
+      identity: {
+        title: string
+      }
+      activity: {
+        title: string
+      }
       languages: {
         title: string
         noData: string
@@ -229,6 +238,8 @@ export type Translation = {
       }
     }
     badge: {
+      configure: string
+      embed: string
       preview: {
         title: string
       }
@@ -308,6 +319,9 @@ export type Translation = {
       }
     }
     workspace: {
+      project: string
+      topBranch: string
+      range: string
       noData: string
       select: {
         placeholder: string

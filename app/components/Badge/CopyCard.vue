@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useI18N()
 const props = defineProps<{
   link: string
 }>()
@@ -8,7 +9,7 @@ const html = computed(() => `<img href="https://codetime.dev" alt="CodeTime Badg
 </script>
 
 <template>
-  <PanelSection num="03" title="EMBED" meta="MARKDOWN · HTML · URL" flush>
+  <PanelSection num="03" :title="t.dashboard.badge.embed" meta="markdown · html · url" flush>
     <template #icon>
       <i class="i-tabler-clipboard-text text-surface-dimmed/70 text-[15px]" />
     </template>

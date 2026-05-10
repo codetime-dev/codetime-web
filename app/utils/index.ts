@@ -96,7 +96,7 @@ export function fetchTop(field: string, minutes: ComputedRef<number>, limit: num
     })) ?? []
   }, {
     server: false,
-    watch: [minutes, filterArray],
+    watch: [minutes, isRef(filters) ? filters : () => unref(filters)],
     ...options,
   })
 }

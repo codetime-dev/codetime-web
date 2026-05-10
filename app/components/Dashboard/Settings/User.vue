@@ -9,7 +9,7 @@ const isPro = computed(() => String(user.value?.plan ?? '').toLowerCase() === 'p
 </script>
 
 <template>
-  <PanelSection num="01" title="ACCOUNT" :meta="t.dashboard.settings.account.title" flush>
+  <PanelSection num="01" :title="t.dashboard.settings.account.title" :meta="t.dashboard.settings.account.title" flush>
     <template #icon>
       <i class="i-tabler-user-circle text-surface-dimmed/70 text-[15px]" />
     </template>

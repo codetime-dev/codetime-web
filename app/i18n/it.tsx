@@ -50,6 +50,18 @@ export const it: Partial<Translation> = {
     loginWithGithub: 'Accedi con GitHub',
     freeMessage: 'Attualmente completamente gratuito, non è richarta la carta di credito',
     demo: 'Demo',
+    heroBadge: 'v3 · analisi',
+    scroll: 'scorri',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Visualizzazione dei dati',
@@ -69,8 +81,12 @@ export const it: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Inizia gratuitamente. Pro quando ne hai bisogno.',
       title: 'Prezzi',
       description: 'Scegli il piano che fa per te.',
+    },
+    closing: {
+      heading: 'Rendi ogni minuto prezioso.',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const it: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Intervallo date',
+      activityTitle: 'Attività',
+      topTitle: 'Top',
       codetimeTrendTitle: 'Tendenza del tempo di programmazione',
       codetimeLanguaeTrendTitle: 'Tendenza del linguaggio di programmazione',
       codetimeProjectTrendTitle: 'Tendenza del progetto',
@@ -244,6 +263,8 @@ export const it: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Configura',
+      embed: 'Incorpora',
       preview: {
         title: 'Anteprima',
       },
@@ -360,9 +381,14 @@ export const it: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Progetto',
+      topBranch: 'Branch principale',
+      range: 'Intervallo date',
+      noData: 'Nessun dato per questo spazio di lavoro.',
       select: {
         placeholder: 'Seleziona uno spazio di lavoro',
         none: 'Inserisci il nome dello spazio di lavoro',
+        prompt: 'Seleziona un progetto per iniziare.',
       },
       flameGraph: {
         title: 'Grafico a fiamma',
@@ -498,8 +524,15 @@ export const it: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Identità',
+      },
+      activity: {
+        title: 'Attività',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Nessun dato linguistico disponibile.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {

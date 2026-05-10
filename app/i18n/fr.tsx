@@ -50,6 +50,18 @@ export const fr: Partial<Translation> = {
     loginWithGithub: 'Se connecter avec GitHub',
     freeMessage: 'Actuellement complètement gratuit, aucune carte de crédit requise',
     demo: 'Démo',
+    heroBadge: 'v3 · analytique',
+    scroll: 'défiler',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Visualisation des données',
@@ -69,8 +81,12 @@ export const fr: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Gratuit pour commencer. Pro quand vous en avez besoin.',
       title: 'Tarification',
       description: 'Choisissez le plan qui vous convient.',
+    },
+    closing: {
+      heading: 'Faites compter chaque minute.',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const fr: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Plage de dates',
+      activityTitle: 'Activité',
+      topTitle: 'Top',
       codetimeTrendTitle: 'Tendance du temps de codage',
       codetimeLanguaeTrendTitle: 'Tendance des langages de programmation',
       codetimeProjectTrendTitle: 'Tendance du projet',
@@ -244,6 +263,8 @@ export const fr: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Configurer',
+      embed: 'Intégrer',
       preview: {
         title: 'Aperçu',
       },
@@ -360,9 +381,14 @@ export const fr: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Projet',
+      topBranch: 'Branche principale',
+      range: 'Plage de dates',
+      noData: 'Aucune donnée pour cet espace de travail.',
       select: {
         placeholder: 'Sélectionnez un espace de travail',
         none: 'Entrez le nom de l\'espace de travail',
+        prompt: 'Sélectionnez un projet pour commencer.',
       },
       flameGraph: {
         title: 'Graphique en flammes',
@@ -498,8 +524,15 @@ export const fr: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Identité',
+      },
+      activity: {
+        title: 'Activité',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Aucune donnée de langue disponible.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {

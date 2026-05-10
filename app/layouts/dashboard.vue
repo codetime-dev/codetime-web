@@ -145,7 +145,7 @@ const showAnnualReport = computed(() => {
             v-for="tab in headerTabs"
             :key="tab.id"
             :to="`/${locale}${tab.path}`"
-            class="dash-tab text-[12px] tracking-[0.18em] font-mono px-3.5 py-2.5 uppercase transition-colors"
+            class="dash-tab text-[12px] tracking-[0.18em] font-mono px-3.5 py-2.5 transition-colors"
             :class="tab === currentTab
               ? 'dash-tab-active text-primary bg-surface-variant-1/35'
               : 'text-surface-dimmed hover:text-surface hover:bg-surface-variant-1/20'"

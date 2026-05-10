@@ -50,6 +50,18 @@ export const es: Partial<Translation> = {
     loginWithGithub: 'Iniciar sesión con GitHub',
     freeMessage: 'Actualmente es completamente gratuito, no se requiere tarjeta de crédito',
     demo: 'Demo',
+    heroBadge: 'v3 · análisis',
+    scroll: 'desplazar',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Visualización de datos',
@@ -69,8 +81,12 @@ export const es: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Comienza gratis. Pro cuando lo necesites.',
       title: 'Precios',
       description: 'Elige el plan que se adapte a ti.',
+    },
+    closing: {
+      heading: 'Haz que cada minuto cuente.',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const es: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Rango de fechas',
+      activityTitle: 'Actividad',
+      topTitle: 'Top',
       codetimeTrendTitle: 'Tendencia de tiempo de programación',
       codetimeLanguaeTrendTitle: 'Tendencia de lenguaje de programación',
       codetimeProjectTrendTitle: 'Tendencia de proyecto',
@@ -244,6 +263,8 @@ export const es: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Configurar',
+      embed: 'Insertar',
       preview: {
         title: 'Vista previa',
       },
@@ -360,9 +381,14 @@ export const es: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Proyecto',
+      topBranch: 'Rama principal',
+      range: 'Rango de fechas',
+      noData: 'No hay datos para este espacio de trabajo.',
       select: {
         placeholder: 'Selecciona un espacio de trabajo',
         none: 'Escribe el nombre del espacio de trabajo',
+        prompt: 'Selecciona un proyecto para comenzar.',
       },
       flameGraph: {
         title: 'Gráfico de llama',
@@ -498,8 +524,15 @@ export const es: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Identidad',
+      },
+      activity: {
+        title: 'Actividad',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Aún no hay datos de idioma.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {

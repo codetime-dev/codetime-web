@@ -21,6 +21,138 @@ watchEffect(() => {
 })
 
 const currentYear = new Date().getFullYear()
+
+// ---------------------------------------------------------------------------
+// JSON-LD structured data — Organization + SoftwareApplication + FAQPage +
+// Speakable, with sameAs links for entity disambiguation.
+// ---------------------------------------------------------------------------
+const jsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://codetime.dev/#org',
+      'name': 'Code Time',
+      'url': 'https://codetime.dev',
+      'logo': 'https://codetime.dev/icon.png',
+      'description':
+        'Code Time builds privacy-respecting coding-time analytics for '
+        + 'developers using VS Code and JetBrains IDEs.',
+      'sameAs': [
+        'https://github.com/jannchie',
+        'https://marketplace.visualstudio.com/items?itemName=jannchie.codetime',
+        'https://plugins.jetbrains.com/plugin/codetime',
+      ],
+      'contactPoint': [
+        {
+          '@type': 'ContactPoint',
+          'email': 'support@codetime.dev',
+          'contactType': 'customer support',
+          'availableLanguage': ['en', 'zh-CN', 'ja'],
+        },
+      ],
+      'address': {
+        '@type': 'PostalAddress',
+        'addressCountry': 'JP',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://codetime.dev/#website',
+      'url': 'https://codetime.dev',
+      'name': 'Code Time',
+      'publisher': { '@id': 'https://codetime.dev/#org' },
+      'inLanguage': 'en',
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': 'https://codetime.dev/#app',
+      'name': 'Code Time',
+      'operatingSystem': 'Windows, macOS, Linux',
+      'applicationCategory': 'DeveloperApplication',
+      'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' },
+      'url': 'https://codetime.dev',
+      'description':
+        'Track programming time, analyze coding patterns, and export raw '
+        + 'editor activity. Compatible with VS Code and JetBrains IDEs.',
+      'softwareVersion': '3',
+      'publisher': { '@id': 'https://codetime.dev/#org' },
+    },
+    {
+      '@type': 'FAQPage',
+      'mainEntity': [
+        {
+          '@type': 'Question',
+          'name': 'What is Code Time?',
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text':
+              'Code Time is a coding-time analytics platform that tracks '
+              + 'how long you spend in your editor and visualises your '
+              + 'coding patterns by language, workspace, and time of day.',
+          },
+        },
+        {
+          '@type': 'Question',
+          'name': 'Which editors are supported?',
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text':
+              'Code Time has official plugins for Visual Studio Code and '
+              + 'all JetBrains IDEs (IntelliJ IDEA, PyCharm, WebStorm, '
+              + 'GoLand, Rider, RubyMine, CLion, and more).',
+          },
+        },
+        {
+          '@type': 'Question',
+          'name': 'How do AI agents call Code Time?',
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text':
+              'Code Time exposes an MCP server at /mcp, an OpenAPI 3.1 '
+              + 'spec at /openapi.json, an NLWeb /ask endpoint, and an '
+              + 'OpenAI plugin manifest at /.well-known/ai-plugin.json.',
+          },
+        },
+        {
+          '@type': 'Question',
+          'name': 'Is Code Time free?',
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text':
+              'Yes — the free tier covers unlimited personal use with '
+              + 'full history retention. Paid tiers add team features.',
+          },
+        },
+      ],
+    },
+    {
+      '@type': 'WebPage',
+      '@id': 'https://codetime.dev/#homepage',
+      'url': 'https://codetime.dev',
+      'name': 'Code Time — Programming Time Analytics & Insights',
+      'speakable': {
+        '@type': 'SpeakableSpecification',
+        'cssSelector': ['h1.landing-title', '.agent-friendly-summary p'],
+      },
+    },
+  ],
+}))
+
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: () => JSON.stringify(jsonLd.value),
+    },
+  ],
+  link: [
+    { rel: 'alternate', type: 'text/markdown', href: '/index.md' },
+    { rel: 'service-desc', type: 'application/openapi+json', href: '/openapi.json' },
+    { rel: 'api-catalog', href: '/.well-known/api-catalog' },
+    { rel: 'describedby', type: 'text/plain', href: '/.well-known/llms.txt' },
+  ],
+})
 </script>
 
 <template>
@@ -52,6 +184,50 @@ const currentYear = new Date().getFullYear()
         <i class="i-tabler-chevron-down text-sm animate-bounce" />
         <span>{{ t.landing.scroll }}</span>
       </div>
+    </div>
+  </section>
+
+  <!-- AGENT-FRIENDLY SUMMARY (SSR text for crawlers / AI agents) -->
+  <section class="agent-friendly-summary" aria-label="About Code Time">
+    <div class="mx-auto px-6 py-16 max-w-4xl space-y-6">
+      <h2 class="text-2xl text-surface font-mono font-semibold">
+        Privacy-respecting coding-time analytics for VS Code and JetBrains
+      </h2>
+      <p class="text-[15px] text-surface-dimmed leading-[1.7] font-mono">
+        Code Time records per-minute coding activity reported by official
+        editor plugins for Visual Studio Code and every JetBrains IDE. Sign
+        in with GitHub or Google, install the plugin, and watch your
+        dashboard fill in: daily distribution, language breakdown,
+        per-workspace totals, and a calendar heatmap. Source code is never
+        uploaded — only file paths, languages, and timestamps. Your raw
+        events are exportable forever through the JSON API.
+      </p>
+      <p class="text-[15px] text-surface-dimmed leading-[1.7] font-mono">
+        Built for developers who want to understand their habits, attribute
+        time to projects, or feed coding metrics into downstream tools.
+        Compatible with VS Code, IntelliJ IDEA, PyCharm, WebStorm, GoLand,
+        Rider, RubyMine, CLion, and the rest of the JetBrains family. The
+        free tier supports unlimited personal use with full history
+        retention.
+      </p>
+      <h3 class="text-lg text-surface font-mono font-semibold mt-8">
+        For AI agents and coding assistants
+      </h3>
+      <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono">
+        Code Time ships first-class agent integrations. Discover the
+        product through
+        <a href="/.well-known/llms.txt" rel="describedby">llms.txt</a>, fetch
+        the
+        <a href="/openapi.json" rel="service-desc">OpenAPI 3.1 spec</a>, call
+        the <a href="/mcp">MCP server</a>
+        (manifest at
+        <a href="/.well-known/mcp/manifest.json">/.well-known/mcp/manifest.json</a>),
+        or POST a natural-language query to <code>/ask</code> for an
+        NLWeb-conformant response with optional SSE streaming. Bearer
+        tokens are issued from the user profile page; OAuth resource
+        metadata is published under
+        <a href="/.well-known/oauth-protected-resource">/.well-known/oauth-protected-resource</a>.
+      </p>
     </div>
   </section>
 

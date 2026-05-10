@@ -62,7 +62,7 @@ function cancelDelete() {
 </script>
 
 <template>
-  <PanelSection num="01" title="TAGS" :meta="meta" flush>
+  <PanelSection num="01" :title="t.dashboard.tags.tagList.title" :meta="meta" flush>
     <template #icon>
       <i class="i-tabler-tag text-surface-dimmed/70 text-[15px]" />
     </template>

@@ -50,6 +50,18 @@ export const de: Partial<Translation> = {
     loginWithGithub: 'Mit GitHub anmelden',
     freeMessage: 'Derzeit völlig kostenlos, keine Kreditkarte erforderlich',
     demo: 'Demo',
+    heroBadge: 'v3 · Analyse',
+    scroll: 'Scrollen',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Datenvisualisierung',
@@ -69,8 +81,12 @@ export const de: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Kostenlos starten. Pro wenn nötig.',
       title: 'Preisgestaltung',
       description: 'Wählen Sie den für Sie passenden Plan aus.',
+    },
+    closing: {
+      heading: 'Lass jede Minute zählen.',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const de: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Zeitraum',
+      activityTitle: 'Aktivität',
+      topTitle: 'Top',
       codetimeTrendTitle: 'Codierungszeit Trend',
       codetimeLanguaeTrendTitle: 'Programmiersprachen Trend',
       codetimeProjectTrendTitle: 'Projekt Trend',
@@ -244,8 +263,15 @@ export const de: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Identität',
+      },
+      activity: {
+        title: 'Aktivität',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Noch keine Sprachdaten verfügbar.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {
@@ -270,6 +296,8 @@ export const de: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Konfigurieren',
+      embed: 'Einbetten',
       preview: {
         title: 'Vorschau',
       },
@@ -386,9 +414,14 @@ export const de: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Projekt',
+      topBranch: 'Top-Branch',
+      range: 'Zeitraum',
+      noData: 'Keine Daten für diesen Arbeitsbereich.',
       select: {
         placeholder: 'Wählen Sie einen Arbeitsbereich',
         none: 'Geben Sie einen Arbeitsbereichsnamen ein',
+        prompt: 'Wählen Sie ein Projekt aus.',
       },
       flameGraph: {
         title: 'Flammen-Graph',

@@ -50,6 +50,18 @@ export const zhCN: Partial<Translation> = {
     loginWithGithub: '使用 GitHub 登录',
     freeMessage: '目前完全免费，无需信用卡',
     demo: '演示',
+    heroBadge: 'v3 · 分析',
+    scroll: '滚动',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: '数据可视化',
@@ -69,8 +81,12 @@ export const zhCN: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: '免费开始，按需升级 Pro。',
       title: '定价',
       description: '选择适合您的计划。',
+    },
+    closing: {
+      heading: '让每一分钟都有价值。',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const zhCN: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: '日期范围',
+      activityTitle: '活动',
+      topTitle: '排行',
       codetimeTrendTitle: '编程时间趋势',
       codetimeLanguaeTrendTitle: '编程语言趋势',
       codetimeProjectTrendTitle: '项目趋势',
@@ -244,8 +263,15 @@ export const zhCN: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: '身份',
+      },
+      activity: {
+        title: '活动',
+      },
       languages: {
         title: '语言亮点',
+        noData: '暂无语言数据。',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {
@@ -297,6 +323,8 @@ export const zhCN: Partial<Translation> = {
       },
     },
     badge: {
+      configure: '配置',
+      embed: '嵌入',
       preview: {
         title: '预览',
       },
@@ -413,9 +441,14 @@ export const zhCN: Partial<Translation> = {
       },
     },
     workspace: {
+      project: '项目',
+      topBranch: '热门分支',
+      range: '日期范围',
+      noData: '该工作区暂无数据。',
       select: {
         placeholder: '选择工作区',
         none: '输入工作区名称',
+        prompt: '请选择一个项目开始。',
       },
       flameGraph: {
         title: '火焰图',

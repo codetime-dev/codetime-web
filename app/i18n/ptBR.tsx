@@ -50,6 +50,18 @@ export const ptBR: Partial<Translation> = {
     loginWithGithub: 'Entrar com o GitHub',
     freeMessage: 'Atualmente completamente gratuito, não é necessário cartão de crédito',
     demo: 'Demo',
+    heroBadge: 'v3 · análise',
+    scroll: 'rolar',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Visualização de dados',
@@ -69,8 +81,12 @@ export const ptBR: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Comece gratuitamente. Pro quando precisar.',
       title: 'Preços',
       description: 'Escolha o plano que mais lhe convier.',
+    },
+    closing: {
+      heading: 'Faça cada minuto contar.',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const ptBR: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Intervalo de datas',
+      activityTitle: 'Atividade',
+      topTitle: 'Top',
       codetimeTrendTitle: 'Tendência de tempo de codificação',
       codetimeLanguaeTrendTitle: 'Tendência de linguagem de programação',
       codetimeProjectTrendTitle: 'Tendência de projeto',
@@ -244,6 +263,8 @@ export const ptBR: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Configurar',
+      embed: 'Incorporar',
       preview: {
         title: 'Visualização',
       },
@@ -360,9 +381,14 @@ export const ptBR: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Projeto',
+      topBranch: 'Branch principal',
+      range: 'Intervalo de datas',
+      noData: 'Nenhum dado para este espaço de trabalho.',
       select: {
         placeholder: 'Selecione um espaço de trabalho',
         none: 'Digite o nome do espaço de trabalho',
+        prompt: 'Selecione um projeto para começar.',
       },
       flameGraph: {
         title: 'Gráfico de chamas',
@@ -498,8 +524,15 @@ export const ptBR: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Identidade',
+      },
+      activity: {
+        title: 'Atividade',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Nenhum dado de idioma disponível.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {

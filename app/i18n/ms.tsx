@@ -50,6 +50,18 @@ export const ms: Partial<Translation> = {
     loginWithGithub: 'Log masuk dengan GitHub',
     freeMessage: 'Sekarang sepenuhnya percuma, tiada kad kredit diperlukan',
     demo: 'Demo',
+    heroBadge: 'v3 · analitik',
+    scroll: 'tatal',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Visualisasi data',
@@ -69,8 +81,12 @@ export const ms: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Mulakan secara percuma. Pro apabila diperlukan.',
       title: 'Harga',
       description: 'Pilih rancangan yang sesuai dengan anda.',
+    },
+    closing: {
+      heading: 'Jadikan setiap minit bermakna.',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const ms: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Julat tarikh',
+      activityTitle: 'Aktiviti',
+      topTitle: 'Teratas',
       codetimeTrendTitle: 'Trend Masa Kod',
       codetimeLanguaeTrendTitle: 'Trend Bahasa Pengaturcaraan',
       codetimeProjectTrendTitle: 'Trend Projek',
@@ -244,8 +263,15 @@ export const ms: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Identiti',
+      },
+      activity: {
+        title: 'Aktiviti',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Tiada data bahasa tersedia.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {
@@ -270,6 +296,8 @@ export const ms: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Konfigurasi',
+      embed: 'Benamkan',
       preview: {
         title: 'Pratonton',
       },
@@ -386,9 +414,14 @@ export const ms: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Projek',
+      topBranch: 'Cawangan teratas',
+      range: 'Julat tarikh',
+      noData: 'Tiada data untuk ruang kerja ini.',
       select: {
         placeholder: 'Pilih Ruang Kerja',
         none: 'Masukkan Nama Ruang Kerja',
+        prompt: 'Pilih projek untuk bermula.',
       },
       flameGraph: {
         title: 'Graf Api',

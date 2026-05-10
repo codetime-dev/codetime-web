@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3GetSelfOverallRank, v3GetUserSelf } from '~/api/v3'
+import { v3GetSelfOverallRank } from '~/api/v3'
 
 const props = defineProps<{
   days: number
@@ -19,18 +19,7 @@ const userRankData = useAsyncData(`user-rank-${props.days}`, async () => {
   watch: [() => props.days],
 })
 
-const userSelfData = useAsyncData('user-self', async () => {
-  try {
-    const result = await v3GetUserSelf()
-    return result.data
-  }
-  catch (error) {
-    console.error('Failed to fetch user self:', error)
-    return null
-  }
-}, {
-  server: false,
-})
+const userSelfData = fetchUser()
 
 const userDisplayRank = computed(() => {
   if (!userRankData.data.value) {

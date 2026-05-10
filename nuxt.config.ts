@@ -40,7 +40,7 @@ export default defineNuxtConfig({
     ],
   },
 
-  modules: ['@unocss/nuxt', '@vueuse/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap', '@nuxt/image', 'nuxt-gtag', [
+  modules: ['@unocss/nuxt', '@vueuse/nuxt', '@nuxtjs/sitemap', '@nuxt/image', 'nuxt-gtag', [
     '@nuxtjs/google-fonts',
     {
       download: true,

@@ -55,6 +55,18 @@ export const ru: Partial<Translation> = {
     freeMessage:
       'В настоящее время полностью бесплатно, кредитная карта не требуется',
     demo: 'Демо',
+    heroBadge: 'v3 · аналитика',
+    scroll: 'прокрутка',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Визуализация данных',
@@ -78,8 +90,12 @@ export const ru: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Начни бесплатно. Pro когда нужно.',
       title: 'Цены',
       description: 'Выберите план, который подходит вам.',
+    },
+    closing: {
+      heading: 'Пусть каждая минута имеет значение.',
     },
   },
   plan: {
@@ -193,6 +209,9 @@ export const ru: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Диапазон дат',
+      activityTitle: 'Активность',
+      topTitle: 'Топ',
       codetimeTrendTitle: 'Тенденция времени программирования',
       codetimeLanguaeTrendTitle: 'Тенденция языка программирования',
       codetimeProjectTrendTitle: 'Тенденция проектов',
@@ -265,6 +284,8 @@ export const ru: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Настройка',
+      embed: 'Встроить',
       preview: {
         title: 'Предварительный просмотр',
       },
@@ -384,9 +405,14 @@ export const ru: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Проект',
+      topBranch: 'Основная ветка',
+      range: 'Диапазон дат',
+      noData: 'Нет данных для этого рабочего пространства.',
       select: {
         placeholder: 'Выберите рабочую область',
         none: 'Введите название рабочей области',
+        prompt: 'Выберите проект для начала.',
       },
       flameGraph: {
         title: 'График пламени',
@@ -522,8 +548,15 @@ export const ru: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Профиль',
+      },
+      activity: {
+        title: 'Активность',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Данных о языках пока нет.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {

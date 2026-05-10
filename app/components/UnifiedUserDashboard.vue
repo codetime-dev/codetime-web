@@ -35,9 +35,6 @@ const isOwnProfile = computed(() => {
   return targetUserId.value === currentUser.value?.id
 })
 
-// 过滤器功能已移除
-const filters: FilterItem[] = []
-
 // 日期范围控制
 const days = useLocalStorage('days', ref(currentUser.value?.plan === 'pro' ? 365 : 28))
 const segments = ref(5)
@@ -196,10 +193,6 @@ const topLanguage = computed(() => {
     return topLanguagesRanks.value[0]?.language
   }
   return null
-})
-
-const topLanguageHighlights = computed(() => {
-  return topLanguagesRanks.value.slice(0, 4)
 })
 
 function formatDate(value?: string | Date | null): string | null {
@@ -460,8 +453,8 @@ watchEffect(() => {
         <PanelSection
           v-if="showControls"
           num="01"
-          title="RANGE"
-          meta="TIME · WINDOW"
+          :title="t.dashboard.overview.rangeTitle"
+          meta="time · window"
           flush
         >
           <template #icon>
@@ -472,8 +465,8 @@ watchEffect(() => {
 
         <PanelSection
           num="02"
-          title="ACTIVITY"
-          meta="ANNUAL · CALENDAR"
+          :title="t.dashboard.overview.activityTitle"
+          meta="annual · calendar"
         >
           <template #icon>
             <i class="i-tabler-activity text-surface-dimmed/70 text-[15px]" />
@@ -487,8 +480,8 @@ watchEffect(() => {
         <PanelSection
           v-if="hasData"
           num="03"
-          title="TOP"
-          meta="LANGUAGE · WORKSPACE · PLATFORM"
+          :title="t.dashboard.overview.topTitle"
+          meta="language · workspace · platform"
           flush
         >
           <template #icon>
@@ -522,7 +515,7 @@ watchEffect(() => {
         <PanelSection
           num="04"
           :title="t.dashboard.overview.codetimeTrendTitle"
-          meta="DAILY · TREND"
+          meta="daily · trend"
           flush
         >
           <template #icon>
@@ -543,7 +536,7 @@ watchEffect(() => {
           v-if="allLanguageDataResp.status.value === 'pending' || pAllLangData.length > 0"
           num="05"
           :title="t.dashboard.overview.codetimeLanguaeTrendTitle"
-          meta="LANGUAGE · DOTS"
+          meta="language · dots"
           flush
         >
           <template #icon>
@@ -566,7 +559,7 @@ watchEffect(() => {
           v-if="allProjectDataResp.status.value === 'pending' || pAllProjectData.length > 0"
           num="06"
           :title="t.dashboard.overview.codetimeProjectTrendTitle"
-          meta="PROJECT · DOTS"
+          meta="project · dots"
           flush
         >
           <template #icon>
@@ -589,7 +582,7 @@ watchEffect(() => {
           v-if="hasData"
           num="07"
           :title="t.dashboard.overview.dailyCodingDistributionTitle"
-          meta="HOUR · DENSITY"
+          meta="hour · density"
           flush
         >
           <template #icon>

@@ -21,7 +21,7 @@ defineProps<{
           />
           <h1
             v-else
-            class="text-[18px] text-surface tracking-[0.22em] font-medium font-mono uppercase"
+            class="text-[18px] text-surface tracking-[0.22em] font-medium font-mono"
           >
             {{ title }}
           </h1>

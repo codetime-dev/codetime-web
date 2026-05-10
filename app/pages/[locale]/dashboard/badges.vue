@@ -75,7 +75,7 @@ const link = computed(() => {
   <DashboardPageContent>
     <BadgePreviewCard :link="link" />
 
-    <PanelSection num="02" title="CONFIGURE" meta="STYLE · COLOR · FILTERS" flush>
+    <PanelSection num="02" :title="t.dashboard.badge.configure" meta="style · color · filters" flush>
       <template #icon>
         <i class="i-tabler-adjustments-horizontal text-surface-dimmed/70 text-[15px]" />
       </template>

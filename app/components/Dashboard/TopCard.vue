@@ -28,7 +28,7 @@ const { status, data: rawData } = fetchTop(props.type, minutes, 5, props.filters
 
 const isLoading = computed(() => unref(status) === 'pending')
 const data = computed(() => unref(rawData) ?? null)
-const filters = inject<FilterItem[]>('filters')
+const filters = inject<FilterItem[]>('filters', [])
 
 function onClickItem(field: string, type: 'language' | 'workspace' | 'platform') {
   if (filters) {

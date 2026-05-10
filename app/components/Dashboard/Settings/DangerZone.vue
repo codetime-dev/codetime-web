@@ -21,7 +21,7 @@ function closeModal() {
 </script>
 
 <template>
-  <PanelSection num="99" title="DANGER ZONE" meta="DESTRUCTIVE" flush>
+  <PanelSection num="99" :title="t.dashboard.settings.dangerZone.title" meta="destructive" flush>
     <template #icon>
       <i class="i-tabler-alert-octagon text-[15px] text-rose-500/80" />
     </template>
@@ -106,7 +106,6 @@ function closeModal() {
 }
 
 .danger-desc {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12.5px;
   line-height: 1.7;
   color: color-mix(in srgb, var(--r-surface-text-color) 75%, transparent);

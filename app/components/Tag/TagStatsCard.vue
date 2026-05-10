@@ -56,7 +56,7 @@ const tagStats = computed(() => {
     tag: tagData.tag,
     totalMinutes: tagData.totalMinutes,
     percentage: totalAllMinutes > 0 ? (tagData.totalMinutes / totalAllMinutes) * 100 : 0,
-  })).sort((a: any, b: any) => b.totalMinutes - a.totalMinutes)
+  })).toSorted((a: any, b: any) => b.totalMinutes - a.totalMinutes)
 })
 </script>
 

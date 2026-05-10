@@ -361,7 +361,7 @@ const lastUpdatedLabel = computed(() => {
     </div>
 
     <template v-else>
-      <Section num="01" title="IDENTITY" :meta="`USER · #${userId}`">
+      <Section num="01" :title="t.dashboard.profile.identity.title" :meta="`user · #${userId}`">
         <template #icon>
           <i class="i-tabler-user-circle text-surface-dimmed/70 text-[15px]" />
         </template>
@@ -379,8 +379,8 @@ const lastUpdatedLabel = computed(() => {
 
       <Section
         num="02"
-        title="BIO"
-        :meta="canEditBio ? 'EDITABLE · OWNER' : 'READ ONLY'"
+        :title="t.dashboard.profile.bio.title"
+        :meta="canEditBio ? 'editable · owner' : 'read only'"
       >
         <template #icon>
           <i class="i-tabler-quote text-surface-dimmed/70 text-[15px]" />
@@ -404,7 +404,7 @@ const lastUpdatedLabel = computed(() => {
 
       <Section
         num="03"
-        title="OVERVIEW"
+        :title="t.dashboard.profile.stats.title"
         :meta="lastUpdatedLabel ? `updated ${lastUpdatedLabel}` : `${HISTORY_DAYS}d window`"
         :flush="true"
       >
@@ -416,8 +416,8 @@ const lastUpdatedLabel = computed(() => {
 
       <Section
         num="04"
-        title="LANGUAGES"
-        :meta="`${topLanguages.length} TRACKED`"
+        :title="t.dashboard.profile.languages.title"
+        :meta="`${topLanguages.length} tracked`"
       >
         <template #icon>
           <i class="i-tabler-braces text-surface-dimmed/70 text-[15px]" />
@@ -427,7 +427,7 @@ const lastUpdatedLabel = computed(() => {
 
       <Section
         num="05"
-        title="ACTIVITY"
+        :title="t.dashboard.profile.activity.title"
         :meta="`${HISTORY_DAYS}d · ${activeDays} active`"
       >
         <template #icon>

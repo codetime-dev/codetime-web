@@ -173,7 +173,7 @@ const dailyAvgMs = computed(() => {
 </script>
 
 <template>
-  <PanelSection num="03" title="STATS" :meta="`TIME · DISTRIBUTION · ${timeRange.toUpperCase()}`" flush>
+  <PanelSection num="03" :title="t.dashboard.tags.stats.title" :meta="`TIME · DISTRIBUTION · ${timeRange}`" flush>
     <template #icon>
       <i class="i-tabler-chart-bar text-surface-dimmed/70 text-[15px]" />
     </template>

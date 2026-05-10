@@ -291,7 +291,7 @@ function removeRuleGroup(groupId: string) {
 </script>
 
 <template>
-  <PanelSection num="02" title="RULES" :meta="isEditing ? 'EDITING' : 'OR · AND · CONDITION'" flush>
+  <PanelSection num="02" :title="t.dashboard.tags.tagRules.title" :meta="isEditing ? 'editing' : 'or · and · condition'" flush>
     <template #icon>
       <i class="i-tabler-rules text-surface-dimmed/70 text-[15px]" />
     </template>

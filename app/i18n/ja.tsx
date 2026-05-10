@@ -50,6 +50,18 @@ export const ja: Partial<Translation> = {
     loginWithGithub: 'GitHub でログイン',
     freeMessage: '現在完全無料、クレジットカード不要',
     demo: 'デモ',
+    heroBadge: 'v3 · 分析',
+    scroll: 'スクロール',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'データ可視化',
@@ -69,8 +81,12 @@ export const ja: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: '無料で始めよう。必要に応じてProへ。',
       title: '価格',
       description: 'あなたに合ったプランを選択してください。',
+    },
+    closing: {
+      heading: '毎分を大切に。',
     },
   },
   plan: {
@@ -179,6 +195,9 @@ export const ja: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: '期間',
+      activityTitle: 'アクティビティ',
+      topTitle: 'トップ',
       codetimeTrendTitle: 'コーディング時間のトレンド',
       codetimeLanguaeTrendTitle: 'コーディング言語のトレンド',
       codetimeProjectTrendTitle: 'プロジェクトのトレンド',
@@ -244,8 +263,15 @@ export const ja: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'プロフィール',
+      },
+      activity: {
+        title: 'アクティビティ',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: '言語データがありません。',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {
@@ -270,6 +296,8 @@ export const ja: Partial<Translation> = {
       },
     },
     badge: {
+      configure: '設定',
+      embed: '埋め込み',
       preview: {
         title: 'プレビュー',
       },
@@ -386,9 +414,14 @@ export const ja: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'プロジェクト',
+      topBranch: '上位ブランチ',
+      range: '期間',
+      noData: 'このワークスペースのデータがありません。',
       select: {
         placeholder: 'ワークスペースを選択',
         none: 'ワークスペース名を入力',
+        prompt: 'プロジェクトを選択してください。',
       },
       flameGraph: {
         title: 'フレームグラフ',

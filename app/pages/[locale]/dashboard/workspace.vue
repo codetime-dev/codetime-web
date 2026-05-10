@@ -96,8 +96,8 @@ const height = 26
   <DashboardPageContent>
     <PanelSection
       num="01"
-      title="PROJECT"
-      :meta="projectName ? `SELECTED · ${projectName}` : 'NONE SELECTED'"
+      :title="t.dashboard.workspace.project"
+      :meta="projectName ? `selected · ${projectName}` : 'none selected'"
     >
       <template #icon>
         <i class="i-tabler-app-window text-surface-dimmed/70 text-[15px]" />
@@ -116,7 +116,7 @@ const height = 26
       </div>
     </PanelSection>
 
-    <PanelSection num="02" title="RANGE" meta="TIME WINDOW">
+    <PanelSection num="02" :title="t.dashboard.workspace.range" meta="time window">
       <template #icon>
         <i class="i-tabler-calendar text-surface-dimmed/70 text-[15px]" />
       </template>
@@ -126,7 +126,7 @@ const height = 26
     <PanelSection
       num="03"
       :title="t.dashboard.workspace.flameGraph.title"
-      meta="FILE · DISTRIBUTION"
+      meta="file · distribution"
     >
       <template #icon>
         <i class="i-tabler-flame text-surface-dimmed/70 text-[15px]" />
@@ -153,8 +153,8 @@ const height = 26
     <PanelSection
       v-if="data && data.length > 0"
       num="04"
-      title="TOP BRANCH"
-      :meta="`${gitBranchCountMap.length} BRANCHES`"
+      :title="t.dashboard.workspace.topBranch"
+      :meta="`${gitBranchCountMap.length} branches`"
     >
       <template #icon>
         <i class="i-tabler-git-branch text-surface-dimmed/70 text-[15px]" />

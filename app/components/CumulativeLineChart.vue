@@ -23,7 +23,7 @@ const quarterAverages = computed(() => {
   }
 
   // Sort data by date
-  const sortedData = [...data.value].sort((a, b) => a.date.getTime() - b.date.getTime())
+  const sortedData = data.value.toSorted((a, b) => a.date.getTime() - b.date.getTime())
 
   // Calculate split point - 3/4 of the way through the time range
   const splitIndex = Math.floor(sortedData.length * 0.75)

@@ -66,14 +66,14 @@ const t = useI18N()
     <DashboardSettingsUser />
 
     <!-- UPLOAD TOKEN -->
-    <PanelSection num="02" title="UPLOAD TOKEN" meta="API · CREDENTIAL" flush>
+    <PanelSection num="02" :title="t.dashboard.settings.token.title" meta="api · credential" flush>
       <template #icon>
         <i class="i-tabler-key text-surface-dimmed/70 text-[15px]" />
       </template>
 
       <div class="set-section">
         <p class="set-desc">
-          // <component :is="t.dashboard.settings.token.getPlugin" />
+          <component :is="t.dashboard.settings.token.getPlugin" />
         </p>
 
         <div class="token-bar">
@@ -113,7 +113,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- THEME -->
-    <PanelSection num="03" title="THEME" meta="APPEARANCE" flush>
+    <PanelSection num="03" :title="t.dashboard.settings.theme.title" meta="appearance" flush>
       <template #icon>
         <i class="i-tabler-palette text-surface-dimmed/70 text-[15px]" />
       </template>
@@ -137,7 +137,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- LANGUAGE -->
-    <PanelSection num="04" title="LANGUAGE" meta="LOCALE" flush>
+    <PanelSection num="04" :title="t.dashboard.settings.language.title" meta="locale" flush>
       <template #icon>
         <i class="i-tabler-language text-surface-dimmed/70 text-[15px]" />
       </template>
@@ -153,7 +153,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- EXPORT -->
-    <PanelSection num="05" title="EXPORT" meta="CSV · DOWNLOAD" flush>
+    <PanelSection num="05" :title="t.dashboard.settings.export.title" meta="csv · download" flush>
       <template #icon>
         <i class="i-tabler-file-export text-surface-dimmed/70 text-[15px]" />
       </template>
@@ -204,7 +204,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- OTHER -->
-    <PanelSection num="06" title="OTHER" meta="SESSION" flush>
+    <PanelSection num="06" :title="t.dashboard.settings.other.title" meta="session" flush>
       <template #icon>
         <i class="i-tabler-dots-circle-horizontal text-surface-dimmed/70 text-[15px]" />
       </template>
@@ -240,7 +240,6 @@ const t = useI18N()
 }
 
 .set-desc {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12.5px;
   letter-spacing: 0.02em;
   line-height: 1.7;
@@ -248,7 +247,6 @@ const t = useI18N()
 }
 
 .set-hint {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 11.5px;
   letter-spacing: 0.02em;
   line-height: 1.7;

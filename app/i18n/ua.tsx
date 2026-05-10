@@ -54,6 +54,18 @@ export const ua: Partial<Translation> = {
     loginWithGithub: 'Увійти за допомогою GitHub',
     freeMessage: 'Наразі повністю безкоштовно, кредитна картка не потрібна',
     demo: 'Демо',
+    heroBadge: 'v3 · аналітика',
+    scroll: 'прокрутка',
+
+    sections: {
+      globalImpact: 'global · impact',
+      visualization: 'visualization',
+      alwaysSynced: 'always synced',
+      openData: 'open data',
+      editors: 'editors',
+      pricing: 'pricing',
+      startTracking: 'start tracking',
+    },
     features: {
       visualization: {
         title: 'Візуалізація даних',
@@ -77,8 +89,12 @@ export const ua: Partial<Translation> = {
       },
     },
     pricing: {
+      heading: 'Почни безкоштовно. Pro коли потрібно.',
       title: 'Ціни',
       description: 'Виберіть план, який підходить вам.',
+    },
+    closing: {
+      heading: 'Нехай кожна хвилина має значення.',
     },
   },
   plan: {
@@ -192,6 +208,9 @@ export const ua: Partial<Translation> = {
       },
     },
     overview: {
+      rangeTitle: 'Діапазон дат',
+      activityTitle: 'Активність',
+      topTitle: 'Топ',
       codetimeTrendTitle: 'Тенденція часу програмування',
       codetimeLanguaeTrendTitle: 'Тенденція мов програмування',
       codetimeProjectTrendTitle: 'Тенденція проектів',
@@ -264,6 +283,8 @@ export const ua: Partial<Translation> = {
       },
     },
     badge: {
+      configure: 'Налаштування',
+      embed: 'Вбудувати',
       preview: {
         title: 'Попередній перегляд',
       },
@@ -383,9 +404,14 @@ export const ua: Partial<Translation> = {
       },
     },
     workspace: {
+      project: 'Проект',
+      topBranch: 'Основна гілка',
+      range: 'Діапазон дат',
+      noData: 'Немає даних для цього робочого простору.',
       select: {
         placeholder: 'Оберіть робочий простір',
         none: 'Введіть назву робочого простору',
+        prompt: 'Оберіть проект для початку.',
       },
       flameGraph: {
         title: 'Графік пламенів',
@@ -521,8 +547,15 @@ export const ua: Partial<Translation> = {
       },
     },
     profile: {
+      identity: {
+        title: 'Профіль',
+      },
+      activity: {
+        title: 'Активність',
+      },
       languages: {
         title: 'Language Highlights',
+        noData: 'Даних про мови ще немає.',
         topPercent: (percent: number) => `TOP ${percent}%`,
       },
       stats: {

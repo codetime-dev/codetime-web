@@ -194,6 +194,9 @@ export const en: Translation = {
       },
     },
     overview: {
+      rangeTitle: 'Date Range',
+      activityTitle: 'Activity',
+      topTitle: 'Top',
       codetimeTrendTitle: 'Coding Time Trend',
       codetimeLanguaeTrendTitle: 'Programming Language Trend',
       codetimeProjectTrendTitle: 'Project Trend',
@@ -286,6 +289,12 @@ export const en: Translation = {
     },
   },
   profile: {
+    identity: {
+      title: 'Identity',
+    },
+    activity: {
+      title: 'Activity',
+    },
     languages: {
       title: 'Language Highlights',
       noData: 'No language data available yet.',
@@ -313,6 +322,8 @@ export const en: Translation = {
     },
   },
   badge: {
+      configure: 'Configure',
+      embed: 'Embed',
       preview: {
         title: 'Preview',
       },
@@ -429,6 +440,9 @@ export const en: Translation = {
       },
     },
     workspace: {
+      project: 'Project',
+      topBranch: 'Top Branch',
+      range: 'Date Range',
       noData: 'No data for this workspace.',
       select: {
         placeholder: 'Select a workspace',

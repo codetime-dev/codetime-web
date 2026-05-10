@@ -30,7 +30,7 @@ const relativeFileCountList = computed(() => {
       countMap.set(item.relativeFile, minutes + duration)
     }
   }
-  return [...countMap.entries()].sort((a, b) => b[1] - a[1])
+  return [...countMap.entries()].toSorted((a, b) => b[1] - a[1])
 })
 const t = useI18N()
 type PathValue = [string, number]

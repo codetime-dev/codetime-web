@@ -1,0 +1,110 @@
+// Custom robots.txt with AI-crawler tier differentiation, Content Signals,
+// and a schemamap directive for NLWeb Schema Feeds discovery.
+import { defineEventHandler, setHeader } from 'h3'
+
+const SITE = 'https://codetime.dev'
+
+const BODY = `# Code Time — robots.txt
+# Site: ${SITE}
+# Updated: 2026-05-10
+
+# ---------------------------------------------------------------
+# Default policy — search indexing allowed, AI training disallowed.
+# Cloudflare Content Signals (https://contentsignals.org)
+# ---------------------------------------------------------------
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
+Disallow: /api/
+Disallow: /v3/
+
+# ---------------------------------------------------------------
+# Tier 1 — search-style AI assistants (allowed: surface answers in real-time)
+# ---------------------------------------------------------------
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: ora-agent
+Allow: /
+
+User-agent: DeepSeekBot
+Allow: /
+
+# ---------------------------------------------------------------
+# Tier 2 — bulk training crawlers (disallowed)
+# ---------------------------------------------------------------
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ByteSpider
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: omgili
+Disallow: /
+
+User-agent: TimpiBot
+Disallow: /
+
+# ---------------------------------------------------------------
+# Discovery resources
+# ---------------------------------------------------------------
+Sitemap: ${SITE}/sitemap.xml
+schemamap: ${SITE}/schema-map.xml
+`
+
+export default defineEventHandler((event) => {
+  setHeader(event, 'Content-Type', 'text/plain; charset=utf-8')
+  setHeader(event, 'Cache-Control', 'public, max-age=3600')
+  return BODY
+})

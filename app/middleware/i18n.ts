@@ -1,5 +1,37 @@
+// Paths that must NOT be locale-redirected — they are agent/machine-readable
+// resources served as-is at canonical URLs.
+const AGENT_PATH_PREFIXES = [
+  '/.well-known/',
+  '/api/',
+  '/ask',
+  '/mcp',
+  '/llms.txt',
+  '/index.md',
+  '/openapi.json',
+  '/openapi.yaml',
+  '/ai-plugin.json',
+  '/AGENTS.md',
+  '/SKILL.md',
+  '/schema-map.xml',
+  '/robots.txt',
+  '/sitemap.xml',
+]
+
+function isAgentPath(path: string): boolean {
+  if (AGENT_PATH_PREFIXES.some(p => path === p || path.startsWith(p))) {
+    return true
+  }
+  // Any path with a file extension (e.g. .json, .md, .txt) is treated as a
+  // static/machine resource and skipped from i18n redirects.
+  const last = path.split('/').pop() || ''
+  return last.includes('.')
+}
+
 export default defineNuxtRouteMiddleware((to, from) => {
   try {
+    if (isAgentPath(to.path)) {
+      return
+    }
     const locale = to.path.split('/')[1] || ''
     if (locales.includes(locale)) {
       return
