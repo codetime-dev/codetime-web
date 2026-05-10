@@ -14,7 +14,7 @@
   font-size: clamp(4rem, 18vw, 11rem);
   letter-spacing: -0.025em;
   font-weight: 600;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-mono);
 }
 
 .title-line {
@@ -24,18 +24,15 @@
 
 .title-code {
   position: relative;
-  background: linear-gradient(135deg, var(--color-primary-1) 0%, var(--color-primary-2) 55%, var(--color-primary-3) 100%);
-  background-size: 200% 200%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: title-shimmer 9s ease-in-out infinite;
+  color: var(--color-primary-1);
+  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
 }
 
 .title-time {
   position: relative;
   color: var(--r-surface-foreground-color);
   opacity: 0.94;
+  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
 }
 
 .title-time::after {
@@ -47,10 +44,5 @@
   transform: translate(0.06em, 0.06em);
   opacity: 0.35;
   pointer-events: none;
-}
-
-@keyframes title-shimmer {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 </style>

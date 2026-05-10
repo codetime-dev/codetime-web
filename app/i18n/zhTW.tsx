@@ -86,7 +86,8 @@ export const zhTW: Partial<Translation> = {
       description: '選擇適合您的方案。',
     },
     closing: {
-      heading: '讓每一分鐘都有價值。',
+      line1: '種下一棵樹最好的時候是三十年前，',
+      line2: '其次是現在。',
     },
   },
   plan: {

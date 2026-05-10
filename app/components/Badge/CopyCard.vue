@@ -1,8 +1,8 @@
 <script setup lang="ts">
-const t = useI18N()
 const props = defineProps<{
   link: string
 }>()
+const t = useI18N()
 const link = computed(() => props.link)
 const markdown = computed(() => `[![CodeTime Badge](${link.value})](https://codetime.dev)`)
 const html = computed(() => `<img href="https://codetime.dev" alt="CodeTime Badge" src="${link.value}">`)

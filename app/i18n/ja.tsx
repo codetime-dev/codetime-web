@@ -86,7 +86,8 @@ export const ja: Partial<Translation> = {
       description: 'あなたに合ったプランを選択してください。',
     },
     closing: {
-      heading: '毎分を大切に。',
+      line1: '木を植えるのに最も良い時は30年前だった。',
+      line2: '次に良いのは今だ。',
     },
   },
   plan: {

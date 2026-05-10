@@ -81,7 +81,8 @@ export type Translation = {
       description: string
     }
     closing: {
-      heading: string
+      line1: string
+      line2: string
     }
   }
   plan: {

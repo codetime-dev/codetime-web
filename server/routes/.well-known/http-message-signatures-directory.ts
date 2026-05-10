@@ -11,7 +11,7 @@ const DIR = {
       kid: 'codetime-bot-2026-05',
       use: 'sig',
       alg: 'EdDSA',
-      x: '11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo',
+      x: 'oOFlvmmlkphyaXf15Kk9QUy5CcSUnrANaqM2rvfBkFY',
       nbf: 1_746_835_200,
       exp: 1_809_907_200,
     },

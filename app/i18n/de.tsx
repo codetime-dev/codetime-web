@@ -86,7 +86,8 @@ export const de: Partial<Translation> = {
       description: 'Wählen Sie den für Sie passenden Plan aus.',
     },
     closing: {
-      heading: 'Lass jede Minute zählen.',
+      line1: 'Die beste Zeit, einen Baum zu pflanzen, war vor dreißig Jahren.',
+      line2: 'Die zweitbeste Zeit ist jetzt.',
     },
   },
   plan: {

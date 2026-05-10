@@ -86,7 +86,8 @@ export const zhCN: Partial<Translation> = {
       description: '选择适合您的计划。',
     },
     closing: {
-      heading: '让每一分钟都有价值。',
+      line1: '种下一棵树最好的时候是三十年前，',
+      line2: '其次是现在。',
     },
   },
   plan: {

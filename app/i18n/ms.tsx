@@ -86,7 +86,8 @@ export const ms: Partial<Translation> = {
       description: 'Pilih rancangan yang sesuai dengan anda.',
     },
     closing: {
-      heading: 'Jadikan setiap minit bermakna.',
+      line1: 'Masa terbaik untuk menanam pokok adalah tiga puluh tahun lalu.',
+      line2: 'Masa kedua terbaik adalah sekarang.',
     },
   },
   plan: {

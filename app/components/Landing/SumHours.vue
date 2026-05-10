@@ -76,14 +76,8 @@ const t = useI18N()
   position: relative;
   font-size: clamp(3rem, 11vw, 6.5rem);
   letter-spacing: -0.025em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  background: linear-gradient(180deg,
-    var(--r-surface-text-color) 0%,
-    var(--r-surface-text-color) 40%,
-    color-mix(in srgb, var(--color-primary-1) 70%, transparent) 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
+  color: var(--r-surface-text-color);
   text-shadow: 0 0 60px color-mix(in srgb, var(--color-primary-1) 25%, transparent);
 }
 </style>

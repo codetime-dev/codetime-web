@@ -85,7 +85,8 @@ export const en: Translation = {
       description: 'Choose the plan that suits you.',
     },
     closing: {
-      heading: 'Make every minute count.',
+      line1: 'The best time to plant a tree was thirty years ago.',
+      line2: 'The second best time is now.',
     },
   },
   plan: {

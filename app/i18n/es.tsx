@@ -86,7 +86,8 @@ export const es: Partial<Translation> = {
       description: 'Elige el plan que se adapte a ti.',
     },
     closing: {
-      heading: 'Haz que cada minuto cuente.',
+      line1: 'El mejor momento para plantar un árbol fue hace treinta años.',
+      line2: 'El segundo mejor momento es ahora.',
     },
   },
   plan: {

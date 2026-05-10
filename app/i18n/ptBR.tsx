@@ -86,7 +86,8 @@ export const ptBR: Partial<Translation> = {
       description: 'Escolha o plano que mais lhe convier.',
     },
     closing: {
-      heading: 'Faça cada minuto contar.',
+      line1: 'O melhor momento para plantar uma árvore foi há trinta anos.',
+      line2: 'O segundo melhor momento é agora.',
     },
   },
   plan: {

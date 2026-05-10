@@ -20,8 +20,6 @@ watchEffect(() => {
   })
 })
 
-const currentYear = new Date().getFullYear()
-
 // ---------------------------------------------------------------------------
 // JSON-LD structured data — Organization + SoftwareApplication + FAQPage +
 // Speakable, with sameAs links for entity disambiguation.
@@ -164,12 +162,6 @@ useHead({
     <div class="hero-vignette" aria-hidden="true" />
 
     <div class="px-6 py-24 flex flex-col gap-10 items-center justify-center relative lg:py-40 sm:py-32">
-      <div class="text-[10.5px] text-primary tracking-[0.4em] font-mono inline-flex gap-3 uppercase items-center">
-        <span class="bg-primary/50 h-px w-10 inline-block" />
-        <span>v3 · analytics · {{ currentYear }}</span>
-        <span class="bg-primary/50 h-px w-10 inline-block" />
-      </div>
-
       <LandingTitle />
 
       <p class="text-[15px] text-surface-dimmed leading-[1.65] tracking-[0.01em] font-mono px-4 text-center max-w-xl sm:text-[16px]">
@@ -180,15 +172,11 @@ useHead({
         <LoginButton />
       </div>
 
-      <div class="text-surface-dimmed/60 text-[10px] tracking-[0.28em] font-mono mt-6 inline-flex gap-2 uppercase items-center">
-        <i class="i-tabler-chevron-down text-sm animate-bounce" />
-        <span>{{ t.landing.scroll }}</span>
-      </div>
     </div>
   </section>
 
-  <!-- AGENT-FRIENDLY SUMMARY (SSR text for crawlers / AI agents) -->
-  <section class="agent-friendly-summary" aria-label="About Code Time">
+  <!-- Privacy-respecting coding-time analytics description (kept for SEO/agents only) -->
+  <section class="agent-friendly-summary visually-hidden" aria-label="About Code Time">
     <div class="mx-auto px-6 py-16 max-w-4xl space-y-6">
       <h2 class="text-2xl text-surface font-mono font-semibold">
         Privacy-respecting coding-time analytics for VS Code and JetBrains
@@ -209,24 +197,6 @@ useHead({
         Rider, RubyMine, CLion, and the rest of the JetBrains family. The
         free tier supports unlimited personal use with full history
         retention.
-      </p>
-      <h3 class="text-lg text-surface font-mono font-semibold mt-8">
-        For AI agents and coding assistants
-      </h3>
-      <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono">
-        Code Time ships first-class agent integrations. Discover the
-        product through
-        <a href="/.well-known/llms.txt" rel="describedby">llms.txt</a>, fetch
-        the
-        <a href="/openapi.json" rel="service-desc">OpenAPI 3.1 spec</a>, call
-        the <a href="/mcp">MCP server</a>
-        (manifest at
-        <a href="/.well-known/mcp/manifest.json">/.well-known/mcp/manifest.json</a>),
-        or POST a natural-language query to <code>/ask</code> for an
-        NLWeb-conformant response with optional SSE streaming. Bearer
-        tokens are issued from the user profile page; OAuth resource
-        metadata is published under
-        <a href="/.well-known/oauth-protected-resource">/.well-known/oauth-protected-resource</a>.
       </p>
     </div>
   </section>
@@ -388,8 +358,9 @@ useHead({
         <span>{{ t.landing.sections.startTracking }}</span>
         <span class="eyebrow-bracket">]</span>
       </div>
-      <h2 class="closing-heading text-surface leading-[1.05] font-mono font-semibold max-w-3xl">
-        {{ t.landing.closing.heading }}
+      <h2 class="closing-heading text-surface font-mono font-semibold max-w-3xl">
+        <span class="closing-line block">{{ t.landing.closing.line1 }}</span>
+        <span class="closing-line closing-line--2 block">{{ t.landing.closing.line2 }}</span>
       </h2>
       <LoginButton />
     </div>
@@ -397,6 +368,18 @@ useHead({
 </template>
 
 <style scoped>
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .section-heading {
   font-size: clamp(2rem, 5vw, 3.25rem);
   letter-spacing: -0.02em;
@@ -404,14 +387,19 @@ useHead({
 
 .closing-heading {
   position: relative;
-  font-size: clamp(2.4rem, 6.5vw, 4.5rem);
-  letter-spacing: -0.025em;
-  background: linear-gradient(180deg,
-    var(--r-surface-text-color) 30%,
-    color-mix(in srgb, var(--color-primary-1) 75%, transparent) 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  letter-spacing: -0.02em;
+  color: var(--r-surface-foreground-color);
+  line-height: 1.25;
+}
+
+.closing-line {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+.closing-line--2 {
+  font-size: clamp(1.5rem, 4vw, 2.75rem);
+  color: var(--color-primary-1);
+  opacity: 0.9;
 }
 
 /* Eyebrow */
@@ -419,7 +407,7 @@ useHead({
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
   font-size: 10.5px;
   letter-spacing: 0.34em;
   text-transform: uppercase;
@@ -542,7 +530,6 @@ useHead({
   border: 1px solid color-mix(in srgb, var(--r-surface-border-color) 38%, transparent);
   padding: 1rem;
   position: relative;
-  transition: border-color 220ms ease, background-color 220ms ease;
 }
 
 .showcase-tile::before,
@@ -569,16 +556,6 @@ useHead({
   right: -1px;
   border-left: 0;
   border-top: 0;
-}
-
-.showcase-tile:hover {
-  border-color: color-mix(in srgb, var(--r-surface-border-color) 90%, transparent);
-  background-color: color-mix(in srgb, var(--color-primary-1) 3%, transparent);
-}
-
-.showcase-tile:hover::before,
-.showcase-tile:hover::after {
-  opacity: 1;
 }
 
 .showcase-scroll {
@@ -651,8 +628,7 @@ useHead({
 
 @media (prefers-reduced-motion: reduce) {
   .hero-grid,
-  .hero-glow,
-  :deep(.title-code) {
+  .hero-glow {
     animation: none;
   }
 }
