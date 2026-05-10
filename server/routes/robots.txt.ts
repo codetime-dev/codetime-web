@@ -100,7 +100,8 @@ Disallow: /
 # Discovery resources
 # ---------------------------------------------------------------
 Sitemap: ${SITE}/sitemap.xml
-schemamap: ${SITE}/schema-map.xml
+# NLWeb Schema Feeds (non-standard, ignored by search engines)
+# schemamap: ${SITE}/schema-map.xml
 `
 
 export default defineEventHandler((event) => {

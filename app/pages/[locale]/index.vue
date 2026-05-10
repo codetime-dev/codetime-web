@@ -821,19 +821,41 @@ useHead({
   width: min(75vw, 720px);
   height: min(75vw, 720px);
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, color-mix(in srgb, var(--ct-primary) 18%, transparent) 0%, transparent 65%);
-  filter: blur(56px);
+  /* Pre-blurred radial: the soft falloff is baked into the gradient stops, so
+     we no longer need a 56px filter pass on every paint — large win on mobile
+     LCP where filter:blur is one of the most expensive paint ops. */
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--ct-primary) 22%, transparent) 0%,
+    color-mix(in srgb, var(--ct-primary) 10%, transparent) 35%,
+    transparent 70%);
   pointer-events: none;
   opacity: 0.85;
+  will-change: auto;
+}
+/* Keep the blur for desktops where GPU paint is cheap and the softer halo
+   reads better against the grid. */
+@media (min-width: 1024px) and (hover: hover) {
+  .hero-glow {
+    background: radial-gradient(circle, color-mix(in srgb, var(--ct-primary) 18%, transparent) 0%, transparent 65%);
+    filter: blur(56px);
+  }
 }
 /* Light scheme: a strong blue blur muddies the hero on a soft-gray bg.
    Fall back to a tighter, lower-opacity halo so the grid carries focus. */
 html[data-scheme="light"] .hero-glow {
   width: min(55vw, 520px);
   height: min(55vw, 520px);
-  background: radial-gradient(circle, color-mix(in srgb, var(--ct-primary) 8%, transparent) 0%, transparent 70%);
-  filter: blur(42px);
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--ct-primary) 12%, transparent) 0%,
+    color-mix(in srgb, var(--ct-primary) 5%, transparent) 40%,
+    transparent 75%);
   opacity: 0.6;
+}
+@media (min-width: 1024px) and (hover: hover) {
+  html[data-scheme="light"] .hero-glow {
+    background: radial-gradient(circle, color-mix(in srgb, var(--ct-primary) 8%, transparent) 0%, transparent 70%);
+    filter: blur(42px);
+  }
 }
 
 /* Section band: subtle alternating bg */

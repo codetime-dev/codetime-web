@@ -15,6 +15,22 @@ client.setConfig({
 const { data: user, status } = await fetchUser()
 provide('user', user)
 provide('user-pending', status.value === 'pending')
+
+// Preload Berkeley Mono Bold — the font used by the LandingTitle (LCP element
+// on /). Fetching in parallel with HTML parsing avoids the late-discovery
+// FOIT that pushes LCP past 4s on cold loads.
+useHead({
+  link: [
+    {
+      rel: 'preload',
+      as: 'font',
+      type: 'font/woff2',
+      href: 'https://cdn.jannchie.com/fonts/BerkeleyMono-Bold.woff2',
+      crossorigin: 'anonymous',
+    },
+    { rel: 'preconnect', href: 'https://cdn.jannchie.com', crossorigin: 'anonymous' },
+  ],
+})
 </script>
 
 <template>
