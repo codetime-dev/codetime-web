@@ -283,6 +283,14 @@ export type Translation = {
       }
       status: {
         title: string
+        primary?: string
+        secondary?: string
+        fields?: {
+          project: string
+          language: string
+          editor: string
+          none: string
+        }
       }
       limit: {
         upgrade: string

@@ -39,54 +39,10 @@ const active = computed<TabId>({
     :description="t.dashboard.pageHeader.description.widget ?? ''"
   />
   <DashboardPageContent>
-    <nav class="widget-tabs" role="tablist">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        type="button"
-        role="tab"
-        :aria-selected="active === tab.id"
-        class="widget-tab"
-        :class="active === tab.id ? 'widget-tab-active' : ''"
-        @click="active = tab.id"
-      >
-        <i :class="tab.icon" class="text-[15px]" />
-        <span>{{ tab.label }}</span>
-      </button>
-    </nav>
+    <UTabs v-model="active" :items="tabs" variant="underline" />
 
     <WidgetBadgeTab v-if="active === 'badge'" />
     <WidgetDonutTab v-else-if="active === 'donut'" />
     <WidgetStatusTab v-else-if="active === 'status'" />
   </DashboardPageContent>
 </template>
-
-<style scoped>
-.widget-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 8px 16px 0;
-  border-bottom: 1px solid var(--ct-border-subtle);
-}
-.widget-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  font-size: var(--ct-text-sm);
-  color: var(--ct-fg-muted);
-  background: transparent;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
-}
-.widget-tab:hover {
-  color: var(--ct-fg);
-  background-color: var(--ct-surface-1);
-}
-.widget-tab-active {
-  color: var(--ct-primary);
-  border-bottom-color: var(--ct-primary);
-}
-</style>

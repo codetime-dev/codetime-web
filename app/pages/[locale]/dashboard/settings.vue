@@ -96,7 +96,7 @@ const t = useI18N()
           >
             <i :class="tokenVisible ? 'i-tabler-eye-off' : 'i-tabler-eye'" class="text-sm" />
           </button>
-          <RCopyBtn :value="token" class="token-copy" />
+          <UCopyBtn :value="token" class="token-copy" />
         </div>
 
         <p class="set-hint">

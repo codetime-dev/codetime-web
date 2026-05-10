@@ -1004,7 +1004,9 @@ export type V3GetUserPublicStatusData = {
     path: {
         user_id: number;
     };
-    query?: never;
+    query?: {
+        show?: string;
+    };
     url: '/v3/users/{user_id}/public/status';
 };
 

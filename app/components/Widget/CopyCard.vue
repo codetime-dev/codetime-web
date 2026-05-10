@@ -28,7 +28,7 @@ const html = computed(() => `<a href="https://codetime.dev"><img alt="${alt.valu
           type="text"
           readonly
         >
-        <RCopyBtn :value="markdown" class="embed-copy" />
+        <UCopyBtn :value="markdown" class="embed-copy" />
       </div>
       <div class="embed-row">
         <div class="embed-tag">
@@ -41,7 +41,7 @@ const html = computed(() => `<a href="https://codetime.dev"><img alt="${alt.valu
           type="text"
           readonly
         >
-        <RCopyBtn :value="html" class="embed-copy" />
+        <UCopyBtn :value="html" class="embed-copy" />
       </div>
       <div class="embed-row">
         <div class="embed-tag">
@@ -54,7 +54,7 @@ const html = computed(() => `<a href="https://codetime.dev"><img alt="${alt.valu
           type="text"
           readonly
         >
-        <RCopyBtn :value="link" class="embed-copy" />
+        <UCopyBtn :value="link" class="embed-copy" />
       </div>
     </div>
   </PanelSection>

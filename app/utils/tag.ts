@@ -6,7 +6,3 @@ export function getTagDisplay(tag: { emoji?: string | null, name: string }) {
   return tag.name.charAt(0).toUpperCase()
 }
 
-export function getTagFullDisplay(tag: { emoji?: string | null, name: string }) {
-  const display = getTagDisplay(tag)
-  return `${display} ${tag.name}`
-}

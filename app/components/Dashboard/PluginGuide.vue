@@ -26,7 +26,7 @@ const t = useI18N()
       </p>
       <div class="pg-token-row">
         <UInput :model-value="token" readonly type="password" class="pg-token-field" />
-        <RCopyBtn :value="token" />
+        <UCopyBtn :value="token" />
       </div>
     </section>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const t = useI18N()
+const locale = useLocale()
 const headerTabs = computed(() => [
   { label: t.value.dashboard.pageHeader.title.overview, id: 'overview', path: `/dashboard` },
   { label: t.value.dashboard.pageHeader.title.widget ?? 'Widgets', id: 'widgets', path: `/dashboard/widgets` },
@@ -9,8 +10,15 @@ const headerTabs = computed(() => [
   { label: t.value.dashboard.pageHeader.title.settings, id: 'settings', path: `/dashboard/settings` },
 ])
 
-const locale = useLocale()
+const tabItems = computed(() =>
+  headerTabs.value.map(tab => ({
+    id: tab.id,
+    label: tab.label,
+    to: `/${locale.value}${tab.path}`,
+  })),
+)
 const currentTab = useCurrentTab(headerTabs)
+const activeTabId = computed(() => currentTab.value?.id)
 const user = useUser()
 
 const pending = autoResetRef(false, 1000)
@@ -27,17 +35,7 @@ useHead({
     <div class="layout-frame mx-auto max-w-7xl w-full">
       <DashboardTopbar>
         <template #nav>
-          <nav class="dash-tabs px-6 pb-0 flex flex-wrap gap-1">
-            <NuxtLink
-              v-for="tab in headerTabs"
-              :key="tab.id"
-              :to="`/${locale}${tab.path}`"
-              class="dash-tab"
-              :class="{ 'dash-tab-active': tab === currentTab }"
-            >
-              {{ tab.label }}
-            </NuxtLink>
-          </nav>
+          <UTabs :items="tabItems" :active-id="activeTabId" variant="underline" />
         </template>
       </DashboardTopbar>
       <div v-if="pending" class="layout-main">
@@ -97,35 +95,4 @@ useHead({
 }
 .layout-frame::before { left: 0; }
 .layout-frame::after  { right: 0; }
-
-/* Tabs — pill-style, modern */
-.dash-tabs { padding-bottom: 0; }
-.dash-tab {
-  position: relative;
-  padding: 10px 14px;
-  font-size: var(--ct-text-sm);
-  font-weight: var(--ct-weight-medium);
-  color: var(--ct-fg-muted);
-  border-radius: 0;
-  transition: color var(--ct-duration-fast) var(--ct-ease),
-              background-color var(--ct-duration-fast) var(--ct-ease);
-}
-.dash-tab:hover { color: var(--ct-fg); background: var(--ct-surface-1); }
-.dash-tab-active {
-  color: var(--ct-primary);
-  background: var(--ct-primary-soft);
-}
-.dash-tab-active:hover {
-  color: var(--ct-primary);
-  background: color-mix(in srgb, var(--ct-primary) 18%, transparent);
-}
-.dash-tab-active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  background: var(--ct-primary);
-}
 </style>

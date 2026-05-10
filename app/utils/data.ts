@@ -114,28 +114,6 @@ export function transformTopLanguageData(data: TopData[]) {
   })
 }
 
-export function useMergedFilters(filters: FilterItem[]) {
-  return computed(() => {
-    const map = new Map<string, string>()
-    for (const f of filters) {
-      if (map.has(f.key)) {
-        const value = map.get(f.key)
-        if (value) {
-          map.set(f.key, `${value},${f.value}`)
-        }
-      }
-      else {
-        map.set(f.key, f.value)
-      }
-    }
-    const res: FilterItem[] = []
-    for (const [key, value] of map.entries()) {
-      res.push({ key, value })
-    }
-    return res
-  })
-}
-
 export function useProcessedData(data: MaybeRef<{
   duration: number
   time: string

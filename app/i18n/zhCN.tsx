@@ -368,12 +368,20 @@ export const zhCN: Partial<Translation> = {
       },
       status: {
         title: '正在编码',
+        primary: '主区域',
+        secondary: '副区域',
+        fields: {
+          project: '项目名',
+          language: '语言',
+          editor: '编辑器',
+          none: '不显示',
+        },
       },
       limit: {
         upgrade: '升级 Pro',
         donutFree: '免费计划：最多 30 天与 5 种语言。升级 Pro 解锁完整范围。',
         donutExceeds: '当前选择超出免费计划上限（30 天 / 5 种语言），将自动回退到上限。',
-        statusFree: '免费计划隐藏当前项目名称。Pro 显示完整状态。',
+        statusFree: '免费计划：项目名与语言只能显示其一。Pro 可同时显示。',
       },
     },
     settings: {

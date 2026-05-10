@@ -367,12 +367,20 @@ export const en: Translation = {
       },
       status: {
         title: 'Currently coding',
+        primary: 'Primary slot',
+        secondary: 'Secondary slot',
+        fields: {
+          project: 'Project',
+          language: 'Language',
+          editor: 'Editor',
+          none: 'None',
+        },
       },
       limit: {
         upgrade: 'Upgrade',
         donutFree: 'Free plan: up to 30 days and 5 languages. Pro removes the cap.',
         donutExceeds: 'Free plan caps the chart at 30 days and 5 languages — values will be clamped.',
-        statusFree: 'Free plan hides the active project name. Pro shows the full status.',
+        statusFree: 'Free plan: pick project name OR language for the card. Pro shows both.',
       },
     },
     settings: {
