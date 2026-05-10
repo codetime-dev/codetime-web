@@ -36,7 +36,7 @@ withDefaults(
       padding: 72px 80px;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0067cc 100%);
       color: #f8fafc;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
     "
   >
     <div style="display: flex; align-items: center; gap: 16px;">

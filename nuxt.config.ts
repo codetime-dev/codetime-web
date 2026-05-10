@@ -19,11 +19,9 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/tokens.css'],
   ogImage: {
-    // Default renderer is satori (fast, edge-friendly).
-    // Latin baseline only at the global level; per-page calls extend the
-    // font list with the appropriate CJK family via getOgFonts(locale)
-    // so non-CJK pages stay slim.
-    fonts: ['Inter:400', 'Inter:600', 'Inter:700'],
+    // Fonts are resolved by @nuxt/fonts (scans font-family in OG components
+    // and subsets per request). CJK fallbacks are declared in each OG
+    // template's font-family stack — only glyphs actually used are shipped.
     defaults: {
       cacheMaxAgeSeconds: 60 * 60 * 24 * 7,
     },
@@ -52,7 +50,7 @@ export default defineNuxtConfig({
       download: true,
       families: {},
     },
-  ], '@sentry/nuxt'],
+  ], '@sentry/nuxt', '@nuxt/fonts'],
 
   routeRules: {
     // Widget SVG endpoints set their own cache headers in the handler. Override

@@ -95,7 +95,6 @@ if (user.value && !userHidden.value) {
   }, {
     width: 1200,
     height: 630,
-    fonts: getOgFonts(locale.value),
     cacheMaxAgeSeconds: 60 * 60 * 24,
   })
 }
