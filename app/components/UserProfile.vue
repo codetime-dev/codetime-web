@@ -314,19 +314,12 @@ async function saveBio() {
   }
 }
 
-// SEO
+// SEO meta + OG image are configured at the page level
+// (pages/[locale]/user/[uid]/index.vue) so we don't override them here.
+// Adding ogType: 'profile' as it is profile-specific and not covered by the page.
 watchEffect(() => {
   if (user.value && !userHidden.value) {
-    useSeoMeta({
-      title: `${user.value.username} · CodeTime`,
-      description: user.value.bio
-        || `View ${user.value.username}'s programming analytics on CodeTime.`,
-      ogTitle: `${user.value.username} · CodeTime`,
-      ogDescription: user.value.bio || `${user.value.username}'s coding analytics`,
-      ogType: 'profile',
-      ogImage: user.value.avatar || '/icon.png',
-      twitterCard: 'summary',
-    })
+    useSeoMeta({ ogType: 'profile' })
   }
 })
 

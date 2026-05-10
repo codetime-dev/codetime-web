@@ -2,6 +2,7 @@
 import { RokuProvider } from '@roku-ui/vue'
 
 const t = useI18N()
+const locale = useLocale()
 
 const route = useRoute()
 
@@ -20,13 +21,17 @@ watchEffect(() => {
   }
 })
 
-// defineOgImageComponent('NuxtSeo', {
-//   title: t.value.meta.title,
-//   description: t.value.meta.description,
-//   colorMode: 'dark',
-//   theme: '#0067cc',
-//   siteLogo: 'https://codetime.dev/icon.png',
-// })
+// Site-wide default OG image. Per-page overrides (e.g. annual-report,
+// user profile) call defineOgImageComponent themselves and take precedence.
+defineOgImageComponent('NuxtSeo', {
+  title: t.value.meta.title,
+  description: t.value.meta.description,
+  colorMode: 'dark',
+  theme: '#0067cc',
+  siteLogo: 'https://codetime.dev/icon.png',
+}, {
+  fonts: getOgFonts(locale.value),
+})
 </script>
 
 <template>

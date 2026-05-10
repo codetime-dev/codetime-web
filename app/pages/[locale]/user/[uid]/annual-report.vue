@@ -33,8 +33,24 @@ watchEffect(() => {
     twitterTitle: t.value.meta.twitterTitle,
     twitterDescription: t.value.meta.twitterDescription,
     ogUrl: 'https://codetime.dev',
-    twitterCard: 'summary',
+    twitterCard: 'summary_large_image',
   })
+})
+
+defineOgImageComponent('AnnualReport', {
+  username: user.value?.username ?? '',
+  avatar: user.value?.avatar ?? '',
+  year: reportYear.value,
+  totalHours: Math.round(sumMinutes.value / 60),
+  activeDays: activeDays.value,
+  title: t.value.annualReport.annualCodeTimeReport(reportYear.value),
+  description: t.value.meta.description,
+  locale: locale.value,
+}, {
+  width: 1200,
+  height: 630,
+  fonts: getOgFonts(locale.value),
+  cacheMaxAgeSeconds: 60 * 60 * 24,
 })
 
 const { share } = useShare()

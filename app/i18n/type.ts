@@ -285,11 +285,19 @@ export type Translation = {
         title: string
         primary?: string
         secondary?: string
+        style?: string
+        color?: string
+        colorDefault?: string
+        background?: string
         fields?: {
           project: string
           language: string
           editor: string
           none: string
+        }
+        styles?: {
+          minimal: string
+          detailed: string
         }
       }
       limit: {
@@ -297,6 +305,7 @@ export type Translation = {
         donutFree: string
         donutExceeds: string
         statusFree: string
+        statusFreeStyle?: string
       }
     }
     settings: {

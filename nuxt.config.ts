@@ -18,11 +18,16 @@ export default defineNuxtConfig({
     name: 'Code Time',
   },
   css: ['~/assets/tokens.css'],
-  // ogImage: {
-  //   fonts: [
-  //     'Noto+Sans+SC:400', // Too big for workers
-  //   ],
-  // },
+  ogImage: {
+    // Default renderer is satori (fast, edge-friendly).
+    // Latin baseline only at the global level; per-page calls extend the
+    // font list with the appropriate CJK family via getOgFonts(locale)
+    // so non-CJK pages stay slim.
+    fonts: ['Inter:400', 'Inter:600', 'Inter:700'],
+    defaults: {
+      cacheMaxAgeSeconds: 60 * 60 * 24 * 7,
+    },
+  },
   gtag: {
     id: 'G-36N091FBKT',
   },
@@ -41,7 +46,7 @@ export default defineNuxtConfig({
     ],
   },
 
-  modules: ['@unocss/nuxt', '@vueuse/nuxt', '@nuxtjs/sitemap', '@nuxt/image', 'nuxt-gtag', [
+  modules: ['@unocss/nuxt', '@vueuse/nuxt', '@nuxtjs/sitemap', 'nuxt-og-image', '@nuxt/image', 'nuxt-gtag', [
     '@nuxtjs/google-fonts',
     {
       download: true,

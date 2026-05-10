@@ -8,16 +8,23 @@ const styleOptions = computed(() => [
   { label: t.value.dashboard.badge.style.social, id: 'social' },
 ])
 const styleObj = ref(styleOptions.value[0])
-const color = ref<string>('0284c7')
+const color = ref<string>('#0284c7')
 const colorPresets = [
-  { hex: '0284c7', label: 'sky' },
-  { hex: '6366f1', label: 'indigo' },
-  { hex: '10b981', label: 'emerald' },
-  { hex: 'f59e0b', label: 'amber' },
-  { hex: 'ef4444', label: 'red' },
-  { hex: 'a855f7', label: 'violet' },
-  { hex: '222222', label: 'graphite' },
+  { hex: '#0284c7', label: 'sky' },
+  { hex: '#6366f1', label: 'indigo' },
+  { hex: '#10b981', label: 'emerald' },
+  { hex: '#f59e0b', label: 'amber' },
+  { hex: '#ef4444', label: 'red' },
+  { hex: '#a855f7', label: 'violet' },
+  { hex: '#222222', label: 'graphite' },
 ]
+function normalizedColor(value: string) {
+  const v = (value ?? '').trim()
+  if (!v) {
+    return ''
+  }
+  return /^[0-9a-f]{3,8}$/i.test(v) ? `#${v}` : v
+}
 const user = useUser()
 const project = ref<{ label: string, id: string } | null>(null)
 const language = ref<string>('')
@@ -38,7 +45,7 @@ const rawParams = computed(() => ({
   uid: user.value?.id,
   project: project.value?.id,
   minutes: String(Number(days.value) * 24 * 60),
-  color: color.value,
+  color: normalizedColor(color.value).replace(/^#/, ''),
   style: styleObj.value?.id ?? '',
   language: language.value,
 }))
@@ -55,7 +62,7 @@ const link = computed(() => {
   const queryString = new URLSearchParams(filteredParams).toString()
   const url = `${apiHost}/v3/users/shield?${queryString}`
   const safeUrl = encodeURIComponent(url)
-  return `https://shields.jannchie.com/endpoint?style=${params.style}&color=${params.color}&url=${safeUrl}`
+  return `https://shields.jannchie.com/endpoint?style=${params.style}&color=${encodeURIComponent(params.color)}&url=${safeUrl}`
 })
 </script>
 
@@ -96,8 +103,7 @@ const link = computed(() => {
         </div>
         <div class="badge-row-control badge-color-row">
           <div class="badge-color-input">
-            <span class="badge-color-swatch" :style="{ background: `#${color}` }" />
-            <span class="badge-color-hash">#</span>
+            <span class="badge-color-swatch" :style="{ background: normalizedColor(color) }" />
             <input
               v-model="color"
               class="line-input badge-color-textfield"
@@ -113,8 +119,8 @@ const link = computed(() => {
               :key="p.hex"
               type="button"
               class="badge-color-preset"
-              :class="color.toLowerCase() === p.hex.toLowerCase() ? 'badge-color-preset-active' : ''"
-              :style="{ background: `#${p.hex}` }"
+              :class="normalizedColor(color).toLowerCase() === p.hex.toLowerCase() ? 'badge-color-preset-active' : ''"
+              :style="{ background: p.hex }"
               :aria-label="p.label"
               :title="p.label"
               @click="selectColor(p.hex)"
@@ -180,11 +186,10 @@ const link = computed(() => {
 .badge-style-btn-active:hover { background-color: color-mix(in srgb, var(--color-primary-1) 22%, transparent); }
 
 .badge-color-row { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; align-items: center; justify-content: space-between; }
-.badge-color-input { display: inline-flex; align-items: center; gap: 0.55rem; flex-grow: 1; min-width: 0; }
+.badge-color-input { display: inline-flex; align-items: center; gap: 0.55rem; flex: 1 1 auto; min-width: 0; }
 .badge-color-swatch { display: inline-block; width: 1.5rem; height: 1.5rem; flex-shrink: 0; box-shadow: inset 0 0 0 1px var(--ct-border-strong); }
-.badge-color-hash { font-family: var(--ct-font-mono); font-size: 13px; color: var(--ct-fg-subtle); }
-.badge-color-textfield { width: 11rem; flex-shrink: 0; letter-spacing: 0.05em; text-transform: lowercase; }
-.badge-color-presets { display: inline-flex; gap: 0.45rem; margin-left: auto; }
+.badge-color-textfield { width: 11rem; min-width: 6rem; flex: 1 1 11rem; letter-spacing: 0.05em; }
+.badge-color-presets { display: inline-flex; flex-wrap: wrap; gap: 0.45rem; flex-shrink: 0; margin-left: auto; }
 .badge-color-preset { width: 1.4rem; height: 1.4rem; border: 0; cursor: pointer; position: relative; box-shadow: inset 0 0 0 1px var(--ct-border); transition: transform 160ms ease, box-shadow 160ms ease; }
 .badge-color-preset:hover { transform: translateY(-1px); }
 .badge-color-preset-active { box-shadow: inset 0 0 0 1px var(--ct-bg), 0 0 0 1px var(--color-primary-1); }

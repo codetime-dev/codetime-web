@@ -369,11 +369,19 @@ export const en: Translation = {
         title: 'Currently coding',
         primary: 'Primary slot',
         secondary: 'Secondary slot',
+        style: 'Style',
+        color: 'Accent color',
+        colorDefault: 'Default',
+        background: 'Background',
         fields: {
           project: 'Project',
           language: 'Language',
           editor: 'Editor',
           none: 'None',
+        },
+        styles: {
+          minimal: 'Minimal',
+          detailed: 'Detailed',
         },
       },
       limit: {
@@ -381,6 +389,7 @@ export const en: Translation = {
         donutFree: 'Free plan: up to 30 days and 5 languages. Pro removes the cap.',
         donutExceeds: 'Free plan caps the chart at 30 days and 5 languages — values will be clamped.',
         statusFree: 'Free plan: pick project name OR language for the card. Pro shows both.',
+        statusFreeStyle: 'Free plan: minimal style with default colors only. Pro unlocks the detailed card and custom accent / background colors.',
       },
     },
     settings: {

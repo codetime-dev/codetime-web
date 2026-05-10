@@ -370,11 +370,19 @@ export const zhCN: Partial<Translation> = {
         title: '正在编码',
         primary: '主区域',
         secondary: '副区域',
+        style: '样式',
+        color: '强调色',
+        colorDefault: '默认',
+        background: '背景色',
         fields: {
           project: '项目名',
           language: '语言',
           editor: '编辑器',
           none: '不显示',
+        },
+        styles: {
+          minimal: '极简',
+          detailed: '详细',
         },
       },
       limit: {
@@ -382,6 +390,7 @@ export const zhCN: Partial<Translation> = {
         donutFree: '免费计划：最多 30 天与 5 种语言。升级 Pro 解锁完整范围。',
         donutExceeds: '当前选择超出免费计划上限（30 天 / 5 种语言），将自动回退到上限。',
         statusFree: '免费计划：项目名与语言只能显示其一。Pro 可同时显示。',
+        statusFreeStyle: '免费计划：仅可使用极简样式与默认配色。Pro 解锁详细样式与自定义强调色、背景色。',
       },
     },
     settings: {
