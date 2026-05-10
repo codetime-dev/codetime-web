@@ -68,14 +68,11 @@ const active = ref(0)
   justify-content: center;
   gap: 0.55rem;
   padding: 0.85rem 0.5rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  font-size: var(--ct-text-xs);
+      color: var(--ct-fg-subtle);
   background: transparent;
   border: 0;
-  border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 25%, transparent);
+  border-left: 1px solid var(--ct-border-subtle);
   cursor: pointer;
   transition: color 180ms ease, background-color 180ms ease;
 }
@@ -85,8 +82,8 @@ const active = ref(0)
 }
 
 .lb-switch-btn:hover {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.22);
+  color: var(--ct-fg);
+  background-color: var(--ct-surface-2);
 }
 
 .lb-switch-btn-active {
@@ -96,8 +93,7 @@ const active = ref(0)
 
 .lb-switch-num {
   font-size: 9.5px;
-  letter-spacing: 0.28em;
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 /* Grid */
@@ -111,7 +107,7 @@ const active = ref(0)
     grid-template-columns: 1fr 1fr 1fr;
   }
   .lb-grid > .lb-col + .lb-col {
-    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+    border-left: 1px solid var(--ct-border-subtle);
   }
 }
 

@@ -68,7 +68,7 @@ const t = useI18N()
     <!-- UPLOAD TOKEN -->
     <PanelSection num="02" :title="t.dashboard.settings.token.title" meta="api · credential" flush>
       <template #icon>
-        <i class="i-tabler-key text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-key text-[15px] text-ct-fg-muted" />
       </template>
 
       <div class="set-section">
@@ -115,14 +115,14 @@ const t = useI18N()
     <!-- THEME -->
     <PanelSection num="03" :title="t.dashboard.settings.theme.title" meta="appearance" flush>
       <template #icon>
-        <i class="i-tabler-palette text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-palette text-[15px] text-ct-fg-muted" />
       </template>
 
       <div class="theme-grid">
         <ClientOnly>
           <template #placeholder>
-            <div class="bg-surface-variant-1/30 h-9 animate-pulse" />
-            <div class="bg-surface-variant-1/30 h-9 animate-pulse" />
+            <div class="bg-ct-surface-2 h-9 animate-pulse" />
+            <div class="bg-ct-surface-2 h-9 animate-pulse" />
           </template>
           <ThemeItem theme="dark" />
           <ThemeItem theme="light" />
@@ -139,7 +139,7 @@ const t = useI18N()
     <!-- LANGUAGE -->
     <PanelSection num="04" :title="t.dashboard.settings.language.title" meta="locale" flush>
       <template #icon>
-        <i class="i-tabler-language text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-language text-[15px] text-ct-fg-muted" />
       </template>
 
       <div class="set-section">
@@ -155,7 +155,7 @@ const t = useI18N()
     <!-- EXPORT -->
     <PanelSection num="05" :title="t.dashboard.settings.export.title" meta="csv · download" flush>
       <template #icon>
-        <i class="i-tabler-file-export text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-file-export text-[15px] text-ct-fg-muted" />
       </template>
 
       <div class="set-section">
@@ -164,27 +164,21 @@ const t = useI18N()
         </p>
 
         <div class="set-row">
-          <button
-            type="button"
-            class="line-btn"
-            :class="exportSucceed ? 'line-btn-ok' : exportFailed ? 'line-btn-danger' : 'line-btn-primary'"
-            :disabled="exporting"
+          <UButton
+            variant="secondary"
+            :loading="exporting"
+            :icon-left="exportSucceed
+              ? 'i-tabler-check'
+              : exportFailed
+                ? 'i-tabler-alert-triangle'
+                : 'i-tabler-file-export'"
             @click="exportData"
           >
-            <i
-              class="text-sm"
-              :class="{
-                'i-tabler-loader animate-spin': exporting,
-                'i-tabler-check': exportSucceed,
-                'i-tabler-alert-triangle': exportFailed,
-                'i-tabler-file-export': !exporting && !exportSucceed && !exportFailed,
-              }"
-            />
             <span v-if="exporting">{{ t.dashboard.settings.export.buttonExporting }}</span>
             <span v-else-if="exportFailed">{{ t.dashboard.settings.export.buttonFailed }}</span>
             <span v-else-if="exportSucceed">{{ t.dashboard.settings.export.buttonSucceed }}</span>
             <span v-else>{{ t.dashboard.settings.export.button }}</span>
-          </button>
+          </UButton>
 
           <a
             v-if="exportURL"
@@ -192,8 +186,9 @@ const t = useI18N()
             :download="fileName"
             class="export-link"
           >
-            <i class="i-tabler-arrow-down text-sm" />
-            <span>{{ t.dashboard.settings.export.download }}</span>
+            <UButton variant="ghost" icon-left="i-tabler-arrow-down">
+              {{ t.dashboard.settings.export.download }}
+            </UButton>
           </a>
         </div>
 
@@ -206,7 +201,7 @@ const t = useI18N()
     <!-- OTHER -->
     <PanelSection num="06" :title="t.dashboard.settings.other.title" meta="session" flush>
       <template #icon>
-        <i class="i-tabler-dots-circle-horizontal text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-dots-circle-horizontal text-[15px] text-ct-fg-muted" />
       </template>
 
       <div class="set-section">
@@ -214,10 +209,9 @@ const t = useI18N()
           {{ t.dashboard.settings.other.description }}
         </p>
         <div class="set-row">
-          <button type="button" class="line-btn" @click="logout">
-            <i class="i-tabler-logout text-sm" />
-            <span>{{ t.dashboard.settings.other.logout }}</span>
-          </button>
+          <UButton variant="secondary" icon-left="i-tabler-logout" @click="logout">
+            {{ t.dashboard.settings.other.logout }}
+          </UButton>
         </div>
       </div>
     </PanelSection>
@@ -236,21 +230,21 @@ const t = useI18N()
 
 .set-foot {
   padding: 0.75rem 1.25rem 1rem;
-  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  border-top: 1px solid var(--ct-border-subtle);
 }
 
 .set-desc {
   font-size: 12.5px;
   letter-spacing: 0.02em;
   line-height: 1.7;
-  color: color-mix(in srgb, var(--r-surface-text-color) 75%, transparent);
+  color: var(--ct-fg-muted);
 }
 
 .set-hint {
   font-size: 11.5px;
   letter-spacing: 0.02em;
   line-height: 1.7;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  color: var(--ct-fg-subtle);
 }
 
 .set-hint-inline {
@@ -271,20 +265,20 @@ const t = useI18N()
   grid-template-columns: 5rem 1fr auto auto;
   align-items: stretch;
   height: 2.5rem;
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  background-color: var(--ct-surface-1);
   transition: background-color 180ms ease;
 }
 
 .token-bar:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.24);
+  background-color: var(--ct-surface-2);
 }
 
 [data-scheme="light"] .token-bar {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
+  background-color: color-mix(in srgb, var(--ct-fg) 5%, transparent);
 }
 
 [data-scheme="light"] .token-bar:hover {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 8%, transparent);
+  background-color: color-mix(in srgb, var(--ct-fg) 8%, transparent);
 }
 
 .token-tag {
@@ -292,12 +286,9 @@ const t = useI18N()
   align-items: center;
   gap: 0.45rem;
   padding: 0 0.95rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--color-primary-1);
-  border-right: 1px solid color-mix(in srgb, var(--r-surface-border-color) 25%, transparent);
+  font-size: var(--ct-text-xs);
+      color: var(--color-primary-1);
+  border-right: 1px solid var(--ct-border-subtle);
 }
 
 .token-field {
@@ -305,10 +296,10 @@ const t = useI18N()
   min-width: 0;
   height: 100%;
   padding: 0 1rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ct-font-mono);
   font-size: 12.5px;
   letter-spacing: 0.05em;
-  color: var(--r-surface-text-color);
+  color: var(--ct-fg);
   background: transparent;
   border: 0;
   outline: 0;
@@ -322,15 +313,15 @@ const t = useI18N()
   height: 100%;
   background: transparent;
   border: 0;
-  border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 25%, transparent);
+  border-left: 1px solid var(--ct-border-subtle);
   cursor: pointer;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  color: var(--ct-fg-subtle);
   transition: color 180ms ease, background-color 180ms ease;
 }
 
 .token-eye:hover {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.22);
+  color: var(--ct-fg);
+  background-color: var(--ct-surface-2);
 }
 
 .token-copy {
@@ -348,13 +339,13 @@ const t = useI18N()
     grid-template-columns: 1fr 1fr;
   }
   .theme-grid > :nth-child(2) {
-    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+    border-left: 1px solid var(--ct-border-subtle);
   }
 }
 
 @media (max-width: 767px) {
   .theme-grid > :nth-child(2) {
-    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+    border-top: 1px solid var(--ct-border-subtle);
   }
 }
 
@@ -365,11 +356,9 @@ const t = useI18N()
   gap: 0.4rem;
   height: 2.25rem;
   padding: 0 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
+  font-size: var(--ct-text-xs);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-primary-1);
+    color: var(--color-primary-1);
   text-decoration: none;
   transition: color 180ms ease, background-color 180ms ease;
 }
@@ -386,12 +375,10 @@ const t = useI18N()
   height: 2.25rem;
   padding: 0 0.95rem;
   border-radius: 0.375rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
+  font-size: var(--ct-text-xs);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+    color: var(--ct-fg);
+  background-color: var(--ct-surface-1);
   border: 0;
   cursor: pointer;
   transition: background-color 180ms ease, color 180ms ease, opacity 180ms ease;
@@ -399,7 +386,7 @@ const t = useI18N()
 }
 
 .line-btn:hover:not(:disabled) {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
+  background-color: var(--ct-surface-2);
 }
 
 .line-btn:disabled {

@@ -48,9 +48,9 @@ export const en: Translation = {
     alreadyStatistical: 'Coding time already tracked',
     minutes: 'minutes',
     loginWithGithub: 'Login with GitHub',
-    freeMessage: 'Currently completely free, no credit card required',
+    freeMessage: 'Free to start, no credit card required. Upgrade to Pro when you need it.',
     demo: 'Demo',
-    heroBadge: 'v3 · analytics',
+    heroBadge: 'focus · private · open',
     scroll: 'scroll',
     sections: {
       globalImpact: 'global · impact',
@@ -69,14 +69,18 @@ export const en: Translation = {
       save: {
         title: 'Save your coding time data forever.',
         description: 'We know the beauty of historical data. Nothing is more frustrating than having your own hard work erased. In order for all users to be able to review their growth history even after many years, we will save your data forever, until you actively destroy them, even if you have never paid.',
+        statRetention: 'Forever retention',
+        statResolution: 'Per-minute resolution',
+        statCost: 'Free to keep',
       },
       export: {
         title: 'Support data export.',
         description: 'The safest place in the world is your own hard drive. Therefore, we support data export, you can quit at any time, and connect to other platforms or self-built services.',
       },
       editor: {
-        title: 'Support multiple editors.',
-        description: 'We are a very small team. This means that we cannot support all IDEs or code editors. However, we currently support VSCode and JetBrain series IDEs. We believe that they cover most of the user needs. We will try our best to support more platforms and benefit more people.',
+        title: 'Built for the editors you already use.',
+        description: 'First-class plugins for VS Code and the full JetBrains family (IntelliJ IDEA, PyCharm, WebStorm, GoLand, CLion and more). VS Code-derived editors work out of the box too — including Cursor, Windsurf and Google Antigravity. More platforms on the way.',
+        more: 'more',
       },
     },
     pricing: {

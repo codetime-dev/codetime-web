@@ -12,13 +12,13 @@ defineProps<{
     <div class="up-section-divider" aria-hidden="true">
       <span class="up-section-divider-fill" />
     </div>
-    <header class="up-section-header bg-surface-variant-1/30 px-5.5 py-3 flex flex-wrap gap-3.5 items-center sm:flex-nowrap sm:gap-3.5">
+    <header class="up-section-header px-5.5 py-3 bg-ct-surface-2 flex flex-wrap gap-3.5 items-center sm:flex-nowrap sm:gap-3.5">
       <span class="up-section-num text-[13px] tracking-[0.14em] font-mono tabular-nums">{{ num }}</span>
       <slot name="icon" />
-      <span class="text-[14px] text-surface tracking-[0.16em] font-medium">{{ title }}</span>
+      <span class="text-[14px] text-ct-fg tracking-[0.16em] font-medium">{{ title }}</span>
       <span
         v-if="meta"
-        class="text-surface-dimmed/80 text-[13px] tracking-[0.04em] font-mono ml-0 ml-auto text-left text-right flex-basis-full min-w-0 break-words tabular-nums sm:ml-auto sm:text-right sm:flex-none"
+        class="text-[13px] text-ct-fg-muted tracking-[0.04em] font-mono ml-0 ml-auto text-left text-right flex-basis-full min-w-0 break-words tabular-nums sm:ml-auto sm:text-right sm:flex-none"
       >{{ meta }}</span>
     </header>
     <div :class="flush ? '' : 'px-5.5 py-4.5'">
@@ -33,7 +33,7 @@ defineProps<{
 }
 
 .up-section-header {
-  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 40%, transparent);
+  border-bottom: 1px solid var(--ct-border);
 }
 
 .up-section-divider {
@@ -52,7 +52,7 @@ defineProps<{
   left: 50%;
   width: 100vw;
   height: 1px;
-  background: var(--r-surface-border-color);
+  background: var(--ct-border);
   opacity: 0.32;
   transform: translateX(-50%);
   pointer-events: none;
@@ -69,7 +69,7 @@ defineProps<{
 .up-section-divider-fill {
   position: absolute;
   inset: 1px 0;
-  background-color: var(--r-surface-border-color);
+  background-color: var(--ct-border);
   opacity: 0.22;
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");
   mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");

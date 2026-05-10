@@ -14,7 +14,7 @@ const query = ref(modelValue.value?.label ?? '')
 const debounced = refDebounced(query, 250)
 const activeIdx = ref(0)
 
-const { data } = await useAsyncData(async () => {
+const { data } = await useAsyncData('project-search', async () => {
   if (!debounced.value) {
     return null
   }
@@ -153,139 +153,97 @@ onClickOutside(root, () => {
 </template>
 
 <style scoped>
-.proj-select {
-  position: relative;
-  width: 100%;
-}
+.proj-select { position: relative; width: 100%; }
 
 .line-input {
   display: block;
   width: 100%;
-  height: 2.25rem;
-  padding: 0 2rem 0 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
-  border: 0;
+  height: 36px;
+  padding: 0 32px 0 12px;
+  font-size: var(--ct-text-base);
+  color: var(--ct-fg);
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
   outline: 0;
-  transition: background-color 180ms ease, box-shadow 180ms ease;
+  transition: border-color var(--ct-duration-fast) var(--ct-ease),
+              box-shadow var(--ct-duration-fast) var(--ct-ease);
 }
-
-.line-input:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.26);
-}
-
+.line-input:hover { border-color: var(--ct-border-strong); }
 .line-input:focus {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
-  box-shadow: inset 0 -1px 0 var(--color-primary-1);
+  border-color: var(--ct-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-primary) 18%, transparent);
 }
-
-.line-input::placeholder {
-  color: color-mix(in srgb, var(--r-surface-text-color) 35%, transparent);
-}
+.line-input::placeholder { color: var(--ct-fg-subtle); }
 
 .proj-clear,
 .proj-caret {
   position: absolute;
   top: 50%;
-  right: 0.6rem;
+  right: 8px;
   transform: translateY(-50%);
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  color: var(--ct-fg-subtle);
 }
-
-.proj-caret {
-  pointer-events: none;
-}
-
+.proj-caret { pointer-events: none; }
 .proj-clear {
   background: transparent;
   border: 0;
   cursor: pointer;
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 22px;
+  height: 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 180ms ease, background-color 180ms ease;
+  border-radius: var(--ct-radius-md);
+  transition: color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease);
 }
-
-.proj-clear:hover {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
-}
+.proj-clear:hover { color: var(--ct-fg); background: var(--ct-surface-2); }
 
 .proj-popover {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(100% + 2px);
+  top: calc(100% + 6px);
   z-index: 30;
   max-height: 14rem;
   overflow-y: auto;
-  background-color: var(--r-surface-background-base-color);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 50%, transparent),
-    0 12px 24px -8px rgb(0 0 0 / 0.35);
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
+  box-shadow: var(--ct-shadow-lg);
+  padding: 4px;
 }
-
 .proj-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 8px;
   width: 100%;
-  padding: 0.55rem 0.85rem;
+  padding: 8px 10px;
   background: transparent;
   border: 0;
+  border-radius: var(--ct-radius-md);
   cursor: pointer;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  color: var(--r-surface-text-color);
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg);
   text-align: left;
-  transition: background-color 140ms ease;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease);
 }
-
-.proj-option-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.proj-option-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proj-option:hover { background: var(--ct-surface-1); color: var(--ct-fg); }
+.proj-option-active {
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary);
 }
-
-.proj-option-active,
-.proj-option:hover {
-  background-color: color-mix(in srgb, var(--color-primary-1) 12%, transparent);
-}
-
-[data-scheme="light"] .line-input {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
-}
-
-[data-scheme="light"] .line-input:hover {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 8%, transparent);
-}
-
-[data-scheme="light"] .line-input:focus {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 11%, transparent);
-}
-
-[data-scheme="light"] .proj-popover {
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--r-surface-text-color) 12%, transparent),
-    0 12px 28px -10px rgb(0 0 0 / 0.18);
-}
-
-[data-scheme="light"] .proj-option-active,
-[data-scheme="light"] .proj-option:hover {
-  background-color: color-mix(in srgb, var(--color-primary-1) 18%, transparent);
+.proj-option-active:hover {
+  background: color-mix(in srgb, var(--ct-primary) 18%, transparent);
+  color: var(--ct-primary);
 }
 
 .proj-empty {
-  padding: 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  padding: 14px;
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-subtle);
 }
 </style>

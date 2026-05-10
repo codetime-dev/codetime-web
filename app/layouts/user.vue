@@ -43,8 +43,8 @@ const sectionLabel = computed(() => {
               loading="lazy"
               decoding="async"
             >
-            <span class="text-[14px] text-surface tracking-[0.3em] font-mono font-semibold">CODE·TIME</span>
-            <span class="text-surface-dimmed/40 text-[12px] font-mono">/</span>
+            <span class="text-[14px] text-ct-fg tracking-[0.3em] font-mono font-semibold">CODE·TIME</span>
+            <span class="text-[12px] text-ct-fg-subtle font-mono">/</span>
             <span class="text-[12px] text-primary tracking-[0.24em] font-mono uppercase">{{ sectionLabel }}</span>
           </NuxtLink>
 
@@ -53,37 +53,37 @@ const sectionLabel = computed(() => {
               <NuxtLink
                 v-if="user"
                 :to="`/${locale}/dashboard`"
-                class="text-[13px] text-surface-dimmed tracking-[0.08em] font-mono inline-flex gap-2 transition-colors items-center hover:text-primary"
+                class="text-[13px] text-ct-fg-muted tracking-[0.08em] font-mono inline-flex gap-2 transition-colors items-center hover:text-primary"
               >
                 <img
                   v-if="user.avatar"
                   :src="user.avatar"
                   alt=""
-                  class="border-surface-dimmed/30 border rounded-full h-5 w-5 object-cover"
+                  class="border border-ct-border rounded-full h-5 w-5 object-cover"
                 >
                 <span class="hidden sm:inline">{{ user.username }}</span>
                 <span
                   class="text-[11px] tracking-[0.14em] font-mono px-2 py-0.5 border rounded-full"
                   :class="String(user.plan).toLowerCase() === 'pro'
-                    ? 'border-primary/30 text-primary bg-primary/12'
-                    : 'border-surface-dimmed/25 text-surface-dimmed/60'"
+                    ? 'border-primary/30 text-primary bg-ct-primary-soft'
+                    : 'border-ct-border text-ct-fg-muted'"
                 >
                   {{ String(user.plan ?? 'free').toUpperCase() }}
                 </span>
               </NuxtLink>
               <div v-else-if="pending" class="flex gap-2 items-center">
-                <div class="bg-surface-variant-1/50 h-5 w-5 animate-pulse" />
-                <div class="bg-surface-variant-1/50 h-3 w-14 hidden animate-pulse sm:block" />
+                <div class="bg-ct-surface-2 h-5 w-5 animate-pulse" />
+                <div class="bg-ct-surface-2 h-3 w-14 hidden animate-pulse sm:block" />
               </div>
               <NuxtLink
                 v-else
                 :to="`/${locale}/login`"
-                class="text-[13px] text-surface-dimmed tracking-[0.08em] font-mono transition-colors hover:text-primary"
+                class="text-[13px] text-ct-fg-muted tracking-[0.08em] font-mono transition-colors hover:text-primary"
               >
                 [ LOGIN ]
               </NuxtLink>
             </ClientOnly>
-            <span class="text-surface-dimmed/30">·</span>
+            <span class="text-ct-fg-subtle">·</span>
             <LanguageSelect />
           </div>
         </div>
@@ -94,9 +94,9 @@ const sectionLabel = computed(() => {
       </main>
 
       <footer class="layout-foot relative">
-        <div class="text-surface-dimmed/55 text-[12px] tracking-[0.12em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
+        <div class="text-[12px] text-ct-fg-muted tracking-[0.12em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
           <span>datreks · {{ new Date().getFullYear() }}</span>
-          <span class="text-surface-dimmed/25">·</span>
+          <span class="text-ct-fg-subtle">·</span>
           <NuxtLink
             to="https://github.com/Jannchie/codetime-web-v3"
             target="_blank"
@@ -105,7 +105,7 @@ const sectionLabel = computed(() => {
             <i class="i-tabler-brand-github text-sm" />
             <span class="hidden sm:inline">github</span>
           </NuxtLink>
-          <span class="text-surface-dimmed/25">·</span>
+          <span class="text-ct-fg-subtle">·</span>
           <NuxtLink
             to="https://discord.gg/WWEQrWCkkP"
             target="_blank"
@@ -114,7 +114,7 @@ const sectionLabel = computed(() => {
             <i class="i-tabler-brand-discord text-sm" />
             <span class="hidden sm:inline">discord</span>
           </NuxtLink>
-          <span class="text-surface-dimmed/25">·</span>
+          <span class="text-ct-fg-subtle">·</span>
           <span class="hidden sm:inline">vue · nuxt · plot</span>
         </div>
       </footer>
@@ -145,7 +145,7 @@ const sectionLabel = computed(() => {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--r-surface-border-color);
+  background: var(--ct-border);
   opacity: 0.35;
   pointer-events: none;
 }
@@ -165,7 +165,7 @@ const sectionLabel = computed(() => {
   left: 50%;
   width: 100vw;
   height: 1px;
-  background: var(--r-surface-border-color);
+  background: var(--ct-border);
   opacity: 0.4;
   transform: translateX(-50%);
   pointer-events: none;
@@ -181,11 +181,11 @@ const sectionLabel = computed(() => {
 
 .layout-foot {
   background: var(--r-surface-background-variant-1-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  background-color: var(--ct-surface-1);
 }
 
 [data-scheme="light"] .layout-foot {
   background: none;
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 4%, transparent);
+  background-color: color-mix(in srgb, var(--ct-fg) 4%, transparent);
 }
 </style>

@@ -131,7 +131,7 @@ const options = computed<PlotOptions>(() => ({
     />
     <div
       v-if="loading"
-      class="bg-surface-variant-1/40 inset-0 absolute animate-pulse"
+      class="bg-ct-surface-2 inset-0 absolute animate-pulse"
     />
   </div>
 </template>

@@ -6,21 +6,43 @@ defineProps<{
 </script>
 
 <template>
-  <div class="bg-surface-variant-1/20 px-3 py-2.5">
-    <div class="text-[10.5px] text-primary tracking-[0.16em] font-mono uppercase">
+  <div class="db">
+    <div class="db-title">
       {{ title }}
     </div>
-    <div
-      v-if="value !== ''"
-      class="text-[15px] text-surface tracking-[0.02em] font-mono mt-1 text-nowrap tabular-nums"
-    >
+    <div v-if="value !== ''" class="db-value tabular-nums">
       {{ value }}
     </div>
-    <div
-      v-else
-      class="text-[15px] text-surface-dimmed font-mono mt-1"
-    >
+    <div v-else class="db-empty">
       —
     </div>
   </div>
 </template>
+
+<style scoped>
+.db {
+  padding: 12px 14px;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+}
+.db-title {
+  font-size: var(--ct-text-xs);
+  color: var(--ct-primary);
+  font-weight: var(--ct-weight-medium);
+  letter-spacing: var(--ct-tracking-wide);
+}
+.db-value {
+  margin-top: 4px;
+  font-size: var(--ct-text-lg);
+  font-weight: var(--ct-weight-semibold);
+  color: var(--ct-fg);
+  font-family: var(--ct-font-mono);
+  white-space: nowrap;
+  letter-spacing: var(--ct-tracking-tight);
+}
+.db-empty {
+  margin-top: 4px;
+  font-size: var(--ct-text-lg);
+  color: var(--ct-fg-subtle);
+}
+</style>

@@ -15,7 +15,7 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--r-surface-border-color);
+  background: var(--ct-border);
   opacity: 0.3;
   pointer-events: none;
 }

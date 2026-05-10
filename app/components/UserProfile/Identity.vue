@@ -58,7 +58,7 @@ const infoItems = computed(() => [
 <template>
   <div class="flex flex-col gap-5 items-start sm:flex-row sm:gap-7 sm:items-center">
     <div class="shrink-0">
-      <div class="border-surface-dimmed/25 border rounded-full h-24 w-24 relative overflow-hidden">
+      <div class="border border-ct-border rounded-full h-24 w-24 relative overflow-hidden">
         <img
           v-if="avatar"
           :src="avatar"
@@ -67,7 +67,7 @@ const infoItems = computed(() => [
         >
         <div
           v-else
-          class="bg-surface-variant-1/40 text-surface-dimmed/45 flex h-full w-full items-center justify-center"
+          class="text-ct-fg-subtle bg-ct-surface-2 flex h-full w-full items-center justify-center"
         >
           <i class="i-tabler-user text-3xl" />
         </div>
@@ -76,27 +76,27 @@ const infoItems = computed(() => [
 
     <div class="flex flex-1 flex-col gap-2 min-w-0 w-full">
       <div class="flex flex-wrap gap-x-3 gap-y-2 items-center">
-        <h1 class="text-[26px] text-surface leading-none tracking-tight font-semibold min-w-0 truncate sm:text-[28px]">
+        <h1 class="text-[26px] text-ct-fg leading-none tracking-tight font-semibold min-w-0 truncate sm:text-[28px]">
           {{ username || `User ${userId}` }}
         </h1>
         <span
           class="text-[10.5px] leading-none tracking-[0.18em] font-mono px-1.5 py-0.5 border uppercase"
-          :class="isPro ? 'border-primary/45 text-primary bg-primary/10' : 'border-surface-dimmed/25 text-surface-dimmed/75'"
+          :class="isPro ? 'border-primary/45 text-primary bg-ct-primary-soft' : 'border-ct-border text-ct-fg-muted'"
         >
           {{ planLabel }}
         </span>
       </div>
 
-      <div v-if="email" class="text-surface-dimmed/70 text-[12px] font-mono truncate">
+      <div v-if="email" class="text-[12px] text-ct-fg-muted font-mono truncate">
         {{ email }}
       </div>
 
       <div class="text-[11.5px] font-mono mt-1.5 flex flex-wrap gap-x-1 gap-y-1.5 items-baseline">
         <template v-for="(item, idx) in infoItems" :key="item.key">
-          <span v-if="idx > 0" class="text-surface-dimmed/25 px-1.5">·</span>
+          <span v-if="idx > 0" class="text-ct-fg-subtle px-1.5">·</span>
           <span class="inline-flex gap-1.5 items-baseline">
-            <span class="text-surface-dimmed/55 tracking-[0.16em] uppercase">{{ item.key }}</span>
-            <span class="text-surface tabular-nums">{{ item.value }}</span>
+            <span class="text-ct-fg-muted tracking-[0.16em] uppercase">{{ item.key }}</span>
+            <span class="text-ct-fg tabular-nums">{{ item.value }}</span>
           </span>
         </template>
       </div>

@@ -124,16 +124,23 @@ const data = Array.from({ length: 30 }, (_, i) => {
 </script>
 
 <template>
-  <div>
-    <div class="text-lg mb-2 flex gap-2 items-center">
-      <i class="i-carbon-chart-line-data" />
-      <div>
-        {{ t.dashboard.overview.codetimeProjectTrendTitle }}
-      </div>
+  <PanelSection
+    num="03"
+    :title="t.dashboard.overview.codetimeProjectTrendTitle"
+    flush
+  >
+    <template #icon>
+      <i class="i-carbon-chart-line-data text-[15px] text-ct-fg-muted" />
+    </template>
+    <div class="trend-pad">
+      <PoltYDot
+        :data="data"
+        :y-label="t.plot.label.project"
+      />
     </div>
-    <PoltYDot
-      :data="data"
-      :y-label="t.plot.label.project"
-    />
-  </div>
+  </PanelSection>
 </template>
+
+<style scoped>
+.trend-pad { padding: 12px 18px 18px; }
+</style>

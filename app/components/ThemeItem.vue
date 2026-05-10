@@ -71,25 +71,23 @@ const themeIcon = computed(() => {
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 0.7rem 1.25rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 60%, transparent);
-  transition: background-color 180ms ease;
+  padding: 12px 18px;
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
+  transition: background-color var(--ct-duration-fast) var(--ct-ease),
+              color var(--ct-duration-fast) var(--ct-ease);
   position: relative;
 }
-
-.theme-item:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.14);
-}
-
+.theme-item:hover { background: var(--ct-surface-1); color: var(--ct-fg); }
 .theme-item-active {
-  color: var(--color-primary-1);
-  background-color: color-mix(in srgb, var(--color-primary-1) 8%, transparent);
+  color: var(--ct-primary);
+  background: var(--ct-primary-soft);
 }
-
+.theme-item-active:hover {
+  color: var(--ct-primary);
+  background: color-mix(in srgb, var(--ct-primary) 18%, transparent);
+}
 .theme-item-active::before {
   content: "";
   position: absolute;
@@ -97,16 +95,8 @@ const themeIcon = computed(() => {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: var(--color-primary-1);
+  background: var(--ct-primary);
 }
-
-.theme-head-left {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.theme-head-active {
-  color: var(--color-primary-1);
-}
+.theme-head-left { display: inline-flex; align-items: center; gap: 8px; }
+.theme-head-active { color: var(--ct-primary); }
 </style>

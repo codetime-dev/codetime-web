@@ -11,7 +11,7 @@ const html = computed(() => `<img href="https://codetime.dev" alt="CodeTime Badg
 <template>
   <PanelSection num="03" :title="t.dashboard.badge.embed" meta="markdown · html · url" flush>
     <template #icon>
-      <i class="i-tabler-clipboard-text text-surface-dimmed/70 text-[15px]" />
+      <i class="i-tabler-clipboard-text text-[15px] text-ct-fg-muted" />
     </template>
     <div class="embed-list">
       <div class="embed-row">
@@ -67,48 +67,40 @@ const html = computed(() => `<img href="https://codetime.dev" alt="CodeTime Badg
   display: grid;
   grid-template-columns: 5rem 1fr auto;
   align-items: stretch;
-  height: 2.75rem;
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
-  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
-  transition: background-color 180ms ease;
+  height: 44px;
+  background: var(--ct-surface-1);
+  border-top: 1px solid var(--ct-border-subtle);
+  transition: background-color var(--ct-duration-fast) var(--ct-ease);
 }
-
-.embed-row:first-child {
-  border-top: 0;
-}
-
-.embed-row:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.26);
-}
+.embed-row:first-child { border-top: 0; }
+.embed-row:hover { background: var(--ct-surface-2); }
 
 .embed-tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0 1rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--color-primary-1);
-  border-right: 1px solid color-mix(in srgb, var(--r-surface-border-color) 25%, transparent);
+  gap: 6px;
+  padding: 0 14px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-primary);
+  border-right: 1px solid var(--ct-border-subtle);
 }
 
 .embed-field {
   width: 100%;
   min-width: 0;
   height: 100%;
-  padding: 0 1rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  color: var(--r-surface-text-color);
+  padding: 0 14px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg);
   background: transparent;
   border: 0;
   outline: 0;
 }
-
 .embed-field::selection {
-  background-color: color-mix(in srgb, var(--color-primary-1) 35%, transparent);
+  background: color-mix(in srgb, var(--ct-primary) 28%, transparent);
 }
 
 .embed-copy {

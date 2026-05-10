@@ -63,41 +63,40 @@ const t = useI18N()
     <!-- Header row -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex gap-3 items-center">
-        <div class="bg-primary/10 text-primary rounded-xl flex h-10 w-10 items-center justify-center">
-          <i class="i-tabler-quote text-xl" />
+        <div class="bio-icon">
+          <i class="i-tabler-quote" />
         </div>
         <div>
-          <h2 class="text-xl font-bold">
+          <h2 class="bio-title">
             {{ t.dashboard.profile.bio.title }}
           </h2>
-          <p class="text-sm text-surface-dimmed">
+          <p class="bio-subtitle">
             {{ t.dashboard.profile.bio.subtitle }}
           </p>
         </div>
       </div>
-      <button
+      <UButton
         v-if="canEdit && !isEditing"
-        class="border-surface-dimmed/40 bg-surface-variant-1/30 hover:border-primary/50 hover:bg-primary/5 text-sm px-4 py-2 border rounded-xl inline-flex gap-2 transition-all duration-200 items-center hover:text-primary hover:shadow-sm active:scale-97"
+        variant="secondary"
+        icon-left="i-tabler-edit"
         type="button"
         @click="emit('startEdit')"
       >
-        <i class="i-tabler-edit text-base" />
-        <span>{{ t.dashboard.profile.bio.edit }}</span>
-      </button>
+        {{ t.dashboard.profile.bio.edit }}
+      </UButton>
     </div>
 
     <!-- Edit mode -->
     <div v-if="isEditing" class="space-y-4">
-      <div class="relative">
+      <div class="bio-textarea-wrap">
         <textarea
           v-model="bioDraftModel"
           :maxlength="maxLength"
           rows="4"
-          class="border-surface-dimmed/50 bg-surface-variant-1/20 placeholder:text-surface-dimmed/50 focus:border-primary/60 focus:bg-surface-variant-1/40 text-sm p-4 pb-10 outline-none border rounded-2xl w-full resize-none transition-all duration-200 focus:shadow-sm"
+          class="bio-textarea"
           :placeholder="t.dashboard.profile.bio.placeholder"
         />
-        <!-- Char count inside the textarea -->
-        <div class="text-xs text-surface-dimmed flex gap-1 items-center bottom-3 right-3 absolute">
+        <div class="bio-counter">
           <span
             class="font-mono tabular-nums"
             :class="{
@@ -107,14 +106,14 @@ const t = useI18N()
           >
             {{ bioRemaining }}
           </span>
-          <span class="text-surface-dimmed/40">/ {{ maxLength }}</span>
+          <span class="bio-counter-sep">/ {{ maxLength }}</span>
         </div>
       </div>
 
       <!-- Progress bar -->
-      <div class="bg-surface-dimmed/30 rounded-full h-1 w-full overflow-hidden">
+      <div class="bio-progress">
         <div
-          class="rounded-full h-full transition-all duration-300 ease-out"
+          class="bio-progress-fill"
           :class="[progressColor]"
           :style="{ width: `${progressPercent}%` }"
         />
@@ -123,61 +122,46 @@ const t = useI18N()
       <div class="flex flex-wrap gap-3 items-center justify-between">
         <span
           v-if="bioRemaining < 0"
-          class="text-xs text-rose-500 flex gap-1 items-center"
+          class="bio-warn"
         >
-          <i class="i-tabler-alert-triangle text-sm" />
+          <i class="i-tabler-alert-triangle" />
           {{ t.dashboard.profile.bio.limitExceeded }}
         </span>
-        <span v-else class="text-xs text-surface-dimmed" />
+        <span v-else />
 
-        <div class="flex gap-3">
-          <button
-            class="border-surface-dimmed/40 hover:bg-surface-variant-1/50 hover:border-surface-dimmed/60 text-sm px-5 py-2.5 border rounded-xl transition-all duration-200 active:scale-97"
-            type="button"
-            @click="emit('cancelEdit')"
-          >
+        <div class="flex gap-2">
+          <UButton variant="ghost" type="button" @click="emit('cancelEdit')">
             {{ t.general.cancel }}
-          </button>
-          <button
-            class="hover:shadow-primary/20 text-sm text-white font-semibold px-6 py-2.5 rounded-xl bg-primary transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-md active:scale-97"
+          </UButton>
+          <UButton
+            variant="primary"
             type="button"
+            :loading="bioSaving"
             :disabled="bioSaving || bioRemaining < 0"
+            icon-left="i-tabler-device-floppy"
             @click="emit('save')"
           >
-            <span v-if="bioSaving" class="inline-flex gap-2 items-center">
-              <i class="i-tabler-loader animate-spin" />
-              {{ t.dashboard.profile.bio.saving }}
-            </span>
-            <span v-else class="inline-flex gap-2 items-center">
-              <i class="i-tabler-device-floppy" />
-              {{ t.dashboard.profile.bio.save }}
-            </span>
-          </button>
+            {{ bioSaving ? t.dashboard.profile.bio.saving : t.dashboard.profile.bio.save }}
+          </UButton>
         </div>
       </div>
     </div>
 
     <!-- View mode -->
     <div v-else>
-      <div
-        v-if="bio"
-        class="bg-surface-variant-1/20 border-surface-dimmed/20 border-l-primary/40 text-base text-surface leading-relaxed p-5 border-l-3 rounded-r-2xl"
-      >
+      <div v-if="bio" class="bio-view">
         <p class="whitespace-pre-wrap break-words">
           {{ bio }}
         </p>
       </div>
-      <div
-        v-else
-        class="border-surface-dimmed/20 py-10 text-center border rounded-2xl border-dashed"
-      >
-        <i class="i-tabler-message-circle text-surface-dimmed/30 text-3xl mx-auto mb-2 block" />
-        <p class="text-surface-dimmed/60 text-sm">
+      <div v-else class="bio-empty">
+        <i class="i-tabler-message-circle bio-empty-icon" />
+        <p class="bio-empty-text">
           {{ t.dashboard.profile.bio.empty }}
         </p>
         <button
           v-if="canEdit"
-          class="text-primary/70 text-sm mt-3 inline-flex gap-1 transition-colors items-center hover:text-primary"
+          class="bio-empty-cta"
           type="button"
           @click="emit('startEdit')"
         >
@@ -191,7 +175,7 @@ const t = useI18N()
     <Transition name="slide-fade">
       <div
         v-if="bioStatusMessage"
-        class="text-sm px-4 py-2.5 border rounded-xl flex gap-2 items-center"
+        class="bio-status"
         :class="[statusClass]"
       >
         <i
@@ -208,22 +192,99 @@ const t = useI18N()
 </template>
 
 <style scoped>
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
+.bio-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary);
+  font-size: 22px;
+  border-radius: var(--ct-radius-md);
 }
-.slide-fade-leave-active {
-  transition: all 0.2s ease-in;
+.bio-title { font-size: var(--ct-text-xl); font-weight: var(--ct-weight-semibold); color: var(--ct-fg); }
+.bio-subtitle { font-size: var(--ct-text-sm); color: var(--ct-fg-muted); margin-top: 2px; }
+
+.bio-textarea-wrap { position: relative; }
+.bio-textarea {
+  width: 100%;
+  resize: none;
+  padding: 14px 14px 36px;
+  font-size: var(--ct-text-base);
+  color: var(--ct-fg);
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  outline: 0;
+  font-family: var(--ct-font-sans);
+  transition: border-color var(--ct-duration-fast) var(--ct-ease),
+              box-shadow var(--ct-duration-fast) var(--ct-ease);
 }
-.slide-fade-enter-from {
-  opacity: 0;
-  transform: translateY(-8px);
+.bio-textarea:focus {
+  border-color: var(--ct-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-primary) 18%, transparent);
 }
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
+.bio-textarea::placeholder { color: var(--ct-fg-subtle); }
+.bio-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-muted);
+  display: inline-flex;
+  gap: 4px;
+}
+.bio-counter-sep { color: var(--ct-fg-disabled); }
+
+.bio-progress { width: 100%; height: 4px; background: var(--ct-surface-2); overflow: hidden; }
+.bio-progress-fill { height: 100%; transition: width 300ms var(--ct-ease); }
+.bio-warn {
+  font-size: var(--ct-text-xs);
+  color: var(--ct-danger);
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
 }
 
-.active\:scale-97:active {
-  transform: scale(0.97);
+.bio-view {
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border);
+  border-left: 3px solid var(--ct-primary);
+  padding: 18px 20px;
+  font-size: var(--ct-text-base);
+  line-height: 1.6;
+  color: var(--ct-fg);
 }
+.bio-empty {
+  border: 1px dashed var(--ct-border);
+  padding: 40px 16px;
+  text-align: center;
+}
+.bio-empty-icon { font-size: 28px; color: var(--ct-fg-subtle); }
+.bio-empty-text { font-size: var(--ct-text-sm); color: var(--ct-fg-subtle); margin: 6px 0 12px; }
+.bio-empty-cta {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  font-size: var(--ct-text-sm);
+  color: var(--ct-primary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.bio-empty-cta:hover { text-decoration: underline; }
+
+.bio-status {
+  font-size: var(--ct-text-sm);
+  padding: 10px 14px;
+  border: 1px solid var(--ct-border);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.slide-fade-enter-active { transition: all 0.3s ease-out; }
+.slide-fade-leave-active { transition: all 0.2s ease-in; }
+.slide-fade-enter-from { opacity: 0; transform: translateY(-8px); }
+.slide-fade-leave-to { opacity: 0; transform: translateY(-4px); }
 </style>

@@ -25,17 +25,17 @@ const sizeClass = computed(() => {
 const variantClass = computed(() => {
   if (props.variant === 'primary') {
     return props.active
-      ? 'bg-primary/25 text-primary'
-      : 'bg-primary/12 text-primary hover:bg-primary/22'
+      ? 'bg-ct-primary-soft text-primary'
+      : 'bg-ct-primary-soft text-primary hover:bg-ct-primary-soft'
   }
   if (props.variant === 'ghost') {
     return props.active
-      ? 'bg-surface-variant-1/40 text-surface'
-      : 'text-surface-dimmed hover:bg-surface-variant-1/30 hover:text-surface'
+      ? 'bg-ct-surface-2 text-ct-fg'
+      : 'text-ct-fg-muted hover:bg-ct-surface-2 hover:text-ct-fg'
   }
   return props.active
-    ? 'bg-surface-variant-1/55 text-surface'
-    : 'bg-surface-variant-1/30 text-surface-dimmed hover:bg-surface-variant-1/55 hover:text-surface'
+    ? 'bg-ct-surface-2 text-ct-fg'
+    : 'bg-ct-surface-2 text-ct-fg-muted hover:bg-ct-surface-2 hover:text-ct-fg'
 })
 </script>
 
@@ -43,7 +43,7 @@ const variantClass = computed(() => {
   <button
     :type="type"
     :disabled="disabled"
-    class="disabled:hover:bg-surface-variant-1/30 tracking-[0.12em] font-mono inline-flex gap-1.5 uppercase transition-colors items-center disabled:opacity-40 disabled:cursor-not-allowed"
+    class="tracking-[0.12em] font-mono inline-flex gap-1.5 uppercase transition-colors items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-ct-surface-2"
     :class="[sizeClass, variantClass]"
   >
     <slot />

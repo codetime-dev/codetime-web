@@ -52,25 +52,25 @@ function widthPct(minutes: number): number {
 
       <template v-if="pending">
         <li v-for="i in 5" :key="`s-${i}`" class="lang-row">
-          <span class="text-surface-dimmed/40 text-[12px] font-mono tabular-nums">{{ String(i).padStart(2, '0') }}</span>
-          <span class="bg-surface-variant-1/50 h-4 w-24 animate-pulse" />
-          <span class="bg-surface-variant-1/30 h-2 w-full animate-pulse" />
-          <span class="bg-surface-variant-1/40 h-3 w-12 justify-self-end animate-pulse" />
-          <span class="bg-surface-variant-1/40 h-3 w-10 justify-self-end animate-pulse" />
-          <span class="bg-surface-variant-1/40 h-3 w-12 justify-self-end animate-pulse" />
+          <span class="text-[12px] text-ct-fg-subtle font-mono tabular-nums">{{ String(i).padStart(2, '0') }}</span>
+          <span class="bg-ct-surface-2 h-4 w-24 animate-pulse" />
+          <span class="bg-ct-surface-2 h-2 w-full animate-pulse" />
+          <span class="bg-ct-surface-2 h-3 w-12 justify-self-end animate-pulse" />
+          <span class="bg-ct-surface-2 h-3 w-10 justify-self-end animate-pulse" />
+          <span class="bg-ct-surface-2 h-3 w-12 justify-self-end animate-pulse" />
         </li>
       </template>
 
       <template v-else-if="entries.length > 0">
         <li v-for="(entry, index) in entries" :key="entry.language || `lang-${index}`" class="lang-row">
-          <span class="text-surface-dimmed/55 text-[13px] font-mono tabular-nums">{{ String(index + 1).padStart(2, '0') }}</span>
+          <span class="text-[13px] text-ct-fg-muted font-mono tabular-nums">{{ String(index + 1).padStart(2, '0') }}</span>
 
           <span class="flex gap-2.5 min-w-0 items-center">
             <VSCodeIcon
               :language="entry.language || 'Unknown'"
               class="shrink-0 h-4.5 w-4.5"
             />
-            <span class="text-[14px] text-surface font-mono truncate">
+            <span class="text-[14px] text-ct-fg font-mono truncate">
               {{ getLanguageName(entry.language || 'Unknown') }}
             </span>
           </span>
@@ -80,9 +80,9 @@ function widthPct(minutes: number): number {
           </span>
 
           <span class="num text-[13px] text-primary font-mono tabular-nums">
-            {{ fmtHours(entry.totalMinutes) }}<span class="text-surface-dimmed/60">h</span>
+            {{ fmtHours(entry.totalMinutes) }}<span class="text-ct-fg-muted">h</span>
           </span>
-          <span class="num text-[13px] text-surface-dimmed font-mono tabular-nums">
+          <span class="num text-[13px] text-ct-fg-muted font-mono tabular-nums">
             {{ sharePct(entry.totalMinutes).toFixed(1) }}%
           </span>
           <span class="num text-[12px] text-emerald-500 tracking-[0.04em] font-mono tabular-nums">
@@ -92,7 +92,7 @@ function widthPct(minutes: number): number {
       </template>
 
       <li v-else class="empty">
-        <i class="i-tabler-chart-bar text-surface-dimmed/30 text-2xl mb-2 block" />
+        <i class="i-tabler-chart-bar text-2xl text-ct-fg-subtle mb-2 block" />
         <span class="text-[12px] tracking-[0.04em] font-mono">{{ t.dashboard.profile.languages.noData }}</span>
       </li>
     </ul>
@@ -113,7 +113,7 @@ function widthPct(minutes: number): number {
   align-items: center;
   padding: 9px 22px;
   margin: 0 -22px;
-  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 40%, transparent);
+  border-bottom: 1px solid var(--ct-border);
   transition: background 120ms ease;
 }
 
@@ -132,9 +132,7 @@ function widthPct(minutes: number): number {
 .hcell {
   font-family: var(--font-mono, monospace);
   font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--r-surface-text-dimmed-color);
+      color: var(--r-surface-text-dimmed-color);
 }
 
 .hcell.num {
@@ -145,7 +143,7 @@ function widthPct(minutes: number): number {
   position: relative;
   height: 8px;
   background: var(--r-surface-background-variant-1-color);
-  border: 1px solid var(--r-surface-border-color);
+  border: 1px solid var(--ct-border);
   overflow: hidden;
 }
 

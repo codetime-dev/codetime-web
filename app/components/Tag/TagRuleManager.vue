@@ -293,7 +293,7 @@ function removeRuleGroup(groupId: string) {
 <template>
   <PanelSection num="02" :title="t.dashboard.tags.tagRules.title" :meta="isEditing ? 'editing' : 'or · and · condition'" flush>
     <template #icon>
-      <i class="i-tabler-rules text-surface-dimmed/70 text-[15px]" />
+      <i class="i-tabler-rules text-[15px] text-ct-fg-muted" />
     </template>
 
     <!-- Toolbar -->
@@ -344,7 +344,7 @@ function removeRuleGroup(groupId: string) {
 
     <!-- Empty state -->
     <div v-if="displayRuleGroups.length === 0" class="rules-empty">
-      <i class="i-tabler-rules-off text-surface-dimmed/50 text-3xl" />
+      <i class="i-tabler-rules-off text-3xl text-ct-fg-muted" />
       <p class="rules-empty-text">
         {{ t.dashboard.tags.tagRules.noRules }}
       </p>
@@ -465,7 +465,7 @@ function removeRuleGroup(groupId: string) {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+  border-bottom: 1px solid var(--ct-border-subtle);
 }
 
 .rules-tag {
@@ -481,7 +481,7 @@ function removeRuleGroup(groupId: string) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ct-font-mono);
   font-size: 12px;
   font-weight: 600;
   color: white;
@@ -504,11 +504,8 @@ function removeRuleGroup(groupId: string) {
 }
 
 .rules-tag-hint {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  font-size: var(--ct-text-xs);
+      color: var(--ct-fg-subtle);
 }
 
 .rules-tag-quota {
@@ -530,16 +527,14 @@ function removeRuleGroup(groupId: string) {
 }
 
 .rules-empty-text {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
+  font-size: var(--ct-text-xs);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+    color: var(--ct-fg-subtle);
 }
 
 .rules-empty-hint {
   font-size: 11.5px;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  color: var(--ct-fg-subtle);
   text-align: center;
 }
 
@@ -561,12 +556,11 @@ function removeRuleGroup(groupId: string) {
 .rules-or-line {
   flex: 1;
   height: 1px;
-  background: color-mix(in srgb, var(--r-surface-border-color) 35%, transparent);
+  background: var(--ct-border);
 }
 
 .rules-or-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
+  font-size: var(--ct-text-xs);
   font-weight: 600;
   letter-spacing: 0.32em;
   color: var(--color-primary-1);
@@ -574,7 +568,7 @@ function removeRuleGroup(groupId: string) {
 
 .rules-group {
   padding: 0.85rem 1rem;
-  background-color: rgb(var(--r-color-surface-7) / 0.12);
+  background-color: var(--ct-surface-1);
 }
 
 .rules-group-conditions {
@@ -585,11 +579,9 @@ function removeRuleGroup(groupId: string) {
 }
 
 .rules-and {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
+  font-size: var(--ct-text-xs);
   font-weight: 600;
-  letter-spacing: 0.28em;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+    color: var(--ct-fg-subtle);
   padding: 0 0.25rem;
 }
 
@@ -605,21 +597,19 @@ function removeRuleGroup(groupId: string) {
   align-items: center;
   height: 1.85rem;
   padding: 0 0.7rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11.5px;
-  background-color: rgb(var(--r-color-surface-7) / 0.22);
-  color: var(--r-surface-text-color);
+  font-size: var(--ct-text-xs);
+  background-color: var(--ct-surface-2);
+  color: var(--ct-fg);
 }
 
 .rules-pill-op {
   color: var(--color-primary-1);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 10.5px;
+    font-size: 10.5px;
 }
 
 .rules-pill-value {
-  color: color-mix(in srgb, var(--r-surface-text-color) 90%, transparent);
+  color: color-mix(in srgb, var(--ct-fg) 90%, transparent);
 }
 
 /* Inputs */
@@ -627,26 +617,26 @@ function removeRuleGroup(groupId: string) {
   display: inline-block;
   height: 2.25rem;
   padding: 0 0.75rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ct-font-mono);
   font-size: 12px;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  color: var(--ct-fg);
+  background-color: var(--ct-surface-1);
   border: 0;
   outline: 0;
   transition: background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .line-input:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.26);
+  background-color: var(--ct-surface-2);
 }
 
 .line-input:focus {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
+  background-color: var(--ct-surface-2);
   box-shadow: inset 0 -1px 0 var(--color-primary-1);
 }
 
 .line-input::placeholder {
-  color: color-mix(in srgb, var(--r-surface-text-color) 35%, transparent);
+  color: var(--ct-fg-subtle);
 }
 
 .rules-value-input {
@@ -657,10 +647,10 @@ function removeRuleGroup(groupId: string) {
 .line-select {
   height: 2.25rem;
   padding: 0 1.85rem 0 0.75rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ct-font-mono);
   font-size: 12px;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  color: var(--ct-fg);
+  background-color: var(--ct-surface-1);
   border: 0;
   outline: 0;
   cursor: pointer;
@@ -673,7 +663,7 @@ function removeRuleGroup(groupId: string) {
 }
 
 .line-select:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.26);
+  background-color: var(--ct-surface-2);
 }
 
 /* Remove btn */
@@ -683,16 +673,16 @@ function removeRuleGroup(groupId: string) {
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  background-color: var(--ct-surface-1);
   border: 0;
   cursor: pointer;
-  color: color-mix(in srgb, var(--r-surface-text-color) 60%, transparent);
+  color: var(--ct-fg-muted);
   transition: color 180ms ease, background-color 180ms ease;
 }
 
 .rules-remove:hover {
-  color: var(--r-color-error-1, #ef4444);
-  background-color: color-mix(in srgb, var(--r-color-error-1, #ef4444) 18%, transparent);
+  color: var(--ct-danger);
+  background-color: color-mix(in srgb, var(--ct-danger) 18%, transparent);
 }
 
 .rules-add-and {
@@ -707,51 +697,46 @@ function removeRuleGroup(groupId: string) {
   justify-content: flex-start;
 }
 
-/* Buttons */
+/* Buttons — aligned with U/Button md */
 .line-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  height: 2.25rem;
-  padding: 0 0.95rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
-  border: 0;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  font-family: var(--ct-font-sans);
+  font-size: var(--ct-text-base);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg);
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
   cursor: pointer;
-  transition: background-color 180ms ease, color 180ms ease, opacity 180ms ease;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease),
+              border-color var(--ct-duration-fast) var(--ct-ease),
+              color var(--ct-duration-fast) var(--ct-ease);
 }
-
-.line-btn:hover:not(:disabled) {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
-}
-
-.line-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+.line-btn:hover:not(:disabled) { background: var(--ct-surface-1); border-color: var(--ct-border-strong); }
+.line-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .line-btn-primary {
-  color: var(--color-primary-1);
-  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
+  color: var(--ct-on-primary);
+  background: var(--ct-primary);
+  border-color: var(--ct-primary);
 }
-
 .line-btn-primary:hover:not(:disabled) {
-  background-color: color-mix(in srgb, var(--color-primary-1) 24%, transparent);
+  background: var(--ct-primary-hover);
+  border-color: var(--ct-primary-hover);
 }
 
 .line-btn-ghost {
-  background-color: transparent;
-  color: color-mix(in srgb, var(--r-surface-text-color) 60%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 30%, transparent);
+  background: transparent;
+  color: var(--ct-fg-muted);
+  border-color: var(--ct-border);
 }
-
 .line-btn-ghost:hover:not(:disabled) {
-  color: var(--color-primary-1);
-  background-color: color-mix(in srgb, var(--color-primary-1) 10%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary-1) 35%, transparent);
+  color: var(--ct-fg);
+  background: var(--ct-surface-1);
 }
 </style>

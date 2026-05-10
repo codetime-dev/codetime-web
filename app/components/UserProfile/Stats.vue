@@ -22,18 +22,18 @@ defineProps<{
       class="kpi-cell"
     >
       <div class="flex gap-2 items-center">
-        <span class="text-surface-dimmed/55 text-[12px] tracking-[0.14em] font-mono tabular-nums">{{ kpi.index }}</span>
-        <i v-if="kpi.icon" :class="kpi.icon" class="text-surface-dimmed/55 text-sm shrink-0" />
-        <span class="text-[13px] text-surface-dimmed tracking-[0.14em] font-mono uppercase">{{ kpi.label }}</span>
+        <span class="text-[12px] text-ct-fg-muted tracking-[0.14em] font-mono tabular-nums">{{ kpi.index }}</span>
+        <i v-if="kpi.icon" :class="kpi.icon" class="text-sm text-ct-fg-muted shrink-0" />
+        <span class="text-[13px] text-ct-fg-muted tracking-[0.14em] font-mono uppercase">{{ kpi.label }}</span>
       </div>
       <div class="flex gap-1 items-baseline">
         <span
           class="text-[28px] leading-none font-mono tabular-nums"
-          :class="kpi.accent ? 'text-primary' : 'text-surface'"
+          :class="kpi.accent ? 'text-primary' : 'text-ct-fg'"
         >{{ kpi.value }}</span>
-        <span v-if="kpi.unit" class="text-surface-dimmed/80 text-[13px] font-mono">{{ kpi.unit }}</span>
+        <span v-if="kpi.unit" class="text-[13px] text-ct-fg-muted font-mono">{{ kpi.unit }}</span>
       </div>
-      <div v-if="kpi.caption" class="text-surface-dimmed/65 text-[12px] font-mono truncate">
+      <div v-if="kpi.caption" class="text-[12px] text-ct-fg-muted font-mono truncate">
         {{ kpi.caption }}
       </div>
     </div>
@@ -52,8 +52,8 @@ defineProps<{
   flex-direction: column;
   gap: 9px;
   padding: 18px 22px 16px;
-  border-right: 1px solid color-mix(in srgb, var(--r-surface-border-color) 40%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 40%, transparent);
+  border-right: 1px solid var(--ct-border);
+  border-bottom: 1px solid var(--ct-border);
   transition: background 160ms ease;
 }
 
@@ -74,7 +74,7 @@ defineProps<{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .kpi-cell {
-    border-right: 1px solid color-mix(in srgb, var(--r-surface-border-color) 40%, transparent);
+    border-right: 1px solid var(--ct-border);
   }
   .kpi-cell:nth-child(2n) {
     border-right: none;
@@ -86,7 +86,7 @@ defineProps<{
     border-bottom: none;
   }
   .kpi-cell:nth-last-child(-n+4):not(:nth-last-child(-n+2)) {
-    border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 40%, transparent);
+    border-bottom: 1px solid var(--ct-border);
   }
 }
 
@@ -96,7 +96,7 @@ defineProps<{
   }
   .kpi-cell {
     border-right: none !important;
-    border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 40%, transparent);
+    border-bottom: 1px solid var(--ct-border);
   }
   .kpi-cell:last-child {
     border-bottom: none;

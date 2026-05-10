@@ -1,0 +1,288 @@
+/* Codetime design tokens. Independent of @roku-ui; both schemes mapped here. */
+
+:root {
+  /* Brand */
+  --ct-brand-50:  #f0f9ff;
+  --ct-brand-100: #e0f2fe;
+  --ct-brand-200: #bae6fd;
+  --ct-brand-300: #7dd3fc;
+  --ct-brand-400: #38bdf8;
+  --ct-brand-500: #0ea5e9;
+  --ct-brand-600: #0284c7;
+  --ct-brand-700: #0369a1;
+  --ct-brand-800: #075985;
+  --ct-brand-900: #0c4a6e;
+
+  /* Radius */
+  --ct-radius-xs: 4px;
+  --ct-radius-sm: 6px;
+  --ct-radius-md: 8px;   /* default */
+  --ct-radius-lg: 10px;
+  --ct-radius-xl: 14px;
+  --ct-radius-2xl: 18px;
+  --ct-radius-full: 9999px;
+
+  /* Spacing */
+  --ct-space-1: 4px;
+  --ct-space-2: 8px;
+  --ct-space-3: 12px;
+  --ct-space-4: 16px;
+  --ct-space-5: 20px;
+  --ct-space-6: 24px;
+  --ct-space-8: 32px;
+  --ct-space-10: 40px;
+  --ct-space-12: 48px;
+
+  /* Typography — sans baseline */
+  --ct-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --ct-font-mono: 'Berkeley Mono', 'JetBrains Mono', 'Share Tech Mono', monospace;
+
+  --ct-text-xs:   12px;
+  --ct-text-sm:   13px;
+  --ct-text-base: 14px;  /* default body */
+  --ct-text-md:   15px;
+  --ct-text-lg:   16px;
+  --ct-text-xl:   18px;
+  --ct-text-2xl:  22px;
+  --ct-text-3xl:  28px;
+  --ct-text-4xl:  36px;
+
+  --ct-leading-tight:  1.25;
+  --ct-leading-snug:   1.4;
+  --ct-leading-normal: 1.55;
+  --ct-leading-relaxed:1.7;
+
+  --ct-tracking-tight:  -0.01em;
+  --ct-tracking-normal: 0;
+  --ct-tracking-wide:   0.02em;
+  --ct-tracking-mono:   0.04em;
+
+  --ct-weight-regular:  400;
+  --ct-weight-medium:   500;
+  --ct-weight-semibold: 600;
+  --ct-weight-bold:     700;
+
+  /* Motion */
+  --ct-duration-fast: 120ms;
+  --ct-duration-base: 180ms;
+  --ct-duration-slow: 260ms;
+  --ct-ease: cubic-bezier(.2, .8, .2, 1);
+
+  /* z */
+  --ct-z-base: 1;
+  --ct-z-overlay: 40;
+  --ct-z-modal: 50;
+  --ct-z-toast: 60;
+}
+
+/* Light scheme (default — also covers prefers-color-scheme: light) */
+:root,
+html[data-scheme="light"] {
+  /* Brand alias */
+  --ct-primary:        var(--ct-brand-600);
+  --ct-primary-hover:  var(--ct-brand-700);
+  --ct-primary-active: var(--ct-brand-800);
+  --ct-on-primary:     #ffffff;
+
+  /* Surface */
+  --ct-bg:           #ffffff;
+  --ct-surface:      #ffffff;
+  --ct-surface-1:    #fafafa;
+  --ct-surface-2:    #f4f4f5;
+  --ct-surface-3:    #e4e4e7;
+
+  /* Border */
+  --ct-border:        #e5e7eb;
+  --ct-border-strong: #d4d4d8;
+  --ct-border-subtle: #f1f1f3;
+
+  /* Text */
+  --ct-fg:           #18181b;
+  --ct-fg-muted:     #52525b;
+  --ct-fg-subtle:    #71717a;
+  --ct-fg-disabled:  #a1a1aa;
+  --ct-fg-on-brand:  #ffffff;
+
+  /* Semantic */
+  --ct-success: #059669;
+  --ct-warning: #d97706;
+  --ct-danger:  #dc2626;
+  --ct-info:    var(--ct-brand-600);
+
+  /* Soft tints */
+  --ct-primary-soft: color-mix(in srgb, var(--ct-primary) 12%, transparent);
+  --ct-success-soft: color-mix(in srgb, var(--ct-success) 12%, transparent);
+  --ct-warning-soft: color-mix(in srgb, var(--ct-warning) 14%, transparent);
+  --ct-danger-soft:  color-mix(in srgb, var(--ct-danger) 12%, transparent);
+
+  /* Shadow */
+  --ct-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+  --ct-shadow-md: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.06);
+  --ct-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.08);
+
+  color-scheme: light;
+}
+
+/* Dark scheme */
+html[data-scheme="dark"] {
+  --ct-primary:        var(--ct-brand-500);
+  --ct-primary-hover:  var(--ct-brand-400);
+  --ct-primary-active: var(--ct-brand-300);
+  --ct-on-primary:     #0b1220;
+
+  --ct-bg:           #0a0a0b;
+  --ct-surface:      #111113;
+  --ct-surface-1:    #16171a;
+  --ct-surface-2:    #1d1e22;
+  --ct-surface-3:    #2a2b30;
+
+  --ct-border:        #27272a;
+  --ct-border-strong: #3f3f46;
+  --ct-border-subtle: #1f1f22;
+
+  --ct-fg:           #f4f4f5;
+  --ct-fg-muted:     #a1a1aa;
+  --ct-fg-subtle:    #71717a;
+  --ct-fg-disabled:  #52525b;
+  --ct-fg-on-brand:  #061018;
+
+  --ct-success: #10b981;
+  --ct-warning: #f59e0b;
+  --ct-danger:  #ef4444;
+  --ct-info:    var(--ct-brand-400);
+
+  --ct-primary-soft: color-mix(in srgb, var(--ct-primary) 18%, transparent);
+  --ct-success-soft: color-mix(in srgb, var(--ct-success) 16%, transparent);
+  --ct-warning-soft: color-mix(in srgb, var(--ct-warning) 18%, transparent);
+  --ct-danger-soft:  color-mix(in srgb, var(--ct-danger) 18%, transparent);
+
+  --ct-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --ct-shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.45);
+  --ct-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.55);
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-scheme="light"]) {
+    --ct-primary:        var(--ct-brand-500);
+    --ct-primary-hover:  var(--ct-brand-400);
+    --ct-primary-active: var(--ct-brand-300);
+    --ct-on-primary:     #0b1220;
+
+    --ct-bg:           #0a0a0b;
+    --ct-surface:      #111113;
+    --ct-surface-1:    #16171a;
+    --ct-surface-2:    #1d1e22;
+    --ct-surface-3:    #2a2b30;
+
+    --ct-border:        #27272a;
+    --ct-border-strong: #3f3f46;
+    --ct-border-subtle: #1f1f22;
+
+    --ct-fg:           #f4f4f5;
+    --ct-fg-muted:     #a1a1aa;
+    --ct-fg-subtle:    #71717a;
+    --ct-fg-disabled:  #52525b;
+    --ct-fg-on-brand:  #061018;
+
+    --ct-success: #10b981;
+    --ct-warning: #f59e0b;
+    --ct-danger:  #ef4444;
+
+    --ct-primary-soft: color-mix(in srgb, var(--ct-primary) 18%, transparent);
+    --ct-success-soft: color-mix(in srgb, var(--ct-success) 16%, transparent);
+    --ct-warning-soft: color-mix(in srgb, var(--ct-warning) 18%, transparent);
+    --ct-danger-soft:  color-mix(in srgb, var(--ct-danger) 18%, transparent);
+
+    --ct-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --ct-shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.45);
+    --ct-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.55);
+
+    color-scheme: dark;
+  }
+}
+
+/* Compatibility shims — map legacy variables used by existing pages onto
+   the new tokens so a piecemeal migration stays visually consistent. */
+:root,
+html[data-scheme="light"],
+html[data-scheme="dark"] {
+  --color-primary-1: var(--ct-primary);
+  --color-primary-2: var(--ct-primary-hover);
+  --color-primary-3: var(--ct-primary-active);
+  --color-frontground: var(--ct-fg);
+  --color-background: var(--ct-bg);
+  --color-bg-1: var(--ct-surface);
+  --color-bg-2: var(--ct-surface-1);
+  --color-bg-3: var(--ct-surface-2);
+  --color-border-1: var(--ct-border);
+  --color-border-2: var(--ct-border-strong);
+  --color-border-3: var(--ct-border-strong);
+  --color-error-1: var(--ct-danger);
+  --color-error-2: var(--ct-danger);
+  --color-success-1: var(--ct-success);
+  --color-success-2: var(--ct-success);
+  --color-warning-1: var(--ct-warning);
+  --color-warning-2: var(--ct-warning);
+}
+
+/* Document base */
+html, body {
+  font-family: var(--ct-font-sans);
+  font-size: var(--ct-text-base);
+  line-height: var(--ct-leading-normal);
+  color: var(--ct-fg);
+  background-color: var(--ct-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--ct-primary) 28%, transparent);
+  color: var(--ct-fg);
+}
+
+/* Diagonal-stripes divider — signature section break.
+     Uses an 8×8 SVG mask of three line segments (main diagonal plus
+     two corner stubs) so the pattern tiles seamlessly. */
+.ct-stripes {
+  position: relative;
+  height: 22px;
+  width: 100%;
+  background-color: var(--ct-border);
+  opacity: 0.5;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='black' stroke-width='1.2'/><line x1='-1' y1='1' x2='1' y2='-1' stroke='black' stroke-width='1.2'/><line x1='7' y1='9' x2='9' y2='7' stroke='black' stroke-width='1.2'/></svg>");
+  -webkit-mask-size: 8px 8px;
+          mask-size: 8px 8px;
+  -webkit-mask-repeat: repeat;
+          mask-repeat: repeat;
+}
+.ct-stripes-band {
+  position: relative;
+}
+.ct-stripes-band::before,
+.ct-stripes-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ct-border);
+  pointer-events: none;
+}
+.ct-stripes-band::before { top: 0; }
+.ct-stripes-band::after { bottom: 0; }
+
+/* Utility classes — used outside Vue components and by Plot. */
+.ct-surface       { background-color: var(--ct-surface); color: var(--ct-fg); }
+.ct-surface-1     { background-color: var(--ct-surface-1); color: var(--ct-fg); }
+.ct-surface-2     { background-color: var(--ct-surface-2); color: var(--ct-fg); }
+.ct-text-muted    { color: var(--ct-fg-muted); }
+.ct-text-subtle   { color: var(--ct-fg-subtle); }
+.ct-text-primary  { color: var(--ct-primary); }
+.ct-border        { border: 1px solid var(--ct-border); }
+.ct-rounded       { border-radius: var(--ct-radius-md); }
+.ct-rounded-lg    { border-radius: var(--ct-radius-lg); }
+.ct-shadow        { box-shadow: var(--ct-shadow-md); }

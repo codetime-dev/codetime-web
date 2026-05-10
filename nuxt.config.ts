@@ -17,6 +17,7 @@ export default defineNuxtConfig({
     url: 'https://codetime.dev',
     name: 'Code Time',
   },
+  css: ['~/assets/tokens.css'],
   // ogImage: {
   //   fonts: [
   //     'Noto+Sans+SC:400', // Too big for workers

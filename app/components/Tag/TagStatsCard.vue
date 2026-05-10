@@ -80,13 +80,13 @@ const tagStats = computed(() => {
         :key="i"
         class="flex gap-3 items-center"
       >
-        <div class="rounded bg-surface-variant-1 h-4 w-4 animate-pulse" />
-        <div class="rounded bg-surface-variant-1 flex-1 h-4 animate-pulse" />
-        <div class="rounded bg-surface-variant-1 h-4 w-16 animate-pulse" />
+        <div class="bg-ct-surface-1 rounded h-4 w-4 animate-pulse" />
+        <div class="bg-ct-surface-1 rounded flex-1 h-4 animate-pulse" />
+        <div class="bg-ct-surface-1 rounded h-4 w-16 animate-pulse" />
       </div>
     </div>
 
-    <div v-else-if="tagStats.length === 0" class="text-surface-dimmed py-8 text-center">
+    <div v-else-if="tagStats.length === 0" class="text-ct-fg-muted py-8 text-center">
       <i class="i-tabler-tag-off text-2xl mb-2" />
       <p class="text-sm">
         {{ t.dashboard.tags.stats.noData }}
@@ -108,9 +108,9 @@ const tagStats = computed(() => {
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between">
             <span class="text-sm font-medium truncate">{{ stat.tag.name }}</span>
-            <span class="text-sm text-surface-dimmed">{{ stat.percentage.toFixed(1) }}%</span>
+            <span class="text-ct-fg-muted text-sm">{{ stat.percentage.toFixed(1) }}%</span>
           </div>
-          <div class="mt-1 rounded-full bg-surface-variant-1 h-2 overflow-hidden">
+          <div class="bg-ct-surface-1 mt-1 rounded-full h-2 overflow-hidden">
             <div
               class="rounded-full h-full transition-all duration-300"
               :style="{
@@ -121,7 +121,7 @@ const tagStats = computed(() => {
             />
           </div>
         </div>
-        <span class="text-sm text-surface-dimmed font-medium">
+        <span class="text-ct-fg-muted text-sm font-medium">
           {{ getDurationString(stat.totalMinutes * 60 * 1000) }}
         </span>
       </div>

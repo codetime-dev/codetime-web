@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { UserSelfPublic } from '~/api/v3'
-import { Btn } from '@roku-ui/vue'
+import UButton from '~/components/U/Button.vue'
 import NuxtLink from '~/i18n/NuxtLink'
 
 const locale = useRoute().params.locale as string
@@ -82,7 +82,7 @@ async function handleGitHubLogin() {
             </NuxtLink>
           </div>
           <div class="flex flex-col gap-3 items-center">
-            <div class="text-sm text-surface-dimmed">
+            <div class="text-sm text-ct-fg-muted">
               {{ t.landing.login }}
             </div>
             <div class="flex gap-2">
@@ -125,38 +125,101 @@ async function handleGitHubLogin() {
 
         <div
           v-else-if="user"
-          class="h-96px"
+          class="flex h-96px items-center"
         >
-          <Btn
-            :is="NuxtLink"
-            variant="light"
-            size="lg"
-            color="black"
+          <NuxtLink
             aria-label="dashboard"
+            class="dashboard-cta"
             :to="`/${locale}/dashboard`"
-            class="px-4 py-3 rounded-xl flex gap-2 items-center"
           >
-            <ClientOnly>
-              <template #placeholder>
-                <div class="rounded-full h-5 w-5 animate-pulse" />
-              </template>
+            <span class="dashboard-cta-avatar">
               <NuxtImg
-                v-if="user && user.avatar"
-                key="main"
+                v-if="user.avatar"
                 alt="avatar"
                 :src="user.avatar"
-                class="rounded-full h-5 w-5"
+                class="dashboard-cta-avatar-img"
               />
-            </ClientOnly>
-            <span class="text-sm">
-              {{ t.landing.toDashboard }}
+              <i v-else class="dashboard-cta-avatar-fallback i-tabler-user" />
             </span>
-          </Btn>
+            <span class="dashboard-cta-text">
+              <span class="dashboard-cta-hello">@{{ user.username }}</span>
+              <span class="dashboard-cta-label">{{ t.landing.toDashboard }}</span>
+            </span>
+            <i class="dashboard-cta-arrow i-tabler-arrow-right" />
+          </NuxtLink>
         </div>
       </div>
     </ClientOnly>
   </div>
 </template>
+
+<style scoped>
+.dashboard-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 22px 10px 10px;
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  background: var(--ct-surface-1);
+  color: var(--ct-fg);
+  text-decoration: none;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.dashboard-cta:hover {
+  background: var(--ct-surface-2);
+  border-color: color-mix(in srgb, var(--ct-primary) 35%, transparent);
+  transform: translateY(-1px);
+}
+.dashboard-cta-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--ct-surface-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.dashboard-cta-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dashboard-cta-avatar-fallback {
+  font-size: 18px;
+  color: var(--ct-fg-muted);
+}
+.dashboard-cta-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+  gap: 2px;
+}
+.dashboard-cta-hello {
+  font-family: var(--ct-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ct-fg-muted);
+}
+.dashboard-cta-label {
+  font-family: var(--ct-font-sans);
+  font-size: 15px;
+  font-weight: var(--ct-weight-semibold);
+  color: var(--ct-fg);
+}
+.dashboard-cta-arrow {
+  font-size: 18px;
+  color: var(--ct-primary);
+  transition: transform 200ms ease;
+}
+.dashboard-cta:hover .dashboard-cta-arrow {
+  transform: translateX(3px);
+}
+</style>
 
 <style>
 iframe {

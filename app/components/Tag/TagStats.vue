@@ -175,7 +175,7 @@ const dailyAvgMs = computed(() => {
 <template>
   <PanelSection num="03" :title="t.dashboard.tags.stats.title" :meta="`TIME · DISTRIBUTION · ${timeRange}`" flush>
     <template #icon>
-      <i class="i-tabler-chart-bar text-surface-dimmed/70 text-[15px]" />
+      <i class="i-tabler-chart-bar text-[15px] text-ct-fg-muted" />
     </template>
 
     <!-- Toolbar -->
@@ -210,14 +210,14 @@ const dailyAvgMs = computed(() => {
     <!-- LOADING -->
     <div v-if="loadingStats" class="stats-cells">
       <div v-for="i in 4" :key="i" class="stats-cell stats-cell-skel">
-        <div class="bg-surface-variant-1/40 h-2.5 w-16 animate-pulse" />
-        <div class="bg-surface-variant-1/55 h-5 w-24 animate-pulse" />
+        <div class="bg-ct-surface-2 h-2.5 w-16 animate-pulse" />
+        <div class="bg-ct-surface-2 h-5 w-24 animate-pulse" />
       </div>
     </div>
 
     <!-- NO DATA -->
     <div v-else-if="!tagStats" class="stats-empty">
-      <i class="i-tabler-chart-bar-off text-surface-dimmed/50 text-3xl" />
+      <i class="i-tabler-chart-bar-off text-3xl text-ct-fg-muted" />
       <p class="stats-empty-text">
         {{ t.dashboard.tags.stats.noData }}
       </p>
@@ -284,7 +284,7 @@ const dailyAvgMs = computed(() => {
           />
         </div>
         <div v-else class="stats-chart-empty">
-          <i class="i-tabler-chart-line-off text-surface-dimmed/50 text-2xl" />
+          <i class="i-tabler-chart-line-off text-2xl text-ct-fg-muted" />
           <p class="stats-empty-text">
             {{ t.dashboard.tags.stats.noChartData }}
           </p>
@@ -301,7 +301,7 @@ const dailyAvgMs = computed(() => {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+  border-bottom: 1px solid var(--ct-border-subtle);
 }
 
 .stats-tag {
@@ -317,7 +317,7 @@ const dailyAvgMs = computed(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ct-font-mono);
   font-size: 12px;
   font-weight: 600;
   color: white;
@@ -341,14 +341,11 @@ const dailyAvgMs = computed(() => {
 .stats-range-btn {
   height: 2rem;
   padding: 0 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  font-size: var(--ct-text-xs);
+      color: var(--ct-fg-subtle);
   background-color: transparent;
   border: 0;
-  border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 25%, transparent);
+  border-left: 1px solid var(--ct-border-subtle);
   cursor: pointer;
   transition: color 180ms ease, background-color 180ms ease;
 }
@@ -358,8 +355,8 @@ const dailyAvgMs = computed(() => {
 }
 
 .stats-range-btn:hover {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.22);
+  color: var(--ct-fg);
+  background-color: var(--ct-surface-2);
 }
 
 .stats-range-btn-active {
@@ -378,10 +375,10 @@ const dailyAvgMs = computed(() => {
     grid-template-columns: 1fr 1fr;
   }
   .stats-cells > .stats-cell:nth-child(n+3) {
-    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+    border-top: 1px solid var(--ct-border-subtle);
   }
   .stats-cells > .stats-cell:nth-child(2n) {
-    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+    border-left: 1px solid var(--ct-border-subtle);
   }
 }
 
@@ -393,13 +390,13 @@ const dailyAvgMs = computed(() => {
     border-top: 0;
   }
   .stats-cells > .stats-cell + .stats-cell {
-    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+    border-left: 1px solid var(--ct-border-subtle);
   }
 }
 
 @media (max-width: 639px) {
   .stats-cells > .stats-cell + .stats-cell {
-    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+    border-top: 1px solid var(--ct-border-subtle);
   }
 }
 
@@ -414,23 +411,20 @@ const dailyAvgMs = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  font-size: var(--ct-text-xs);
+      color: var(--ct-fg-subtle);
 }
 
 .stats-cell-value {
   font-size: 18px;
   font-weight: 600;
-  color: var(--r-surface-text-color);
+  color: var(--ct-fg);
 }
 
 .stats-cell-unit {
   font-size: 12px;
   font-weight: 400;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  color: var(--ct-fg-subtle);
   margin-left: 0.25rem;
 }
 
@@ -448,16 +442,14 @@ const dailyAvgMs = computed(() => {
 }
 
 .stats-empty-text {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
+  font-size: var(--ct-text-xs);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+    color: var(--ct-fg-subtle);
 }
 
 /* Chart */
 .stats-chart-wrap {
-  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  border-top: 1px solid var(--ct-border-subtle);
   padding: 1rem 1.25rem 1.25rem;
 }
 
@@ -465,11 +457,9 @@ const dailyAvgMs = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
+  font-size: var(--ct-text-xs);
   letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--color-primary-1);
+    color: var(--color-primary-1);
   margin-bottom: 0.85rem;
 }
 
@@ -479,7 +469,7 @@ const dailyAvgMs = computed(() => {
 }
 
 .stats-chart-eyebrow-num {
-  color: var(--r-surface-text-color);
+  color: var(--ct-fg);
   opacity: 0.85;
 }
 

@@ -364,7 +364,7 @@ watchEffect(() => {
       <!-- User Header -->
       <template v-else>
         <!-- Profile Card (avatar + identity only, no nested sections) -->
-        <div class="border-surface-dimmed/30 border rounded-2xl bg-surface relative overflow-hidden">
+        <div class="border border-ct-border rounded-2xl bg-surface relative overflow-hidden">
           <div class="bg-primary/40 h-0.5 w-full left-0 top-0 absolute" />
           <div class="p-5 sm:p-6">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -377,12 +377,12 @@ watchEffect(() => {
                   <img
                     :src="user.avatar"
                     :alt="user.username"
-                    class="border-surface-dimmed/20 border rounded-full h-20 w-20 object-cover sm:h-24 sm:w-24"
+                    class="border border-ct-border rounded-full h-20 w-20 object-cover sm:h-24 sm:w-24"
                   >
                 </div>
                 <div
                   v-else
-                  class="border-surface-dimmed/30 bg-surface-variant-1/40 text-surface-dimmed/60 border rounded-full flex h-20 w-20 items-center justify-center sm:h-24 sm:w-24"
+                  class="text-ct-fg-muted border border-ct-border rounded-full bg-ct-surface-2 flex h-20 w-20 items-center justify-center sm:h-24 sm:w-24"
                 >
                   <i class="i-tabler-user text-3xl" />
                 </div>
@@ -395,26 +395,26 @@ watchEffect(() => {
                     {{ user?.username || `User ${targetUserId}` }}
                   </h1>
                   <span
-                    class="border-primary/30 bg-primary/10 text-[11px] text-primary tracking-[0.15em] font-semibold px-2.5 py-0.5 border rounded-full shrink-0 uppercase"
+                    class="border-primary/30 bg-ct-primary-soft text-[11px] text-primary tracking-[0.15em] font-semibold px-2.5 py-0.5 border rounded-full shrink-0 uppercase"
                   >
                     {{ planBadgeLabel }}
                   </span>
                 </div>
-                <p v-if="user?.email" class="text-surface-dimmed/70 text-sm mb-2">
+                <p v-if="user?.email" class="text-sm text-ct-fg-muted mb-2">
                   {{ user.email }}
                 </p>
                 <!-- Stat Pills -->
                 <div class="flex flex-wrap gap-1.5 justify-center sm:justify-start">
-                  <span class="text-xs text-surface-dimmed inline-flex gap-1 items-center">
+                  <span class="text-xs text-ct-fg-muted inline-flex gap-1 items-center">
                     <i class="i-tabler-hash text-sm" />
                     {{ user?.id || targetUserId }}
                   </span>
-                  <span v-if="user?.timezone" class="text-xs text-surface-dimmed inline-flex gap-1 items-center">
+                  <span v-if="user?.timezone" class="text-xs text-ct-fg-muted inline-flex gap-1 items-center">
                     <i class="i-tabler-point-filled text-[6px]" />
                     <i class="i-tabler-world text-sm" />
                     {{ user.timezone }}
                   </span>
-                  <span v-if="formatDate(user?.createdAt)" class="text-xs text-surface-dimmed inline-flex gap-1 items-center">
+                  <span v-if="formatDate(user?.createdAt)" class="text-xs text-ct-fg-muted inline-flex gap-1 items-center">
                     <i class="i-tabler-point-filled text-[6px]" />
                     <i class="i-tabler-calendar-plus text-sm" />
                     {{ t.dashboard.profile.stats.joined }} {{ formatDate(user?.createdAt) }}
@@ -455,10 +455,9 @@ watchEffect(() => {
           num="01"
           :title="t.dashboard.overview.rangeTitle"
           meta="time · window"
-          flush
         >
           <template #icon>
-            <i class="i-tabler-calendar text-surface-dimmed/70 text-[15px]" />
+            <i class="i-tabler-calendar text-[15px] text-ct-fg-muted" />
           </template>
           <DashboardDataRange v-model:days="days" />
         </PanelSection>
@@ -469,7 +468,7 @@ watchEffect(() => {
           meta="annual · calendar"
         >
           <template #icon>
-            <i class="i-tabler-activity text-surface-dimmed/70 text-[15px]" />
+            <i class="i-tabler-activity text-[15px] text-ct-fg-muted" />
           </template>
           <DashboardCalendarCard
             :loading="allDataResp.status.value !== 'success'"
@@ -485,7 +484,7 @@ watchEffect(() => {
           flush
         >
           <template #icon>
-            <i class="i-tabler-medal text-surface-dimmed/70 text-[15px]" />
+            <i class="i-tabler-medal text-[15px] text-ct-fg-muted" />
           </template>
           <div class="top-grid">
             <DashboardTopCard
@@ -519,7 +518,7 @@ watchEffect(() => {
           flush
         >
           <template #icon>
-            <i class="i-tabler-calendar-event text-surface-dimmed/70 text-[15px]" />
+            <i class="i-tabler-calendar-event text-[15px] text-ct-fg-muted" />
           </template>
           <CumulativeLineChart
             v-if="allDataResp.status.value === 'success' && hasData"
@@ -528,7 +527,7 @@ watchEffect(() => {
           />
           <div
             v-else
-            class="bg-surface-variant-1/40 h-64 w-full animate-pulse"
+            class="bg-ct-surface-2 h-64 w-full animate-pulse"
           />
         </PanelSection>
 
@@ -540,9 +539,9 @@ watchEffect(() => {
           flush
         >
           <template #icon>
-            <i class="i-carbon-chart-line-data text-surface-dimmed/70 text-[15px]" />
+            <i class="i-carbon-chart-line-data text-[15px] text-ct-fg-muted" />
           </template>
-          <div class="relative">
+          <div class="trend-pad">
             <PoltYDot
               v-if="allLanguageDataResp.status.value === 'success' && pAllLangData.length > 0"
               :data="pAllLangData"
@@ -550,7 +549,7 @@ watchEffect(() => {
             />
             <div
               v-else
-              class="bg-surface-variant-1/40 h-64 w-full animate-pulse"
+              class="trend-skel"
             />
           </div>
         </PanelSection>
@@ -563,9 +562,9 @@ watchEffect(() => {
           flush
         >
           <template #icon>
-            <i class="i-carbon-chart-line-data text-surface-dimmed/70 text-[15px]" />
+            <i class="i-carbon-chart-line-data text-[15px] text-ct-fg-muted" />
           </template>
-          <div class="relative">
+          <div class="trend-pad">
             <PoltYDot
               v-if="allProjectDataResp.status.value === 'success' && pAllProjectData.length > 0"
               :data="pAllProjectData"
@@ -573,7 +572,7 @@ watchEffect(() => {
             />
             <div
               v-else
-              class="bg-surface-variant-1/40 h-64 w-full animate-pulse"
+              class="trend-skel"
             />
           </div>
         </PanelSection>
@@ -586,7 +585,7 @@ watchEffect(() => {
           flush
         >
           <template #icon>
-            <i class="i-tabler-clock-hour-4 text-surface-dimmed/70 text-[15px]" />
+            <i class="i-tabler-clock-hour-4 text-[15px] text-ct-fg-muted" />
           </template>
           <PoltDailyDistribution
             :start-time="startTime"
@@ -601,7 +600,7 @@ watchEffect(() => {
     <div v-if="showUserInfo && !userHiddenData" class="space-y-8">
       <!-- Top Languages Ranking -->
       <div>
-        <h2 class="text-lg text-surface-dimmed tracking-[0.15em] font-medium mb-4 uppercase">
+        <h2 class="text-lg text-ct-fg-muted tracking-[0.15em] font-medium mb-4 uppercase">
           {{ t.dashboard.overview.top.language }}
         </h2>
 
@@ -612,11 +611,11 @@ watchEffect(() => {
             :key="i"
             class="py-3 flex gap-3 items-center animate-pulse"
           >
-            <div class="rounded bg-surface-variant-1 shrink-0 h-6 w-6" />
-            <div class="rounded-full bg-surface-variant-1 shrink-0 h-8 w-8" />
+            <div class="rounded bg-ct-surface-1 shrink-0 h-6 w-6" />
+            <div class="rounded-full bg-ct-surface-1 shrink-0 h-8 w-8" />
             <div class="flex-1 space-y-1.5">
-              <div class="rounded bg-surface-variant-1 h-4 w-24" />
-              <div class="rounded bg-surface-variant-1 h-3 w-16" />
+              <div class="rounded bg-ct-surface-1 h-4 w-24" />
+              <div class="rounded bg-ct-surface-1 h-3 w-16" />
             </div>
           </div>
         </div>
@@ -626,10 +625,10 @@ watchEffect(() => {
           <div
             v-for="(rank, index) in topLanguagesRanks"
             :key="rank.language"
-            class="border-surface-dimmed/20 py-3 border-b flex items-center justify-between last:border-b-0"
+            class="py-3 border-b border-ct-border flex items-center justify-between last:border-b-0"
           >
             <div class="flex gap-3 items-center">
-              <div class="text-primary/60 text-sm font-mono text-right shrink-0 w-6">
+              <div class="text-sm text-ct-primary font-mono text-right shrink-0 w-6">
                 {{ index + 1 }}
               </div>
               <VSCodeIcon
@@ -640,7 +639,7 @@ watchEffect(() => {
                 <div class="font-semibold">
                   {{ getLanguageName(rank.language || 'Unknown') }}
                 </div>
-                <div class="text-sm text-surface-dimmed">
+                <div class="text-sm text-ct-fg-muted">
                   {{ getDurationString(rank.totalMinutes * 60 * 1000) }}
                 </div>
               </div>
@@ -652,7 +651,7 @@ watchEffect(() => {
         </div>
 
         <!-- Empty State -->
-        <div v-else class="text-surface-dimmed py-10 text-center">
+        <div v-else class="text-ct-fg-muted py-10 text-center">
           <i class="i-tabler-chart-bar text-4xl mx-auto mb-3 opacity-30 block" />
           <p class="text-sm">
             No programming language data available for this user yet.
@@ -674,13 +673,17 @@ watchEffect(() => {
     grid-template-columns: 1fr 1fr 1fr;
   }
   .top-grid > :where(:not(:first-child)) {
-    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 30%, transparent);
+    border-left: 1px solid var(--ct-border);
   }
 }
 
 @media (max-width: 639px) {
   .top-grid > :where(:not(:first-child)) {
-    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 30%, transparent);
+    border-top: 1px solid var(--ct-border);
   }
 }
+
+.trend-pad { position: relative; padding: 6px 10px; }
+.trend-skel { height: 16rem; width: 100%; background: var(--ct-surface-2); animation: trend-pulse 1.4s ease-in-out infinite; }
+@keyframes trend-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
 </style>

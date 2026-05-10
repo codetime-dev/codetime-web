@@ -36,14 +36,14 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
   <div class="space-y-4">
     <!-- View mode -->
     <div v-if="!isEditing" class="space-y-3">
-      <div v-if="bio" class="bg-surface-variant-1/25 px-4 py-3.5">
-        <p class="text-[14px] text-surface leading-[1.65] font-mono whitespace-pre-wrap break-words">
+      <div v-if="bio" class="px-4 py-3.5 bg-ct-surface-1">
+        <p class="text-[14px] text-ct-fg leading-[1.65] font-mono whitespace-pre-wrap break-words">
           {{ bio }}
         </p>
       </div>
       <div
         v-else
-        class="bg-surface-variant-1/15 text-surface-dimmed/60 text-[12.5px] tracking-[0.04em] font-mono py-4 flex gap-2 items-center justify-center"
+        class="text-[12.5px] text-ct-fg-muted tracking-[0.04em] font-mono py-4 bg-ct-surface-1 flex gap-2 items-center justify-center"
       >
         <i class="i-tabler-quote-off text-base opacity-60" />
         <span>{{ t.dashboard.profile.bio.empty }}</span>
@@ -58,12 +58,12 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
 
     <!-- Edit mode -->
     <div v-else class="space-y-3">
-      <div class="bg-surface-variant-1/25 focus-within:bg-surface-variant-1/40 transition-colors relative">
+      <div class="bg-ct-surface-1 transition-colors relative focus-within:bg-ct-surface-2">
         <textarea
           v-model="bioDraftModel"
           :maxlength="maxLength"
           rows="4"
-          class="placeholder:text-surface-dimmed/40 text-[14px] text-surface leading-[1.65] font-mono p-3.5 pb-8 outline-none bg-transparent w-full block resize-none"
+          class="text-[14px] text-ct-fg leading-[1.65] font-mono p-3.5 pb-8 outline-none bg-transparent w-full block resize-none placeholder:text-ct-fg-subtle"
           :placeholder="t.dashboard.profile.bio.placeholder"
         />
         <div class="text-[12px] tracking-widest font-mono flex gap-1 bottom-2 right-3 absolute tabular-nums">
@@ -71,12 +71,12 @@ const nearLimit = computed(() => props.bioRemaining >= 0 && props.bioRemaining <
             :class="{
               'text-rose-500': overLimit,
               'text-amber-500': nearLimit,
-              'text-surface-dimmed/60': !overLimit && !nearLimit,
+              'text-ct-fg-muted': !overLimit && !nearLimit,
             }"
           >
             {{ bioRemaining }}
           </span>
-          <span class="text-surface-dimmed/30">/ {{ maxLength }}</span>
+          <span class="text-ct-fg-subtle">/ {{ maxLength }}</span>
         </div>
       </div>
 

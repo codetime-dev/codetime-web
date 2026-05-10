@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Btn, Paper, useContainerFilledCS } from '@roku-ui/vue'
 import { formatDistanceToNow } from 'date-fns'
 import { de, es, fr, it, ja, ko, ms, ptBR, ru, zhCN, zhTW } from 'date-fns/locale'
 import { v3GetActiveDiscounts } from '~/api/v3/sdk.gen'
@@ -10,9 +9,6 @@ const props = defineProps<{
 }>()
 const isAnuual = computed(() => props.variant === 'annual')
 const isOneTime = computed(() => props.variant === 'one-time')
-const annualGradientCls = 'text-error'
-const monthlyGradientCls = 'text-primary'
-
 const user = useUser()
 
 const t = useI18N()
@@ -272,7 +268,6 @@ const discountText = computed(() => {
     }
   }
 })
-const filledContainerCS = useContainerFilledCS('primary')
 async function toCheckoutLink() {
   if (globalThis.window === undefined) {
     return
@@ -298,83 +293,69 @@ async function toCheckoutLink() {
   <!-- Embedded mode: just the CTA button (used inside PriceTable) -->
   <template v-if="embedded">
     <ClientOnly>
-      <div v-if="user && user.plan === 'pro'" class="flex gap-2">
-        <Btn
-          v-if="user.planStatus"
-          class="w-full"
-          variant="transparent"
-          disabled
-        >
-          <template #leftSection>
-            <i class="i-tabler-check" />
-          </template>
-          {{ t.plan.status(user.planStatus) }}
-        </Btn>
-      </div>
-      <div v-else-if="user && user.plan === 'free'">
-        <Btn
-          variant="filled"
-          class="lemonsqueezy-button w-full !text-[14px] !tracking-[0.02em] !rounded-xl !h-11"
-          color="primary"
-          @click="toCheckoutLink"
-        >
-          <template #leftSection>
-            <i class="i-tabler-credit-card" />
-            <i v-if="isOneTime" class="i-ant-design-alipay-circle-outlined" />
-            <i v-if="isOneTime" class="i-ant-design-wechat-filled" />
-            <i v-if="isOneTime" class="i-entypo-social-paypal" />
-          </template>
-          <div class="text-center">
-            {{ t.plan.pro.button }}
-          </div>
-        </Btn>
-      </div>
-      <div v-else>
-        <Btn
-          v-if="!user"
-          class="w-full !text-[14px] !rounded-xl !h-11"
-          variant="transparent"
-          @click="onLogin"
-        >
-          {{ t.plan.needLogin }}
-        </Btn>
-      </div>
+      <UButton
+        v-if="user && user.plan === 'pro' && user.planStatus"
+
+        variant="secondary"
+        size="lg"
+        icon-left="i-tabler-check"
+        disabled block
+      >
+        {{ t.plan.status(user.planStatus) }}
+      </UButton>
+      <UButton
+        v-else-if="user && user.plan === 'free'"
+        block
+        variant="primary"
+        size="lg"
+        icon-left="i-tabler-credit-card"
+        class="lemonsqueezy-button"
+        @click="toCheckoutLink"
+      >
+        {{ t.plan.pro.button }}
+      </UButton>
+      <UButton
+        v-else-if="!user"
+        block
+        variant="secondary"
+        size="lg"
+        @click="onLogin"
+      >
+        {{ t.plan.needLogin }}
+      </UButton>
     </ClientOnly>
   </template>
 
   <!-- Full card mode (used standalone in modals, etc.) -->
-  <Paper
+  <div
     v-else
-    class="flex flex-col h-full min-h-600px w-full justify-between"
+    class="ppp"
   >
-    <div
-      v-bind="filledContainerCS"
-      class="text-sm text-white px-4 py-1 rounded-full right-4 top-0 absolute -translate-y-50%"
-    >
+    <div class="ppp-pop">
       {{ !isAnuual ? t.plan.mostPopular : t.plan.bestValue }}
     </div>
     <div>
-      <div class="text-base font-light">
+      <div class="ppp-name">
         {{ t.plan.pro.title }}
       </div>
-      <div class="font-light flex gap-2 items-end">
+      <div class="ppp-price-row">
         <div
+          class="ppp-price"
           :class="{
-            [monthlyGradientCls]: !isAnuual,
-            [annualGradientCls]: isAnuual,
+            'ppp-price-annual': isAnuual,
+            'ppp-price-monthly': !isAnuual,
           }"
-          class="text-4xl"
         >
           {{ isAnuual ? '$36' : '$4' }}
         </div>
-        <div class="text-sm text-surface-dimmed">
+        <div class="ppp-price-unit">
           {{ isAnuual ? t.plan.pro.preYear : t.plan.pro.preMonth }}
         </div>
       </div>
-      <div class="text-xl mb-2 mt-4">
+      <div class="ppp-feature-title">
         {{ t.plan.basic.features.title }}
       </div>
-      <div class="text-sm text-surface-dimmed flex flex-col gap-2">
+      <div class="ppp-features">
         <FeatureItem>
           {{ t.plan.pro.features.item.include }}
         </FeatureItem>
@@ -391,43 +372,81 @@ async function toCheckoutLink() {
     </div>
     <div>
       <ClientOnly>
-        <div v-if="user && user.plan === 'pro'" class="flex gap-2">
-          <Btn
-            v-if="user.planStatus"
-            class="w-full"
-            variant="transparent"
-            disabled
-          >
-            <template #leftSection>
-              <i class="i-tabler-check" />
-            </template>
-            {{ t.plan.status(user.planStatus) }}
-          </Btn>
-        </div>
-        <div v-else-if="user && user.plan === 'free'">
-          <Btn
-            variant="filled"
-            class="lemonsqueezy-button w-full"
-            color="primary"
-            @click="toCheckoutLink"
-          >
-            <template #leftSection>
-              <i class="i-tabler-credit-card" />
-              <i v-if="isOneTime" class="i-ant-design-alipay-circle-outlined" />
-              <i v-if="isOneTime" class="i-ant-design-wechat-filled" />
-              <i v-if="isOneTime" class="i-entypo-social-paypal" />
-            </template>
-            <div class="text-center">
-              {{ t.plan.pro.button }}
-            </div>
-          </Btn>
-        </div>
-        <div v-else>
-          <Btn v-if="!user" class="w-full" variant="transparent" @click="onLogin">
-            {{ t.plan.needLogin }}
-          </Btn>
-        </div>
+        <UButton
+          v-if="user && user.plan === 'pro' && user.planStatus"
+
+          variant="secondary"
+          size="lg"
+          icon-left="i-tabler-check"
+          disabled block
+        >
+          {{ t.plan.status(user.planStatus) }}
+        </UButton>
+        <UButton
+          v-else-if="user && user.plan === 'free'"
+          block
+          variant="primary"
+          size="lg"
+          icon-left="i-tabler-credit-card"
+          class="lemonsqueezy-button"
+          @click="toCheckoutLink"
+        >
+          {{ t.plan.pro.button }}
+        </UButton>
+        <UButton
+          v-else-if="!user"
+          block
+          variant="secondary"
+          size="lg"
+          @click="onLogin"
+        >
+          {{ t.plan.needLogin }}
+        </UButton>
       </ClientOnly>
     </div>
-  </Paper>
+  </div>
 </template>
+
+<style scoped>
+.ppp {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 600px;
+  padding: 28px 24px;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+}
+.ppp-pop {
+  position: absolute;
+  right: 16px;
+  top: 0;
+  transform: translateY(-50%);
+  padding: 4px 14px;
+  font-size: var(--ct-text-xs);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-on-primary);
+  background: var(--ct-primary);
+  border-radius: var(--ct-radius-full);
+}
+.ppp-name { font-size: var(--ct-text-base); font-weight: var(--ct-weight-medium); color: var(--ct-fg-muted); }
+.ppp-price-row { display: flex; gap: 8px; align-items: baseline; margin-top: 4px; }
+.ppp-price {
+  font-size: 36px;
+  font-weight: var(--ct-weight-semibold);
+  letter-spacing: var(--ct-tracking-tight);
+}
+.ppp-price-monthly { color: var(--ct-primary); }
+.ppp-price-annual  { color: var(--ct-danger); }
+.ppp-price-unit { font-size: var(--ct-text-sm); color: var(--ct-fg-subtle); }
+.ppp-feature-title {
+  margin-top: 24px;
+  margin-bottom: 10px;
+  font-size: var(--ct-text-lg);
+  font-weight: var(--ct-weight-semibold);
+  color: var(--ct-fg);
+}
+.ppp-features { display: flex; flex-direction: column; gap: 8px; font-size: var(--ct-text-sm); color: var(--ct-fg-muted); }
+</style>

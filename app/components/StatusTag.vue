@@ -5,9 +5,7 @@ defineProps<{
 </script>
 
 <template>
-  <div
-    class="bg-gray-5/20 border-gray-5 text-gray-5 text-xs font-mono px-3 py-0.5 rounded-full uppercase"
-  >
+  <UTag tone="neutral" variant="outline" size="sm">
     {{ status }}
-  </div>
+  </UTag>
 </template>

@@ -20,18 +20,18 @@ watchEffect(() => {
   <NuxtLayout name="default">
     <div class="layout-frame mx-auto max-w-7xl w-full">
       <header class="layout-topbar relative">
-        <div class="px-5.5 py-3.5 flex flex-wrap gap-x-6 gap-y-3 items-center justify-between">
-          <NuxtLink :to="`/${locale}`" class="flex gap-3 items-center">
+        <div class="px-6 py-4 flex flex-wrap gap-x-6 gap-y-3 items-center justify-between">
+          <NuxtLink :to="`/${locale}`" class="flex gap-2.5 items-center">
             <img
               alt="Code Time"
               src="/icon.svg"
-              width="20"
-              height="20"
+              width="22"
+              height="22"
               class="block"
               loading="lazy"
               decoding="async"
             >
-            <span class="text-[14px] text-surface tracking-[0.3em] font-mono font-semibold">CODE·TIME</span>
+            <span class="lp-mark">Code Time</span>
           </NuxtLink>
           <div class="flex gap-3 items-center">
             <LanguageSelect />
@@ -44,25 +44,25 @@ watchEffect(() => {
       </main>
 
       <footer class="layout-foot relative">
-        <div class="text-surface-dimmed/55 text-[12px] tracking-[0.12em] font-mono px-5.5 py-3.5 flex gap-3 uppercase items-center justify-center">
-          <span>datreks · {{ new Date().getFullYear() }}</span>
-          <span class="text-surface-dimmed/25">·</span>
+        <div class="lp-foot">
+          <span>Datreks · {{ new Date().getFullYear() }}</span>
+          <span class="lp-foot-sep">·</span>
           <NuxtLink
             to="https://github.com/Jannchie/codetime-web-v3"
             target="_blank"
-            class="inline-flex gap-1 transition-colors items-center hover:text-primary"
+            class="lp-foot-link"
           >
-            <i class="i-tabler-brand-github text-sm" />
-            <span class="hidden sm:inline">github</span>
+            <i class="i-tabler-brand-github" />
+            <span class="hidden sm:inline">GitHub</span>
           </NuxtLink>
-          <span class="text-surface-dimmed/25">·</span>
+          <span class="lp-foot-sep">·</span>
           <NuxtLink
             to="https://discord.gg/WWEQrWCkkP"
             target="_blank"
-            class="inline-flex gap-1 transition-colors items-center hover:text-primary"
+            class="lp-foot-link"
           >
-            <i class="i-tabler-brand-discord text-sm" />
-            <span class="hidden sm:inline">discord</span>
+            <i class="i-tabler-brand-discord" />
+            <span class="hidden sm:inline">Discord</span>
           </NuxtLink>
         </div>
       </footer>
@@ -93,7 +93,7 @@ watchEffect(() => {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--r-surface-border-color);
+  background: var(--ct-border);
   opacity: 0.35;
   pointer-events: none;
 }
@@ -113,7 +113,7 @@ watchEffect(() => {
   left: 50%;
   width: 100vw;
   height: 1px;
-  background: var(--r-surface-border-color);
+  background: var(--ct-border);
   opacity: 0.4;
   transform: translateX(-50%);
   pointer-events: none;
@@ -128,12 +128,33 @@ watchEffect(() => {
 }
 
 .layout-foot {
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  background-color: var(--ct-surface-1);
 }
 
-[data-scheme="light"] .layout-foot {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 4%, transparent);
+.lp-mark {
+  font-size: var(--ct-text-md);
+  font-weight: var(--ct-weight-semibold);
+  color: var(--ct-fg);
+  letter-spacing: var(--ct-tracking-tight);
 }
+
+.lp-foot {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+}
+.lp-foot-sep { color: var(--ct-fg-disabled); }
+.lp-foot-link {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  transition: color var(--ct-duration-fast) var(--ct-ease);
+}
+.lp-foot-link:hover { color: var(--ct-primary); }
 </style>
 
 <style>

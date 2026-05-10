@@ -3,7 +3,7 @@ import { v3GetTotalMinutes } from '~/api/v3'
 import { locales } from '~/i18n'
 
 const locale = useLocale()
-const { data, status } = await useAsyncData(async () => {
+const { data, status } = await useAsyncData('landing-total-minutes', async () => {
   const { data } = await v3GetTotalMinutes()
   return data
 }, { server: false })
@@ -55,18 +55,27 @@ const t = useI18N()
   <div class="flex flex-col gap-6 items-center">
     <span
       v-if="status === 'success'"
-      class="sum-number text-surface leading-none font-mono font-semibold tabular-nums"
+      class="sum-number text-ct-fg leading-none font-mono font-semibold tabular-nums"
     >
       {{ fomater.format(minutes) }}
     </span>
-    <div v-else class="bg-surface-variant-1/40 h-[clamp(3rem,9vw,5rem)] w-[min(24rem,80vw)] animate-pulse" />
+    <div v-else class="sum-skel" />
 
-    <div class="text-surface-dimmed/80 text-[11px] tracking-[0.32em] font-mono inline-flex gap-3 uppercase items-center">
-      <span class="bg-primary/40 h-px w-10 inline-block" />
+    <div class="sum-caption">
+      <span class="sum-rule" />
       <span>{{ t.landing.alreadyStatistical }}</span>
-      <span class="text-surface-dimmed/40">·</span>
-      <span class="text-primary/80">{{ t.landing.minutes }}</span>
-      <span class="bg-primary/40 h-px w-10 inline-block" />
+      <span class="sum-sep">·</span>
+      <span class="sum-unit">{{ t.landing.minutes }}</span>
+      <span class="sum-rule" />
+    </div>
+
+    <div
+      v-if="status === 'success' && data?.last24HMinutes"
+      class="sum-delta"
+    >
+      <span class="sum-delta-arrow">↑</span>
+      <span class="sum-delta-num tabular-nums">{{ fomater.format(data.last24HMinutes) }}</span>
+      <span class="sum-delta-label">last 24h</span>
     </div>
   </div>
 </template>
@@ -76,8 +85,60 @@ const t = useI18N()
   position: relative;
   font-size: clamp(3rem, 11vw, 6.5rem);
   letter-spacing: -0.025em;
-  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
-  color: var(--r-surface-text-color);
-  text-shadow: 0 0 60px color-mix(in srgb, var(--color-primary-1) 25%, transparent);
+  font-family: var(--ct-font-mono);
+  color: var(--ct-fg);
+  text-shadow: 0 0 60px color-mix(in srgb, var(--ct-primary) 25%, transparent);
+}
+.sum-skel {
+  height: clamp(3rem, 9vw, 5rem);
+  width: min(24rem, 80vw);
+  background: var(--ct-surface-2);
+  animation: sum-pulse 1.4s ease-in-out infinite;
+}
+@keyframes sum-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+.sum-caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-muted);
+}
+.sum-rule {
+  width: 40px;
+  height: 1px;
+  display: inline-block;
+  background: color-mix(in srgb, var(--ct-primary) 40%, transparent);
+}
+.sum-sep { color: var(--ct-fg-disabled); }
+.sum-unit { color: var(--ct-primary); }
+
+.sum-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 6px 14px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  letter-spacing: 0.04em;
+  color: var(--ct-fg-muted);
+  background: color-mix(in srgb, var(--ct-primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ct-primary) 25%, transparent);
+}
+.sum-delta-arrow {
+  color: var(--ct-primary);
+  font-weight: var(--ct-weight-semibold);
+}
+.sum-delta-num {
+  color: var(--ct-fg);
+  font-weight: var(--ct-weight-semibold);
+}
+.sum-delta-label {
+  color: var(--ct-fg-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 </style>

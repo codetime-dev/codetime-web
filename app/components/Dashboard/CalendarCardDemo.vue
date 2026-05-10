@@ -67,6 +67,7 @@ function isWesternHoliday(date: Date): boolean {
   return false
 }
 
+const t = useI18N()
 const data = Array.from({ length: 365 }, (_, i) => {
   // 以组件加载时的系统时间为基准，生成前365天的UTC零点
   const date = new Date()
@@ -97,5 +98,10 @@ const data = Array.from({ length: 365 }, (_, i) => {
 </script>
 
 <template>
-  <DashboardCalendarCard :data="data" />
+  <PanelSection num="02" :title="t.dashboard.overview.activityTitle">
+    <template #icon>
+      <i class="i-tabler-activity text-[15px] text-ct-fg-muted" />
+    </template>
+    <DashboardCalendarCard :data="data" />
+  </PanelSection>
 </template>

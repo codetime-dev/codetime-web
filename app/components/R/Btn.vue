@@ -1,18 +1,29 @@
 <script setup lang="ts">
-import { Btn } from '@roku-ui/vue'
+import UButton from '~/components/U/Button.vue'
 
 withDefaults(defineProps<{
   color?: 'error' | 'primary'
+  size?: 'sm' | 'md' | 'lg'
+  block?: boolean
+  loading?: boolean
+  disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
 }>(), {
   color: 'primary',
+  size: 'md',
+  type: 'button',
 })
 </script>
 
 <template>
-  <Btn
-    :color="color"
-    hover-variant="filled"
+  <UButton
+    :variant="color === 'error' ? 'danger' : 'primary'"
+    :size="size"
+    :block="block"
+    :loading="loading"
+    :disabled="disabled"
+    :type="type"
   >
     <slot />
-  </Btn>
+  </UButton>
 </template>

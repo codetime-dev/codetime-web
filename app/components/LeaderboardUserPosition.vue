@@ -62,14 +62,14 @@ function navigateToUser() {
 <template>
   <div v-if="userRankData.status.value === 'pending'" class="up-self up-self-skel">
     <div class="up-self-rank">
-      <div class="bg-surface-variant-1/55 h-3 w-12 animate-pulse" />
+      <div class="up-skel up-skel-rank" />
     </div>
-    <div class="bg-surface-variant-1/55 h-7 w-7 animate-pulse" />
+    <div class="up-skel up-skel-avatar" />
     <div class="up-self-meta">
-      <div class="bg-surface-variant-1/55 h-3 w-20 animate-pulse" />
-      <div class="bg-surface-variant-1/45 h-2 w-14 animate-pulse" />
+      <div class="up-skel up-skel-name" />
+      <div class="up-skel up-skel-meta" />
     </div>
-    <div class="bg-surface-variant-1/45 h-3 w-10 animate-pulse" />
+    <div class="up-skel up-skel-pct" />
   </div>
 
   <button
@@ -110,24 +110,21 @@ function navigateToUser() {
 
 <style scoped>
 .up-self {
-  height: 65px;
   display: grid;
-  grid-template-columns: 2.25rem 1.85rem 1fr auto;
+  grid-template-columns: 2.25rem 1.85rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.85rem 1rem;
-  background-color: color-mix(in srgb, var(--color-primary-1) 8%, transparent);
+  min-height: 60px;
+  padding: 0.65rem 1rem;
+  background: var(--ct-surface-1);
   border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-primary-1) 25%, transparent);
+  border-bottom: 1px solid var(--ct-border-subtle);
   cursor: pointer;
   text-align: left;
-  transition: background-color 180ms ease;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease);
 }
-
-.up-self:hover {
-  background-color: color-mix(in srgb, var(--color-primary-1) 16%, transparent);
-}
+.up-self:hover { background: var(--ct-surface-2); }
 
 .up-self-skel {
   cursor: default;
@@ -139,25 +136,14 @@ function navigateToUser() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  color: var(--color-primary-1);
+  gap: 2px;
+  font-family: var(--ct-font-mono);
+  color: var(--ct-fg-muted);
   font-variant-numeric: tabular-nums;
   line-height: 1.15;
 }
-
-.up-self-rank-prefix {
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
-.up-self-rank-value {
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  font-weight: 500;
-}
+.up-self-rank-prefix { font-size: 10px; opacity: 0.75; }
+.up-self-rank-value { font-size: var(--ct-text-sm); font-weight: var(--ct-weight-semibold); }
 
 .up-self-avatar {
   width: 1.85rem;
@@ -165,49 +151,45 @@ function navigateToUser() {
   object-fit: cover;
   flex-shrink: 0;
   border-radius: 9999px;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary-1) 40%, transparent);
 }
-
 .up-self-avatar-fallback {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-primary-1);
-  background-color: color-mix(in srgb, var(--color-primary-1) 16%, transparent);
+  font-size: 11px;
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
+  background: var(--ct-surface-2);
 }
 
-.up-self-meta {
-  min-width: 0;
-}
-
+.up-self-meta { min-width: 0; }
 .up-self-name {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--r-surface-text-color);
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .up-self-duration {
-  margin-top: 0.15rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  margin-top: 2px;
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
 }
-
 .up-self-pct {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  color: var(--color-primary-1);
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-muted);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  white-space: nowrap;
 }
+
+.up-skel { background: var(--ct-surface-2); animation: up-pulse 1.4s ease-in-out infinite; }
+.up-skel-rank { width: 36px; height: 14px; }
+.up-skel-avatar { width: 28px; height: 28px; border-radius: 9999px; }
+.up-skel-name { width: 96px; height: 14px; }
+.up-skel-meta { width: 56px; height: 12px; margin-top: 4px; }
+.up-skel-pct { width: 40px; height: 14px; }
+@keyframes up-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
 </style>

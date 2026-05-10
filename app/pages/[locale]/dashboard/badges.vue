@@ -77,7 +77,7 @@ const link = computed(() => {
 
     <PanelSection num="02" :title="t.dashboard.badge.configure" meta="style · color · filters" flush>
       <template #icon>
-        <i class="i-tabler-adjustments-horizontal text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-adjustments-horizontal text-[15px] text-ct-fg-muted" />
       </template>
 
       <div class="badge-form">
@@ -198,7 +198,7 @@ const link = computed(() => {
   display: grid;
   grid-template-columns: 9rem 1fr;
   align-items: stretch;
-  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+  border-top: 1px solid var(--ct-border-subtle);
 }
 
 .badge-row:first-child {
@@ -208,20 +208,18 @@ const link = computed(() => {
 .badge-row-label {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 1rem 1.25rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--r-surface-text-color);
-  opacity: 0.85;
-  border-right: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+  gap: 8px;
+  padding: 16px 18px;
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
+  border-right: 1px solid var(--ct-border-subtle);
 }
 
 .badge-label-num {
-  color: var(--color-primary-1);
-  font-weight: 500;
+  color: var(--ct-primary);
+  font-weight: var(--ct-weight-semibold);
+  font-family: var(--ct-font-mono);
 }
 
 .badge-row-control {
@@ -247,14 +245,11 @@ const link = computed(() => {
   padding: 0;
   height: 100%;
   min-height: 3rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  font-size: var(--ct-text-xs);
+      color: var(--ct-fg-subtle);
   background: transparent;
   border: 0;
-  border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 25%, transparent);
+  border-left: 1px solid var(--ct-border-subtle);
   cursor: pointer;
   transition: color 180ms ease, background-color 180ms ease;
 }
@@ -264,8 +259,8 @@ const link = computed(() => {
 }
 
 .badge-style-btn:hover {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.22);
+  color: var(--ct-fg);
+  background-color: var(--ct-surface-2);
 }
 
 .badge-style-btn-active {
@@ -299,13 +294,13 @@ const link = computed(() => {
   width: 1.5rem;
   height: 1.5rem;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 70%, transparent);
+  box-shadow: inset 0 0 0 1px var(--ct-border-strong);
 }
 
 .badge-color-hash {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ct-font-mono);
   font-size: 13px;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  color: var(--ct-fg-subtle);
 }
 
 .badge-color-textfield {
@@ -327,7 +322,7 @@ const link = computed(() => {
   border: 0;
   cursor: pointer;
   position: relative;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 50%, transparent);
+  box-shadow: inset 0 0 0 1px var(--ct-border);
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
@@ -337,7 +332,7 @@ const link = computed(() => {
 
 .badge-color-preset-active {
   box-shadow:
-    inset 0 0 0 1px var(--r-surface-background-base-color),
+    inset 0 0 0 1px var(--ct-bg),
     0 0 0 1px var(--color-primary-1);
 }
 
@@ -353,13 +348,13 @@ const link = computed(() => {
     grid-template-columns: 1fr 1fr 1fr;
   }
   .badge-filter-grid > .badge-filter-cell + .badge-filter-cell {
-    border-left: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+    border-left: 1px solid var(--ct-border-subtle);
   }
 }
 
 @media (max-width: 767px) {
   .badge-filter-grid > .badge-filter-cell + .badge-filter-cell {
-    border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+    border-top: 1px solid var(--ct-border-subtle);
   }
 }
 
@@ -372,40 +367,32 @@ const link = computed(() => {
 }
 
 .badge-filter-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
+  font-size: var(--ct-text-xs);
+      color: var(--ct-fg-subtle);
 }
 
-/* Shared input style: borderless, slight bg, full width, h-9 */
+/* Shared input style aligned with U/Input md */
 .line-input {
   display: block;
   width: 100%;
-  height: 2.25rem;
-  padding: 0 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
-  border: 0;
+  height: 36px;
+  padding: 0 12px;
+  font-family: var(--ct-font-sans);
+  font-size: var(--ct-text-base);
+  color: var(--ct-fg);
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
   outline: 0;
-  transition: background-color 180ms ease, box-shadow 180ms ease;
+  transition: border-color var(--ct-duration-fast) var(--ct-ease),
+              box-shadow var(--ct-duration-fast) var(--ct-ease);
 }
-
-.line-input:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.26);
-}
-
+.line-input:hover { border-color: var(--ct-border-strong); }
 .line-input:focus {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
-  box-shadow: inset 0 -1px 0 var(--color-primary-1);
+  border-color: var(--ct-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-primary) 18%, transparent);
 }
-
-.line-input::placeholder {
-  color: color-mix(in srgb, var(--r-surface-text-color) 35%, transparent);
-}
+.line-input::placeholder { color: var(--ct-fg-subtle); }
 
 /* Number spinner removal */
 .line-input[type="number"]::-webkit-outer-spin-button,
@@ -425,7 +412,7 @@ const link = computed(() => {
   }
   .badge-row-label {
     border-right: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+    border-bottom: 1px solid var(--ct-border-subtle);
     padding: 0.7rem 1rem;
   }
   .badge-style-group {

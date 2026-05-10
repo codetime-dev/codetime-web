@@ -157,19 +157,27 @@ useHead({
   <!-- HERO -->
   <section class="hero relative overflow-hidden">
     <div class="hero-grid" aria-hidden="true" />
-    <div class="hero-scan" aria-hidden="true" />
     <div class="hero-glow" aria-hidden="true" />
-    <div class="hero-vignette" aria-hidden="true" />
 
-    <div class="px-6 py-24 flex flex-col gap-10 items-center justify-center relative lg:py-40 sm:py-32">
+    <div class="px-6 py-24 flex flex-col gap-8 items-center justify-center relative lg:py-32 sm:py-28">
+      <div class="hero-badge">
+        <span class="hero-badge-dot" />
+        <span>{{ t.landing.heroBadge }}</span>
+      </div>
+
       <LandingTitle />
 
-      <p class="text-[15px] text-surface-dimmed leading-[1.65] tracking-[0.01em] font-mono px-4 text-center max-w-xl sm:text-[16px]">
+      <p class="hero-desc">
         {{ t.landing.description }}
       </p>
 
-      <div class="mt-2">
+      <div class="mt-2 flex flex-col gap-4 items-center">
         <LoginButton />
+        <div class="hero-meta">
+          <span class="hero-meta-rule" />
+          <span>{{ t.landing.freeMessage }}</span>
+          <span class="hero-meta-rule" />
+        </div>
       </div>
 
     </div>
@@ -178,10 +186,10 @@ useHead({
   <!-- Privacy-respecting coding-time analytics description (kept for SEO/agents only) -->
   <section class="agent-friendly-summary visually-hidden" aria-label="About Code Time">
     <div class="mx-auto px-6 py-16 max-w-4xl space-y-6">
-      <h2 class="text-2xl text-surface font-mono font-semibold">
+      <h2 class="text-2xl text-ct-fg font-mono font-semibold">
         Privacy-respecting coding-time analytics for VS Code and JetBrains
       </h2>
-      <p class="text-[15px] text-surface-dimmed leading-[1.7] font-mono">
+      <p class="text-[15px] text-ct-fg-muted leading-[1.7] font-mono">
         Code Time records per-minute coding activity reported by official
         editor plugins for Visual Studio Code and every JetBrains IDE. Sign
         in with GitHub or Google, install the plugin, and watch your
@@ -190,7 +198,7 @@ useHead({
         uploaded — only file paths, languages, and timestamps. Your raw
         events are exportable forever through the JSON API.
       </p>
-      <p class="text-[15px] text-surface-dimmed leading-[1.7] font-mono">
+      <p class="text-[15px] text-ct-fg-muted leading-[1.7] font-mono">
         Built for developers who want to understand their habits, attribute
         time to projects, or feed coding metrics into downstream tools.
         Compatible with VS Code, IntelliJ IDEA, PyCharm, WebStorm, GoLand,
@@ -226,27 +234,27 @@ useHead({
           <span>{{ t.landing.sections.visualization }}</span>
           <span class="eyebrow-bracket">]</span>
         </div>
-        <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold max-w-3xl">
+        <h2 class="section-heading text-ct-fg leading-[1.05] font-mono font-semibold max-w-3xl">
           {{ t.landing.features.visualization.title }}
         </h2>
-        <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono mt-2 max-w-2xl">
+        <p class="text-[14px] text-ct-fg-muted leading-[1.7] font-mono mt-2 max-w-2xl">
           {{ t.landing.features.visualization.description }}
         </p>
       </div>
 
-      <div class="gap-3 grid">
-        <div class="gap-3 grid grid-cols-1 lg:grid-cols-[22rem_1fr]">
-          <div class="showcase-tile">
+      <div class="showcase-frame">
+        <div class="showcase-grid">
+          <div class="showcase-cell showcase-cell--top">
             <DashboardTopCardTemplateDemo />
           </div>
-          <div class="showcase-tile">
+          <div class="showcase-cell showcase-cell--cal">
             <DashboardCalendarCardDemo class="w-full" />
           </div>
         </div>
-        <div class="showcase-tile showcase-scroll">
+        <div class="showcase-cell showcase-scroll">
           <DashboardProjectYDotCardDemo />
         </div>
-        <div class="showcase-tile showcase-scroll">
+        <div class="showcase-cell showcase-scroll">
           <PoltDailyDistributionTemplateDemo />
         </div>
       </div>
@@ -255,74 +263,135 @@ useHead({
 
   <!-- FEATURE PAIRS -->
   <section class="section-band">
-    <div class="mx-auto px-6 py-24 max-w-6xl space-y-24 sm:py-32">
-      <!-- 02 SAVE -->
-      <div class="gap-10 grid items-center md:gap-16 md:grid-cols-[1fr_auto]">
-        <div class="space-y-3">
-          <div class="eyebrow">
+    <div class="mx-auto px-6 py-24 max-w-6xl space-y-28 sm:py-32 sm:space-y-32">
+      <!-- 02 SAVE — wide hero card with calendar visual -->
+      <div class="feature-card feature-card--wide">
+        <div class="feature-card-body">
+          <div class="eyebrow feature-eyebrow">
             <span class="eyebrow-bracket">[</span>
             <span class="eyebrow-num">02</span>
             <span class="eyebrow-sep">/</span>
             <span>{{ t.landing.sections.alwaysSynced }}</span>
             <span class="eyebrow-bracket">]</span>
           </div>
-          <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
+          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.save.title }}
           </h2>
-          <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono max-w-xl">
+          <p class="feature-desc text-ct-fg-muted leading-[1.7] font-mono max-w-2xl">
             {{ t.landing.features.save.description }}
           </p>
+          <div class="feature-stat-row">
+            <div class="feature-stat">
+              <span class="feature-stat-num">∞</span>
+              <span class="feature-stat-label">{{ t.landing.features.save.statRetention || 'Forever' }}</span>
+            </div>
+            <div class="feature-stat">
+              <span class="feature-stat-num">1m</span>
+              <span class="feature-stat-label">{{ t.landing.features.save.statResolution || 'Per minute' }}</span>
+            </div>
+            <div class="feature-stat">
+              <span class="feature-stat-num">0$</span>
+              <span class="feature-stat-label">{{ t.landing.features.save.statCost || 'Free to keep' }}</span>
+            </div>
+          </div>
         </div>
-        <div class="feature-icon">
-          <i class="i-line-md-calendar" />
+        <div class="feature-card-visual">
+          <i class="i-line-md-calendar feature-card-visual-icon" />
+          <span class="feature-card-visual-grid" aria-hidden="true" />
         </div>
       </div>
 
-      <!-- 03 EXPORT -->
-      <div class="gap-10 grid items-center md:gap-16 md:grid-cols-[auto_1fr]">
-        <div class="feature-icon md:order-1">
-          <i class="i-line-md-cloud-down-twotone" />
-        </div>
-        <div class="space-y-3 md:order-2">
-          <div class="eyebrow">
+      <!-- 03 EXPORT — split with API/JSON snippet -->
+      <div class="gap-12 grid items-stretch md:gap-14 md:grid-cols-[1fr_1.25fr]">
+        <div class="feature-text-block">
+          <div class="eyebrow feature-eyebrow">
             <span class="eyebrow-bracket">[</span>
             <span class="eyebrow-num">03</span>
             <span class="eyebrow-sep">/</span>
             <span>{{ t.landing.sections.openData }}</span>
             <span class="eyebrow-bracket">]</span>
           </div>
-          <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
+          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.export.title }}
           </h2>
-          <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono max-w-xl">
+          <p class="feature-desc text-ct-fg-muted leading-[1.7] font-mono max-w-xl">
             {{ t.landing.features.export.description }}
           </p>
+          <div class="feature-chip-row">
+            <span class="feature-chip"><i class="i-tabler-braces" />JSON</span>
+            <span class="feature-chip"><i class="i-tabler-table" />CSV</span>
+            <span class="feature-chip"><i class="i-tabler-api" />REST API</span>
+          </div>
+        </div>
+        <div class="code-card">
+          <div class="code-card-bar">
+            <span class="code-card-method">GET</span>
+            <span class="code-card-path">/v3/stats</span>
+            <span class="code-card-status">200 OK</span>
+          </div>
+          <pre class="code-card-body"><code>{
+  "minutes": 14820,
+  "since": "2024-01-01",
+  "by": "language",
+  "data": [
+    {
+      "field": "TypeScript",
+      "minutes": 6240
+    },
+    {
+      "field": "Python",
+      "minutes": 4180
+    },
+    {
+      "field": "Go",
+      "minutes": 2120
+    }
+  ]
+}</code></pre>
         </div>
       </div>
 
-      <!-- 04 EDITOR -->
-      <div class="gap-10 grid items-center md:gap-16 md:grid-cols-[1fr_auto]">
-        <div class="space-y-3">
-          <div class="eyebrow">
+      <!-- 04 EDITOR — title above, editor grid below -->
+      <div class="space-y-12">
+        <div class="feature-text-block max-w-3xl">
+          <div class="eyebrow feature-eyebrow">
             <span class="eyebrow-bracket">[</span>
             <span class="eyebrow-num">04</span>
             <span class="eyebrow-sep">/</span>
             <span>{{ t.landing.sections.editors }}</span>
             <span class="eyebrow-bracket">]</span>
           </div>
-          <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
+          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.editor.title }}
           </h2>
-          <p class="text-[14px] text-surface-dimmed leading-[1.7] font-mono max-w-xl">
+          <p class="feature-desc text-ct-fg-muted leading-[1.7] font-mono max-w-2xl">
             {{ t.landing.features.editor.description }}
           </p>
         </div>
-        <div class="flex gap-4 items-center">
-          <div class="editor-tile">
-            <i class="i-logos-visual-studio-code h-14 w-14 md:h-16 md:w-16" />
+        <div class="editor-grid">
+          <div class="editor-tile editor-tile--lg">
+            <i class="i-logos-visual-studio-code editor-tile-icon" />
+            <span class="editor-tile-name">VS Code</span>
           </div>
-          <div class="editor-tile">
-            <i class="i-logos-jetbrains h-14 w-14 md:h-16 md:w-16" />
+          <div class="editor-tile editor-tile--lg">
+            <i class="i-logos-jetbrains editor-tile-icon" />
+            <span class="editor-tile-name">JetBrains</span>
+          </div>
+          <div class="editor-tile editor-tile--lg">
+            <i class="i-simple-icons-cursor editor-tile-icon editor-tile-icon--mono" />
+            <span class="editor-tile-name">Cursor</span>
+          </div>
+          <div class="editor-tile editor-tile--lg">
+            <i class="i-simple-icons-windsurf editor-tile-icon editor-tile-icon--mono" />
+            <span class="editor-tile-name">Windsurf</span>
+          </div>
+          <div class="editor-tile editor-tile--lg">
+            <i class="i-tabler-rocket editor-tile-icon editor-tile-icon--mono" />
+            <span class="editor-tile-name">Antigravity</span>
+          </div>
+          <div class="editor-tile editor-tile--lg editor-tile--more">
+            <i class="i-tabler-plus editor-tile-icon editor-tile-icon--mono" />
+            <span class="editor-tile-name">{{ t.landing.features.editor.more || 'more' }}</span>
           </div>
         </div>
       </div>
@@ -340,9 +409,12 @@ useHead({
           <span>{{ t.landing.sections.pricing }}</span>
           <span class="eyebrow-bracket">]</span>
         </div>
-        <h2 class="section-heading text-surface leading-[1.05] font-mono font-semibold">
+        <h2 class="section-heading text-ct-fg leading-[1.05] font-mono font-semibold max-w-3xl">
           {{ t.landing.pricing.heading }}
         </h2>
+        <p class="text-[14px] text-ct-fg-muted leading-[1.7] font-mono mt-2 max-w-xl">
+          {{ t.landing.pricing.description }}
+        </p>
       </div>
       <PriceTable />
     </div>
@@ -358,7 +430,7 @@ useHead({
         <span>{{ t.landing.sections.startTracking }}</span>
         <span class="eyebrow-bracket">]</span>
       </div>
-      <h2 class="closing-heading text-surface font-mono font-semibold max-w-3xl">
+      <h2 class="closing-heading text-ct-fg font-mono font-semibold max-w-3xl">
         <span class="closing-line block">{{ t.landing.closing.line1 }}</span>
         <span class="closing-line closing-line--2 block">{{ t.landing.closing.line2 }}</span>
       </h2>
@@ -381,56 +453,350 @@ useHead({
 }
 
 .section-heading {
-  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-family: var(--ct-font-sans);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: var(--ct-weight-semibold);
   letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 .closing-heading {
   position: relative;
+  font-family: var(--ct-font-sans);
   letter-spacing: -0.02em;
-  color: var(--r-surface-foreground-color);
+  color: var(--ct-fg);
   line-height: 1.25;
 }
-
 .closing-line {
-  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-size: clamp(1.25rem, 3vw, 1.875rem);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
 }
-
 .closing-line--2 {
-  font-size: clamp(1.5rem, 4vw, 2.75rem);
-  color: var(--color-primary-1);
-  opacity: 0.9;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: var(--ct-primary);
+  font-weight: var(--ct-weight-semibold);
 }
 
-/* Eyebrow */
+/* Eyebrow — softened: shorter tracking, lighter accents */
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  font-family: 'Berkeley Mono', 'Share Tech Mono', monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.34em;
+  gap: 6px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  letter-spacing: 0.08em;
+  color: var(--ct-primary);
   text-transform: uppercase;
-  color: var(--color-primary-1);
 }
-
 .eyebrow-bracket {
-  color: color-mix(in srgb, var(--color-primary-1) 55%, transparent);
-  font-weight: 400;
+  color: color-mix(in srgb, var(--ct-primary) 50%, transparent);
+}
+.eyebrow-num {
+  color: var(--ct-fg-muted);
+  font-weight: var(--ct-weight-medium);
+}
+.eyebrow-sep {
+  color: color-mix(in srgb, var(--ct-primary) 40%, transparent);
 }
 
-.eyebrow-num {
-  color: var(--r-surface-text-color);
+.hero-desc {
+  font-family: var(--ct-font-sans);
+  font-size: clamp(15px, 1.6vw, 17px);
+  line-height: 1.7;
+  color: var(--ct-fg-muted);
+  text-align: center;
+  max-width: 38rem;
+  padding: 0 16px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ct-fg-muted);
+  background: color-mix(in srgb, var(--ct-surface-1) 70%, transparent);
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ct-primary);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ct-primary) 80%, transparent);
+  animation: hero-badge-pulse 2.4s ease-in-out infinite;
+}
+@keyframes hero-badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+  letter-spacing: 0.04em;
+}
+.hero-meta-rule {
+  width: 28px;
+  height: 1px;
+  background: color-mix(in srgb, var(--ct-primary) 35%, transparent);
+}
+
+/* Feature card (02 SAVE) */
+.feature-card {
+  position: relative;
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-surface-1);
+  overflow: hidden;
+}
+.feature-card--wide {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .feature-card--wide {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+.feature-card-body {
+  padding: clamp(1.75rem, 3vw, 2.75rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Feature text block: title/description rhythm */
+.feature-text-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.feature-eyebrow {
+  margin-bottom: 18px;
+}
+.feature-title {
+  margin: 0 0 22px 0;
+}
+.feature-desc {
+  font-size: 15px;
+  margin: 0;
+}
+.feature-card-body .feature-chip-row,
+.feature-text-block .feature-chip-row {
+  margin-top: 22px;
+}
+.feature-card-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--ct-primary) 8%, transparent) 0%,
+    transparent 70%);
+  border-top: 1px solid var(--ct-border);
+}
+@media (min-width: 768px) {
+  .feature-card-visual {
+    border-top: 0;
+    border-left: 1px solid var(--ct-border);
+  }
+}
+.feature-card-visual-icon {
+  font-size: clamp(4rem, 9vw, 6.5rem);
+  color: var(--ct-primary);
+  opacity: 0.85;
+  position: relative;
+  z-index: 1;
+}
+.feature-card-visual-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--ct-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--ct-border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.35;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+.feature-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 32px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px dashed var(--ct-border);
+}
+.feature-stat {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 88px;
+}
+.feature-stat-num {
+  font-family: var(--ct-font-mono);
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  font-weight: var(--ct-weight-semibold);
+  color: var(--ct-primary);
+  line-height: 1;
+}
+.feature-stat-label {
+  font-family: var(--ct-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ct-fg-muted);
+  text-transform: uppercase;
+}
+
+/* Feature chip row (03) */
+.feature-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: var(--ct-font-mono);
+  font-size: 12px;
+  color: var(--ct-fg);
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+}
+.feature-chip i {
+  font-size: 14px;
+  color: var(--ct-primary);
+}
+
+/* Code card (03) */
+.code-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-surface);
+  font-family: var(--ct-font-mono);
+  overflow: hidden;
+  border-radius: 14px;
+}
+.code-card-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--ct-surface-1);
+  border-bottom: 1px solid var(--ct-border);
+  font-family: var(--ct-font-mono);
+  min-width: 0;
+}
+.code-card-method {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: var(--ct-weight-semibold);
+  letter-spacing: 0.08em;
+  color: var(--ct-on-primary, #fff);
+  background: var(--ct-primary);
+  border-radius: 6px;
+}
+.code-card-path {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--ct-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.code-card-status {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ct-fg-muted);
+}
+.code-card-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #28c840;
+  box-shadow: 0 0 8px color-mix(in srgb, #28c840 60%, transparent);
+}
+.code-card-body {
+  margin: 0;
+  padding: 18px 20px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ct-fg);
+  white-space: pre;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+@media (min-width: 1024px) {
+  .code-card-body { font-size: 13px; }
+}
+
+/* Editor grid (04) */
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (min-width: 640px) {
+  .editor-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .editor-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.editor-tile--lg {
+  flex-direction: column;
+  gap: 10px;
+  padding: 1.5rem 1rem;
+}
+.editor-tile-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+.editor-tile-icon--mono {
+  color: var(--ct-fg);
   opacity: 0.85;
 }
-
-.eyebrow-sep {
-  color: color-mix(in srgb, var(--color-primary-1) 45%, transparent);
+.editor-tile-name {
+  font-family: var(--ct-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ct-fg-muted);
+}
+.editor-tile--more {
+  border-style: dashed;
 }
 
 /* Hero */
 .hero {
-  min-height: clamp(560px, 92vh, 900px);
+  min-height: clamp(520px, 88vh, 820px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -440,67 +806,32 @@ useHead({
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--r-surface-border-color) 80%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--r-surface-border-color) 80%, transparent) 1px, transparent 1px);
-  background-size: 64px 64px;
-  opacity: 0.2;
-  mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
+    linear-gradient(to right, var(--ct-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--ct-border) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.35;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
   pointer-events: none;
-  animation: grid-drift 40s linear infinite;
-}
-
-.hero-scan {
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    180deg,
-    transparent 0,
-    transparent 3px,
-    rgba(255, 255, 255, 0.012) 3px,
-    rgba(255, 255, 255, 0.012) 4px
-  );
-  pointer-events: none;
-  mix-blend-mode: overlay;
-}
-
-.hero-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center,
-    transparent 50%,
-    color-mix(in srgb, var(--r-color-surface-9) 60%, transparent) 100%);
-  pointer-events: none;
-}
-
-@keyframes grid-drift {
-  from { background-position: 0 0, 0 0; }
-  to { background-position: 64px 64px, 64px 64px; }
 }
 
 .hero-glow {
   position: absolute;
   left: 50%;
-  top: 60%;
-  width: min(80vw, 800px);
-  height: min(80vw, 800px);
+  top: 55%;
+  width: min(75vw, 720px);
+  height: min(75vw, 720px);
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-primary-1) 26%, transparent) 0%, transparent 60%);
-  filter: blur(48px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--ct-primary) 18%, transparent) 0%, transparent 65%);
+  filter: blur(56px);
   pointer-events: none;
-  opacity: 0.75;
-  animation: glow-pulse 8s ease-in-out infinite;
-}
-
-@keyframes glow-pulse {
-  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.08); }
+  opacity: 0.85;
 }
 
 /* Section band: subtle alternating bg */
 .section-band {
   position: relative;
-  background-color: rgb(var(--r-color-surface-7) / 0.12);
+  background-color: var(--ct-surface-1);
 }
 
 .section-band::before,
@@ -510,7 +841,7 @@ useHead({
   left: 50%;
   width: 100vw;
   height: 1px;
-  background: var(--r-surface-border-color);
+  background: var(--ct-border);
   opacity: 0.3;
   transform: translateX(-50%);
   pointer-events: none;
@@ -524,48 +855,46 @@ useHead({
   bottom: 0;
 }
 
-/* Showcase tile — blueprint corner crosshairs */
-.showcase-tile {
-  background-color: transparent;
-  border: 1px solid color-mix(in srgb, var(--r-surface-border-color) 38%, transparent);
-  padding: 1rem;
+/* Showcase frame — mirrors the actual dashboard look */
+.showcase-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--ct-border);
+  border-radius: 16px;
+  background: var(--ct-bg);
+  overflow: hidden;
+}
+.showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 1024px) {
+  .showcase-grid {
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  }
+  .showcase-grid > .showcase-cell + .showcase-cell {
+    border-left: 1px solid var(--ct-border-subtle);
+  }
+}
+.showcase-cell {
   position: relative;
+  min-width: 0;
 }
-
-.showcase-tile::before,
-.showcase-tile::after {
-  content: "";
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border: 1px solid color-mix(in srgb, var(--color-primary-1) 70%, transparent);
-  pointer-events: none;
-  transition: opacity 220ms ease;
-  opacity: 0.55;
+.showcase-frame > .showcase-cell + .showcase-cell,
+.showcase-frame > .showcase-grid + .showcase-cell {
+  border-top: 1px solid var(--ct-border-subtle);
 }
-
-.showcase-tile::before {
-  top: -1px;
-  left: -1px;
-  border-right: 0;
-  border-bottom: 0;
-}
-
-.showcase-tile::after {
-  bottom: -1px;
-  right: -1px;
-  border-left: 0;
-  border-top: 0;
-}
-
 .showcase-scroll {
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
 }
-
 .showcase-scroll::-webkit-scrollbar {
-  display: none;
+  height: 6px;
+}
+.showcase-scroll::-webkit-scrollbar-thumb {
+  background: var(--ct-border);
+  border-radius: 3px;
 }
 
 /* Feature icon */
@@ -575,7 +904,7 @@ useHead({
   justify-content: center;
   width: clamp(7rem, 16vw, 10rem);
   height: clamp(7rem, 16vw, 10rem);
-  background-color: rgb(var(--r-color-surface-7) / 0.16);
+  background-color: var(--ct-surface-1);
   position: relative;
 }
 
@@ -615,21 +944,14 @@ useHead({
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  background-color: rgb(var(--r-color-surface-7) / 0.16);
-  border: 1px solid color-mix(in srgb, var(--r-surface-border-color) 35%, transparent);
+  background-color: var(--ct-surface-1);
+  border: 1px solid var(--ct-border);
   transition: background-color 220ms ease, transform 220ms ease, border-color 220ms ease;
 }
 
 .editor-tile:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
+  background-color: var(--ct-surface-2);
   border-color: color-mix(in srgb, var(--color-primary-1) 50%, transparent);
   transform: translateY(-2px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-grid,
-  .hero-glow {
-    animation: none;
-  }
 }
 </style>

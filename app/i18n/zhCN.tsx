@@ -48,9 +48,9 @@ export const zhCN: Partial<Translation> = {
     alreadyStatistical: '已统计编程时间',
     minutes: '分钟',
     loginWithGithub: '使用 GitHub 登录',
-    freeMessage: '目前完全免费，无需信用卡',
+    freeMessage: '免费开始使用，无需信用卡。Pro 订阅按需开通',
     demo: '演示',
-    heroBadge: 'v3 · 分析',
+    heroBadge: '专注 · 隐私 · 开放',
     scroll: '滚动',
 
     sections: {
@@ -70,6 +70,9 @@ export const zhCN: Partial<Translation> = {
       save: {
         title: '永久保存您的编程时间数据。',
         description: '我们知道历史数据的美好。没有什么比自己的辛勤劳动被抹去更令人沮丧的了。为了让所有用户都能够在多年之后回顾自己的成长历史，我们会永久保存您的数据，直到您主动销毁它们，即使您从未付费。',
+        statRetention: '永久保留',
+        statResolution: '分钟级精度',
+        statCost: '免费保存',
       },
       export: {
         title: '支持数据导出。',
@@ -77,7 +80,8 @@ export const zhCN: Partial<Translation> = {
       },
       editor: {
         title: '支持多种编辑器。',
-        description: '我们是一个非常小的团队。这意味着我们无法支持所有 IDE 或代码编辑器。但是，我们目前支持 VSCode 和 JetBrain 系列 IDE。我们相信它们涵盖了大多数用户的需求。我们将尽最大努力支持更多平台，造福更多人。',
+        description: '官方支持 VS Code 与 JetBrains 全家桶（IntelliJ IDEA、PyCharm、WebStorm、GoLand、CLion 等）。基于 VS Code 的衍生编辑器也开箱即用，包括 Cursor、Windsurf、Google Antigravity 等。我们将持续扩展更多平台。',
+        more: '更多',
       },
     },
     pricing: {

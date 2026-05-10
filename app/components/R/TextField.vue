@@ -1,16 +1,26 @@
 <script setup lang="ts">
+import UInput from '~/components/U/Input.vue'
+
 defineProps<{
   modelValue?: string | number
-  onChange?: (value: string) => void
+  placeholder?: string
+  type?: string
+  size?: 'sm' | 'md' | 'lg'
+  disabled?: boolean
+  invalid?: boolean
 }>()
 
-defineEmits(['change', 'update:modelValue'])
+defineEmits(['update:modelValue'])
 </script>
 
 <template>
-  <input
-    :value="modelValue"
-    class="border-surface-border-low px-2 py-1 outline-none border rounded bg-surface-base"
-    @input="$emit('update:modelValue', ($event.target as any)?.value ?? '')"
-  >
+  <UInput
+    :model-value="modelValue"
+    :placeholder="placeholder"
+    :type="type"
+    :size="size"
+    :disabled="disabled"
+    :invalid="invalid"
+    @update:model-value="$emit('update:modelValue', $event)"
+  />
 </template>

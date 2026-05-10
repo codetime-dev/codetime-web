@@ -65,6 +65,9 @@ export type Translation = {
       save: {
         title: string
         description: string
+        statRetention?: string
+        statResolution?: string
+        statCost?: string
       }
       export: {
         title: string
@@ -73,6 +76,7 @@ export type Translation = {
       editor: {
         title: string
         description: string
+        more?: string
       }
     }
     pricing: {

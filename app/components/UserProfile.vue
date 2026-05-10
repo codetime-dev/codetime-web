@@ -352,10 +352,10 @@ const lastUpdatedLabel = computed(() => {
         <i class="i-tabler-lock text-base" />
         <span>PROFILE · LOCKED</span>
       </div>
-      <p class="text-surface-dimmed/80 text-[13px] font-mono">
+      <p class="text-[13px] text-ct-fg-muted font-mono">
         // 此用户已隐藏了信息
       </p>
-      <p class="text-surface-dimmed/60 text-[12px] font-mono">
+      <p class="text-[12px] text-ct-fg-muted font-mono">
         // The user chose to keep their coding data private.
       </p>
     </div>
@@ -363,7 +363,7 @@ const lastUpdatedLabel = computed(() => {
     <template v-else>
       <Section num="01" :title="t.dashboard.profile.identity.title" :meta="`user · #${userId}`">
         <template #icon>
-          <i class="i-tabler-user-circle text-surface-dimmed/70 text-[15px]" />
+          <i class="i-tabler-user-circle text-[15px] text-ct-fg-muted" />
         </template>
         <Identity
           :username="user?.username"
@@ -383,7 +383,7 @@ const lastUpdatedLabel = computed(() => {
         :meta="canEditBio ? 'editable · owner' : 'read only'"
       >
         <template #icon>
-          <i class="i-tabler-quote text-surface-dimmed/70 text-[15px]" />
+          <i class="i-tabler-quote text-[15px] text-ct-fg-muted" />
         </template>
         <Bio
           :bio="user?.bio"
@@ -409,7 +409,7 @@ const lastUpdatedLabel = computed(() => {
         :flush="true"
       >
         <template #icon>
-          <i class="i-tabler-chart-bar text-surface-dimmed/70 text-[15px]" />
+          <i class="i-tabler-chart-bar text-[15px] text-ct-fg-muted" />
         </template>
         <Stats :kpis="kpis" />
       </Section>
@@ -420,7 +420,7 @@ const lastUpdatedLabel = computed(() => {
         :meta="`${topLanguages.length} tracked`"
       >
         <template #icon>
-          <i class="i-tabler-braces text-surface-dimmed/70 text-[15px]" />
+          <i class="i-tabler-braces text-[15px] text-ct-fg-muted" />
         </template>
         <Languages :entries="topLanguages" :pending="languagesPending" />
       </Section>
@@ -431,7 +431,7 @@ const lastUpdatedLabel = computed(() => {
         :meta="`${HISTORY_DAYS}d · ${activeDays} active`"
       >
         <template #icon>
-          <i class="i-tabler-activity text-surface-dimmed/70 text-[15px]" />
+          <i class="i-tabler-activity text-[15px] text-ct-fg-muted" />
         </template>
         <Activity :history="codingHistory" :pending="historyPending" />
       </Section>

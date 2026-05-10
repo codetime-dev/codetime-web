@@ -75,20 +75,18 @@ watchEffect(() => {
     <Transition name="lang-fade">
       <div
         v-if="open"
-        class="bg-surface-base/98 mt-1 min-w-[11rem] shadow-black/20 shadow-lg right-0 absolute z-50 backdrop-blur-sm"
+        class="lang-menu"
       >
-        <ul class="py-1 max-h-[60vh] overflow-y-auto">
+        <ul>
           <li v-for="opt in languageOptions" :key="opt.id">
             <button
               type="button"
-              class="text-[12.5px] font-mono px-3 py-1.5 text-left flex gap-2 w-full transition-colors items-center justify-between"
-              :class="opt.id === currentId
-                ? 'bg-surface-variant-1/55 text-primary'
-                : 'text-surface-dimmed hover:bg-surface-variant-1/35 hover:text-surface'"
+              class="lang-item"
+              :class="{ 'lang-item-active': opt.id === currentId }"
               @click="select(opt.id)"
             >
               <span>{{ opt.label }}</span>
-              <span class="text-[10.5px] tracking-[0.12em] opacity-50 uppercase">{{ opt.id }}</span>
+              <span class="lang-item-id">{{ opt.id }}</span>
             </button>
           </li>
         </ul>
@@ -101,39 +99,80 @@ watchEffect(() => {
 .lang-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  height: 2.25rem;
-  padding: 0 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 65%, transparent);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
-  border: 0;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
   cursor: pointer;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease),
+              color var(--ct-duration-fast) var(--ct-ease),
+              border-color var(--ct-duration-fast) var(--ct-ease);
 }
-
 .lang-trigger:hover,
 .lang-trigger-open {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
+  color: var(--ct-fg);
+  border-color: var(--ct-border-strong);
+  background: var(--ct-surface-1);
 }
 
-[data-scheme="light"] .lang-trigger {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
+.lang-menu {
+  position: absolute;
+  right: 0;
+  margin-top: 6px;
+  min-width: 12rem;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
+  box-shadow: var(--ct-shadow-lg);
+  z-index: 50;
+  overflow: hidden;
 }
-
-[data-scheme="light"] .lang-trigger:hover,
-[data-scheme="light"] .lang-trigger-open {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 10%, transparent);
+.lang-menu ul {
+  padding: 4px;
+  max-height: 60vh;
+  overflow-y: auto;
 }
-
-.lang-trigger > span:nth-child(2) {
-  letter-spacing: 0;
-  text-transform: none;
+.lang-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-muted);
+  border-radius: var(--ct-radius-md);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease),
+              color var(--ct-duration-fast) var(--ct-ease);
 }
+.lang-item:hover {
+  background: var(--ct-surface-1);
+  color: var(--ct-fg);
+}
+.lang-item-active {
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary);
+}
+.lang-item-active:hover {
+  background: color-mix(in srgb, var(--ct-primary) 18%, transparent);
+  color: var(--ct-primary);
+}
+.lang-item-id {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ct-fg-subtle);
+}
+.lang-item-active .lang-item-id { color: var(--ct-primary); opacity: 0.75; }
 
 .lang-fade-enter-active,
 .lang-fade-leave-active {

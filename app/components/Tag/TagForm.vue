@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { TagResponse } from '~/api/v3/types.gen'
-import { Modal, Paper } from '@roku-ui/vue'
 import { defineAsyncComponent } from 'vue'
 
 type Props = {
@@ -122,297 +121,179 @@ const colorHex = computed({
 </script>
 
 <template>
-  <Modal v-model="modelValue">
-    <Paper class="w-2xl" with-border>
-      <div class="form-shell">
-        <!-- Head -->
-        <div class="form-head">
-          <div class="form-eyebrow">
-            <span class="form-eyebrow-bracket">[</span>
-            <span class="form-eyebrow-num">{{ isEditing ? '·' : '+' }}</span>
-            <span class="form-eyebrow-sep">/</span>
-            <span>{{ isEditing ? 'edit · tag' : 'new · tag' }}</span>
-            <span class="form-eyebrow-bracket">]</span>
-          </div>
-          <button
-            type="button"
-            class="form-close"
-            :title="t.dashboard.tags.tagForm.cancel"
-            @click="handleClose"
-          >
-            <i class="i-tabler-x text-base" />
-          </button>
+  <UModal
+    v-model="modelValue"
+    :title="isEditing ? t.dashboard.tags.tagForm.edit : t.dashboard.tags.tagForm.create"
+    width="640px"
+  >
+    <form class="form-body" @submit.prevent="handleSave">
+      <!-- NAME -->
+      <div class="form-row">
+        <label class="form-label">
+          {{ t.dashboard.tags.tagForm.name }}
+        </label>
+        <div class="form-control">
+          <UInput
+            v-model="formData.name"
+            :placeholder="t.dashboard.tags.tagForm.namePlaceholder"
+            autocomplete="off"
+            spellcheck="false"
+          />
         </div>
-
-        <h2 class="form-title">
-          {{ isEditing ? t.dashboard.tags.tagForm.edit : t.dashboard.tags.tagForm.create }}
-        </h2>
-
-        <form class="form-body" @submit.prevent="handleSave">
-          <!-- NAME -->
-          <div class="form-row">
-            <div class="form-row-label">
-              <span class="form-label-num">a</span>
-              <span>{{ t.dashboard.tags.tagForm.name }}</span>
-            </div>
-            <div class="form-row-control">
-              <input
-                v-model="formData.name"
-                type="text"
-                class="line-input"
-                :placeholder="t.dashboard.tags.tagForm.namePlaceholder"
-                autocomplete="off"
-                spellcheck="false"
-                required
-              >
-            </div>
-          </div>
-
-          <!-- COLOR -->
-          <div class="form-row">
-            <div class="form-row-label">
-              <span class="form-label-num">b</span>
-              <span>{{ t.dashboard.tags.tagForm.color }}</span>
-            </div>
-            <div class="form-row-control form-color-control">
-              <div class="form-color-current">
-                <label class="form-color-swatch" :style="{ background: formData.color }">
-                  <input
-                    v-model="formData.color"
-                    type="color"
-                    class="form-color-native"
-                  >
-                </label>
-                <span class="form-color-hash">#</span>
-                <input
-                  v-model="colorHex"
-                  class="line-input form-color-hex"
-                  type="text"
-                  :placeholder="t.dashboard.tags.tagForm.colorPlaceholder"
-                  spellcheck="false"
-                >
-              </div>
-              <div class="form-color-presets">
-                <button
-                  v-for="c in presetColors"
-                  :key="c"
-                  type="button"
-                  class="form-color-preset"
-                  :class="formData.color.toLowerCase() === c.toLowerCase() ? 'form-color-preset-active' : ''"
-                  :style="{ background: c }"
-                  :aria-label="c"
-                  :title="c"
-                  @click="handleColorSelect(c)"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- EMOJI -->
-          <div class="form-row">
-            <div class="form-row-label">
-              <span class="form-label-num">c</span>
-              <span>{{ t.dashboard.tags.tagForm.emoji }}</span>
-              <span class="form-label-optional">{{ t.common.optional }}</span>
-            </div>
-            <div class="form-row-control">
-              <div class="form-emoji-row">
-                <button
-                  type="button"
-                  class="line-btn emoji-picker-trigger form-emoji-trigger"
-                  @click="showEmojiPicker = !showEmojiPicker"
-                >
-                  <span v-if="formData.emoji" class="form-emoji-glyph">{{ formData.emoji }}</span>
-                  <i v-else class="i-tabler-mood-smile text-sm" />
-                  <span>{{ formData.emoji || t.dashboard.tags.tagForm.emojiPlaceholder }}</span>
-                </button>
-                <button
-                  v-if="formData.emoji"
-                  type="button"
-                  class="line-btn line-btn-ghost form-emoji-clear"
-                  :title="t.dashboard.tags.tagForm.cancel"
-                  @click="formData.emoji = null"
-                >
-                  <i class="i-tabler-x text-sm" />
-                </button>
-              </div>
-              <ClientOnly>
-                <div v-if="showEmojiPicker" class="form-emoji-picker">
-                  <EmojiPicker
-                    theme="auto"
-                    :native="true"
-                    :display-recent="true"
-                    :disable-skin-tones="false"
-                    @select="handleEmojiSelect"
-                  />
-                </div>
-              </ClientOnly>
-            </div>
-          </div>
-
-          <!-- ACTIONS -->
-          <div class="form-actions">
-            <button
-              type="button"
-              class="line-btn"
-              @click="handleClose"
-            >
-              {{ t.dashboard.tags.tagForm.cancel }}
-            </button>
-            <button
-              type="submit"
-              class="line-btn line-btn-primary"
-              :disabled="!formData.name.trim() || saving"
-            >
-              <i v-if="saving" class="i-tabler-loader text-sm animate-spin" />
-              <i v-else class="i-tabler-check text-sm" />
-              <span>{{ isEditing ? t.dashboard.tags.tagForm.save : t.dashboard.tags.tagForm.create }}</span>
-            </button>
-          </div>
-        </form>
       </div>
-    </Paper>
-  </Modal>
+
+      <!-- COLOR -->
+      <div class="form-row">
+        <label class="form-label">
+          {{ t.dashboard.tags.tagForm.color }}
+        </label>
+        <div class="form-control form-color-control">
+          <div class="form-color-current">
+            <label class="form-color-swatch" :style="{ background: formData.color }">
+              <input
+                v-model="formData.color"
+                type="color"
+                class="form-color-native"
+              >
+            </label>
+            <span class="form-color-hash">#</span>
+            <UInput v-model="colorHex" class="form-color-hex" :placeholder="t.dashboard.tags.tagForm.colorPlaceholder" />
+          </div>
+          <div class="form-color-presets">
+            <button
+              v-for="c in presetColors"
+              :key="c"
+              type="button"
+              class="form-color-preset"
+              :class="{ 'form-color-preset-active': formData.color.toLowerCase() === c.toLowerCase() }"
+              :style="{ background: c }"
+              :aria-label="c"
+              :title="c"
+              @click="handleColorSelect(c)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- EMOJI -->
+      <div class="form-row">
+        <label class="form-label">
+          {{ t.dashboard.tags.tagForm.emoji }}
+          <span class="form-label-optional">{{ t.common.optional }}</span>
+        </label>
+        <div class="form-control">
+          <div class="form-emoji-row">
+            <UButton
+              variant="secondary"
+              size="md"
+              class="emoji-picker-trigger form-emoji-trigger"
+              type="button"
+              @click="showEmojiPicker = !showEmojiPicker"
+            >
+              <span v-if="formData.emoji" class="form-emoji-glyph">{{ formData.emoji }}</span>
+              <i v-else class="i-tabler-mood-smile" />
+              <span>{{ formData.emoji || t.dashboard.tags.tagForm.emojiPlaceholder }}</span>
+            </UButton>
+            <UButton
+              v-if="formData.emoji"
+              variant="ghost"
+              size="md"
+              icon-left="i-tabler-x"
+              :title="t.dashboard.tags.tagForm.cancel"
+              type="button"
+              @click="formData.emoji = null"
+            />
+          </div>
+          <ClientOnly>
+            <div v-if="showEmojiPicker" class="form-emoji-picker">
+              <EmojiPicker
+                theme="auto"
+                :native="true"
+                :display-recent="true"
+                :disable-skin-tones="false"
+                @select="handleEmojiSelect"
+              />
+            </div>
+          </ClientOnly>
+        </div>
+      </div>
+    </form>
+
+    <template #footer>
+      <UButton variant="ghost" type="button" @click="handleClose">
+        {{ t.dashboard.tags.tagForm.cancel }}
+      </UButton>
+      <UButton
+        variant="primary"
+        :loading="saving"
+        :disabled="!formData.name.trim()"
+        icon-left="i-tabler-check"
+        @click="handleSave"
+      >
+        {{ isEditing ? t.dashboard.tags.tagForm.save : t.dashboard.tags.tagForm.create }}
+      </UButton>
+    </template>
+  </UModal>
 </template>
 
 <style scoped>
-.form-shell {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.form-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--color-primary-1);
-}
-
-.form-eyebrow-bracket,
-.form-eyebrow-sep {
-  opacity: 0.55;
-}
-
-.form-eyebrow-num {
-  color: var(--r-surface-text-color);
-  font-weight: 500;
-}
-
-.form-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
-  transition: color 180ms ease, background-color 180ms ease;
-}
-
-.form-close:hover {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
-}
-
-.form-title {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--r-surface-text-color);
-}
-
 .form-body {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+  gap: 16px;
 }
 
-/* Rows */
 .form-row {
   display: grid;
   grid-template-columns: 8rem 1fr;
-  align-items: stretch;
-  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+  gap: 16px;
+  align-items: start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ct-border-subtle);
 }
+.form-row:last-child { border-bottom: 0; padding-bottom: 0; }
 
-.form-row-label {
+.form-label {
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
+  padding-top: 8px;
   display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 1rem 1rem 1rem 0.25rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--r-surface-text-color);
-  opacity: 0.85;
-  border-right: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
+  align-items: baseline;
+  gap: 6px;
 }
-
-.form-label-num {
-  color: var(--color-primary-1);
-  font-weight: 500;
-}
-
 .form-label-optional {
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: color-mix(in srgb, var(--r-surface-text-color) 40%, transparent);
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+  font-weight: var(--ct-weight-regular);
 }
 
-.form-row-control {
+.form-control {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
+  gap: 12px;
   min-width: 0;
 }
 
 @media (max-width: 599px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-  .form-row-label {
-    border-right: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
-    padding: 0.75rem 1rem;
-  }
+  .form-row { grid-template-columns: 1fr; gap: 8px; }
 }
 
 /* Color */
-.form-color-control {
-  gap: 0.85rem;
-}
-
 .form-color-current {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 10px;
 }
-
 .form-color-swatch {
   position: relative;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 70%, transparent);
+  border-radius: var(--ct-radius-md);
+  border: 1px solid var(--ct-border);
 }
-
 .form-color-native {
   position: absolute;
   inset: 0;
@@ -423,161 +304,41 @@ const colorHex = computed({
   border: 0;
   padding: 0;
 }
-
 .form-color-hash {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-base);
+  color: var(--ct-fg-subtle);
 }
-
-.form-color-hex {
-  width: 9rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
+.form-color-hex { width: 9rem; }
 
 .form-color-presets {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 0.4rem;
+  gap: 6px;
 }
-
 @media (max-width: 599px) {
-  .form-color-presets {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  .form-color-presets { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
-
 .form-color-preset {
-  height: 1.85rem;
+  height: 28px;
   width: 100%;
-  border: 0;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
   cursor: pointer;
-  position: relative;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 50%, transparent);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition: transform 160ms var(--ct-ease), box-shadow 160ms var(--ct-ease);
 }
-
-.form-color-preset:hover {
-  transform: translateY(-1px);
-}
-
+.form-color-preset:hover { transform: translateY(-1px); }
 .form-color-preset-active {
-  box-shadow:
-    inset 0 0 0 1px var(--r-surface-background-base-color),
-    0 0 0 1px var(--color-primary-1);
+  box-shadow: 0 0 0 2px var(--ct-bg), 0 0 0 4px var(--ct-primary);
 }
 
 /* Emoji */
-.form-emoji-row {
-  display: inline-flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.form-emoji-trigger {
-  min-width: 12rem;
-  justify-content: flex-start !important;
-}
-
-.form-emoji-glyph {
-  font-size: 16px;
-}
-
-.form-emoji-clear {
-  width: 2.25rem !important;
-  padding: 0 !important;
-  justify-content: center !important;
-}
-
+.form-emoji-row { display: inline-flex; gap: 8px; align-items: center; }
+.form-emoji-trigger { min-width: 12rem; justify-content: flex-start !important; }
+.form-emoji-glyph { font-size: 16px; }
 .form-emoji-picker {
-  margin-top: 0.5rem;
+  margin-top: 8px;
   position: relative;
   z-index: 50;
-}
-
-/* Actions */
-.form-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  padding-top: 1rem;
-  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 28%, transparent);
-}
-
-/* Inputs */
-.line-input {
-  display: block;
-  width: 100%;
-  height: 2.25rem;
-  padding: 0 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
-  border: 0;
-  outline: 0;
-  transition: background-color 180ms ease, box-shadow 180ms ease;
-}
-
-.line-input:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.26);
-}
-
-.line-input:focus {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
-  box-shadow: inset 0 -1px 0 var(--color-primary-1);
-}
-
-.line-input::placeholder {
-  color: color-mix(in srgb, var(--r-surface-text-color) 35%, transparent);
-}
-
-/* Buttons */
-.line-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 2.25rem;
-  padding: 0 0.95rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
-  border: 0;
-  cursor: pointer;
-  transition: background-color 180ms ease, color 180ms ease, opacity 180ms ease;
-  white-space: nowrap;
-}
-
-.line-btn:hover:not(:disabled) {
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
-}
-
-.line-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.line-btn-primary {
-  color: var(--color-primary-1);
-  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
-}
-
-.line-btn-primary:hover:not(:disabled) {
-  background-color: color-mix(in srgb, var(--color-primary-1) 24%, transparent);
-}
-
-.line-btn-ghost {
-  background-color: transparent;
-  color: color-mix(in srgb, var(--r-surface-text-color) 60%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-surface-border-color) 30%, transparent);
-}
-
-.line-btn-ghost:hover:not(:disabled) {
-  color: var(--r-surface-text-color);
-  background-color: rgb(var(--r-color-surface-7) / 0.22);
 }
 </style>

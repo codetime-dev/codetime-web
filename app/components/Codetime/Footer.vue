@@ -1,63 +1,105 @@
 <template>
-  <footer class="mt-32 mt-auto pb-8 pt-32 text-center">
-    <div class="text-sm text-surface-dimmed flex justify-center">
-      <div class="flex gap-5 items-center">
-        <div class="bg-surface-low h-1px w-16" />
-        <div>
-          datreks @ {{ new Date().getFullYear() }}
-        </div>
-        <div class="bg-surface-low h-1px w-16" />
-      </div>
+  <footer class="ct-footer">
+    <div class="ct-footer-divider">
+      <span />
+      <span class="ct-footer-mark">Datreks @ {{ new Date().getFullYear() }}</span>
+      <span />
     </div>
-    <div class="mt-6 flex gap-4 items-center justify-center">
+    <div class="ct-footer-links">
       <NuxtLink
         aria-label="github"
-        class="text-surface-dimmed hover:op75"
+        class="ct-footer-link"
         to="https://github.com/Jannchie/codetime-web-v3"
         target="_blank"
       >
-        <i class="i-tabler-brand-github h-6 w-6" />
+        <i class="i-tabler-brand-github" />
       </NuxtLink>
       <NuxtLink
         aria-label="twitter"
-        class="text-surface-dimmed hover:op75"
+        class="ct-footer-link"
         to="https://twitter.com/__codetime"
         target="_blank"
       >
-        <i class="i-tabler-brand-twitter h-6 w-6" />
+        <i class="i-tabler-brand-twitter" />
       </NuxtLink>
       <NuxtLink
         aria-label="email"
-        class="text-surface-dimmed hover:op75"
+        class="ct-footer-link"
         to="mailto:admin@codetime.dev"
         target="_blank"
       >
-        <i class="i-tabler-mail h-6 w-6" />
+        <i class="i-tabler-mail" />
       </NuxtLink>
       <NuxtLink
         aria-label="vscode"
-        class="text-surface-dimmed hover:op75"
+        class="ct-footer-link"
         to="https://marketplace.visualstudio.com/items?itemName=jannchie.codetime"
         target="_blank"
       >
-        <i class="i-tabler-brand-vscode text-surface-dimmed h-6 w-6 hover:op75" />
+        <i class="i-tabler-brand-vscode" />
       </NuxtLink>
       <NuxtLink
         aria-label="jetbrains"
-        class="text-surface-dimmed hover:op75"
+        class="ct-footer-link"
         target="_blank"
         to="https://plugins.jetbrains.com/plugin/25617-codetime"
       >
-        <i class="i-devicon-plain-jetbrains text-surface-dimmed h-5 w-5 hover:op75" />
+        <i class="i-devicon-plain-jetbrains" />
       </NuxtLink>
       <NuxtLink
         aria-label="discord"
-        class="text-surface-dimmed hover:op75"
+        class="ct-footer-link"
         to="https://discord.gg/WWEQrWCkkP"
         target="_blank"
       >
-        <i class="i-tabler-brand-discord h-6 w-6" />
+        <i class="i-tabler-brand-discord" />
       </NuxtLink>
     </div>
   </footer>
 </template>
+
+<style scoped>
+.ct-footer {
+  margin-top: auto;
+  padding: 96px 16px 48px;
+  text-align: center;
+}
+.ct-footer-divider {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-subtle);
+}
+.ct-footer-divider > span:first-child,
+.ct-footer-divider > span:last-child {
+  height: 1px;
+  width: 64px;
+  background: var(--ct-border);
+}
+.ct-footer-mark { white-space: nowrap; }
+.ct-footer-links {
+  margin-top: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+.ct-footer-link {
+  color: var(--ct-fg-subtle);
+  font-size: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ct-radius-md);
+  transition: color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease);
+}
+.ct-footer-link:hover {
+  color: var(--ct-primary);
+  background: var(--ct-primary-soft);
+}
+</style>

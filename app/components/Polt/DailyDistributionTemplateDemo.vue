@@ -150,12 +150,26 @@ const segmentedData = [
 </script>
 
 <template>
-  <PoltDailyDistributionTemplate
-    :segmented-data="segmentedData"
-    :summary-data="summaryData"
-    :fallback-data="[]"
-    :interval="10"
+  <PanelSection
+    num="04"
     title="Daily Coding Distribution"
-    :loading="false"
-  />
+    flush
+  >
+    <template #icon>
+      <i class="i-tabler-clock-hour-4 text-[15px] text-ct-fg-muted" />
+    </template>
+    <div class="dist-pad">
+      <PoltDailyDistributionTemplate
+        :segmented-data="segmentedData"
+        :summary-data="summaryData"
+        :fallback-data="[]"
+        :interval="10"
+        :loading="false"
+      />
+    </div>
+  </PanelSection>
 </template>
+
+<style scoped>
+.dist-pad { padding: 12px 18px 18px; }
+</style>

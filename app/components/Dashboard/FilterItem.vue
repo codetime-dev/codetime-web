@@ -72,18 +72,46 @@ onUnmounted(() => {
       top: `${pos.y}px`,
       left: `${pos.x}px`,
     }"
-    class="text-white px-2 py-1 rounded-full bg-primary flex gap-2 items-center"
+    class="filter-pill"
   >
     <div>
       {{ k }}: {{ filter.key === 'language' ? getLanguageName(filter.value) : filter.value }}
     </div>
     <button
-      class="leading-0 bg-transparent"
+      class="filter-pill-close"
       @click="onClickFilterItem(filter.key, filter.value)"
     >
-      <i
-        class="i-tabler-x h-4 w-4"
-      />
+      <i class="i-tabler-x" />
     </button>
   </span>
 </template>
+
+<style scoped>
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 10px;
+  border-radius: var(--ct-radius-full);
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary);
+  font-size: var(--ct-text-xs);
+  font-weight: var(--ct-weight-medium);
+}
+.filter-pill-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--ct-radius-full);
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease);
+}
+.filter-pill-close:hover {
+  background: color-mix(in srgb, var(--ct-primary) 22%, transparent);
+}
+</style>

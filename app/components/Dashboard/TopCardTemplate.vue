@@ -36,12 +36,12 @@ const maxMinutes = computed(() => {
     v-bind="flat ? {} : { num: num ?? '00', title, meta: `TOP · ${type.toUpperCase()}` }"
   >
     <template v-if="!flat" #icon>
-      <i :class="icon" class="text-surface-dimmed/70 text-[15px]" />
+      <i :class="icon" style="color: var(--ct-fg-subtle); font-size: 15px" />
     </template>
-    <div v-if="flat" class="top-flat px-4 py-3">
-      <div class="text-[10.5px] text-primary tracking-[0.32em] font-mono mb-3 flex gap-2 uppercase items-center">
-        <i :class="icon" class="text-surface-dimmed/70 text-sm" />
-        <span class="text-surface tracking-[0.32em]">{{ title }}</span>
+    <div v-if="flat" class="top-flat">
+      <div class="top-flat-head">
+        <i :class="icon" class="top-flat-icon" />
+        <span class="top-flat-title">{{ title }}</span>
       </div>
       <div ref="ani" class="flex flex-col gap-1" :style="{ minHeight: '160px' }">
         <template v-if="loading && !data">
@@ -53,13 +53,13 @@ const maxMinutes = computed(() => {
           >
             <div class="flex gap-2 items-center justify-between">
               <div class="flex gap-2 items-center">
-                <div class="bg-surface-variant-1/50 h-3 w-3 animate-pulse" />
-                <div class="bg-surface-variant-1/50 h-3 w-20 animate-pulse" />
+                <div class="top-skel top-skel-icon" />
+                <div class="top-skel top-skel-name" />
               </div>
-              <div class="bg-surface-variant-1/50 h-3 w-12 animate-pulse" />
+              <div class="top-skel top-skel-val" />
             </div>
             <div class="top-bar-track">
-              <div class="bg-surface-variant-1/40 h-full w-full animate-pulse" />
+              <div class="top-skel top-bar-fill-skel" />
             </div>
           </div>
         </template>
@@ -72,9 +72,9 @@ const maxMinutes = computed(() => {
             :class="i === 0 ? 'top-row-lead' : ''"
             @click="$emit('clickItem', d.field, type)"
           >
-            <div class="text-[12.5px] font-mono mb-1 flex gap-2 items-center justify-between">
+            <div class="top-row-head">
               <span class="inline-flex gap-2 min-w-0 truncate items-center">
-                <span class="text-surface-dimmed/60 text-[12px] text-right w-3 tabular-nums">{{ String(i + 1).padStart(2, '0') }}</span>
+                <span class="top-row-rank tabular-nums">{{ String(i + 1).padStart(2, '0') }}</span>
                 <template v-if="d.icon">
                   <i
                     v-if="!d.icon.startsWith('i-vscode-icons')"
@@ -92,9 +92,9 @@ const maxMinutes = computed(() => {
                     decoding="async"
                   >
                 </template>
-                <span class="truncate" :class="i === 0 ? 'text-surface font-medium' : 'text-surface/85'">{{ type === 'language' ? getLanguageName(d.field) : d.field }}</span>
+                <span class="truncate" :class="i === 0 ? 'top-row-name top-row-name-lead' : 'top-row-name'">{{ type === 'language' ? getLanguageName(d.field) : d.field }}</span>
               </span>
-              <span class="text-[11.5px] shrink-0 tabular-nums" :class="i === 0 ? 'text-primary' : 'text-surface-dimmed'">
+              <span class="top-row-val tabular-nums" :class="i === 0 ? 'top-row-val-lead' : ''">
                 {{ getDurationString(d.minutes * 60 * 1000) }}
               </span>
             </div>
@@ -118,14 +118,14 @@ const maxMinutes = computed(() => {
         <div
           v-for="i in 5"
           :key="i"
-          class="bg-surface-variant-1/20 px-2 py-1.5 flex justify-between"
+          class="top-skel-row"
           :style="{ opacity: 0.5 + 0.5 * (-i / 5) }"
         >
           <div class="flex gap-1">
-            <div class="bg-surface-variant-1/55 h-3 w-3 animate-pulse" />
-            <div class="bg-surface-variant-1/55 h-3 w-20 animate-pulse" />
+            <div class="top-skel top-skel-icon" />
+            <div class="top-skel top-skel-name" />
           </div>
-          <div class="bg-surface-variant-1/55 h-3 w-16 animate-pulse" />
+          <div class="top-skel top-skel-val" />
         </div>
       </template>
       <template v-else>
@@ -133,13 +133,11 @@ const maxMinutes = computed(() => {
           v-for="d in data"
           :key="d.field"
           type="button"
-          class="px-2 py-1.5 text-left transition-colors"
-          :class="filters?.find(f => f.key === type && f.value === d.field)
-            ? 'bg-primary/15 text-primary'
-            : 'bg-surface-variant-1/20 text-surface hover:bg-surface-variant-1/40'"
+          class="top-cell"
+          :class="{ 'top-cell-active': filters?.find(f => f.key === type && f.value === d.field) }"
           @click="$emit('clickItem', d.field, type)"
         >
-          <div class="text-[12.5px] font-mono mb-1 flex gap-2 items-center justify-between">
+          <div class="top-row-head">
             <span class="inline-flex gap-1.5 min-w-0 truncate items-center">
               <template v-if="d.icon">
                 <i
@@ -158,15 +156,15 @@ const maxMinutes = computed(() => {
                   decoding="async"
                 >
               </template>
-              <span class="truncate">{{ type === 'language' ? getLanguageName(d.field) : d.field }}</span>
+              <span class="top-row-name truncate">{{ type === 'language' ? getLanguageName(d.field) : d.field }}</span>
             </span>
-            <span class="text-[11.5px] text-surface-dimmed shrink-0 tabular-nums">
+            <span class="top-row-val tabular-nums">
               {{ getDurationString(d.minutes * 60 * 1000) }}
             </span>
           </div>
-          <div class="bg-surface-variant-1/40 h-0.5 overflow-hidden">
+          <div class="top-bar-track">
             <div
-              class="bg-primary h-full transition-all"
+              class="top-bar-fill"
               :style="{ width: `${maxMinutes ? d.minutes / maxMinutes * 100 : 0}%` }"
             />
           </div>
@@ -177,39 +175,108 @@ const maxMinutes = computed(() => {
 </template>
 
 <style scoped>
+.top-flat { padding: 14px 16px; }
+.top-flat-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.top-flat-icon { color: var(--ct-fg-subtle); font-size: 14px; }
+.top-flat-title {
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-semibold);
+  color: var(--ct-fg);
+  letter-spacing: var(--ct-tracking-wide);
+}
+
 .top-row {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 0.125rem 0;
+  padding: 4px 0;
   background: transparent;
   border: 0;
   cursor: pointer;
-  transition: opacity 200ms ease;
+  border-radius: var(--ct-radius-md);
+  transition: background-color var(--ct-duration-fast) var(--ct-ease);
 }
+.top-row:hover { background: var(--ct-surface-1); }
 
-.top-row:hover {
-  opacity: 0.85;
+.top-row-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--ct-text-sm);
+  margin-bottom: 4px;
+  padding: 0 4px;
 }
+.top-row-rank {
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+  width: 14px;
+  text-align: right;
+}
+.top-row-name { color: var(--ct-fg-muted); }
+.top-row-name-lead { color: var(--ct-fg); font-weight: var(--ct-weight-medium); }
+.top-row-val {
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.top-row-val-lead { color: var(--ct-primary); font-weight: var(--ct-weight-medium); }
 
 .top-bar-track {
   position: relative;
   height: 2px;
-  background: color-mix(in srgb, var(--r-surface-border-color) 35%, transparent);
+  background: var(--ct-surface-2);
   overflow: hidden;
+  border-radius: 2px;
+  margin: 0 4px;
 }
-
 .top-bar-fill {
   height: 100%;
-  background: color-mix(in srgb, var(--color-primary-1) 55%, transparent);
-  transition: width 320ms ease;
+  background: var(--ct-primary);
+  transition: width 320ms var(--ct-ease);
 }
+.top-row-lead .top-bar-track { height: 3px; }
 
-.top-bar-fill-lead {
-  background: linear-gradient(90deg, var(--color-primary-1), color-mix(in srgb, var(--color-primary-1) 60%, transparent));
+.top-cell {
+  padding: 8px 10px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--ct-border-subtle);
+  cursor: pointer;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease),
+              border-color var(--ct-duration-fast) var(--ct-ease);
 }
+.top-cell:hover { background: var(--ct-surface-1); }
+.top-cell-active {
+  background: var(--ct-primary-soft);
+  border-color: color-mix(in srgb, var(--ct-primary) 40%, transparent);
+}
+.top-cell-active:hover {
+  background: color-mix(in srgb, var(--ct-primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--ct-primary) 50%, transparent);
+}
+.top-cell-active .top-row-name { color: var(--ct-primary); }
 
-.top-row-lead .top-bar-track {
-  height: 3px;
+.top-skel-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+}
+.top-skel { background: var(--ct-surface-2); animation: top-pulse 1.4s ease-in-out infinite; }
+.top-skel-icon { width: 12px; height: 12px; }
+.top-skel-name { width: 80px; height: 12px; }
+.top-skel-val { width: 60px; height: 12px; }
+.top-bar-fill-skel { height: 100%; width: 100%; }
+@keyframes top-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
 }
 </style>

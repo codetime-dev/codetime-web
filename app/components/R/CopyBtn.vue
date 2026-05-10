@@ -33,7 +33,7 @@ function onClick() {
   gap: 0.4rem;
   height: 2.25rem;
   padding: 0 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ct-font-mono);
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;

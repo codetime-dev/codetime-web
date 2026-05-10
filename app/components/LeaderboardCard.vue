@@ -52,7 +52,7 @@ function pct(minutes: number) {
     flush
   >
     <template #icon>
-      <i class="i-tabler-trophy text-surface-dimmed/70 text-[15px]" />
+      <i class="i-tabler-trophy text-[15px] text-ct-fg-muted" />
     </template>
 
     <div class="lb-daterange">
@@ -70,14 +70,14 @@ function pct(minutes: number) {
           :style="{ opacity: 1 - (i - 1) * 0.06 }"
         >
           <div class="lb-rank">
-            <div class="bg-surface-variant-1/55 h-3 w-4 animate-pulse" />
+            <div class="lb-skel lb-skel-rank" />
           </div>
-          <div class="bg-surface-variant-1/55 h-7 w-7 animate-pulse" />
+          <div class="lb-skel lb-skel-avatar" />
           <div class="flex-1 space-y-1">
-            <div class="bg-surface-variant-1/55 h-3 w-24 animate-pulse" />
-            <div class="bg-surface-variant-1/45 h-2 w-16 animate-pulse" />
+            <div class="lb-skel lb-skel-name" />
+            <div class="lb-skel lb-skel-meta" />
           </div>
-          <div class="bg-surface-variant-1/45 h-3 w-10 animate-pulse" />
+          <div class="lb-skel lb-skel-pct" />
         </div>
       </template>
 
@@ -123,9 +123,9 @@ function pct(minutes: number) {
       </template>
 
       <div v-else class="lb-empty">
-        <i class="i-tabler-trophy-off text-surface-dimmed/50 text-2xl" />
+        <i class="i-tabler-trophy-off lb-empty-icon" />
         <p class="lb-empty-text">
-          empty · leaderboard
+          {{ t.dashboard.leaderboard.title(days) }}
         </p>
       </div>
     </div>
@@ -134,13 +134,11 @@ function pct(minutes: number) {
 
 <style scoped>
 .lb-daterange {
-  padding: 0.65rem 1rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--r-surface-border-color) 22%, transparent);
+  padding: 10px 16px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+  border-bottom: 1px solid var(--ct-border-subtle);
   font-variant-numeric: tabular-nums;
 }
 
@@ -151,14 +149,15 @@ function pct(minutes: number) {
 
 .lb-row {
   display: grid;
-  grid-template-columns: 2.25rem 1.85rem 1fr auto;
+  grid-template-columns: 2.25rem 1.85rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
+  min-height: 60px;
   padding: 0.65rem 1rem;
   background: transparent;
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--r-surface-border-color) 18%, transparent);
+  border-top: 1px solid var(--ct-border-subtle);
   cursor: pointer;
   text-align: left;
   transition: background-color 180ms ease;
@@ -169,15 +168,14 @@ function pct(minutes: number) {
 }
 
 .lb-row:hover {
-  background-color: rgb(var(--r-color-surface-7) / 0.18);
+  background-color: var(--ct-surface-1);
 }
 
 .lb-row-podium {
-  background-color: color-mix(in srgb, var(--color-primary-1) 4%, transparent);
+  background: var(--ct-surface-1);
 }
-
 .lb-row-podium:hover {
-  background-color: color-mix(in srgb, var(--color-primary-1) 10%, transparent);
+  background: var(--ct-surface-2);
 }
 
 .lb-row-skel {
@@ -191,10 +189,9 @@ function pct(minutes: number) {
 }
 
 .lb-rank-num {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
   font-variant-numeric: tabular-nums;
 }
 
@@ -210,13 +207,14 @@ function pct(minutes: number) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
   border-radius: 9999px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: var(--ct-weight-medium);
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 55%, transparent);
-  background-color: rgb(var(--r-color-surface-7) / 0.32);
+  color: var(--ct-fg-muted);
+  background-color: var(--ct-surface-2);
 }
 
 .lb-meta {
@@ -224,58 +222,54 @@ function pct(minutes: number) {
 }
 
 .lb-name {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  color: var(--r-surface-text-color);
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.lb-row-podium .lb-name {
-  font-weight: 500;
-}
+.lb-row-podium .lb-name { font-weight: var(--ct-weight-semibold); }
 
 .lb-duration {
-  margin-top: 0.15rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+  margin-top: 2px;
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
 }
 
 .lb-pct {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--r-surface-text-color) 60%, transparent);
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-muted);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .lb-pct-lead {
   color: var(--color-primary-1);
 }
 
-.lb-pct-unit {
-  font-size: 9.5px;
-  margin-left: 0.1rem;
-  opacity: 0.6;
-}
+.lb-pct-unit { font-size: 11px; margin-left: 2px; opacity: 0.6; }
 
 .lb-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
-  padding: 3rem 1rem;
+  gap: 12px;
+  padding: 56px 16px;
 }
+.lb-empty-icon { font-size: 28px; color: var(--ct-fg-subtle); }
+.lb-empty-text { font-size: var(--ct-text-sm); color: var(--ct-fg-subtle); }
 
-.lb-empty-text {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--r-surface-text-color) 50%, transparent);
+.lb-skel { background: var(--ct-surface-2); animation: lb-pulse 1.4s ease-in-out infinite; }
+.lb-skel-rank { width: 16px; height: 12px; }
+.lb-skel-avatar { width: 28px; height: 28px; border-radius: 9999px; }
+.lb-skel-name { width: 96px; height: 12px; }
+.lb-skel-meta { width: 64px; height: 10px; }
+.lb-skel-pct { width: 40px; height: 12px; }
+@keyframes lb-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
 }
 </style>

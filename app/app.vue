@@ -75,41 +75,38 @@ provide('user-pending', status.value === 'pending')
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
-/* Light-mode surface tint overrides.
-   The shared recipe `rgb(var(--r-color-surface-7) / X)` reads muddy on white.
-   We swap it for an ink-tinted overlay derived from the text color, which
-   stays clean across schemes. The `html[...]` prefix wins over Vue scoped
-   selectors (`.cls[data-v-...]`). */
-html[data-scheme="light"] .line-btn,
-html[data-scheme="light"] .line-input,
-html[data-scheme="light"] .token-bar,
-html[data-scheme="light"] .lang-trigger,
-html[data-scheme="light"] .acc-avatar,
-html[data-scheme="light"] .layout-foot,
-html[data-scheme="light"] .badge-style-btn:hover {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 5%, transparent);
+/* Token-driven surface tints. Reading from --ct-* keeps these classes
+   cohesive across light/dark without duplicating overrides per scheme. */
+.line-btn,
+.line-input,
+.token-bar,
+.lang-trigger,
+.acc-avatar,
+.layout-foot,
+.badge-style-btn:hover {
+  background-color: var(--ct-surface-1);
 }
 
-html[data-scheme="light"] .line-btn:hover,
-html[data-scheme="light"] .line-input:hover,
-html[data-scheme="light"] .token-bar:hover,
-html[data-scheme="light"] .lang-trigger:hover,
-html[data-scheme="light"] .lang-trigger-open {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 9%, transparent);
+.line-btn:hover,
+.line-input:hover,
+.token-bar:hover,
+.lang-trigger:hover,
+.lang-trigger-open {
+  background-color: var(--ct-surface-2);
 }
 
-html[data-scheme="light"] .line-input:focus {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 11%, transparent);
+.line-input:focus {
+  background-color: var(--ct-surface-2);
 }
 
 /* Pill markers (e.g. FREE / PRO badge in account settings). */
-html[data-scheme="light"] .acc-pill {
-  background-color: color-mix(in srgb, var(--r-surface-text-color) 8%, transparent);
-  color: color-mix(in srgb, var(--r-surface-text-color) 85%, transparent);
+.acc-pill {
+  background-color: var(--ct-surface-2);
+  color: var(--ct-fg-muted);
 }
 
-html[data-scheme="light"] .acc-pill-primary {
-  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
-  color: var(--color-primary-1);
+.acc-pill-primary {
+  background-color: var(--ct-primary-soft);
+  color: var(--ct-primary);
 }
 </style>

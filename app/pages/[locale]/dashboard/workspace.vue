@@ -37,7 +37,7 @@ const user = useUser()
 
 const days = ref(user.value?.plan === 'pro' ? 365 * 100 : 28)
 
-const { data, pending } = useAsyncData(async () => {
+const { data, pending } = useAsyncData('workspace-files', async () => {
   if (!projectName.value) {
     return null
   }
@@ -100,25 +100,24 @@ const height = 26
       :meta="projectName ? `selected · ${projectName}` : 'none selected'"
     >
       <template #icon>
-        <i class="i-tabler-app-window text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-app-window ws-icon" />
       </template>
       <ProjectSelect v-model="project" />
-      <div v-if="historyWorkspaceNameList.length > 0" class="mt-3 flex flex-wrap gap-2">
+      <div v-if="historyWorkspaceNameList.length > 0" class="ws-history">
         <PanelButton
           v-for="name in historyWorkspaceNameList"
           :key="name"
-          size="sm"
           @click="project = { label: name ?? '', id: name ?? '' }"
         >
-          <i class="i-tabler-history text-sm" />
-          <span class="tracking-normal normal-case">{{ name }}</span>
+          <i class="i-tabler-history" />
+          <span>{{ name }}</span>
         </PanelButton>
       </div>
     </PanelSection>
 
-    <PanelSection num="02" :title="t.dashboard.workspace.range" meta="time window">
+    <PanelSection num="02" :title="t.dashboard.workspace.range" :meta="t.dashboard.workspace.range">
       <template #icon>
-        <i class="i-tabler-calendar text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-calendar ws-icon" />
       </template>
       <DashboardDataRange v-model:days="days" />
     </PanelSection>
@@ -126,25 +125,18 @@ const height = 26
     <PanelSection
       num="03"
       :title="t.dashboard.workspace.flameGraph.title"
-      meta="file · distribution"
     >
       <template #icon>
-        <i class="i-tabler-flame text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-flame ws-icon" />
       </template>
-      <div class="bg-surface-variant-1/15 px-2 py-3 min-h-64 relative">
+      <div class="ws-flame">
         <DashboardFlameChart
           v-if="data && data.length > 0"
           :line-height="height"
           :data="data"
         />
-        <div
-          v-else-if="pending"
-          class="bg-surface-variant-1/40 inset-0 absolute animate-pulse"
-        />
-        <div
-          v-else
-          class="text-surface-dimmed/60 text-[12.5px] tracking-[0.04em] font-mono py-12 text-center"
-        >
+        <div v-else-if="pending" class="ws-flame-skel" />
+        <div v-else class="ws-flame-empty">
           {{ projectName ? t.dashboard.workspace.noData : t.dashboard.workspace.select.prompt }}
         </div>
       </div>
@@ -154,26 +146,26 @@ const height = 26
       v-if="data && data.length > 0"
       num="04"
       :title="t.dashboard.workspace.topBranch"
-      :meta="`${gitBranchCountMap.length} branches`"
+      :meta="`${gitBranchCountMap.length}`"
     >
       <template #icon>
-        <i class="i-tabler-git-branch text-surface-dimmed/70 text-[15px]" />
+        <i class="i-tabler-git-branch ws-icon" />
       </template>
-      <div class="space-y-2.5">
+      <div class="ws-branch-list">
         <div
           v-for="([branch, count]) in gitBranchCountMap.slice(0, 5)"
           :key="branch"
-          class="bg-surface-variant-1/20 px-3 py-2"
+          class="ws-branch"
         >
-          <div class="text-[12.5px] font-mono mb-1.5 flex gap-3 items-center justify-between">
-            <span class="text-surface truncate">{{ branch }}</span>
-            <span class="text-surface-dimmed shrink-0 tabular-nums">
+          <div class="ws-branch-head">
+            <span class="ws-branch-name truncate">{{ branch }}</span>
+            <span class="ws-branch-val tabular-nums">
               {{ getDurationString(count * 60 * 1000) }}
             </span>
           </div>
-          <div class="bg-surface-variant-1/40 h-0.5 overflow-hidden">
+          <div class="ws-branch-track">
             <div
-              class="bg-primary h-full transition-all"
+              class="ws-branch-fill"
               :style="{ width: `${maxBranchCount ? count / maxBranchCount * 100 : 0}%` }"
             />
           </div>
@@ -182,3 +174,32 @@ const height = 26
     </PanelSection>
   </DashboardPageContent>
 </template>
+
+<style scoped>
+.ws-icon { color: var(--ct-fg-subtle); font-size: 15px; }
+.ws-history { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.ws-flame { min-height: 16rem; position: relative; }
+.ws-flame-skel { position: absolute; inset: 0; background: var(--ct-surface-1); animation: ws-pulse 1.4s ease-in-out infinite; }
+.ws-flame-empty { padding: 48px 16px; text-align: center; font-size: var(--ct-text-sm); color: var(--ct-fg-subtle); }
+
+.ws-branch-list { display: flex; flex-direction: column; gap: 10px; }
+.ws-branch { padding: 10px 12px; background: var(--ct-surface-1); border: 1px solid var(--ct-border-subtle); }
+.ws-branch-head {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  margin-bottom: 6px; font-size: var(--ct-text-sm);
+}
+.ws-branch-name {
+  color: var(--ct-fg);
+  font-weight: var(--ct-weight-medium);
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ws-branch-val { color: var(--ct-fg-subtle); flex-shrink: 0; white-space: nowrap; }
+.ws-branch-track { height: 2px; background: var(--ct-surface-2); overflow: hidden; }
+.ws-branch-fill { height: 100%; background: var(--ct-primary); transition: width 320ms var(--ct-ease); }
+@keyframes ws-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
+</style>

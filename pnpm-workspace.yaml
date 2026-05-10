@@ -7,3 +7,10 @@ onlyBuiltDependencies:
   - '@sentry/cli'
   - esbuild
   - sharp
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@sentry/cli': true
+  esbuild: true
+  sharp: true
+  vue-demi: true

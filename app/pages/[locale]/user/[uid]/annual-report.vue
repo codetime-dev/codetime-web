@@ -1,5 +1,4 @@
 <script setup lang="tsx">
-import { Btn } from '@roku-ui/vue'
 import { v3GetUserByUserId, v3GetYearlyReportData } from '~/api/v3'
 
 const route = useRoute()
@@ -268,7 +267,7 @@ function HeaderComponent({ title, value, extra }: { title: string, value?: strin
       }
       {
         extra && (
-          <div class="text-sm text-surface-dimmed">
+          <div class="text-sm text-ct-fg-muted">
             {extra}
           </div>
         )
@@ -373,7 +372,7 @@ function resolveTimezone(value: string, fallback: string): string {
         <div class="text-4xl font-bold">
           {{ t.annualReport.noData }}
         </div>
-        <div class="text-surface-dimmed">
+        <div class="text-ct-fg-muted">
           {{ t.annualReport.noDataAvailableFor(reportYear) }}
         </div>
       </div>
@@ -401,7 +400,7 @@ function resolveTimezone(value: string, fallback: string): string {
             <div class="text-sm font-bold">
               {{ user.username }}
             </div>
-            <div class="text-xs text-surface-dimmed">
+            <div class="text-xs text-ct-fg-muted">
               {{ user.email }}
             </div>
           </div>
@@ -422,7 +421,7 @@ function resolveTimezone(value: string, fallback: string): string {
               <div class="text-3xl text-primary">
                 {{ (weekendMinutesRatio * 100).toFixed(0) }}%
               </div>
-              <div class="text-sm text-surface-dimmed">
+              <div class="text-sm text-ct-fg-muted">
                 {{ t.annualReport.weekendCodingTimeRatio }}
               </div>
             </div>
@@ -430,7 +429,7 @@ function resolveTimezone(value: string, fallback: string): string {
               <div class="text-3xl text-primary">
                 {{ getDurationString(averageMinutes * 60 * 1000, ["hours", "minutes"]) }}
               </div>
-              <div class="text-sm text-surface-dimmed">
+              <div class="text-sm text-ct-fg-muted">
                 {{ t.annualReport.averageDailyCodingTime }}
               </div>
             </div>
@@ -440,7 +439,7 @@ function resolveTimezone(value: string, fallback: string): string {
               <div class="text-3xl text-primary">
                 {{ activeDaysLabel }}
               </div>
-              <div class="text-sm text-surface-dimmed">
+              <div class="text-sm text-ct-fg-muted">
                 {{ t.annualReport.activeDaysOfTheYear }}
               </div>
             </div>
@@ -448,7 +447,7 @@ function resolveTimezone(value: string, fallback: string): string {
               <div class="text-3xl text-primary">
                 {{ formateDays(longestStreak) }}
               </div>
-              <div class="text-sm text-surface-dimmed">
+              <div class="text-sm text-ct-fg-muted">
                 {{ t.annualReport.longestStreakOfTheYear }}
               </div>
             </div>
@@ -456,7 +455,7 @@ function resolveTimezone(value: string, fallback: string): string {
               <div class="text-3xl text-primary">
                 {{ busiestDayLabel }}
               </div>
-              <div class="text-sm text-surface-dimmed">
+              <div class="text-sm text-ct-fg-muted">
                 {{ t.annualReport.busiestDayOfTheYear }}
               </div>
             </div>
@@ -558,18 +557,17 @@ function resolveTimezone(value: string, fallback: string): string {
           </div>
         </div>
         <div class="flex justify-center">
-          <Btn
+          <UButton
+            variant="primary"
             size="lg"
+            icon-left="i-tabler-share"
             @click="() => share({
               title: `${user?.username} - ${t.annualReport.annualCodeTimeReport(reportYear)}`,
               url: `https://codetime.dev/${locale}/user/${uid}/annual-report`,
             })"
           >
-            <i class="i-tabler-share h-5 w-5" />
-            <span>
-              {{ t.annualReport.shareMyReport }}
-            </span>
-          </Btn>
+            {{ t.annualReport.shareMyReport }}
+          </UButton>
         </div>
       </div>
     </div>
