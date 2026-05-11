@@ -4,20 +4,20 @@
 export default defineNuxtPlugin(() => {
   const { initialize } = useGtag()
 
+  const events = ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const
+  const opts = { passive: true, once: true } as AddEventListenerOptions
+
   let started = false
-  const start = () => {
+  const cleanup = () => {
+    for (const ev of events) globalThis.removeEventListener(ev, start)
+  }
+  function start() {
     if (started) {
- return
-}
+      return
+    }
     started = true
     initialize()
     cleanup()
-  }
-
-  const events = ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const
-  const opts = { passive: true, once: true } as AddEventListenerOptions
-  const cleanup = () => {
-    for (const ev of events) globalThis.removeEventListener(ev, start)
   }
 
   for (const ev of events) globalThis.addEventListener(ev, start, opts)

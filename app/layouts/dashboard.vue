@@ -21,8 +21,15 @@ const currentTab = useCurrentTab(headerTabs)
 const activeTabId = computed(() => currentTab.value?.id)
 const user = useUser()
 
-const pending = autoResetRef(false, 1000)
-pending.value = true
+// Drive the skeleton off of the real user-fetch lifecycle instead of a
+// fixed 1s timer. The previous autoResetRef would always hold the
+// skeleton for a full second — long after `user` had already resolved —
+// producing the "skeleton → blank → content" flash users reported.
+const userPending = inject<ComputedRef<boolean>>(
+  'user-pending',
+  computed(() => false),
+)
+const pending = computed(() => userPending.value && !user.value)
 
 useHead({
   htmlAttrs: { lang: locale.value },
@@ -38,16 +45,14 @@ useHead({
           <UTabs :items="tabItems" :active-id="activeTabId" variant="underline" />
         </template>
       </DashboardTopbar>
-      <div v-if="pending" class="layout-main">
-        <DashboardPageTitle loading />
-        <DashboardPageContent>
-          <div class="px-6 py-6">
-            <div class="rounded-ct-lg h-32 w-full animate-pulse" style="background: var(--ct-surface-2)" />
-          </div>
-        </DashboardPageContent>
-      </div>
-      <main v-else class="layout-main relative">
-        <slot v-if="user" />
+      <main class="layout-main relative">
+        <!-- Render the page slot as soon as we have a user OR while the
+             user fetch is still in flight. Letting the slot mount during
+             the fetch lets the page's own skeletons (e.g. the panel-level
+             skeletons inside UnifiedUserDashboard) take over immediately,
+             so there is no intermediate blank frame between the layout
+             skeleton and the page content. -->
+        <slot v-if="user || pending" />
         <div
           v-else
           class="py-16 op75 flex flex-col h-full items-center justify-center"

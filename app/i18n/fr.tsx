@@ -81,13 +81,13 @@ export const fr: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: 'Gratuit pour commencer. Pro quand vous en avez besoin.',
+      heading: 'Gratuit pour commencer. Pro quand vous en avez besoin',
       title: 'Tarification',
       description: 'Choisissez le plan qui vous convient.',
     },
     closing: {
-      line1: 'Le meilleur moment pour planter un arbre était il y a trente ans.',
-      line2: 'Le deuxième meilleur moment, c\'est maintenant.',
+      line1: 'Le meilleur moment pour planter un arbre était il y a trente ans',
+      line2: 'Le deuxième meilleur moment, c\'est maintenant',
     },
   },
   plan: {

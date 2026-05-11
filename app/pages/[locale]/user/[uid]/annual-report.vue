@@ -37,21 +37,6 @@ watchEffect(() => {
   })
 })
 
-defineOgImageComponent('AnnualReport', {
-  username: user.value?.username ?? '',
-  avatar: user.value?.avatar ?? '',
-  year: reportYear.value,
-  totalHours: Math.round(sumMinutes.value / 60),
-  activeDays: activeDays.value,
-  title: t.value.annualReport.annualCodeTimeReport(reportYear.value),
-  description: t.value.meta.description,
-  locale: locale.value,
-}, {
-  width: 1200,
-  height: 630,
-  cacheMaxAgeSeconds: 60 * 60 * 24,
-})
-
 const { share } = useShare()
 
 const yearlyDataResp = await v3GetYearlyReportData({
@@ -168,6 +153,24 @@ const weekendMinutesRatio = computed(() => {
 const activeDays = computed(() => {
   return yearlyData.value?.dailyDistribution.filter(d => d.minutes > 0).length ?? 0
 })
+
+// Declared after `sumMinutes` / `activeDays` so the OG image template can
+// reference their values without tripping the use-before-define rule.
+defineOgImageComponent('AnnualReport', {
+  username: user.value?.username ?? '',
+  avatar: user.value?.avatar ?? '',
+  year: reportYear.value,
+  totalHours: Math.round(sumMinutes.value / 60),
+  activeDays: activeDays.value,
+  title: t.value.annualReport.annualCodeTimeReport(reportYear.value),
+  description: t.value.meta.description,
+  locale: locale.value,
+}, {
+  width: 1200,
+  height: 630,
+  cacheMaxAgeSeconds: 60 * 60 * 24,
+})
+
 const totalDaysInYear = computed(() => getDaysInYear(reportYear.value))
 const activeDaysRatio = computed(() => {
   return totalDaysInYear.value > 0 ? activeDays.value / totalDaysInYear.value : 0
@@ -219,7 +222,13 @@ const busiestMonth = computed(() => {
   if (monthlyMinutes.value.length === 0) {
     return null
   }
-  return monthlyMinutes.value.reduce((max, cur) => ((cur.minutes ?? 0) > (max.minutes ?? 0) ? cur : max))
+  let max = monthlyMinutes.value[0]!
+  for (const cur of monthlyMinutes.value) {
+    if ((cur.minutes ?? 0) > (max.minutes ?? 0)) {
+      max = cur
+    }
+  }
+  return max
 })
 
 const topLanguages = computed(() => yearlyData.value?.topLanguages ?? [])

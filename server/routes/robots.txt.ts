@@ -64,17 +64,23 @@ User-agent: DeepSeekBot
 Allow: /
 
 # ---------------------------------------------------------------
-# Tier 2 — bulk training crawlers (disallowed)
+# Tier 2 — bulk training crawlers
+# Allowed: GPTBot, CCBot, anthropic-ai, Google-Extended (already above).
+# Blocking these drops codetime.dev out of training corpora and out of
+# AI-search citation graphs; the public landing copy is marketing, not
+# proprietary data, so the upside of presence beats the downside of
+# inclusion in training sets.
 # ---------------------------------------------------------------
 User-agent: GPTBot
-Disallow: /
+Allow: /
 
 User-agent: CCBot
-Disallow: /
+Allow: /
 
 User-agent: anthropic-ai
-Disallow: /
+Allow: /
 
+# Still blocked — undisclosed crawl behaviour, scraper-grade UAs.
 User-agent: ByteSpider
 Disallow: /
 

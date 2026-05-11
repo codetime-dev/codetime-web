@@ -81,13 +81,13 @@ export const it: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: 'Inizia gratuitamente. Pro quando ne hai bisogno.',
+      heading: 'Inizia gratuitamente. Pro quando ne hai bisogno',
       title: 'Prezzi',
       description: 'Scegli il piano che fa per te.',
     },
     closing: {
-      line1: 'Il momento migliore per piantare un albero era trent\'anni fa.',
-      line2: 'Il secondo momento migliore è adesso.',
+      line1: 'Il momento migliore per piantare un albero era trent\'anni fa',
+      line2: 'Il secondo momento migliore è adesso',
     },
   },
   plan: {

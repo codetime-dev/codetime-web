@@ -81,13 +81,13 @@ export const ja: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: '無料で始めよう。必要に応じてProへ。',
+      heading: '無料で始めよう。必要に応じてProへ',
       title: '価格',
       description: 'あなたに合ったプランを選択してください。',
     },
     closing: {
-      line1: '木を植えるのに最も良い時は30年前だった。',
-      line2: '次に良いのは今だ。',
+      line1: '木を植えるのに最も良い時は30年前だった',
+      line2: '次に良いのは今だ',
     },
   },
   plan: {

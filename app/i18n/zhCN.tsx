@@ -85,13 +85,13 @@ export const zhCN: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: '免费开始，按需升级 Pro。',
+      heading: '免费开始，按需升级 Pro',
       title: '定价',
       description: '选择适合您的计划。',
     },
     closing: {
-      line1: '种下一棵树最好的时候是三十年前，',
-      line2: '其次是现在。',
+      line1: '种下一棵树最好的时候是三十年前',
+      line2: '其次是现在',
     },
   },
   plan: {

@@ -81,13 +81,13 @@ export const de: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: 'Kostenlos starten. Pro wenn nötig.',
+      heading: 'Kostenlos starten. Pro wenn nötig',
       title: 'Preisgestaltung',
       description: 'Wählen Sie den für Sie passenden Plan aus.',
     },
     closing: {
-      line1: 'Die beste Zeit, einen Baum zu pflanzen, war vor dreißig Jahren.',
-      line2: 'Die zweitbeste Zeit ist jetzt.',
+      line1: 'Die beste Zeit, einen Baum zu pflanzen, war vor dreißig Jahren',
+      line2: 'Die zweitbeste Zeit ist jetzt',
     },
   },
   plan: {

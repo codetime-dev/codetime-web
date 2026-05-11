@@ -81,13 +81,13 @@ export const zhTW: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: '免費開始，按需升級 Pro。',
+      heading: '免費開始，按需升級 Pro',
       title: '定價',
       description: '選擇適合您的方案。',
     },
     closing: {
-      line1: '種下一棵樹最好的時候是三十年前，',
-      line2: '其次是現在。',
+      line1: '種下一棵樹最好的時候是三十年前',
+      line2: '其次是現在',
     },
   },
   plan: {

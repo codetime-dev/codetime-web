@@ -477,7 +477,7 @@ watchEffect(() => {
         </PanelSection>
 
         <PanelSection
-          v-if="hasData"
+          v-if="allDataResp.status.value !== 'success' || hasData"
           num="03"
           :title="t.dashboard.overview.topTitle"
           meta="language · workspace · platform"
@@ -525,14 +525,13 @@ watchEffect(() => {
             :loading="false"
             :data="filtedData"
           />
-          <div
-            v-else
-            class="bg-ct-surface-2 h-64 w-full animate-pulse"
-          />
+          <div v-else class="trend-pad">
+            <div class="trend-skel" />
+          </div>
         </PanelSection>
 
         <PanelSection
-          v-if="allLanguageDataResp.status.value === 'pending' || pAllLangData.length > 0"
+          v-if="allLanguageDataResp.status.value !== 'success' || pAllLangData.length > 0"
           num="05"
           :title="t.dashboard.overview.codetimeLanguaeTrendTitle"
           meta="language · dots"
@@ -555,7 +554,7 @@ watchEffect(() => {
         </PanelSection>
 
         <PanelSection
-          v-if="allProjectDataResp.status.value === 'pending' || pAllProjectData.length > 0"
+          v-if="allProjectDataResp.status.value !== 'success' || pAllProjectData.length > 0"
           num="06"
           :title="t.dashboard.overview.codetimeProjectTrendTitle"
           meta="project · dots"
@@ -578,7 +577,7 @@ watchEffect(() => {
         </PanelSection>
 
         <PanelSection
-          v-if="hasData"
+          v-if="allDataResp.status.value !== 'success' || hasData"
           num="07"
           :title="t.dashboard.overview.dailyCodingDistributionTitle"
           meta="hour · density"
@@ -587,11 +586,18 @@ watchEffect(() => {
           <template #icon>
             <i class="i-tabler-clock-hour-4 text-[15px] text-ct-fg-muted" />
           </template>
-          <PoltDailyDistribution
-            :start-time="startTime"
-            :end-time="endTime"
-            :segments="segments"
-          />
+          <div class="trend-pad">
+            <PoltDailyDistribution
+              v-if="allDataResp.status.value === 'success' && hasData"
+              :start-time="startTime"
+              :end-time="endTime"
+              :segments="segments"
+            />
+            <div
+              v-else
+              class="trend-skel"
+            />
+          </div>
         </PanelSection>
       </template>
     </template>
@@ -684,6 +690,8 @@ watchEffect(() => {
 }
 
 .trend-pad { position: relative; padding: 6px 10px; }
-.trend-skel { height: 16rem; width: 100%; background: var(--ct-surface-2); animation: trend-pulse 1.4s ease-in-out infinite; }
+/* Match PoltChart's min-height (300px) so swapping between the
+   skeleton and the real chart never shifts the panel below it. */
+.trend-skel { height: 300px; width: 100%; background: var(--ct-surface-2); animation: trend-pulse 1.4s ease-in-out infinite; }
 @keyframes trend-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
 </style>

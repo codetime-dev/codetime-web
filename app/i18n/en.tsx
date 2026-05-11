@@ -84,13 +84,13 @@ export const en: Translation = {
       },
     },
     pricing: {
-      heading: 'Free to start. Pro when you need it.',
+      heading: 'Free to start. Pro when you need it',
       title: 'Pricing',
       description: 'Choose the plan that suits you.',
     },
     closing: {
-      line1: 'The best time to plant a tree was thirty years ago.',
-      line2: 'The second best time is now.',
+      line1: 'The best time to plant a tree was thirty years ago',
+      line2: 'The second best time is now',
     },
   },
   plan: {

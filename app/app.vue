@@ -14,7 +14,11 @@ client.setConfig({
 
 const { data: user, status } = await fetchUser()
 provide('user', user)
-provide('user-pending', status.value === 'pending')
+// Provide the status ref itself so consumers (e.g. the dashboard layout)
+// can reactively bind their skeleton state to the real auth-fetch lifecycle
+// instead of relying on a timed autoResetRef.
+provide('user-status', status)
+provide('user-pending', computed(() => status.value === 'pending' || status.value === 'idle'))
 
 // Preload Berkeley Mono Bold — the font used by the LandingTitle (LCP element
 // on /). Fetching in parallel with HTML parsing avoids the late-discovery

@@ -1,4 +1,16 @@
-export const INDEX_MD = `# Code Time — Programming Time Analytics & Insights
+// Frontmatter required by Vercel agent-readability spec: title/description
+// for citation, canonical_url so agents resolve duplicates, last_updated so
+// they can age out stale cached copies. Bump last_updated when this content
+// changes materially.
+export const INDEX_MD = `---
+title: "Code Time — Programming Time Analytics & Insights"
+description: "Privacy-respecting coding-time analytics for VS Code and JetBrains IDEs. Per-minute aggregates, raw event export, free tier with full history."
+canonical_url: "https://codetime.dev/"
+last_updated: "2026-05-11"
+source: "https://codetime.dev/index.md"
+---
+
+# Code Time — Programming Time Analytics & Insights
 
 > Code Time is a privacy-respecting coding-time analytics platform.
 > Track how long you spend in your editor, see per-language and

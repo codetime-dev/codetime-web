@@ -4,6 +4,33 @@ definePageMeta({
   layout: 'landing',
 })
 const t = useI18N()
+const route = useRoute()
+
+// Hand-tokenised JSON snippet for the 03 EXPORT card. Injected via v-html so
+// Vue's template whitespace-condense pass doesn't eat the column alignment
+// between the spans.
+const sampleJsonHtml = [
+  '<span class="tk-pun">{</span>',
+  '  <span class="tk-key">"minutes"</span><span class="tk-pun">:</span> <span class="tk-num">14820</span><span class="tk-pun">,</span>',
+  '  <span class="tk-key">"since"</span><span class="tk-pun">:</span>   <span class="tk-str">"2024-01-01"</span><span class="tk-pun">,</span>',
+  '  <span class="tk-key">"by"</span><span class="tk-pun">:</span>      <span class="tk-str">"language"</span><span class="tk-pun">,</span>',
+  '  <span class="tk-key">"data"</span><span class="tk-pun">:</span> <span class="tk-pun">[</span>',
+  '    <span class="tk-pun">{</span> <span class="tk-key">"field"</span><span class="tk-pun">:</span> <span class="tk-str">"TypeScript"</span><span class="tk-pun">,</span> <span class="tk-key">"minutes"</span><span class="tk-pun">:</span> <span class="tk-num">6240</span> <span class="tk-pun">},</span>',
+  '    <span class="tk-pun">{</span> <span class="tk-key">"field"</span><span class="tk-pun">:</span> <span class="tk-str">"Python"</span><span class="tk-pun">,</span>     <span class="tk-key">"minutes"</span><span class="tk-pun">:</span> <span class="tk-num">4180</span> <span class="tk-pun">},</span>',
+  '    <span class="tk-pun">{</span> <span class="tk-key">"field"</span><span class="tk-pun">:</span> <span class="tk-str">"Go"</span><span class="tk-pun">,</span>         <span class="tk-key">"minutes"</span><span class="tk-pun">:</span> <span class="tk-num">2120</span> <span class="tk-pun">}</span>',
+  '  <span class="tk-pun">]</span>',
+  '<span class="tk-pun">}</span>',
+].join('\n')
+
+// Canonical URL: every localized homepage points back to the single
+// site root so agents don't cite the 12 locale variants as separate
+// pages. (Localized SEO is still handled by hreflang/sitemap entries.)
+const canonicalUrl = computed(() => {
+  const locale = (route.params.locale as string) || 'en'
+  return locale === 'en'
+    ? 'https://codetime.dev/'
+    : `https://codetime.dev/${locale}`
+})
 
 watchEffect(() => {
   useSeoMeta({
@@ -13,6 +40,7 @@ watchEffect(() => {
     ogTitle: 'Code Time — Coding Analytics for VS Code & JetBrains',
     ogDescription: 'Automatically track how long you spend coding, visualise habits by language and project, and export your raw editor data. Free plugins for VS Code, Cursor, Windsurf and every JetBrains IDE.',
     ogType: 'website',
+    ogUrl: canonicalUrl.value,
     ogImage: '/icon.png',
     twitterCard: 'summary_large_image',
     twitterTitle: 'Code Time — Coding Analytics for VS Code & JetBrains',
@@ -145,6 +173,7 @@ useHead({
     },
   ],
   link: [
+    { rel: 'canonical', href: canonicalUrl.value },
     { rel: 'alternate', type: 'text/markdown', href: '/index.md' },
     { rel: 'service-desc', type: 'application/openapi+json', href: '/openapi.json' },
     { rel: 'api-catalog', href: '/.well-known/api-catalog' },
@@ -331,25 +360,7 @@ useHead({
             <span class="code-card-path">/v3/stats</span>
             <span class="code-card-status">200 OK</span>
           </div>
-          <pre class="code-card-body"><code>{
-  "minutes": 14820,
-  "since": "2024-01-01",
-  "by": "language",
-  "data": [
-    {
-      "field": "TypeScript",
-      "minutes": 6240
-    },
-    {
-      "field": "Python",
-      "minutes": 4180
-    },
-    {
-      "field": "Go",
-      "minutes": 2120
-    }
-  ]
-}</code></pre>
+          <pre class="code-card-body"><code class="code-card-code" v-html="sampleJsonHtml" /></pre>
         </div>
       </div>
 
@@ -752,13 +763,31 @@ useHead({
 .code-card-body {
   margin: 0;
   padding: 18px 20px;
+  font-family: var(--ct-font-mono);
+  font-variant-ligatures: none;
+  font-feature-settings: "tnum" 1, "calt" 0;
   font-size: 12px;
   line-height: 1.7;
   color: var(--ct-fg);
   white-space: pre;
   overflow-x: auto;
   scrollbar-width: thin;
+  tab-size: 2;
 }
+.code-card-body .code-card-code,
+.code-card-body :deep(span) {
+  font-family: var(--ct-font-mono);
+  font-variant-ligatures: none;
+  font-feature-settings: "tnum" 1, "calt" 0;
+}
+.code-card-body :deep(.tk-key) { color: #7aa2f7; }
+.code-card-body :deep(.tk-str) { color: #9ece6a; }
+.code-card-body :deep(.tk-num) { color: #ff9e64; }
+.code-card-body :deep(.tk-pun) { color: color-mix(in srgb, var(--ct-fg) 55%, transparent); }
+html[data-scheme="light"] .code-card-body :deep(.tk-key) { color: #2563eb; }
+html[data-scheme="light"] .code-card-body :deep(.tk-str) { color: #15803d; }
+html[data-scheme="light"] .code-card-body :deep(.tk-num) { color: #c2410c; }
+html[data-scheme="light"] .code-card-body :deep(.tk-pun) { color: color-mix(in srgb, var(--ct-fg) 50%, transparent); }
 @media (min-width: 1024px) {
   .code-card-body { font-size: 13px; }
 }

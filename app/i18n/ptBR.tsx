@@ -81,13 +81,13 @@ export const ptBR: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: 'Comece gratuitamente. Pro quando precisar.',
+      heading: 'Comece gratuitamente. Pro quando precisar',
       title: 'Preços',
       description: 'Escolha o plano que mais lhe convier.',
     },
     closing: {
-      line1: 'O melhor momento para plantar uma árvore foi há trinta anos.',
-      line2: 'O segundo melhor momento é agora.',
+      line1: 'O melhor momento para plantar uma árvore foi há trinta anos',
+      line2: 'O segundo melhor momento é agora',
     },
   },
   plan: {

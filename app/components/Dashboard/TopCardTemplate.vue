@@ -45,17 +45,24 @@ const maxMinutes = computed(() => {
       </div>
       <div ref="ani" class="flex flex-col gap-1" :style="{ minHeight: '160px' }">
         <template v-if="loading && !data">
+          <!-- Skeleton rows mirror the real .top-row layout exactly
+               (paddings, rank slot, head row, bar track) so the
+               vertical rhythm and per-row height match the loaded
+               state — preventing the shift users saw when the
+               skeleton's compact rows expanded into the real
+               14px-text rows. -->
           <div
             v-for="i in 5"
             :key="i"
-            class="flex flex-col gap-1"
-            :style="{ opacity: 0.7 - 0.1 * i }"
+            class="top-row"
+            :style="{ opacity: 0.7 - 0.1 * (i - 1) }"
           >
-            <div class="flex gap-2 items-center justify-between">
-              <div class="flex gap-2 items-center">
+            <div class="top-row-head">
+              <span class="inline-flex gap-2 min-w-0 items-center">
+                <span class="top-row-rank tabular-nums">{{ String(i).padStart(2, '0') }}</span>
                 <div class="top-skel top-skel-icon" />
                 <div class="top-skel top-skel-name" />
-              </div>
+              </span>
               <div class="top-skel top-skel-val" />
             </div>
             <div class="top-bar-track">

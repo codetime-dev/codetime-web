@@ -1,11 +1,15 @@
 // Agent-friendly response middleware:
 // 1. Adds RFC 8288 Link headers advertising sitemap, markdown alternate,
 //    OpenAPI spec, and the API catalog on every response.
-// 2. Adds `Vary: Accept` so caches don't conflate HTML / Markdown clients.
-// 3. Implements text/markdown content negotiation on the homepage:
-//    when an agent sends `Accept: text/markdown`, return /index.md inline.
+// 2. Adds `Vary: Accept` and `Vary: User-Agent` so caches don't conflate
+//    HTML / Markdown clients or human / agent clients.
+// 3. Implements text/markdown content negotiation on the homepage —
+//    triggered by either `Accept: text/markdown` or a known AI agent UA.
 // 4. Implements `?mode=agent` on the homepage: a structured JSON view
 //    listing API endpoints, auth, and key capabilities.
+// 5. Implements the `{url}.md` markdown-mirror convention by stripping
+//    a trailing `.md` from locale-homepage paths (e.g. `/en.md`) and
+//    returning the markdown body inline.
 import type { H3Event } from 'h3'
 import { defineEventHandler, getQuery, getRequestHeader, setHeader } from 'h3'
 import { INDEX_MD } from '../utils/index-md'
@@ -21,6 +25,33 @@ const LINK_HEADER = [
   `<${SITE}/.well-known/mcp/manifest.json>; rel="https://modelcontextprotocol.io/rel/manifest"`,
 ].join(', ')
 
+// Substrings (case-insensitive) found in User-Agent headers from AI clients
+// fetching pages for retrieval / citation. Hitting any of these flips the
+// response to markdown so agents don't waste tokens on HTML/JS scaffolding.
+const AGENT_UA_TOKENS = [
+  'gptbot',
+  'chatgpt-user',
+  'oai-searchbot',
+  'claudebot',
+  'claude-user',
+  'claude-searchbot',
+  'anthropic-ai',
+  'perplexitybot',
+  'perplexity-user',
+  'ccbot',
+  'google-extended',
+  'googleother',
+  'applebot-extended',
+  'duckassistbot',
+  'cohere-ai',
+  'bytespider',
+  'amazonbot',
+  'meta-externalagent',
+  'facebookbot',
+  'deepseekbot',
+  'ora-agent',
+]
+
 function isHomepagePath(path: string): boolean {
   // matches "/", "/en", "/en/", "/zh-CN", "/zh-CN/" etc.
   if (path === '/' || path === '') {
@@ -31,10 +62,38 @@ function isHomepagePath(path: string): boolean {
   return parts.length === 1 && !parts[0]!.includes('.')
 }
 
+// Strip a trailing `.md` from locale-homepage style paths so `{url}.md`
+// works as a markdown mirror without a custom Accept header. Returns the
+// underlying path if it should be served as markdown, or null otherwise.
+function stripMdSuffix(path: string): string | null {
+  if (!path.endsWith('.md')) {
+    return null
+  }
+  const base = path.slice(0, -3)
+  // Allow `/index.md` (already handled by a dedicated route) and locale
+  // homepages like `/en.md`, `/zh-CN.md`. Reject deep paths for now since
+  // we don't have per-page markdown bodies for them.
+  if (base === '' || base === '/') {
+    return '/'
+  }
+  if (isHomepagePath(base)) {
+    return base
+  }
+  return null
+}
+
 function wantsMarkdown(event: H3Event): boolean {
   const accept = getRequestHeader(event, 'accept') || ''
   // Treat text/markdown ahead of text/html as a markdown preference.
   return /text\/markdown/i.test(accept) && !/text\/html/i.test(accept.split(',')[0] || '')
+}
+
+function isAgentUA(event: H3Event): boolean {
+  const ua = (getRequestHeader(event, 'user-agent') || '').toLowerCase()
+  if (!ua) {
+    return false
+  }
+  return AGENT_UA_TOKENS.some(t => ua.includes(t))
 }
 
 function agentJsonView() {
@@ -100,23 +159,32 @@ function agentJsonView() {
 }
 
 export default defineEventHandler(async (event) => {
-  const path = event.path?.split('?')[0] || ''
+  const rawPath = event.path?.split('?')[0] || ''
 
-  // 1. Always advertise discovery resources via Link header + Vary: Accept.
+  // 1. Always advertise discovery resources via Link header + Vary headers.
   setHeader(event, 'Link', LINK_HEADER)
-  // Append "Accept" to Vary without clobbering any upstream value.
   const existingVary = (event.node.res.getHeader('vary') as string | undefined) || ''
   const varyParts = new Set(
     existingVary.split(',').map(s => s.trim()).filter(Boolean),
   )
   varyParts.add('Accept')
+  varyParts.add('User-Agent')
   setHeader(event, 'Vary', [...varyParts].join(', '))
 
-  if (!isHomepagePath(path)) {
+  // 2. {url}.md — markdown mirror via path suffix. Works without any
+  //    custom headers, so a user can paste the URL into a chat.
+  const mdMirror = stripMdSuffix(rawPath)
+  if (mdMirror) {
+    setHeader(event, 'Content-Type', 'text/markdown; charset=utf-8')
+    setHeader(event, 'Cache-Control', 'public, max-age=600')
+    return INDEX_MD
+  }
+
+  if (!isHomepagePath(rawPath)) {
     return
   }
 
-  // 2. ?mode=agent — structured JSON view.
+  // 3. ?mode=agent — structured JSON view.
   const q = getQuery(event)
   if (q.mode === 'agent') {
     setHeader(event, 'Content-Type', 'application/json; charset=utf-8')
@@ -124,8 +192,8 @@ export default defineEventHandler(async (event) => {
     return agentJsonView()
   }
 
-  // 3. Markdown content negotiation.
-  if (wantsMarkdown(event)) {
+  // 4. Markdown content negotiation by Accept header or agent UA.
+  if (wantsMarkdown(event) || isAgentUA(event)) {
     setHeader(event, 'Content-Type', 'text/markdown; charset=utf-8')
     setHeader(event, 'Cache-Control', 'public, max-age=600')
     return INDEX_MD

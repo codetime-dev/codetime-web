@@ -81,13 +81,13 @@ export const ms: Partial<Translation> = {
       },
     },
     pricing: {
-      heading: 'Mulakan secara percuma. Pro apabila diperlukan.',
+      heading: 'Mulakan secara percuma. Pro apabila diperlukan',
       title: 'Harga',
       description: 'Pilih rancangan yang sesuai dengan anda.',
     },
     closing: {
-      line1: 'Masa terbaik untuk menanam pokok adalah tiga puluh tahun lalu.',
-      line2: 'Masa kedua terbaik adalah sekarang.',
+      line1: 'Masa terbaik untuk menanam pokok adalah tiga puluh tahun lalu',
+      line2: 'Masa kedua terbaik adalah sekarang',
     },
   },
   plan: {

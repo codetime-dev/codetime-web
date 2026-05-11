@@ -26,8 +26,6 @@ const props = withDefaults(defineProps<{
   loading: false,
 })
 
-const t = useI18N()
-
 const currentTime = computed(() => {
   const now = new Date()
   return now.getHours() * 60 + now.getMinutes()

@@ -119,7 +119,11 @@ export default defineNuxtConfig({
       changefreq: 'weekly',
       priority: 0.6,
     },
-    autoLastmod: false,
+    // autoLastmod must be true for agent-readability — agents use <lastmod>
+    // to decide whether to re-crawl. The build-time stamp is good enough for
+    // marketing copy; the per-URL handler in server/api/__sitemap__/urls.ts
+    // overrides it on entries that have a real change date.
+    autoLastmod: true,
     urls: async () => {
       // Generate URLs only for main pages; user pages are handled by dynamic routes.
       return []
