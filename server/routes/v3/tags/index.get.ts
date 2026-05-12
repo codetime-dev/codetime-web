@@ -32,14 +32,14 @@ defineRouteMeta({
         schemas: {
           TagResponse: {
             type: 'object',
-            required: ['id', 'name', 'color', 'created_at', 'updated_at'],
+            required: ['id', 'name', 'color', 'createdAt', 'updatedAt'],
             properties: {
               id: { type: 'string', format: 'uuid' },
               name: { type: 'string' },
               color: { type: 'string' },
               emoji: { type: 'string', nullable: true },
-              created_at: { type: 'string', format: 'date-time' },
-              updated_at: { type: 'string', format: 'date-time' },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
               rules: { type: 'object', nullable: true, additionalProperties: true },
             },
           },

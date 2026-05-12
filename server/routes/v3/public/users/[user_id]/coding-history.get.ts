@@ -30,16 +30,16 @@ defineRouteMeta({
         schemas: {
           UserCodingHistoryResponse: {
             type: 'object',
-            required: ['user_id', 'username', 'total_minutes', 'data', 'period_start', 'period_end', 'time_range_days', 'updated_at'],
+            required: ['userId', 'username', 'totalMinutes', 'data', 'periodStart', 'periodEnd', 'timeRangeDays', 'updatedAt'],
             properties: {
-              user_id: { type: 'integer' },
+              userId: { type: 'integer' },
               username: { type: 'string' },
-              total_minutes: { type: 'integer' },
+              totalMinutes: { type: 'integer' },
               data: { type: 'array', items: { $ref: '#/components/schemas/StatsTimeData' } },
-              period_start: { type: 'string', format: 'date' },
-              period_end: { type: 'string', format: 'date' },
-              time_range_days: { type: 'integer' },
-              updated_at: { type: 'string', format: 'date-time' },
+              periodStart: { type: 'string', format: 'date' },
+              periodEnd: { type: 'string', format: 'date' },
+              timeRangeDays: { type: 'integer' },
+              updatedAt: { type: 'string', format: 'date-time' },
             },
           },
         },
@@ -78,13 +78,13 @@ export default defineEventHandler(async (event) => {
 
   const rows = await fetchUserCodingHistory(uid, from, now, tz)
   return {
-    user_id: uid,
+    userId: uid,
     username: user.username,
-    total_minutes: rows.reduce((s, r) => s + r.minutes, 0),
+    totalMinutes: rows.reduce((s, r) => s + r.minutes, 0),
     data: rows.map(r => ({ duration: r.minutes, time: r.date })),
-    period_start: from.toISOString().slice(0, 10),
-    period_end: now.toISOString().slice(0, 10),
-    time_range_days: days,
-    updated_at: now.toISOString(),
+    periodStart: from.toISOString().slice(0, 10),
+    periodEnd: now.toISOString().slice(0, 10),
+    timeRangeDays: days,
+    updatedAt: now.toISOString(),
   }
 })

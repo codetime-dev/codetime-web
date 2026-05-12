@@ -30,23 +30,23 @@ defineRouteMeta({
         schemas: {
           LanguageRankingEntry: {
             type: 'object',
-            required: ['user', 'total_minutes', 'rank', 'percentile'],
+            required: ['user', 'totalMinutes', 'rank', 'percentile'],
             properties: {
               user: { $ref: '#/components/schemas/UserPublic' },
-              total_minutes: { type: 'integer' },
+              totalMinutes: { type: 'integer' },
               rank: { type: 'integer' },
               percentile: { type: 'number' },
             },
           },
           LanguageRankingResponse: {
             type: 'object',
-            required: ['entries', 'language', 'total_users', 'updated_at'],
+            required: ['entries', 'language', 'totalUsers', 'updatedAt'],
             properties: {
               entries: { type: 'array', items: { $ref: '#/components/schemas/LanguageRankingEntry' } },
               language: { type: 'string' },
-              total_users: { type: 'integer' },
-              time_range_days: { type: 'integer', nullable: true },
-              updated_at: { type: 'string', format: 'date-time' },
+              totalUsers: { type: 'integer' },
+              timeRangeDays: { type: 'integer', nullable: true },
+              updatedAt: { type: 'string', format: 'date-time' },
             },
           },
         },
@@ -78,25 +78,27 @@ export default defineEventHandler(async (event) => {
   return {
     entries: entries.map(r => ({
       user: {
-        id: r.user_id,
-        email: r.email,
+        // Python forces email/googleId to null on the public ranking;
+        // githubId is only exposed when the target user opts in.
+        id: r.userId,
+        email: null,
         username: r.username,
         avatar: r.avatar,
-        github_id: r.show_github ? r.github_id : null,
+        githubId: r.showGithub ? r.githubId : null,
         bio: r.bio,
-        google_id: null,
+        googleId: null,
         plan: r.plan,
         timezone: r.timezone,
-        created_at: r.created_at,
-        updated_at: r.updated_at,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
       },
-      total_minutes: r.total_minutes,
+      totalMinutes: r.totalMinutes,
       rank: r.rank,
       percentile: r.percentile,
     })),
     language,
-    total_users: Number(totalRow?.value ?? 0),
-    time_range_days: days,
-    updated_at: now.toISOString(),
+    totalUsers: Number(totalRow?.value ?? 0),
+    timeRangeDays: days,
+    updatedAt: now.toISOString(),
   }
 })

@@ -32,22 +32,22 @@ defineRouteMeta({
         schemas: {
           UserTopLanguageRankEntry: {
             type: 'object',
-            required: ['language', 'total_minutes', 'percentile'],
+            required: ['language', 'totalMinutes', 'percentile'],
             properties: {
               language: { type: 'string' },
-              total_minutes: { type: 'integer' },
+              totalMinutes: { type: 'integer' },
               percentile: { type: 'number' },
             },
           },
           UserTopLanguagesRankResponse: {
             type: 'object',
-            required: ['user_id', 'username', 'entries', 'updated_at'],
+            required: ['userId', 'username', 'entries', 'updatedAt'],
             properties: {
-              user_id: { type: 'integer' },
+              userId: { type: 'integer' },
               username: { type: 'string' },
               entries: { type: 'array', items: { $ref: '#/components/schemas/UserTopLanguageRankEntry' } },
-              time_range_days: { type: 'integer', nullable: true },
-              updated_at: { type: 'string', format: 'date-time' },
+              timeRangeDays: { type: 'integer', nullable: true },
+              updatedAt: { type: 'string', format: 'date-time' },
             },
           },
         },
@@ -91,10 +91,10 @@ export default defineEventHandler(async (event) => {
     : (days ?? 30)
 
   return {
-    user_id: session.id,
+    userId: session.id,
     username: session.username,
-    entries: rows.map(r => ({ language: r.language, total_minutes: r.total_minutes, percentile: r.percentile })),
-    time_range_days: calculatedDays,
-    updated_at: endTime.toISOString(),
+    entries: rows.map(r => ({ language: r.language, totalMinutes: r.totalMinutes, percentile: r.percentile })),
+    timeRangeDays: calculatedDays,
+    updatedAt: endTime.toISOString(),
   }
 })

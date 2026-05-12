@@ -64,14 +64,14 @@ export default defineEventHandler(async (event) => {
   ])
 
   return {
-    available_options: {
+    availableOptions: {
       languages: languages.map(r => r.value).filter(Boolean),
       workspaces: workspaces.map(r => r.value).filter(Boolean),
       editors: editors.map(r => r.value).filter(Boolean),
       platforms: platforms.map(r => r.value).filter(Boolean),
       tags: userTags.map(r => r.name).filter(Boolean),
     },
-    feed_url: '/v3/icalendar/feed.ics',
+    feedUrl: '/v3/icalendar/feed.ics',
     parameters: {
       target: 'string - field to group by (language, workspace, editor, platform)',
       start_date: 'YYYY-MM-DD format',

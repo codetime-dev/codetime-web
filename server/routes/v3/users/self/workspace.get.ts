@@ -37,11 +37,11 @@ defineRouteMeta({
         schemas: {
           WorkspaceFileActivity: {
             type: 'object',
-            required: ['language', 'relative_file', 'git_branch', 'minutes'],
+            required: ['language', 'relativeFile', 'gitBranch', 'minutes'],
             properties: {
               language: { type: 'string' },
-              relative_file: { type: 'string' },
-              git_branch: { type: 'string' },
+              relativeFile: { type: 'string' },
+              gitBranch: { type: 'string' },
               minutes: { type: 'integer' },
             },
           },
@@ -105,8 +105,8 @@ export default defineEventHandler(async (event) => {
   const rows = await db
     .select({
       language: workspaceMetaV2.language,
-      relative_file: workspaceMetaV2.relativeFile,
-      git_branch: workspaceMetaV2.gitBranch,
+      relativeFile: workspaceMetaV2.relativeFile,
+      gitBranch: workspaceMetaV2.gitBranch,
       minutes: count(),
     })
     .from(workspaceMetaV2)
@@ -117,8 +117,8 @@ export default defineEventHandler(async (event) => {
 
   return rows.map(r => ({
     language: r.language ?? '',
-    relative_file: r.relative_file ?? '',
-    git_branch: r.git_branch ?? '',
+    relativeFile: r.relativeFile ?? '',
+    gitBranch: r.gitBranch ?? '',
     minutes: Number(r.minutes),
   }))
 })

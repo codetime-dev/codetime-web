@@ -27,20 +27,20 @@ defineRouteMeta({
         schemas: {
           LeaderboardEntry: {
             type: 'object',
-            required: ['user', 'total_minutes', 'rank'],
+            required: ['user', 'totalMinutes', 'rank'],
             properties: {
               user: { $ref: '#/components/schemas/UserPublic' },
-              total_minutes: { type: 'integer' },
+              totalMinutes: { type: 'integer' },
               rank: { type: 'integer' },
             },
           },
           LeaderboardResponse: {
             type: 'object',
-            required: ['entries', 'total_users', 'updated_at'],
+            required: ['entries', 'totalUsers', 'updatedAt'],
             properties: {
               entries: { type: 'array', items: { $ref: '#/components/schemas/LeaderboardEntry' } },
-              total_users: { type: 'integer' },
-              updated_at: { type: 'string', format: 'date-time' },
+              totalUsers: { type: 'integer' },
+              updatedAt: { type: 'string', format: 'date-time' },
             },
           },
         },
@@ -64,22 +64,22 @@ export default defineEventHandler(async (event) => {
   return {
     entries: rows.map(r => ({
       user: {
-        id: r.user_id,
-        email: null,
+        id: r.userId,
+        email: null, // Python forces null on the public leaderboard
         username: r.username,
         avatar: r.avatar,
-        github_id: null,
+        githubId: r.githubId,
         bio: r.bio,
-        google_id: null,
+        googleId: null,
         plan: r.plan,
-        timezone: null,
-        created_at: now.toISOString(),
-        updated_at: now.toISOString(),
+        timezone: r.timezone,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
       },
-      total_minutes: r.total_minutes,
+      totalMinutes: r.totalMinutes,
       rank: r.rank,
     })),
-    total_users: Number(totalRow?.value ?? 0),
-    updated_at: now.toISOString(),
+    totalUsers: Number(totalRow?.value ?? 0),
+    updatedAt: now.toISOString(),
   }
 })

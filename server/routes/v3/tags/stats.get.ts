@@ -36,20 +36,20 @@ defineRouteMeta({
         schemas: {
           TagTimeData: {
             type: 'object',
-            required: ['tag', 'total_minutes'],
+            required: ['tag', 'totalMinutes'],
             properties: {
               tag: { $ref: '#/components/schemas/TagResponse' },
-              total_minutes: { type: 'integer' },
+              totalMinutes: { type: 'integer' },
             },
           },
           TagTimeStatsResponse: {
             type: 'object',
-            required: ['data', 'total_minutes', 'period_start', 'period_end'],
+            required: ['data', 'totalMinutes', 'periodStart', 'periodEnd'],
             properties: {
               data: { type: 'array', items: { $ref: '#/components/schemas/TagTimeData' } },
-              total_minutes: { type: 'integer' },
-              period_start: { type: 'string', format: 'date' },
-              period_end: { type: 'string', format: 'date' },
+              totalMinutes: { type: 'integer' },
+              periodStart: { type: 'string', format: 'date' },
+              periodEnd: { type: 'string', format: 'date' },
             },
           },
         },
@@ -95,9 +95,9 @@ export default defineEventHandler(async (event) => {
   if (tagRows.length === 0) {
     return {
       data: [],
-      total_minutes: 0,
-      period_start: startDt.toISOString().slice(0, 10),
-      period_end: endDt.toISOString().slice(0, 10),
+      totalMinutes: 0,
+      periodStart: startDt.toISOString().slice(0, 10),
+      periodEnd: endDt.toISOString().slice(0, 10),
     }
   }
 
@@ -135,13 +135,13 @@ export default defineEventHandler(async (event) => {
  total++
 }
     }
-    return { tag: toTagResponse(tag), total_minutes: total }
+    return { tag: toTagResponse(tag), totalMinutes: total }
   })
 
   return {
     data,
-    total_minutes: data.reduce((s, d) => s + d.total_minutes, 0),
-    period_start: startDt.toISOString().slice(0, 10),
-    period_end: endDt.toISOString().slice(0, 10),
+    totalMinutes: data.reduce((s, d) => s + d.totalMinutes, 0),
+    periodStart: startDt.toISOString().slice(0, 10),
+    periodEnd: endDt.toISOString().slice(0, 10),
   }
 })

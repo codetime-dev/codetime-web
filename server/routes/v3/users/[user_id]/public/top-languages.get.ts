@@ -63,19 +63,12 @@ function intOr(v: unknown, fallback: number): number {
   return Number.isFinite(n) ? Math.trunc(n) : fallback
 }
 
-// Python's check_and_update_user_expiration drops the plan to 'free'
-// once plan_expires_at has passed. We compute that effective plan
-// without writing to the DB — the Python service still owns updates.
-function effectivePlan(plan: string | null, planExpiresAt: Date | null): string {
-  const p = (plan || 'free').toLowerCase()
-  if (p === 'free') {
- return 'free'
-}
-  if (planExpiresAt && Date.now() >= planExpiresAt.getTime()) {
- return 'free'
-}
-  return p
-}
+// Python's check_and_update_user_expiration is a no-op in practice:
+// it sets user.plan = "free" in memory but then calls
+// session.refresh(user) before commit, which reloads the row from the
+// database and overwrites the change. The net effect is that the
+// stored user.plan is always returned verbatim — we mirror that here
+// rather than implementing the intent of the function.
 
 export default defineEventHandler(async (event) => {
   const userIdStr = getRouterParam(event, 'user_id')
@@ -86,15 +79,13 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb()
   const [userRow] = await db
-    .select({ plan: users.plan, planExpiresAt: users.planExpiresAt })
+    .select({ plan: users.plan })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  if (!userRow) {
- return sendPyError(event, 404, 'User not found')
-}
+  if (!userRow) return sendPyError(event, 404, 'User not found')
 
-  const plan = effectivePlan(userRow.plan, userRow.planExpiresAt)
+  const plan = (userRow.plan || 'free').toLowerCase()
   const isPro = plan === 'pro'
   const maxDays = isPro ? PRO_MAX_DAYS : FREE_MAX_DAYS
   const maxLimit = isPro ? PRO_MAX_LIMIT : FREE_MAX_LIMIT

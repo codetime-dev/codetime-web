@@ -48,10 +48,10 @@ defineRouteMeta({
           },
           CheckoutResponse: {
             type: 'object',
-            required: ['checkout_url', 'expires_at'],
+            required: ['checkoutUrl', 'expiresAt'],
             properties: {
-              checkout_url: { type: 'string' },
-              expires_at: { type: 'string', format: 'date-time' },
+              checkoutUrl: { type: 'string' },
+              expiresAt: { type: 'string', format: 'date-time' },
             },
           },
         },
@@ -116,5 +116,5 @@ export default defineEventHandler(async (event) => {
 
   // Python sets expires_at = now + 24h regardless of LS' real expiry.
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-  return { checkout_url: data.data.attributes.url, expires_at: expiresAt }
+  return { checkoutUrl: data.data.attributes.url, expiresAt: expiresAt }
 })

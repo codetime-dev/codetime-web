@@ -47,10 +47,10 @@ export default defineEventHandler(async (event) => {
 
   const rows = await fetchUserTopLanguagesRank(uid, topN, from, now)
   return {
-    user_id: uid,
+    userId: uid,
     username: user.username,
-    entries: rows.map(r => ({ language: r.language, total_minutes: r.total_minutes, percentile: r.percentile })),
-    time_range_days: days,
-    updated_at: now.toISOString(),
+    entries: rows.map(r => ({ language: r.language, totalMinutes: r.totalMinutes, percentile: r.percentile })),
+    timeRangeDays: days,
+    updatedAt: now.toISOString(),
   }
 })

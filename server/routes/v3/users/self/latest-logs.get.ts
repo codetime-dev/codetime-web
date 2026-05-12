@@ -32,17 +32,17 @@ defineRouteMeta({
         schemas: {
           EventLogPublic: {
             type: 'object',
-            required: ['event_time', 'language', 'project', 'relative_file', 'editor', 'platform', 'absolute_file', 'git_origin', 'git_branch'],
+            required: ['eventTime', 'language', 'project', 'relativeFile', 'editor', 'platform', 'absoluteFile', 'gitOrigin', 'gitBranch'],
             properties: {
-              event_time: { type: 'integer' },
+              eventTime: { type: 'integer' },
               language: { type: 'string' },
               project: { type: 'string' },
-              relative_file: { type: 'string' },
+              relativeFile: { type: 'string' },
               editor: { type: 'string' },
               platform: { type: 'string' },
-              absolute_file: { type: 'string' },
-              git_origin: { type: 'string' },
-              git_branch: { type: 'string' },
+              absoluteFile: { type: 'string' },
+              gitOrigin: { type: 'string' },
+              gitBranch: { type: 'string' },
             },
           },
         },
@@ -68,14 +68,14 @@ export default defineEventHandler(async (event) => {
     .orderBy(desc(eventLogs.eventTime))
     .limit(limit)
   return rows.map(r => ({
-    event_time: r.eventTime,
+    eventTime: r.eventTime,
     language: r.language,
     project: r.project,
-    relative_file: r.relativeFile,
+    relativeFile: r.relativeFile,
     editor: r.editor,
     platform: r.platform,
-    absolute_file: r.absoluteFile ?? '',
-    git_origin: r.gitOrigin ?? '',
-    git_branch: r.gitBranch ?? '',
+    absoluteFile: r.absoluteFile ?? '',
+    gitOrigin: r.gitOrigin ?? '',
+    gitBranch: r.gitBranch ?? '',
   }))
 })

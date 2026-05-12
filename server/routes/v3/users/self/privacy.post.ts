@@ -20,8 +20,8 @@ defineRouteMeta({
         'application/json': {
           schema: {
             type: 'object',
-            properties: { show_github: { type: 'boolean' } },
-            required: ['show_github'],
+            properties: { showGithub: { type: 'boolean' } },
+            required: ['showGithub'],
           },
         },
       },
@@ -42,8 +42,8 @@ export default defineEventHandler(async (event) => {
  return sendPyError(event, 401, 'Not authenticated')
 }
 
-  const body = await readBody<{ show_github?: boolean }>(event).catch(() => null)
-  const showGithub = Boolean(body?.show_github)
+  const body = await readBody<{ showGithub?: boolean }>(event).catch(() => null)
+  const showGithub = Boolean(body?.showGithub)
 
   const db = useDb()
   const [row] = await db
@@ -54,5 +54,5 @@ export default defineEventHandler(async (event) => {
   if (!row) {
  return sendPyError(event, 401, 'Not authenticated')
 }
-  return { show_email: false, show_github: row.showGithub }
+  return { showEmail: false, showGithub: row.showGithub }
 })

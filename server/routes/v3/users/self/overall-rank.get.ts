@@ -31,14 +31,14 @@ defineRouteMeta({
         schemas: {
           UserOverallRankResponse: {
             type: 'object',
-            required: ['user_id', 'username', 'total_minutes', 'percentile', 'updated_at'],
+            required: ['userId', 'username', 'totalMinutes', 'percentile', 'updatedAt'],
             properties: {
-              user_id: { type: 'integer' },
+              userId: { type: 'integer' },
               username: { type: 'string' },
-              total_minutes: { type: 'integer' },
+              totalMinutes: { type: 'integer' },
               percentile: { type: 'number' },
-              time_range_days: { type: 'integer', nullable: true },
-              updated_at: { type: 'string', format: 'date-time' },
+              timeRangeDays: { type: 'integer', nullable: true },
+              updatedAt: { type: 'string', format: 'date-time' },
             },
           },
         },
@@ -81,20 +81,20 @@ export default defineEventHandler(async (event) => {
   const rank = await fetchUserOverallRank(session.id, startTime, endTime)
   if (!rank) {
     return {
-      user_id: session.id,
+      userId: session.id,
       username: session.username,
-      total_minutes: 0,
+      totalMinutes: 0,
       percentile: 100,
-      time_range_days: calculatedDays,
-      updated_at: endTime.toISOString(),
+      timeRangeDays: calculatedDays,
+      updatedAt: endTime.toISOString(),
     }
   }
   return {
-    user_id: session.id,
+    userId: session.id,
     username: session.username,
-    total_minutes: rank.total_minutes,
+    totalMinutes: rank.totalMinutes,
     percentile: rank.percentile,
-    time_range_days: calculatedDays,
-    updated_at: endTime.toISOString(),
+    timeRangeDays: calculatedDays,
+    updatedAt: endTime.toISOString(),
   }
 })

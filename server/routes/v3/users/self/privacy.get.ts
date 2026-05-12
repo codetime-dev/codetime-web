@@ -23,10 +23,10 @@ defineRouteMeta({
         schemas: {
           PrivacySettings: {
             type: 'object',
-            required: ['show_email', 'show_github'],
+            required: ['showEmail', 'showGithub'],
             properties: {
-              show_email: { type: 'boolean' },
-              show_github: { type: 'boolean' },
+              showEmail: { type: 'boolean' },
+              showGithub: { type: 'boolean' },
             },
           },
         },
@@ -40,5 +40,5 @@ export default defineEventHandler(async (event) => {
   if (!session) {
  return sendPyError(event, 401, 'Not authenticated')
 }
-  return { show_email: false, show_github: session.showGithub }
+  return { showEmail: false, showGithub: session.showGithub }
 })

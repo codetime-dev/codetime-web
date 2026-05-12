@@ -37,10 +37,10 @@ defineRouteMeta({
         schemas: {
           ShieldResponse: {
             type: 'object',
-            required: ['schema_version', 'label', 'message', 'color'],
+            required: ['schemaVersion', 'label', 'message', 'color'],
             properties: {
-              schema_version: { type: 'integer' },
-              logo_svg: { type: 'string', nullable: true },
+              schemaVersion: { type: 'integer' },
+              logoSvg: { type: 'string', nullable: true },
               label: { type: 'string' },
               message: { type: 'string' },
               color: { type: 'string' },
@@ -83,10 +83,17 @@ function titleCase(s: string): string {
 
 export default defineEventHandler(async (event) => {
   const q = getQuery(event)
+  // Match Litestar: missing required query param → 400 with a specific
+  // message; bad-shaped value → 404 User not found (preserve old
+  // Nuxt-side behaviour for non-numeric uid).
+  if (q.uid === undefined || q.uid === null || q.uid === '') {
+    const path = event.path || '/v3/users/shield'
+    return sendPyError(event, 400, `Missing required query parameter 'uid' for path ${path}`)
+  }
   const uid = Number(q.uid)
   if (!Number.isFinite(uid) || uid <= 0) {
- return sendPyError(event, 404, 'User not found')
-}
+    return sendPyError(event, 404, 'User not found')
+  }
 
   const db = useDb()
   const [user] = await db
@@ -160,14 +167,23 @@ export default defineEventHandler(async (event) => {
 
   const message = onlyHours ? `${Math.floor(resultMinutes / 60)}h` : getShieldMessage(resultMinutes, minutes)
 
-  let color = resultMinutes > 0 ? 'blue' : 'lightgrey'
-  if (language && LANGUAGE_COLORS[language]) {
- color = LANGUAGE_COLORS[language]
-}
+  // Python branches on which inputs are present:
+  //   - no project/language: color = blue if the requested window
+  //     `minutes` is > 0, else lightgrey (does NOT consider the count)
+  //   - otherwise: color = blue if any minutes were found, then
+  //     overridden by the language palette entry if applicable
+  let color: string
+  if (!project && !language) {
+    color = minutes > 0 ? 'blue' : 'lightgrey'
+  }
+  else {
+    color = resultMinutes > 0 ? 'blue' : 'lightgrey'
+    if (language && LANGUAGE_COLORS[language]) color = LANGUAGE_COLORS[language]
+  }
 
   return {
-    schema_version: 1,
-    logo_svg: LOGO_SVG,
+    schemaVersion: 1,
+    logoSvg: LOGO_SVG,
     label,
     message,
     color,

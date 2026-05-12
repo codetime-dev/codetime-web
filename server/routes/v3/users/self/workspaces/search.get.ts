@@ -58,6 +58,6 @@ export default defineEventHandler(async (event) => {
     .orderBy(workspaceMetaV2.workspaceName)
     .limit(limit)
 
-  const results = rows.map(r => ({ workspace_name: r.workspaceName }))
-  return { results, total_results: results.length }
+  const results = rows.map(r => ({ workspaceName: r.workspaceName }))
+  return { results, totalResults: results.length }
 })

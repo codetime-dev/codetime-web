@@ -27,16 +27,16 @@ defineRouteMeta({
         schemas: {
           DiscountPublic: {
             type: 'object',
-            required: ['id', 'name', 'code', 'amount', 'amount_type', 'duration', 'status'],
+            required: ['id', 'name', 'code', 'amount', 'amountType', 'duration', 'status'],
             properties: {
               id: { type: 'string' },
               name: { type: 'string' },
               code: { type: 'string' },
               amount: { type: 'integer' },
-              amount_type: { type: 'string', description: '"percent" or "fixed"' },
-              expires_at: { type: 'string', format: 'date-time', nullable: true },
+              amountType: { type: 'string', description: '"percent" or "fixed"' },
+              expiresAt: { type: 'string', format: 'date-time', nullable: true },
               duration: { type: 'string', description: '"once", "repeating", or "forever"' },
-              duration_in_months: { type: 'integer', nullable: true },
+              durationInMonths: { type: 'integer', nullable: true },
               status: { type: 'string', description: '"published" or "draft"' },
             },
           },
@@ -94,10 +94,10 @@ export default defineEventHandler(async () => {
         name: a.name ?? '',
         code: a.code ?? '',
         amount: a.amount ?? 0,
-        amount_type: a.amount_type ?? '',
-        expires_at: a.expires_at ?? null,
+        amountType: a.amount_type ?? '',
+        expiresAt: a.expires_at ?? null,
         duration: a.duration ?? '',
-        duration_in_months: a.duration_in_months ?? null,
+        durationInMonths: a.duration_in_months ?? null,
         status: a.status ?? '',
       })
     }

@@ -29,17 +29,17 @@ defineRouteMeta({
         schemas: {
           UserLanguageRankResponse: {
             type: 'object',
-            required: ['user_id', 'username', 'language', 'total_minutes', 'rank', 'percentile', 'total_users', 'updated_at'],
+            required: ['userId', 'username', 'language', 'totalMinutes', 'rank', 'percentile', 'totalUsers', 'updatedAt'],
             properties: {
-              user_id: { type: 'integer' },
+              userId: { type: 'integer' },
               username: { type: 'string' },
               language: { type: 'string' },
-              total_minutes: { type: 'integer' },
+              totalMinutes: { type: 'integer' },
               rank: { type: 'integer' },
               percentile: { type: 'number' },
-              total_users: { type: 'integer' },
-              time_range_days: { type: 'integer', nullable: true },
-              updated_at: { type: 'string', format: 'date-time' },
+              totalUsers: { type: 'integer' },
+              timeRangeDays: { type: 'integer', nullable: true },
+              updatedAt: { type: 'string', format: 'date-time' },
             },
           },
         },
@@ -73,26 +73,26 @@ export default defineEventHandler(async (event) => {
   const rank = await fetchUserLanguageRank(uid, language, from, now)
   if (!rank) {
     return {
-      user_id: uid,
+      userId: uid,
       username: user.username,
       language,
-      total_minutes: 0,
+      totalMinutes: 0,
       rank: 0,
       percentile: 100,
-      total_users: 0,
-      time_range_days: days,
-      updated_at: now.toISOString(),
+      totalUsers: 0,
+      timeRangeDays: days,
+      updatedAt: now.toISOString(),
     }
   }
   return {
-    user_id: uid,
+    userId: uid,
     username: user.username,
     language,
-    total_minutes: rank.total_minutes,
+    totalMinutes: rank.totalMinutes,
     rank: rank.rank,
     percentile: rank.percentile,
-    total_users: rank.total_users,
-    time_range_days: days,
-    updated_at: now.toISOString(),
+    totalUsers: rank.totalUsers,
+    timeRangeDays: days,
+    updatedAt: now.toISOString(),
   }
 })

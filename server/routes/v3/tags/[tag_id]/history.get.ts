@@ -47,13 +47,13 @@ defineRouteMeta({
           },
           TagHistoryResponse: {
             type: 'object',
-            required: ['tag', 'data', 'total_minutes', 'period_start', 'period_end'],
+            required: ['tag', 'data', 'totalMinutes', 'periodStart', 'periodEnd'],
             properties: {
               tag: { $ref: '#/components/schemas/TagResponse' },
               data: { type: 'array', items: { $ref: '#/components/schemas/StatsTimeData' } },
-              total_minutes: { type: 'integer' },
-              period_start: { type: 'string', format: 'date' },
-              period_end: { type: 'string', format: 'date' },
+              totalMinutes: { type: 'integer' },
+              periodStart: { type: 'string', format: 'date' },
+              periodEnd: { type: 'string', format: 'date' },
             },
           },
         },
@@ -126,9 +126,9 @@ export default defineEventHandler(async (event) => {
     return {
       tag: toTagResponse(tag),
       data: [],
-      total_minutes: 0,
-      period_start: startDt.toISOString().slice(0, 10),
-      period_end: endDt.toISOString().slice(0, 10),
+      totalMinutes: 0,
+      periodStart: startDt.toISOString().slice(0, 10),
+      periodEnd: endDt.toISOString().slice(0, 10),
     }
   }
 
@@ -175,8 +175,8 @@ export default defineEventHandler(async (event) => {
   return {
     tag: toTagResponse(tag),
     data,
-    total_minutes: total,
-    period_start: startDt.toISOString().slice(0, 10),
-    period_end: endDt.toISOString().slice(0, 10),
+    totalMinutes: total,
+    periodStart: startDt.toISOString().slice(0, 10),
+    periodEnd: endDt.toISOString().slice(0, 10),
   }
 })

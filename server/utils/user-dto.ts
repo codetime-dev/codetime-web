@@ -2,23 +2,24 @@ import type { users } from '../db/schema'
 
 // Serialise a `users` row to the Python UserSelfPublic shape. The wire
 // format must stay byte-equivalent to codetime-server-v3/src/dto.py so
-// existing UI / SDK code reads either backend unchanged.
+// existing UI / SDK code reads either backend unchanged. Python emits
+// camelCase keys via pydantic's `alias_generator=to_camel`.
 
 export type UserSelfPublic = {
   id: number
   email: string | null
   username: string
   avatar: string | null
-  github_id: number | null
+  githubId: number | null
   bio: string | null
-  google_id: string | null
+  googleId: string | null
   plan: string
   timezone: string | null
-  upload_token: string
-  plan_expires_at: string | null
-  plan_status: string | null
-  created_at: string
-  updated_at: string
+  uploadToken: string
+  planExpiresAt: string | null
+  planStatus: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export function toUserSelfPublic(row: typeof users.$inferSelect): UserSelfPublic {
@@ -27,15 +28,15 @@ export function toUserSelfPublic(row: typeof users.$inferSelect): UserSelfPublic
     email: row.email,
     username: row.username,
     avatar: row.avatar,
-    github_id: row.githubId,
+    githubId: row.githubId,
     bio: row.bio,
-    google_id: row.googleId,
+    googleId: row.googleId,
     plan: row.plan,
     timezone: row.timezone,
-    upload_token: row.uploadToken,
-    plan_expires_at: row.planExpiresAt ? row.planExpiresAt.toISOString() : null,
-    plan_status: row.planStatus,
-    created_at: row.createdAt.toISOString(),
-    updated_at: row.updatedAt.toISOString(),
+    uploadToken: row.uploadToken,
+    planExpiresAt: row.planExpiresAt ? row.planExpiresAt.toISOString() : null,
+    planStatus: row.planStatus,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
   }
 }

@@ -7,8 +7,9 @@ import { useDb } from '../../../utils/db'
 import { sendPyError } from '../../../utils/py-error'
 
 // Mirrors POST /v3/auth/refresh-token. Issues new upload_token and
-// token_v1, returns `{token, token_v1}` (Python `TokenRefreshResponse`).
-// `token` is the upload_token — historical naming kept on the wire.
+// token_v1, returns `{token, tokenV1}` (Python `TokenRefreshResponse`,
+// camelCase aliased). `token` is the upload_token — historical naming
+// kept on the wire.
 
 defineRouteMeta({
   openAPI: {
@@ -28,10 +29,10 @@ defineRouteMeta({
         schemas: {
           TokenRefreshResponse: {
             type: 'object',
-            required: ['token', 'token_v1'],
+            required: ['token', 'tokenV1'],
             properties: {
               token: { type: 'string' },
-              token_v1: { type: 'string' },
+              tokenV1: { type: 'string' },
             },
           },
         },
@@ -59,5 +60,5 @@ export default defineEventHandler(async (event) => {
  return sendPyError(event, 404, 'User not found')
 }
 
-  return { token: row.uploadToken, token_v1: row.tokenV1 }
+  return { token: row.uploadToken, tokenV1: row.tokenV1 }
 })

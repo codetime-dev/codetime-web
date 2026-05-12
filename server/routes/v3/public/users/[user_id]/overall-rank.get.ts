@@ -46,20 +46,20 @@ export default defineEventHandler(async (event) => {
   const rank = await fetchUserOverallRank(uid, from, now)
   if (!rank) {
     return {
-      user_id: uid,
+      userId: uid,
       username: user.username,
-      total_minutes: 0,
+      totalMinutes: 0,
       percentile: 100,
-      time_range_days: days,
-      updated_at: now.toISOString(),
+      timeRangeDays: days,
+      updatedAt: now.toISOString(),
     }
   }
   return {
-    user_id: uid,
+    userId: uid,
     username: user.username,
-    total_minutes: rank.total_minutes,
+    totalMinutes: rank.totalMinutes,
     percentile: rank.percentile,
-    time_range_days: days,
-    updated_at: now.toISOString(),
+    timeRangeDays: days,
+    updatedAt: now.toISOString(),
   }
 })

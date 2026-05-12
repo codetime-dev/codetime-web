@@ -31,15 +31,15 @@ defineRouteMeta({
         schemas: {
           WorkspaceSearchResult: {
             type: 'object',
-            required: ['workspace_name'],
-            properties: { workspace_name: { type: 'string' } },
+            required: ['workspaceName'],
+            properties: { workspaceName: { type: 'string' } },
           },
           WorkspaceSearchResponse: {
             type: 'object',
-            required: ['results', 'total_results'],
+            required: ['results', 'totalResults'],
             properties: {
               results: { type: 'array', items: { $ref: '#/components/schemas/WorkspaceSearchResult' } },
-              total_results: { type: 'integer' },
+              totalResults: { type: 'integer' },
             },
           },
         },
@@ -78,6 +78,6 @@ export default defineEventHandler(async (event) => {
 
   const results = rows
     .filter(r => Boolean(r.project))
-    .map(r => ({ workspace_name: r.project }))
-  return { results, total_results: results.length }
+    .map(r => ({ workspaceName: r.project }))
+  return { results, totalResults: results.length }
 })

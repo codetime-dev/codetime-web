@@ -32,23 +32,23 @@ defineRouteMeta({
         schemas: {
           WorkspaceEvaluationRequest: {
             type: 'object',
-            required: ['workspace_name', 'language', 'platform', 'editor', 'relative_file'],
+            required: ['workspaceName', 'language', 'platform', 'editor', 'relativeFile'],
             properties: {
-              workspace_name: { type: 'string' },
+              workspaceName: { type: 'string' },
               language: { type: 'string' },
-              git_origin: { type: 'string', nullable: true },
-              git_branch: { type: 'string', nullable: true },
+              gitOrigin: { type: 'string', nullable: true },
+              gitBranch: { type: 'string', nullable: true },
               platform: { type: 'string' },
               editor: { type: 'string' },
-              absolute_file: { type: 'string', nullable: true },
-              relative_file: { type: 'string' },
+              absoluteFile: { type: 'string', nullable: true },
+              relativeFile: { type: 'string' },
             },
           },
           WorkspaceEvaluationResponse: {
             type: 'object',
-            required: ['matching_tags'],
+            required: ['matchingTags'],
             properties: {
-              matching_tags: {
+              matchingTags: {
                 type: 'array',
                 items: { $ref: '#/components/schemas/TagResponse' },
               },
@@ -66,10 +66,24 @@ export default defineEventHandler(async (event) => {
  return sendPyError(event, 401, 'Not authenticated')
 }
 
-  const ws = await readBody<WorkspaceData>(event).catch(() => null)
-  if (!ws) {
- return sendPyError(event, 400, 'Invalid body')
-}
+  // SDK posts camelCase keys (matching Python's pydantic
+  // alias_generator=to_camel). tag-rules' FIELD_ALIAS normalises
+  // condition.field but reads ws[snake_case], so we translate the
+  // incoming body into the snake_case-keyed WorkspaceData shape here.
+  const body = await readBody<Record<string, unknown>>(event).catch(() => null)
+  if (!body) {
+    return sendPyError(event, 400, 'Invalid body')
+  }
+  const ws: WorkspaceData = {
+    workspace_name: (body.workspaceName ?? body.workspace_name) as string | null | undefined ?? null,
+    language: (body.language ?? null) as string | null,
+    git_origin: (body.gitOrigin ?? body.git_origin) as string | null | undefined ?? null,
+    git_branch: (body.gitBranch ?? body.git_branch) as string | null | undefined ?? null,
+    platform: (body.platform ?? null) as string | null,
+    editor: (body.editor ?? null) as string | null,
+    absolute_file: (body.absoluteFile ?? body.absolute_file) as string | null | undefined ?? null,
+    relative_file: (body.relativeFile ?? body.relative_file) as string | null | undefined ?? null,
+  }
 
   const db = useDb()
   const rows = await db
@@ -78,5 +92,5 @@ export default defineEventHandler(async (event) => {
     .where(and(eq(tags.uid, session.id), isNotNull(tags.rulesJson)))
 
   const matching = rows.filter(r => r.rulesJson && evaluateRule(r.rulesJson, ws))
-  return { matching_tags: matching.map(toTagResponse) }
+  return { matchingTags: matching.map(toTagResponse) }
 })

@@ -1,29 +1,42 @@
 import { sql } from 'drizzle-orm'
 import { useDb } from './db'
 
+// Match Python's serialization of percent values: rounds to 10 decimal
+// places (e.g. 2.0833333333333335 → 2.0833333333). Without this we leak
+// trailing IEEE 754 noise digits that the Python service drops.
+function roundPct(x: number): number {
+  if (!Number.isFinite(x)) return 0
+  return Math.round(x * 1e10) / 1e10
+}
+
 // Window-function ranking helpers — mirror Python services/logs.py.
 // Each function uses a Postgres CTE (minutes per user) + rank() +
 // percent_rank() so behaviour is identical at the SQL layer. Returns
-// plain objects ready to map to DTO shape.
+// plain objects in camelCase — wire format matches Python's
+// `alias_generator=to_camel`. Raw DB columns inside the `sql` template
+// literals stay snake_case because that's how Postgres knows them.
 
 export type LanguageRankEntry = {
-  user_id: number
+  userId: number
   username: string
   avatar: string | null
   bio: string | null
-  github_id: number | null
-  google_id: string | null
+  githubId: number | null
+  googleId: string | null
   email: string | null
   plan: string
   timezone: string | null
-  created_at: string
-  updated_at: string
-  share_current: boolean
-  show_email: boolean
-  show_github: boolean
+  createdAt: string
+  updatedAt: string
+  shareCurrent: boolean
+  showEmail: boolean
+  showGithub: boolean
   language: string
-  total_minutes: number
+  totalMinutes: number
   rank: number
+  // Python convention: percentile = percent_rank() * 100 directly.
+  // Lower is better — rank 1 = ~0, last rank = 100. Emitted at full
+  // precision (no rounding) to match the Python output byte-for-byte.
   percentile: number
 }
 
@@ -57,25 +70,36 @@ export async function fetchLanguageRanking(
     limit ${limit}
   `)
   return (rows as any as any[]).map((r: any) => ({
-    user_id: Number(r.id),
+    userId: Number(r.id),
     username: String(r.username),
     avatar: r.avatar ?? null,
     bio: r.bio ?? null,
-    github_id: r.github_id ?? null,
-    google_id: r.google_id ?? null,
+    githubId: r.github_id ?? null,
+    googleId: r.google_id ?? null,
     email: r.show_email ? (r.email ?? null) : null,
     plan: String(r.plan),
     timezone: r.timezone ?? null,
-    created_at: new Date(r.created_at).toISOString(),
-    updated_at: new Date(r.updated_at).toISOString(),
-    share_current: Boolean(r.share_current),
-    show_email: Boolean(r.show_email),
-    show_github: Boolean(r.show_github),
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+    shareCurrent: Boolean(r.share_current),
+    showEmail: Boolean(r.show_email),
+    showGithub: Boolean(r.show_github),
     language,
-    total_minutes: Number(r.total_minutes),
+    totalMinutes: Number(r.total_minutes),
     rank: Number(r.rnk),
-    percentile: Math.round((1 - Number(r.pct_raw)) * 1000) / 10,
+    percentile: roundPct(Number(r.pct_raw) * 100),
   }))
+}
+
+// Python uses count(*) FROM users (incl. inactive/deleted) and then
+// multiplies by 7 as the percentile denominator. This makes the
+// percentile field reflect a far larger user base than the active
+// rankers in the time window — we mirror that quirk verbatim.
+async function totalAllUsersTimes7(): Promise<number> {
+  const db = useDb()
+  const r = await db.execute(sql`select count(id)::int as n from users`)
+  const n = Number((r as any as any[])[0]?.n ?? 0)
+  return n * 7
 }
 
 export async function fetchUserLanguageRank(uid: number, language: string, from: Date, to: Date) {
@@ -89,23 +113,21 @@ export async function fetchUserLanguageRank(uid: number, language: string, from:
     ),
     ranked as (
       select uid, total_minutes,
-        rank() over (order by total_minutes desc) as rnk,
-        percent_rank() over (order by total_minutes desc) as pct_raw,
-        count(*) over () as total_users
+        rank() over (order by total_minutes desc) as rnk
       from user_minutes
     )
-    select total_minutes, rnk, pct_raw, total_users
+    select total_minutes, rnk
     from ranked where uid = ${uid}
   `)
   const row = (result as any as any[])[0]
-  if (!row) {
- return null
-}
+  if (!row) return null
+  const totalUsers = await totalAllUsersTimes7()
+  const rank = Number(row.rnk)
   return {
-    total_minutes: Number(row.total_minutes),
-    rank: Number(row.rnk),
-    percentile: Math.round((1 - Number(row.pct_raw)) * 1000) / 10,
-    total_users: Number(row.total_users),
+    totalMinutes: Number(row.total_minutes),
+    rank,
+    percentile: totalUsers > 0 ? roundPct((rank / totalUsers) * 100) : 100,
+    totalUsers,
   }
 }
 
@@ -120,32 +142,30 @@ export async function fetchUserOverallRank(uid: number, from: Date, to: Date) {
     ),
     ranked as (
       select uid, total_minutes,
-        rank() over (order by total_minutes desc) as rnk,
-        percent_rank() over (order by total_minutes desc) as pct_raw,
-        count(*) over () as total_users
+        rank() over (order by total_minutes desc) as rnk
       from user_minutes
     )
-    select total_minutes, rnk, pct_raw, total_users
+    select total_minutes, rnk
     from ranked where uid = ${uid}
   `)
   const row = (result as any as any[])[0]
-  if (!row) {
- return null
-}
+  if (!row) return null
+  const totalUsers = await totalAllUsersTimes7()
+  const rank = Number(row.rnk)
   return {
-    total_minutes: Number(row.total_minutes),
-    rank: Number(row.rnk),
-    percentile: Math.round((1 - Number(row.pct_raw)) * 1000) / 10,
-    total_users: Number(row.total_users),
+    totalMinutes: Number(row.total_minutes),
+    rank,
+    percentile: totalUsers > 0 ? roundPct((rank / totalUsers) * 100) : 100,
+    totalUsers,
   }
 }
 
 export type UserTopLanguageRankRow = {
   language: string
-  total_minutes: number
+  totalMinutes: number
   rank: number
   percentile: number
-  total_users: number
+  totalUsers: number
 }
 
 export async function fetchUserTopLanguagesRank(uid: number, topN: number, from: Date, to: Date): Promise<UserTopLanguageRankRow[]> {
@@ -168,64 +188,82 @@ export async function fetchUserTopLanguagesRank(uid: number, topN: number, from:
     ),
     ranked as (
       select language, uid, total_minutes,
-        rank() over (partition by language order by total_minutes desc) as rnk,
-        percent_rank() over (partition by language order by total_minutes desc) as pct_raw,
-        count(*) over (partition by language) as total_users
+        rank() over (partition by language order by total_minutes desc) as rnk
       from global_minutes
     )
-    select r.language, r.total_minutes, r.rnk, r.pct_raw, r.total_users
+    select r.language, r.total_minutes, r.rnk, ut.user_minutes
     from ranked r
+    join user_top ut on ut.language = r.language
     where r.uid = ${uid}
-    order by r.total_minutes desc
+    order by ut.user_minutes desc
   `)
-  return (result as any as any[]).map((row: any) => ({
-    language: String(row.language),
-    total_minutes: Number(row.total_minutes),
-    rank: Number(row.rnk),
-    percentile: Math.round((1 - Number(row.pct_raw)) * 1000) / 10,
-    total_users: Number(row.total_users),
-  }))
+  const rows = result as any as any[]
+  if (rows.length === 0) return []
+  const totalUsers = await totalAllUsersTimes7()
+  return rows.map((row: any) => {
+    const rank = Number(row.rnk)
+    return {
+      language: String(row.language),
+      totalMinutes: Number(row.total_minutes),
+      rank,
+      percentile: totalUsers > 0 ? roundPct((rank / totalUsers) * 100) : 100,
+      totalUsers,
+    }
+  })
 }
 
 export type LeaderboardRow = {
-  user_id: number
+  userId: number
   username: string
   avatar: string | null
   bio: string | null
+  githubId: number | null
+  googleId: string | null
   plan: string
-  total_minutes: number
+  timezone: string | null
+  createdAt: Date
+  updatedAt: Date
+  showGithub: boolean
+  totalMinutes: number
   rank: number
 }
 
-export async function fetchLeaderboard(from: Date, to: Date, limit: number): Promise<LeaderboardRow[]> {
+// Mirror Python controllers/public.get_leaderboard: aggregate first,
+// join users second, no upper time bound. Rank is the enumerate index
+// of the ordering, not a SQL rank() — identical for unique totals,
+// differs only on ties (Python doesn't dedupe ties).
+export async function fetchLeaderboard(from: Date, _to: Date, limit: number): Promise<LeaderboardRow[]> {
   const db = useDb()
   const result = await db.execute(sql`
-    with user_minutes as (
-      select uid, count(meta_xxh3_64)::int as total_minutes
+    with top_uids as (
+      select uid, count(*)::int as total_minutes
       from workspace_minutes_v2
-      where recorded_at >= ${from.toISOString()} and recorded_at <= ${to.toISOString()}
+      where recorded_at >= ${from.toISOString()}
       group by uid
-    ),
-    ranked as (
-      select uid, total_minutes,
-        rank() over (order by total_minutes desc) as rnk
-      from user_minutes
+      order by total_minutes desc
+      limit ${limit}
     )
-    select u.id, u.username, u.avatar, u.bio, u.plan, u.share_current, u.show_email, u.show_github,
-           r.total_minutes, r.rnk
-    from ranked r
-    join users u on u.id = r.uid
-    order by r.rnk asc
-    limit ${limit}
+    select u.id, u.username, u.email, u.avatar, u.github_id, u.bio, u.google_id,
+           u.plan, u.timezone, u.created_at, u.updated_at, u.show_github,
+           t.total_minutes
+    from top_uids t
+    join users u on u.id = t.uid
+    order by t.total_minutes desc
   `)
-  return (result as any as any[]).map((row: any) => ({
-    user_id: Number(row.id),
+  return (result as any as any[]).map((row: any, idx: number) => ({
+    userId: Number(row.id),
     username: String(row.username),
     avatar: row.avatar ?? null,
     bio: row.bio ?? null,
+    githubId: row.show_github ? (row.github_id ?? null) : null,
+    googleId: null,
     plan: String(row.plan),
-    total_minutes: Number(row.total_minutes),
-    rank: Number(row.rnk),
+    timezone: row.timezone ?? null,
+    createdAt: row.created_at instanceof Date ? row.created_at : new Date(row.created_at),
+    updatedAt: row.updated_at instanceof Date ? row.updated_at : new Date(row.updated_at),
+    showGithub: Boolean(row.show_github),
+    totalMinutes: Number(row.total_minutes),
+    rank: idx + 1,
   }))
 }
 

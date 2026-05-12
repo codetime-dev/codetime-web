@@ -34,15 +34,15 @@ defineRouteMeta({
         schemas: {
           WidgetStatusResponse: {
             type: 'object',
-            required: ['username', 'plan', 'today_minutes'],
+            required: ['username', 'plan', 'todayMinutes'],
             properties: {
               username: { type: 'string' },
               plan: { type: 'string' },
               project: { type: 'string', nullable: true },
               language: { type: 'string', nullable: true },
               editor: { type: 'string', nullable: true },
-              last_active_at: { type: 'integer', nullable: true, description: 'Unix seconds.' },
-              today_minutes: { type: 'integer' },
+              lastActiveAt: { type: 'integer', nullable: true, description: 'Unix seconds.' },
+              todayMinutes: { type: 'integer' },
             },
           },
         },
@@ -50,17 +50,6 @@ defineRouteMeta({
     },
   },
 })
-
-function effectivePlan(plan: string | null, planExpiresAt: Date | null): string {
-  const p = (plan || 'free').toLowerCase()
-  if (p === 'free') {
- return 'free'
-}
-  if (planExpiresAt && Date.now() >= planExpiresAt.getTime()) {
- return 'free'
-}
-  return p
-}
 
 // Compute the UTC instant at the start of today in the given IANA tz.
 // Mirrors Python `datetime.now(tz).replace(hour=0...).astimezone(UTC)`.
@@ -116,17 +105,15 @@ export default defineEventHandler(async (event) => {
     .select({
       username: users.username,
       plan: users.plan,
-      planExpiresAt: users.planExpiresAt,
       timezone: users.timezone,
     })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  if (!user) {
- return sendPyError(event, 404, 'User not found')
-}
+  if (!user) return sendPyError(event, 404, 'User not found')
 
-  const plan = effectivePlan(user.plan, user.planExpiresAt)
+  // Python's expiration check is a no-op in practice (see top-languages.get.ts).
+  const plan = (user.plan || 'free').toLowerCase()
   const isPro = plan === 'pro'
 
   // Parallel queries: most recent event log + max(recorded_at) + today's minutes.
@@ -171,7 +158,7 @@ export default defineEventHandler(async (event) => {
     project: requested.has('project') ? (latest?.project ?? null) : null,
     language: requested.has('language') ? (latest?.language ?? null) : null,
     editor: requested.has('editor') ? (latest?.editor ?? null) : null,
-    last_active_at: lastActiveAt,
-    today_minutes: todayMinutes,
+    lastActiveAt,
+    todayMinutes,
   }
 })

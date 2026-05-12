@@ -9,15 +9,15 @@ import { sendPyError } from '../../../utils/py-error'
 // we do the same to keep downstream stats consistent across backends.
 
 type EventLogBody = {
-  event_time?: number
+  eventTime?: number
   language?: string
   project?: string
-  relative_file?: string
+  relativeFile?: string
   editor?: string
   platform?: string
-  absolute_file?: string | null
-  git_origin?: string | null
-  git_branch?: string | null
+  absoluteFile?: string | null
+  gitOrigin?: string | null
+  gitBranch?: string | null
 }
 
 defineRouteMeta({
@@ -39,17 +39,17 @@ defineRouteMeta({
         schemas: {
           EventLogRequest: {
             type: 'object',
-            required: ['event_time', 'language', 'project', 'relative_file', 'editor', 'platform'],
+            required: ['eventTime', 'language', 'project', 'relativeFile', 'editor', 'platform'],
             properties: {
-              event_time: { type: 'integer' },
+              eventTime: { type: 'integer' },
               language: { type: 'string' },
               project: { type: 'string' },
-              relative_file: { type: 'string' },
+              relativeFile: { type: 'string' },
               editor: { type: 'string' },
               platform: { type: 'string' },
-              absolute_file: { type: 'string', nullable: true },
-              git_origin: { type: 'string', nullable: true },
-              git_branch: { type: 'string', nullable: true },
+              absoluteFile: { type: 'string', nullable: true },
+              gitOrigin: { type: 'string', nullable: true },
+              gitBranch: { type: 'string', nullable: true },
             },
           },
         },
@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
   if (!data) {
  return sendPyError(event, 400, 'Invalid body')
 }
-  const required = ['event_time', 'language', 'project', 'relative_file', 'editor', 'platform'] as const
+  const required = ['eventTime', 'language', 'project', 'relativeFile', 'editor', 'platform'] as const
   for (const key of required) {
     if (data[key] === undefined || data[key] === null || data[key] === '') {
       return sendPyError(event, 400, `${key} is required`)
@@ -82,15 +82,15 @@ export default defineEventHandler(async (event) => {
   try {
     await db.insert(eventLogs).values({
       uid: session.id,
-      eventTime: Number(data.event_time),
+      eventTime: Number(data.eventTime),
       language,
       project: String(data.project),
-      relativeFile: String(data.relative_file),
+      relativeFile: String(data.relativeFile),
       editor,
       platform: String(data.platform),
-      absoluteFile: data.absolute_file ?? null,
-      gitOrigin: data.git_origin ?? null,
-      gitBranch: data.git_branch ?? null,
+      absoluteFile: data.absoluteFile ?? null,
+      gitOrigin: data.gitOrigin ?? null,
+      gitBranch: data.gitBranch ?? null,
       createdAt: new Date(),
     } as any)
     setResponseStatus(event, 201)
