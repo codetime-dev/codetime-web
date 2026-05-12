@@ -1,109 +1,120 @@
 <script setup lang="ts">
-const props = defineProps<{
-  theme?: string
-}>()
+import type { SchemeString } from '~/composables/useScheme'
+
+const SCHEME_OPTIONS = [
+  { value: 'system', icon: 'i-tabler-device-desktop' },
+  { value: 'light', icon: 'i-tabler-sun' },
+  { value: 'dark', icon: 'i-tabler-moon-stars' },
+] as const satisfies ReadonlyArray<{ value: SchemeString, icon: string }>
 
 const t = useI18N()
-const currentScheme = computed({
-  get() {
-    if (globalThis.window !== undefined) {
-      return document.documentElement.dataset.scheme ?? 'light'
-    }
-    return 'light'
-  },
-  set(value: string) {
-    if (globalThis.window === undefined) {
-      return
-    }
-    const root = document.documentElement
-    root.classList.add('is-theme-switching')
-    root.dataset.scheme = value
-    // Double rAF: let the new scheme paint, then drop the override.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        root.classList.remove('is-theme-switching')
-      })
-    })
-  },
-})
 const scheme = useSchemeString()
-const isCurrent = computed(() => props.theme === scheme.value)
-const title = computed(() => {
-  switch (props.theme) {
-    case 'dark': { return t.value.dashboard.settings.theme.dark
-    }
-    case 'light': { return t.value.dashboard.settings.theme.light
-    }
-    case 'system': { return t.value.dashboard.settings.theme.system
-    }
-  }
-  return ''
-})
-const themeIcon = computed(() => {
-  switch (props.theme) {
-    case 'dark': { return 'i-tabler-moon-stars'
-    }
-    case 'light': { return 'i-tabler-sun'
-    }
-    default: { return 'i-tabler-device-desktop'
-    }
-  }
-})
+
+const activeIndex = computed(() =>
+  SCHEME_OPTIONS.findIndex(o => o.value === scheme.value),
+)
 </script>
 
 <template>
-  <button
-    type="button"
-    class="theme-item"
-    :class="isCurrent ? 'theme-item-active' : ''"
-    @click="() => currentScheme = props.theme ?? 'system'"
+  <div
+    class="theme-switch"
+    role="radiogroup"
+    :aria-label="t.dashboard.settings.theme.title"
   >
-    <span class="theme-head-left">
-      <i :class="themeIcon" class="text-sm" />
-      <span>{{ title }}</span>
-    </span>
-    <span v-if="isCurrent" class="theme-head-active">
-      <i class="i-tabler-circle-check-filled text-sm" />
-    </span>
-  </button>
+    <span
+      class="theme-switch-thumb"
+      aria-hidden="true"
+      :style="{ '--idx': activeIndex }"
+    />
+    <button
+      v-for="opt in SCHEME_OPTIONS"
+      :key="opt.value"
+      type="button"
+      role="radio"
+      :aria-checked="scheme === opt.value"
+      class="theme-switch-item"
+      :class="{ 'is-active': scheme === opt.value }"
+      @click="scheme = opt.value"
+    >
+      <i :class="opt.icon" class="theme-switch-icon" />
+      <span class="theme-switch-label">{{ t.dashboard.settings.theme[opt.value] }}</span>
+    </button>
+  </div>
 </template>
 
 <style scoped>
-.theme-item {
-  display: flex;
+.theme-switch {
+  --count: 3;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--count), 1fr);
+  gap: 2px;
+  padding: 4px;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: 10px;
+  isolation: isolate;
+}
+
+.theme-switch-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--count));
+  border-radius: 7px;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border-subtle);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  transform: translateX(calc(var(--idx) * 100%));
+  transition: transform var(--ct-duration-base, 200ms) var(--ct-ease, cubic-bezier(0.4, 0, 0.2, 1));
+  z-index: 0;
+}
+
+.theme-switch-item {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  text-align: left;
-  background: transparent;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
   border: 0;
+  background: transparent;
+  border-radius: 7px;
   cursor: pointer;
-  padding: 12px 18px;
   font-size: var(--ct-text-sm);
   font-weight: var(--ct-weight-medium);
   color: var(--ct-fg-muted);
-  transition: background-color var(--ct-duration-fast) var(--ct-ease),
-              color var(--ct-duration-fast) var(--ct-ease);
-  position: relative;
+  letter-spacing: 0.01em;
+  transition: color var(--ct-duration-fast, 150ms) var(--ct-ease, ease);
 }
-.theme-item:hover { background: var(--ct-surface-1); color: var(--ct-fg); }
-.theme-item-active {
+
+.theme-switch-item:hover {
+  color: var(--ct-fg);
+}
+
+.theme-switch-item.is-active {
   color: var(--ct-primary);
-  background: var(--ct-primary-soft);
 }
-.theme-item-active:hover {
-  color: var(--ct-primary);
-  background: color-mix(in srgb, var(--ct-primary) 18%, transparent);
+
+.theme-switch-item:focus-visible {
+  outline: 2px solid var(--ct-primary);
+  outline-offset: 2px;
 }
-.theme-item-active::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--ct-primary);
+
+.theme-switch-icon {
+  font-size: 16px;
+  flex-shrink: 0;
 }
-.theme-head-left { display: inline-flex; align-items: center; gap: 8px; }
-.theme-head-active { color: var(--ct-primary); }
+
+@media (max-width: 480px) {
+  .theme-switch-label {
+    display: none;
+  }
+  .theme-switch-item {
+    padding: 0 8px;
+  }
+}
 </style>

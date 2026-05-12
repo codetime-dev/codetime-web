@@ -362,11 +362,20 @@ async function toCheckoutLink() {
         <FeatureItem>
           {{ t.plan.pro.features.item.browseAll }}
         </FeatureItem>
-        <FeatureItem not-yet>
+        <FeatureItem>
+          {{ t.plan.pro.features.item.workspace }}
+        </FeatureItem>
+        <FeatureItem>
+          {{ t.plan.pro.features.item.tag }}
+        </FeatureItem>
+        <FeatureItem>
           {{ t.plan.pro.features.item.rule }}
         </FeatureItem>
-        <FeatureItem not-yet>
-          {{ t.plan.pro.features.item.tag }}
+        <FeatureItem>
+          {{ t.plan.pro.features.item.widgetCustom }}
+        </FeatureItem>
+        <FeatureItem>
+          {{ t.plan.pro.features.item.widgetUnlimited }}
         </FeatureItem>
       </div>
     </div>

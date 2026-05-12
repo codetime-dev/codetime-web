@@ -50,7 +50,7 @@ export const ms: Partial<Translation> = {
     loginWithGithub: 'Log masuk dengan GitHub',
     freeMessage: 'Sekarang sepenuhnya percuma, tiada kad kredit diperlukan',
     demo: 'Demo',
-    heroBadge: 'v3 · analitik',
+    heroBadge: 'fokus · peribadi · terbuka',
     scroll: 'tatal',
 
     sections: {
@@ -59,6 +59,7 @@ export const ms: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -78,6 +79,14 @@ export const ms: Partial<Translation> = {
       editor: {
         title: 'Sokong pelbagai editor.',
         description: 'Kami adalah pasukan yang sangat kecil. Ini bermakna kami tidak dapat menyokong semua IDE atau editor kod. Walau bagaimanapun, kami kini menyokong VSCode dan IDE siri JetBrain. Kami percaya bahawa mereka merangkumi keperluan pengguna kebanyakan. Kami akan berusaha sebaik mungkin untuk menyokong lebih banyak platform dan manfaatkan lebih banyak orang.',
+      },
+      widgets: {
+        title: 'Benamkan masa pengekodan anda di mana-mana.',
+        description: 'Letakkan lencana, donat bahasa dan kad status langsung ke dalam mana-mana README, blog atau laman peribadi. Setiap widget ialah SVG tunggal — boleh ditemakan, berdiri sendiri dan dijana serta-merta daripada data terkini anda.',
+        badge: 'Lencana gaya Shields',
+        donut: 'Donat bahasa',
+        status: 'Kad status langsung',
+        cta: 'Bina widget',
       },
     },
     pricing: {

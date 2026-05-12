@@ -54,7 +54,7 @@ export const ua: Partial<Translation> = {
     loginWithGithub: 'Увійти за допомогою GitHub',
     freeMessage: 'Наразі повністю безкоштовно, кредитна картка не потрібна',
     demo: 'Демо',
-    heroBadge: 'v3 · аналітика',
+    heroBadge: 'фокус · приватність · відкритість',
     scroll: 'прокрутка',
 
     sections: {
@@ -63,6 +63,7 @@ export const ua: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -86,6 +87,14 @@ export const ua: Partial<Translation> = {
         title: 'Підтримка декількох редакторів.',
         description:
           'Ми - дуже мала команда. Це означає, що ми не можемо підтримувати всі IDE або редактори коду. Однак наразі ми підтримуємо IDE VSCode та JetBrain. Ми вважаємо, що вони охоплюють більшість потреб користувачів. Ми зробимо все можливе, щоб підтримати більше платформ і забезпечити користь для більшої кількості людей.',
+      },
+      widgets: {
+        title: 'Вбудовуйте свій час кодингу будь-куди.',
+        description: 'Додавайте бейджі, кільцеві діаграми мов і живі статус-картки до будь-якого README, блогу чи особистого сайту. Кожен віджет — це один SVG: з підтримкою тем, самодостатній і відмальовується на льоту з ваших найсвіжіших даних.',
+        badge: 'Бейдж у стилі Shields',
+        donut: 'Кільце мов',
+        status: 'Жива статус-картка',
+        cta: 'Створити віджет',
       },
     },
     pricing: {

@@ -50,7 +50,7 @@ export const de: Partial<Translation> = {
     loginWithGithub: 'Mit GitHub anmelden',
     freeMessage: 'Derzeit völlig kostenlos, keine Kreditkarte erforderlich',
     demo: 'Demo',
-    heroBadge: 'v3 · Analyse',
+    heroBadge: 'Fokus · Privatsphäre · Offen',
     scroll: 'Scrollen',
 
     sections: {
@@ -59,6 +59,7 @@ export const de: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -78,6 +79,14 @@ export const de: Partial<Translation> = {
       editor: {
         title: 'Unterstützung mehrerer Editoren.',
         description: 'Wir sind ein sehr kleines Team. Dies bedeutet, dass wir nicht alle IDEs oder Code-Editoren unterstützen können. Derzeit unterstützen wir jedoch VSCode und JetBrain-Serien-IDEs. Wir glauben, dass sie die meisten Benutzeranforderungen abdecken. Wir werden unser Bestes tun, um mehr Plattformen zu unterstützen und mehr Menschen zu begünstigen.',
+      },
+      widgets: {
+        title: 'Binde deine Coding-Zeit überall ein.',
+        description: 'Platziere Badges, Sprach-Donuts und Live-Status-Karten in jedem README, Blog oder auf deiner persönlichen Seite. Jedes Widget ist ein einzelnes SVG — themenfähig, eigenständig und live aus deinen aktuellen Daten gerendert.',
+        badge: 'Badge im Shields-Stil',
+        donut: 'Sprach-Donut',
+        status: 'Live-Status-Karte',
+        cta: 'Widget erstellen',
       },
     },
     pricing: {

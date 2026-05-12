@@ -50,7 +50,7 @@ export const fr: Partial<Translation> = {
     loginWithGithub: 'Se connecter avec GitHub',
     freeMessage: 'Actuellement complètement gratuit, aucune carte de crédit requise',
     demo: 'Démo',
-    heroBadge: 'v3 · analytique',
+    heroBadge: 'focus · privé · ouvert',
     scroll: 'défiler',
 
     sections: {
@@ -59,6 +59,7 @@ export const fr: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -78,6 +79,14 @@ export const fr: Partial<Translation> = {
       editor: {
         title: 'Prise en charge de plusieurs éditeurs.',
         description: 'Nous sommes une très petite équipe. Cela signifie que nous ne pouvons pas prendre en charge tous les IDE ou éditeurs de code. Cependant, nous prenons actuellement en charge VSCode et JetBrain séries IDE. Nous pensons qu\'ils couvrent la plupart des besoins des utilisateurs. Nous ferons de notre mieux pour prendre en charge plus de plates-formes et profiter à plus de gens.',
+      },
+      widgets: {
+        title: 'Intégrez votre temps de code partout.',
+        description: 'Ajoutez des badges, des anneaux de langages et des cartes de statut en direct à n\'importe quel README, blog ou site personnel. Chaque widget est un SVG unique — thématisable, autonome et généré à la volée à partir de vos données les plus récentes.',
+        badge: 'Badge style Shields',
+        donut: 'Anneau de langages',
+        status: 'Carte de statut en direct',
+        cta: 'Créer un widget',
       },
     },
     pricing: {

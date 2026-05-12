@@ -44,9 +44,15 @@ html.is-theme-switching *::after {
   --ct-space-10: 40px;
   --ct-space-12: 48px;
 
-  /* Typography — sans baseline */
-  --ct-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --ct-font-mono: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Typography — Latin baselines feed both stacks; lang overrides below
+     append CJK-coverage families so a single inherited font-family works
+     for every locale. Berkeley Mono has no CJK glyphs, so CJK ideographs
+     fall through to a UI sans-serif (CJK ideographs are already equal-width
+     by design, so this preserves the monospace rhythm visually). */
+  --ct-font-sans-latin: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --ct-font-mono-latin: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, Consolas;
+  --ct-font-sans: var(--ct-font-sans-latin);
+  --ct-font-mono: var(--ct-font-mono-latin), monospace;
 
   --ct-text-xs:   12px;
   --ct-text-sm:   13px;
@@ -84,6 +90,21 @@ html.is-theme-switching *::after {
   --ct-z-overlay: 40;
   --ct-z-modal: 50;
   --ct-z-toast: 60;
+}
+
+/* Locale font swaps — flip the two font vars per [lang] and the cascade
+   carries the right stack everywhere. Adding a new locale = one block. */
+[lang="zh-CN"] {
+  --ct-font-sans: 'HarmonyOS Sans SC', 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans SC', var(--ct-font-sans-latin);
+  --ct-font-mono: var(--ct-font-mono-latin), 'HarmonyOS Sans SC', 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans SC', monospace;
+}
+[lang="zh-TW"] {
+  --ct-font-sans: 'PingFang TC', 'Microsoft JhengHei UI', 'Noto Sans TC', var(--ct-font-sans-latin);
+  --ct-font-mono: var(--ct-font-mono-latin), 'PingFang TC', 'Microsoft JhengHei UI', 'Noto Sans TC', monospace;
+}
+[lang="ja"] {
+  --ct-font-sans: 'HarmonyOS Sans JP', 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', var(--ct-font-sans-latin);
+  --ct-font-mono: var(--ct-font-mono-latin), 'HarmonyOS Sans JP', 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', monospace;
 }
 
 /* Light scheme (default — also covers prefers-color-scheme: light)
@@ -300,6 +321,30 @@ html, body {
 }
 .ct-stripes-band::before { top: 0; }
 .ct-stripes-band::after { bottom: 0; }
+
+/* Landing-shared typography — used by index.vue and each section component
+   under app/components/Landing/*. Hoisted here so sections don't redefine. */
+.section-heading {
+  font-family: var(--ct-font-sans);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: var(--ct-weight-semibold);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  letter-spacing: 0.08em;
+  color: var(--ct-primary);
+  text-transform: uppercase;
+}
+.eyebrow-bracket { color: color-mix(in srgb, var(--ct-primary) 50%, transparent); }
+.eyebrow-num { color: var(--ct-fg-muted); font-weight: var(--ct-weight-medium); }
+.eyebrow-sep { color: color-mix(in srgb, var(--ct-primary) 40%, transparent); }
 
 /* Utility classes — used outside Vue components and by Plot. */
 .ct-surface       { background-color: var(--ct-surface); color: var(--ct-fg); }

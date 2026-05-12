@@ -50,7 +50,7 @@ export const ptBR: Partial<Translation> = {
     loginWithGithub: 'Entrar com o GitHub',
     freeMessage: 'Atualmente completamente gratuito, não é necessário cartão de crédito',
     demo: 'Demo',
-    heroBadge: 'v3 · análise',
+    heroBadge: 'foco · privado · aberto',
     scroll: 'rolar',
 
     sections: {
@@ -59,6 +59,7 @@ export const ptBR: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -78,6 +79,14 @@ export const ptBR: Partial<Translation> = {
       editor: {
         title: 'Suporte a vários editores.',
         description: 'Somos uma equipe muito pequena. Isso significa que não podemos suportar todos os IDEs ou editores de código. No entanto, atualmente suportamos IDEs da série VSCode e JetBrain. Acreditamos que eles cobrem a maioria das necessidades dos usuários. Faremos o nosso melhor para suportar mais plataformas e beneficiar mais pessoas.',
+      },
+      widgets: {
+        title: 'Incorpore seu tempo de programação em qualquer lugar.',
+        description: 'Coloque selos, donuts de linguagens e cartões de status ao vivo em qualquer README, blog ou site pessoal. Cada widget é um único SVG — personalizável, autônomo e renderizado na hora a partir dos seus dados mais recentes.',
+        badge: 'Selo estilo Shields',
+        donut: 'Donut de linguagens',
+        status: 'Cartão de status ao vivo',
+        cta: 'Criar um widget',
       },
     },
     pricing: {

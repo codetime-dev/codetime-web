@@ -131,7 +131,7 @@ function widthPct(minutes: number): number {
 }
 
 .hcell {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--ct-font-mono);
   font-size: 12px;
       color: var(--r-surface-text-dimmed-color);
 }

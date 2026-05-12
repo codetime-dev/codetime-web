@@ -261,7 +261,7 @@ useHead({
         <h2 class="section-heading text-ct-fg leading-[1.05] font-mono font-semibold max-w-3xl">
           {{ t.landing.features.visualization.title }}
         </h2>
-        <p class="text-[14px] text-ct-fg-muted leading-[1.7] font-mono mt-2 max-w-2xl">
+        <p class="text-[14px] text-ct-fg-muted leading-[1.7] mt-2 max-w-2xl">
           {{ t.landing.features.visualization.description }}
         </p>
       </div>
@@ -289,6 +289,23 @@ useHead({
           </div>
         </div>
       </OnVisible>
+
+      <!--
+        Static previews above only hint at the real dashboard. The /demo
+        route renders the full UnifiedUserDashboard against synthetic data
+        so visitors can poke around the live UI before signing in.
+      -->
+      <div class="mt-10 flex justify-center sm:mt-12">
+        <NuxtLink
+          aria-label="demo"
+          :to="`/${($route.params.locale || 'en')}/demo`"
+          class="demo-cta"
+        >
+          <i class="demo-cta-icon i-eva-bar-chart-outline" />
+          <span>{{ t.landing.demo }}</span>
+          <i class="demo-cta-arrow i-tabler-arrow-right" />
+        </NuxtLink>
+      </div>
     </div>
   </section>
 
@@ -308,7 +325,7 @@ useHead({
           <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.save.title }}
           </h2>
-          <p class="feature-desc text-ct-fg-muted leading-[1.7] font-mono max-w-2xl">
+          <p class="feature-desc text-ct-fg-muted leading-[1.7] max-w-2xl">
             {{ t.landing.features.save.description }}
           </p>
           <div class="feature-stat-row">
@@ -345,7 +362,7 @@ useHead({
           <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.export.title }}
           </h2>
-          <p class="feature-desc text-ct-fg-muted leading-[1.7] font-mono max-w-xl">
+          <p class="feature-desc text-ct-fg-muted leading-[1.7] max-w-xl">
             {{ t.landing.features.export.description }}
           </p>
           <div class="feature-chip-row">
@@ -377,7 +394,7 @@ useHead({
           <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
             {{ t.landing.features.editor.title }}
           </h2>
-          <p class="feature-desc text-ct-fg-muted leading-[1.7] font-mono max-w-2xl">
+          <p class="feature-desc text-ct-fg-muted leading-[1.7] max-w-2xl">
             {{ t.landing.features.editor.description }}
           </p>
         </div>
@@ -411,13 +428,16 @@ useHead({
     </div>
   </section>
 
+  <!-- WIDGETS -->
+  <LandingWidgetShowcase />
+
   <!-- PRICING -->
   <section>
     <div class="mx-auto px-6 py-24 max-w-6xl sm:py-32">
       <div class="mb-12 text-center flex flex-col gap-3 items-center">
         <div class="eyebrow">
           <span class="eyebrow-bracket">[</span>
-          <span class="eyebrow-num">05</span>
+          <span class="eyebrow-num">06</span>
           <span class="eyebrow-sep">/</span>
           <span>{{ t.landing.sections.pricing }}</span>
           <span class="eyebrow-bracket">]</span>
@@ -425,7 +445,7 @@ useHead({
         <h2 class="section-heading text-ct-fg leading-[1.05] font-mono font-semibold max-w-3xl">
           {{ t.landing.pricing.heading }}
         </h2>
-        <p class="text-[14px] text-ct-fg-muted leading-[1.7] font-mono mt-2 max-w-xl">
+        <p class="text-[14px] text-ct-fg-muted leading-[1.7] mt-2 max-w-xl">
           {{ t.landing.pricing.description }}
         </p>
       </div>
@@ -467,14 +487,6 @@ useHead({
   border: 0;
 }
 
-.section-heading {
-  font-family: var(--ct-font-sans);
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: var(--ct-weight-semibold);
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
 .closing-heading {
   position: relative;
   font-family: var(--ct-font-sans);
@@ -491,28 +503,6 @@ useHead({
   font-size: clamp(1.5rem, 4vw, 2.5rem);
   color: var(--ct-primary);
   font-weight: var(--ct-weight-semibold);
-}
-
-/* Eyebrow — softened: shorter tracking, lighter accents */
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--ct-font-mono);
-  font-size: var(--ct-text-xs);
-  letter-spacing: 0.08em;
-  color: var(--ct-primary);
-  text-transform: uppercase;
-}
-.eyebrow-bracket {
-  color: color-mix(in srgb, var(--ct-primary) 50%, transparent);
-}
-.eyebrow-num {
-  color: var(--ct-fg-muted);
-  font-weight: var(--ct-weight-medium);
-}
-.eyebrow-sep {
-  color: color-mix(in srgb, var(--ct-primary) 40%, transparent);
 }
 
 .hero-desc {
@@ -1000,6 +990,41 @@ html[data-scheme="light"] .hero-glow {
   font-size: clamp(3rem, 7vw, 4.5rem);
   color: var(--color-primary-1);
   opacity: 0.85;
+}
+
+/* Demo CTA (under visualization showcase) */
+.demo-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  font-family: var(--ct-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--ct-fg);
+  text-decoration: none;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.demo-cta:hover {
+  background: var(--ct-surface-2);
+  border-color: color-mix(in srgb, var(--ct-primary) 45%, transparent);
+  transform: translateY(-1px);
+}
+.demo-cta-icon {
+  font-size: 16px;
+  color: var(--ct-primary);
+}
+.demo-cta-arrow {
+  font-size: 15px;
+  color: var(--ct-fg-muted);
+  transition: transform 200ms ease;
+}
+.demo-cta:hover .demo-cta-arrow {
+  color: var(--ct-primary);
+  transform: translateX(3px);
 }
 
 /* Editor tile */

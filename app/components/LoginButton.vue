@@ -65,21 +65,6 @@ async function handleGitHubLogin() {
           class="flex flex-col gap-8"
           style="color-scheme: light;"
         >
-          <div class="flex">
-            <NuxtLink
-              key="demo"
-              aria-label="demo"
-              :to="`/${locale}/dashboard`"
-              class="border-surface-border-low hover:bg-surface-low bg-surface-base px-4 py-3 border rounded-xl bg-transparent hidden transition-all"
-            >
-              <div class="text-sm flex gap-2 items-center">
-                <i class="i-eva-bar-chart-outline h-4 w-4" />
-                <span>
-                  {{ t.landing.demo }}
-                </span>
-              </div>
-            </NuxtLink>
-          </div>
           <div class="flex flex-col gap-3 items-center">
             <div class="text-sm text-ct-fg-muted">
               {{ t.landing.login }}

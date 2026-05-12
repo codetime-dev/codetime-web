@@ -54,6 +54,7 @@ export type Translation = {
       alwaysSynced: string
       openData: string
       editors: string
+      widgets: string
       pricing: string
       startTracking: string
     }
@@ -77,6 +78,14 @@ export type Translation = {
         title: string
         description: string
         more?: string
+      }
+      widgets: {
+        title: string
+        description: string
+        badge: string
+        donut: string
+        status: string
+        cta: string
       }
     }
     pricing: {

@@ -185,11 +185,16 @@ const height = 26
 .ws-flame-skel { position: absolute; inset: 0; background: var(--ct-surface-1); animation: ws-pulse 1.4s ease-in-out infinite; }
 .ws-flame-empty { padding: 48px 16px; text-align: center; font-size: var(--ct-text-sm); color: var(--ct-fg-subtle); }
 
-.ws-branch-list { display: flex; flex-direction: column; gap: 10px; }
-.ws-branch { padding: 10px 12px; background: var(--ct-surface-1); border: 1px solid var(--ct-border-subtle); }
+.ws-branch-list {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--ct-border-subtle);
+}
+.ws-branch { padding: 12px 0; }
+.ws-branch + .ws-branch { border-top: 1px solid var(--ct-border-subtle); }
 .ws-branch-head {
   display: flex; gap: 12px; align-items: center; justify-content: space-between;
-  margin-bottom: 6px; font-size: var(--ct-text-sm);
+  margin-bottom: 8px; font-size: var(--ct-text-sm);
 }
 .ws-branch-name {
   color: var(--ct-fg);

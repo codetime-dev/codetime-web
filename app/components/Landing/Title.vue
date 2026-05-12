@@ -8,7 +8,7 @@ const t = useI18N()
       <span class="title-code font-mono">CODE</span>
       <span class="title-time font-mono">TIME</span>
     </span>
-    <span class="title-tagline font-mono">
+    <span class="title-tagline">
       {{ t.landing.description }}
     </span>
   </h1>
@@ -39,11 +39,11 @@ const t = useI18N()
   line-height: 0.95;
 }
 .title-tagline {
-  font-family: var(--ct-font-mono);
+  font-family: var(--ct-font-sans);
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 500;
   letter-spacing: 0;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--ct-fg-muted);
   text-transform: none;
   max-width: 38rem;

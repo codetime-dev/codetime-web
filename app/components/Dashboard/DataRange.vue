@@ -41,17 +41,7 @@ function onNext() {
 </script>
 
 <template>
-  <UModal v-model="priceModal" :title="t.plan.modal.title" width="640px">
-    <div class="dr-modal">
-      <div class="dr-modal-text">
-        <p>{{ t.plan.modal.p1 }}</p>
-        <p>{{ t.plan.modal.p2 }}</p>
-        <p>{{ t.plan.modal.p3 }}</p>
-        <a href="mailto:admin@codetime.dev">admin@codetime.dev</a>
-      </div>
-      <ProPricePaper variant="monthly" class="dr-modal-price" />
-    </div>
-  </UModal>
+  <ProUpgradeModal v-model:open="priceModal" />
 
   <div class="dr-bar">
     <div class="dr-controls">
@@ -117,12 +107,4 @@ function onNext() {
 }
 .dr-meta-sep { margin: 0 6px; opacity: 0.5; }
 
-.dr-modal {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.dr-modal-text { display: flex; flex-direction: column; gap: 6px; font-size: var(--ct-text-sm); color: var(--ct-fg-muted); }
-.dr-modal-text a { color: var(--ct-primary); }
-.dr-modal-price { min-height: 480px; }
 </style>

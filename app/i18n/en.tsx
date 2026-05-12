@@ -58,6 +58,7 @@ export const en: Translation = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -81,6 +82,14 @@ export const en: Translation = {
         title: 'Built for the editors you already use.',
         description: 'First-class plugins for VS Code and the full JetBrains family (IntelliJ IDEA, PyCharm, WebStorm, GoLand, CLion and more). VS Code-derived editors work out of the box too — including Cursor, Windsurf and Google Antigravity. More platforms on the way.',
         more: 'more',
+      },
+      widgets: {
+        title: 'Embed your coding time anywhere.',
+        description: 'Drop badges, language donuts, and live status cards into any README, blog, or personal site. Every widget is a single SVG — themeable, self-contained, and rendered on the fly from your latest data.',
+        badge: 'Shields-style badge',
+        donut: 'Language donut',
+        status: 'Live status card',
+        cta: 'Build a widget',
       },
     },
     pricing: {

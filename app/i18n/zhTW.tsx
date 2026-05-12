@@ -50,7 +50,7 @@ export const zhTW: Partial<Translation> = {
     loginWithGithub: '使用 GitHub 登入',
     freeMessage: '目前完全免費，無需信用卡',
     demo: '演示',
-    heroBadge: 'v3 · 分析',
+    heroBadge: '專注 · 隱私 · 開放',
     scroll: '捲動',
 
     sections: {
@@ -59,6 +59,7 @@ export const zhTW: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -78,6 +79,14 @@ export const zhTW: Partial<Translation> = {
       editor: {
         title: '支援多種編輯器。',
         description: '我們是一個非常小的團隊。這意味著我們無法支援所有 IDE 或程式碼編輯器。但是，我們目前支援 VSCode 和 JetBrains 系列 IDE。我們相信它們涵蓋了大多數用戶的需求。我們將盡最大努力支援更多平台，造福更多人。',
+      },
+      widgets: {
+        title: '把編程時間嵌入任意角落。',
+        description: '將徽章、語言環圖與即時狀態卡片放進 README、部落格或個人主頁。每個元件都是一張獨立 SVG，主題可自訂，根據最新資料動態渲染。',
+        badge: 'Shields 風格徽章',
+        donut: '語言佔比環圖',
+        status: '即時狀態卡',
+        cta: '生成元件',
       },
     },
     pricing: {

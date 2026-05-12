@@ -73,41 +73,6 @@ useHead({
   size-adjust: 96%;
 }
 
-:root {
-  /* CJK glyphs fall through Berkeley Mono (no CJK coverage) and land on
-     a UI-friendly sans-serif display font — CJK ideographs are naturally
-     equal-width so we don't need a monospace font for them. */
-  --font-mono: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', monospace;
-  --font-mono-cjk-sc: 'HarmonyOS Sans SC', 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans SC', sans-serif;
-  --font-mono-cjk-tc: 'PingFang TC', 'Microsoft JhengHei UI', 'Noto Sans TC', sans-serif;
-  --font-mono-cjk-ja: 'HarmonyOS Sans JP', 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-[lang="ja"] .font-mono {
-  font-family: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', var(--font-mono-cjk-ja), monospace;
-}
-[lang="zh-CN"] .font-mono {
-  font-family: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', var(--font-mono-cjk-sc), monospace;
-}
-[lang="zh-TW"] .font-mono {
-  font-family: 'Berkeley Mono', 'Berkeley Mono Fallback', 'Share Tech Mono', var(--font-mono-cjk-tc), monospace;
-}
-
-[lang="ja"] *:not(.font-mono) {
-  font-family: 'HarmonyOS Sans JP', 'Yu Gothic UI', 'Segoe UI', 'Inter', system-ui, sans-serif;
-}
-[lang="zh-CN"] *:not(.font-mono) {
-  font-family: 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Segoe UI', 'Inter', system-ui, sans-serif;
-}
-
-*:not(.font-mono) {
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-}
-
 /* Token-driven surface tints. Reading from --ct-* keeps these classes
    cohesive across light/dark without duplicating overrides per scheme. */
 .line-btn,

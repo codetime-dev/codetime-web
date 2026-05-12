@@ -50,7 +50,7 @@ export const ja: Partial<Translation> = {
     loginWithGithub: 'GitHub でログイン',
     freeMessage: '現在完全無料、クレジットカード不要',
     demo: 'デモ',
-    heroBadge: 'v3 · 分析',
+    heroBadge: '集中 · プライバシー · オープン',
     scroll: 'スクロール',
 
     sections: {
@@ -59,6 +59,7 @@ export const ja: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -78,6 +79,14 @@ export const ja: Partial<Translation> = {
       editor: {
         title: '複数のエディタをサポート。',
         description: '小規模なチームであり、すべてのIDEやコードエディタのサポートは不可能です。しかし、現在はVSCodeとJetBrainsシリーズのIDEに対応しており、これにより多くのユーザーの要望に応えていると考えています。さらに多くのプラットフォームへの対応を目指し、より広範な利用者に利益を提供するために努力しています。',
+      },
+      widgets: {
+        title: 'コーディング時間をどこにでも埋め込み。',
+        description: 'バッジ、言語ドーナツ、ライブステータスカードを README、ブログ、個人サイトに配置できます。すべてのウィジェットは単一の SVG — テーマ変更可能で、独立しており、最新データから即座に描画されます。',
+        badge: 'Shields スタイルのバッジ',
+        donut: '言語ドーナツ',
+        status: 'ライブステータスカード',
+        cta: 'ウィジェットを作成',
       },
     },
     pricing: {

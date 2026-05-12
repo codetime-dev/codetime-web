@@ -457,9 +457,10 @@ const dailyAvgMs = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: var(--ct-font-mono);
   font-size: var(--ct-text-xs);
   letter-spacing: 0.32em;
-    color: var(--color-primary-1);
+  color: var(--color-primary-1);
   margin-bottom: 0.85rem;
 }
 

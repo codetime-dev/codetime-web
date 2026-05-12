@@ -118,14 +118,12 @@ const t = useI18N()
         <i class="i-tabler-palette text-[15px] text-ct-fg-muted" />
       </template>
 
-      <div class="theme-grid">
+      <div class="theme-wrap">
         <ClientOnly>
           <template #placeholder>
-            <div class="bg-ct-surface-2 h-9 animate-pulse" />
-            <div class="bg-ct-surface-2 h-9 animate-pulse" />
+            <div class="theme-skeleton" />
           </template>
-          <ThemeItem theme="dark" />
-          <ThemeItem theme="light" />
+          <ThemeItem />
         </ClientOnly>
       </div>
 
@@ -262,40 +260,52 @@ const t = useI18N()
 /* TOKEN */
 .token-bar {
   display: grid;
-  grid-template-columns: 5rem 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: stretch;
-  height: 2.5rem;
+  height: 2.75rem;
+  padding: 4px;
+  gap: 2px;
   background-color: var(--ct-surface-1);
-  transition: background-color 180ms ease;
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: 10px;
+  transition: background-color 180ms ease, border-color 180ms ease;
 }
 
 .token-bar:hover {
   background-color: var(--ct-surface-2);
+  border-color: var(--ct-border);
+}
+
+.token-bar:focus-within {
+  border-color: var(--ct-primary);
 }
 
 [data-scheme="light"] .token-bar {
-  background-color: color-mix(in srgb, var(--ct-fg) 5%, transparent);
+  background-color: color-mix(in srgb, var(--ct-fg) 4%, transparent);
 }
 
 [data-scheme="light"] .token-bar:hover {
-  background-color: color-mix(in srgb, var(--ct-fg) 8%, transparent);
+  background-color: color-mix(in srgb, var(--ct-fg) 7%, transparent);
 }
 
 .token-tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0 0.95rem;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
   font-size: var(--ct-text-xs);
-      color: var(--color-primary-1);
-  border-right: 1px solid var(--ct-border-subtle);
+  font-weight: var(--ct-weight-medium);
+  letter-spacing: 0.05em;
+  color: var(--ct-primary);
+  background: var(--ct-primary-soft);
+  border-radius: 7px;
 }
 
 .token-field {
   width: 100%;
   min-width: 0;
   height: 100%;
-  padding: 0 1rem;
+  padding: 0 0.85rem;
   font-family: var(--ct-font-mono);
   font-size: 12.5px;
   letter-spacing: 0.05em;
@@ -309,11 +319,11 @@ const t = useI18N()
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
+  width: 2.25rem;
   height: 100%;
   background: transparent;
   border: 0;
-  border-left: 1px solid var(--ct-border-subtle);
+  border-radius: 7px;
   cursor: pointer;
   color: var(--ct-fg-subtle);
   transition: color 180ms ease, background-color 180ms ease;
@@ -321,32 +331,30 @@ const t = useI18N()
 
 .token-eye:hover {
   color: var(--ct-fg);
-  background-color: var(--ct-surface-2);
+  background-color: var(--ct-surface);
 }
 
 .token-copy {
   height: 100% !important;
+  border-radius: 7px !important;
 }
 
-/* THEME grid */
-.theme-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+/* THEME */
+.theme-wrap {
+  padding: 1rem 1.25rem 1.1rem;
 }
 
-@media (min-width: 768px) {
-  .theme-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .theme-grid > :nth-child(2) {
-    border-left: 1px solid var(--ct-border-subtle);
-  }
+.theme-skeleton {
+  height: 44px;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: 10px;
+  animation: pulse 1.4s ease-in-out infinite;
 }
 
-@media (max-width: 767px) {
-  .theme-grid > :nth-child(2) {
-    border-top: 1px solid var(--ct-border-subtle);
-  }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 
 /* EXPORT */

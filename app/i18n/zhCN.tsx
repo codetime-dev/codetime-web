@@ -59,6 +59,7 @@ export const zhCN: Partial<Translation> = {
       alwaysSynced: 'always synced',
       openData: 'open data',
       editors: 'editors',
+      widgets: 'widgets',
       pricing: 'pricing',
       startTracking: 'start tracking',
     },
@@ -82,6 +83,14 @@ export const zhCN: Partial<Translation> = {
         title: '支持多种编辑器。',
         description: '官方支持 VS Code 与 JetBrains 全家桶（IntelliJ IDEA、PyCharm、WebStorm、GoLand、CLion 等）。基于 VS Code 的衍生编辑器也开箱即用，包括 Cursor、Windsurf、Google Antigravity 等。我们将持续扩展更多平台。',
         more: '更多',
+      },
+      widgets: {
+        title: '把编程时间嵌入任意角落。',
+        description: '将徽章、语言环图与实时状态卡片放进 README、博客或个人主页。每个组件都是一张独立 SVG，主题可定制，根据最新数据动态渲染。',
+        badge: 'Shields 风格徽章',
+        donut: '语言占比环图',
+        status: '实时状态卡',
+        cta: '生成组件',
       },
     },
     pricing: {
