@@ -4,6 +4,7 @@ import { users } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { sendPyError } from '../../../utils/py-error'
+import { toUserSelfPublic } from '../../../utils/user-dto'
 
 // Nitro parses defineRouteMeta() statically (via oxc-parser), so the
 // argument must be a literal object — imported spreads are ignored. The
@@ -26,7 +27,7 @@ defineRouteMeta({
     $global: {
       components: {
         securitySchemes: {
-          bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'upload_token' },
+          bearerAuth: { type: 'http', scheme: 'bearer', description: 'upload_token' },
           cookieAuth: { type: 'apiKey', in: 'cookie', name: 'auth_token' },
         },
         schemas: {
@@ -79,28 +80,8 @@ defineRouteMeta({
 })
 
 // Mirrors codetime-server-v3 GET /v3/users/self -> UserSelfPublic.
-// Response shape must stay byte-equivalent to dto.py::UserSelfPublic.
-
-type UserSelfPublic = {
-  id: number
-  email: string | null
-  username: string
-  avatar: string | null
-  github_id: number | null
-  bio: string | null
-  google_id: string | null
-  plan: string
-  timezone: string | null
-  upload_token: string
-  plan_expires_at: string | null
-  plan_status: string | null
-  created_at: string
-  updated_at: string
-}
-
-function toIso(d: Date | null | undefined) {
-  return d ? d.toISOString() : null
-}
+// Wire format is owned by toUserSelfPublic() in utils/user-dto.ts so every
+// /users endpoint that returns the same DTO produces identical bytes.
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
@@ -109,22 +90,5 @@ export default defineEventHandler(async (event) => {
   const db = useDb()
   const [row] = await db.select().from(users).where(eq(users.id, session.id)).limit(1)
   if (!row) return sendPyError(event, 404, 'User not found')
-
-  const body: UserSelfPublic = {
-    id: row.id,
-    email: row.email,
-    username: row.username,
-    avatar: row.avatar,
-    github_id: row.githubId,
-    bio: row.bio,
-    google_id: row.googleId,
-    plan: row.plan,
-    timezone: row.timezone,
-    upload_token: row.uploadToken,
-    plan_expires_at: toIso(row.planExpiresAt),
-    plan_status: row.planStatus,
-    created_at: row.createdAt.toISOString(),
-    updated_at: row.updatedAt.toISOString(),
-  }
-  return body
+  return toUserSelfPublic(row)
 })

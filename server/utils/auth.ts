@@ -25,14 +25,18 @@ export async function tryUser(event: H3Event): Promise<AuthUser | null> {
     const token = authHeader.slice(7).trim()
     if (token) {
       const rows = await db.select().from(users).where(eq(users.uploadToken, token)).limit(1)
-      if (rows[0]) return rows[0]
+      if (rows[0]) {
+ return rows[0]
+}
     }
   }
 
   const tokenHeader = getHeader(event, 'token')
   if (tokenHeader) {
     const rows = await db.select().from(users).where(eq(users.uploadToken, tokenHeader)).limit(1)
-    if (rows[0]) return rows[0]
+    if (rows[0]) {
+ return rows[0]
+}
   }
 
   const userIdCookie = getCookie(event, 'user_id')
@@ -40,10 +44,10 @@ export async function tryUser(event: H3Event): Promise<AuthUser | null> {
   if (userIdCookie && authTokenCookie) {
     const uid = Number(userIdCookie)
     if (Number.isFinite(uid)) {
-      const rows = await db.select().from(users)
-        .where(and(eq(users.id, uid), eq(users.tokenV1, authTokenCookie)))
-        .limit(1)
-      if (rows[0]) return rows[0]
+      const rows = await db.select().from(users).where(and(eq(users.id, uid), eq(users.tokenV1, authTokenCookie))).limit(1)
+      if (rows[0]) {
+ return rows[0]
+}
     }
   }
 

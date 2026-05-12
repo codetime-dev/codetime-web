@@ -7,10 +7,12 @@
 // response-compatible with the Python endpoint (same status, body shape,
 // error format). Removing or shadowing a route here flips traffic back.
 
-export const MIGRATED_ROUTES: readonly RegExp[] = [
-  /^\/v3\/users\/self$/,
-  /^\/v3\/dev\/be$/,
-]
+// Build-out phase: the Nuxt backend hosts implementations but the
+// frontend still talks to the Python service for ALL routes. The cutover
+// will happen in one switch once every needed endpoint is on Nuxt and
+// has been verified. Until then this list stays empty so the SDK keeps
+// dispatching everything to apiHost.
+export const MIGRATED_ROUTES: readonly RegExp[] = []
 
 export function isMigratedRoute(pathname: string): boolean {
   return MIGRATED_ROUTES.some(re => re.test(pathname))

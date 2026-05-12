@@ -36,7 +36,8 @@ const isOwnProfile = computed(() => {
 })
 
 // 日期范围控制
-const days = useLocalStorage('days', ref(currentUser.value?.plan === 'pro' ? 365 : 28))
+// initOnMounted: avoid SSR/hydration mismatch by reading localStorage after mount only
+const days = useLocalStorage('days', ref(currentUser.value?.plan === 'pro' ? 365 : 28), { initOnMounted: true })
 const segments = ref(5)
 
 const endTime = computed(() => new Date())

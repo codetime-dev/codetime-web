@@ -1,4 +1,4 @@
-import { bigint, boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { bigint, boolean, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 // Drizzle schema — must match codetime-server-v3/src/db.py exactly.
 // Alembic owns migrations; this file is read-only against the live schema.
@@ -31,3 +31,18 @@ export const users = pgTable('users', {
 })
 
 export type UserRow = typeof users.$inferSelect
+
+export const tags = pgTable('tags', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  uid: bigint('uid', { mode: 'number' }).notNull(),
+  name: text('name').notNull(),
+  color: text('color').notNull(),
+  emoji: text('emoji'),
+  // Tree-shaped condition object — see codetime-server-v3
+  // src/services/tags.py for the schema. Stored as JSONB.
+  rulesJson: jsonb('rules_json'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+})
+
+export type TagRow = typeof tags.$inferSelect
