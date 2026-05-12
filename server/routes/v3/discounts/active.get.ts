@@ -71,15 +71,23 @@ export default defineEventHandler(async () => {
       filter: { storeId },
       page: { number: page, size: PAGE_SIZE },
     })
-    if (error || !data) break
+    if (error || !data) {
+ break
+}
 
     const rows = (data.data ?? []) as DiscountRow[]
     for (const row of rows) {
       const a = row.attributes
-      if (!a) continue
-      if (a.status !== 'published') continue
+      if (!a) {
+ continue
+}
+      if (a.status !== 'published') {
+ continue
+}
       // Drop 100% percentage discounts — same gate Python applies.
-      if (a.amount_type === 'percent' && (a.amount ?? 0) >= 100) continue
+      if (a.amount_type === 'percent' && (a.amount ?? 0) >= 100) {
+ continue
+}
 
       out.push({
         id: String(row.id ?? ''),
@@ -95,7 +103,9 @@ export default defineEventHandler(async () => {
     }
 
     const hasNext = Boolean((data.links as Record<string, unknown> | undefined)?.next)
-    if (!hasNext || rows.length < PAGE_SIZE) break
+    if (!hasNext || rows.length < PAGE_SIZE) {
+ break
+}
   }
 
   return out

@@ -1,9 +1,9 @@
 import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
 import { defineEventHandler, getQuery } from 'h3'
-import { users, workspaceMetaV2, workspaceMinutesV2 } from '../../../db/schema'
-import { useDb } from '../../../utils/db'
 import languageColors from '../../../assets/LanguageColor.json'
 import languageIdentifiers from '../../../assets/LanguageIdentifiers.json'
+import { users, workspaceMetaV2, workspaceMinutesV2 } from '../../../db/schema'
+import { useDb } from '../../../utils/db'
 import { getShieldMessage } from '../../../utils/duration'
 import { sendPyError } from '../../../utils/py-error'
 
@@ -56,7 +56,9 @@ const LANGUAGE_COLORS = languageColors as Record<string, string>
 const LANGUAGE_IDENTIFIERS = languageIdentifiers as Record<string, string>
 
 function intOr(v: unknown, fallback: number): number {
-  if (v === '' || v === undefined || v === null) return fallback
+  if (v === '' || v === undefined || v === null) {
+ return fallback
+}
   const n = Number(v)
   return Number.isFinite(n) ? Math.trunc(n) : fallback
 }
@@ -66,19 +68,25 @@ function strOr(v: unknown): string | null {
 }
 
 function asBool(v: unknown): boolean {
-  if (typeof v === 'boolean') return v
-  if (typeof v === 'string') return /^(1|true|yes)$/i.test(v)
+  if (typeof v === 'boolean') {
+ return v
+}
+  if (typeof v === 'string') {
+ return /^(?:1|true|yes)$/i.test(v)
+}
   return false
 }
 
 function titleCase(s: string): string {
-  return s.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase())
+  return s.replaceAll(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase())
 }
 
 export default defineEventHandler(async (event) => {
   const q = getQuery(event)
   const uid = Number(q.uid)
-  if (!Number.isFinite(uid) || uid <= 0) return sendPyError(event, 404, 'User not found')
+  if (!Number.isFinite(uid) || uid <= 0) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   const db = useDb()
   const [user] = await db
@@ -86,7 +94,9 @@ export default defineEventHandler(async (event) => {
     .from(users)
     .where(eq(users.id, uid))
     .limit(1)
-  if (!user) return sendPyError(event, 404, 'User not found')
+  if (!user) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   const minutes = Math.max(0, intOr(q.minutes, 0))
   const project = strOr(q.project)
@@ -106,7 +116,9 @@ export default defineEventHandler(async (event) => {
       eq(workspaceMinutesV2.uid, uid),
       lte(workspaceMinutesV2.recordedAt, sql`now()`),
     ]
-    if (cutoff) where.push(gte(workspaceMinutesV2.recordedAt, cutoff))
+    if (cutoff) {
+ where.push(gte(workspaceMinutesV2.recordedAt, cutoff))
+}
     const rows = await db
       .select({ value: count() })
       .from(workspaceMinutesV2)
@@ -118,9 +130,15 @@ export default defineEventHandler(async (event) => {
       eq(workspaceMinutesV2.uid, uid),
       lte(workspaceMinutesV2.recordedAt, sql`now()`),
     ]
-    if (cutoff) where.push(gte(workspaceMinutesV2.recordedAt, cutoff))
-    if (project) where.push(eq(workspaceMetaV2.workspaceName, project))
-    if (language) where.push(eq(workspaceMetaV2.language, language))
+    if (cutoff) {
+ where.push(gte(workspaceMinutesV2.recordedAt, cutoff))
+}
+    if (project) {
+ where.push(eq(workspaceMetaV2.workspaceName, project))
+}
+    if (language) {
+ where.push(eq(workspaceMetaV2.language, language))
+}
     const rows = await db
       .select({ value: count() })
       .from(workspaceMetaV2)
@@ -133,13 +151,19 @@ export default defineEventHandler(async (event) => {
   }
 
   let label = 'CodeTime'
-  if (language) label = LANGUAGE_IDENTIFIERS[language] ?? titleCase(language)
-  if (project) label += `@${project}`
+  if (language) {
+ label = LANGUAGE_IDENTIFIERS[language] ?? titleCase(language)
+}
+  if (project) {
+ label += `@${project}`
+}
 
   const message = onlyHours ? `${Math.floor(resultMinutes / 60)}h` : getShieldMessage(resultMinutes, minutes)
 
   let color = resultMinutes > 0 ? 'blue' : 'lightgrey'
-  if (language && LANGUAGE_COLORS[language]) color = LANGUAGE_COLORS[language]
+  if (language && LANGUAGE_COLORS[language]) {
+ color = LANGUAGE_COLORS[language]
+}
 
   return {
     schema_version: 1,

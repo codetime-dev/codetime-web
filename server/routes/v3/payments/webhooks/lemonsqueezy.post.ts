@@ -52,11 +52,17 @@ defineRouteMeta({
 function verifySignature(raw: string | Buffer, signature: string | undefined): boolean {
   const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET
   // Matches Python: when no secret is configured, skip verification.
-  if (!secret) return true
-  if (!signature) return false
+  if (!secret) {
+ return true
+}
+  if (!signature) {
+ return false
+}
   const provided = signature.replace(/^sha256=/, '')
   const expected = createHmac('sha256', secret).update(raw).digest('hex')
-  if (expected.length !== provided.length) return false
+  if (expected.length !== provided.length) {
+ return false
+}
   try {
     return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(provided, 'hex'))
   }
@@ -69,7 +75,9 @@ type Webhook = Record<string, any>
 
 function uidOf(webhook: Webhook): number | null {
   const raw = webhook.meta?.custom_data?.uid
-  if (raw === undefined || raw === null) return null
+  if (raw === undefined || raw === null) {
+ return null
+}
   const n = Number(raw)
   return Number.isFinite(n) ? n : null
 }
@@ -81,9 +89,13 @@ async function loadUser(db: ReturnType<typeof useDb>, uid: number) {
 
 async function handleSubscriptionCreated(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   const user = await loadUser(db, uid)
-  if (!user) return
+  if (!user) {
+ return
+}
 
   const renewsAt = w.data?.attributes?.renews_at
   let expires = user.planExpiresAt
@@ -107,15 +119,23 @@ async function handleSubscriptionCreated(db: ReturnType<typeof useDb>, w: Webhoo
 
 async function handleSubscriptionUpdated(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   const user = await loadUser(db, uid)
-  if (!user) return
+  if (!user) {
+ return
+}
 
   const status = String(w.data?.attributes?.status || '')
   const mapped = SUBSCRIPTION_STATUS_MAP[status] ?? user.planStatus
   let plan = user.plan
-  if (status === 'expired') plan = 'free'
-  else if (status === 'active') plan = 'pro'
+  if (status === 'expired') {
+ plan = 'free'
+}
+  else if (status === 'active') {
+ plan = 'pro'
+}
 
   const renewsAt = w.data?.attributes?.renews_at
   const renewExp = renewExpiry(renewsAt) ?? user.planExpiresAt
@@ -126,7 +146,9 @@ async function handleSubscriptionUpdated(db: ReturnType<typeof useDb>, w: Webhoo
 
 async function handleSubscriptionCancelled(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   const endsAt = w.data?.attributes?.ends_at
   const endsExp = endsExpiry(endsAt)
   await db.update(users)
@@ -139,7 +161,9 @@ async function handleSubscriptionCancelled(db: ReturnType<typeof useDb>, w: Webh
 
 async function handleSubscriptionExpired(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   await db.update(users)
     .set({ plan: 'free', planStatus: PlanStatus.EXPIRED, planExpiresAt: null })
     .where(eq(users.id, uid))
@@ -147,7 +171,9 @@ async function handleSubscriptionExpired(db: ReturnType<typeof useDb>, w: Webhoo
 
 async function handleSubscriptionResumed(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   const renewExp = renewExpiry(w.data?.attributes?.renews_at)
   await db.update(users)
     .set({
@@ -160,21 +186,29 @@ async function handleSubscriptionResumed(db: ReturnType<typeof useDb>, w: Webhoo
 
 async function handleSubscriptionPaused(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   await db.update(users).set({ planStatus: PlanStatus.PAUSED }).where(eq(users.id, uid))
 }
 
 async function handleSubscriptionUnpaused(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   await db.update(users).set({ planStatus: PlanStatus.ACTIVE }).where(eq(users.id, uid))
 }
 
 async function handleSubscriptionPaymentSuccess(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   const user = await loadUser(db, uid)
-  if (!user) return
+  if (!user) {
+ return
+}
   const billingReason = String(w.data?.attributes?.billing_reason || '')
   if ((billingReason === 'renewal' || billingReason === 'recurring') && user.plan !== 'pro') {
     await db.update(users)
@@ -185,16 +219,24 @@ async function handleSubscriptionPaymentSuccess(db: ReturnType<typeof useDb>, w:
 
 async function handleOrderCreated(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   const user = await loadUser(db, uid)
-  if (!user) return
+  if (!user) {
+ return
+}
 
   // Subscription orders are handled by subscription_created — avoid
   // double-counting by short-circuiting here.
-  if (isSubscriptionOrder(w)) return
+  if (isSubscriptionOrder(w)) {
+ return
+}
 
   const status = String(w.data?.attributes?.status || '')
-  if (status !== 'paid') return
+  if (status !== 'paid') {
+ return
+}
 
   const variantId = w.data?.relationships?.variant?.data?.id
   const expires = calcExpirationFromVariant(variantId ? String(variantId) : null, user.planExpiresAt)
@@ -205,7 +247,9 @@ async function handleOrderCreated(db: ReturnType<typeof useDb>, w: Webhook) {
 
 async function handleOrderRefunded(db: ReturnType<typeof useDb>, w: Webhook) {
   const uid = uidOf(w)
-  if (!uid) return
+  if (!uid) {
+ return
+}
   await db.update(users)
     .set({ plan: 'free', planStatus: PlanStatus.EXPIRED, planExpiresAt: null })
     .where(eq(users.id, uid))
@@ -226,7 +270,9 @@ const HANDLERS: Record<string, (db: ReturnType<typeof useDb>, w: Webhook) => Pro
 
 export default defineEventHandler(async (event) => {
   const raw = await readRawBody(event, false)
-  if (!raw) return sendPyError(event, 400, 'Empty webhook body')
+  if (!raw) {
+ return sendPyError(event, 400, 'Empty webhook body')
+}
 
   const signature = getHeader(event, 'x-signature')
   if (!verifySignature(raw, signature)) {
@@ -253,7 +299,7 @@ export default defineEventHandler(async (event) => {
       // ->> extracts JSON text; cheaper than ->'..'->>'..' chaining here.
       .where(sql`data->'meta'->>'webhook_id' = ${webhookId}`)
       .limit(1)
-    if (rows.length) {
+    if (rows.length > 0) {
       return { success: true, message: 'Webhook already processed' }
     }
   }
@@ -270,8 +316,8 @@ export default defineEventHandler(async (event) => {
     try {
       await handler(db, webhook)
     }
-    catch (err) {
-      console.error('[ls-webhook] handler failed', eventName, err)
+    catch (error) {
+      console.error('[ls-webhook] handler failed', eventName, error)
       // Return success so LemonSqueezy doesn't keep retrying; matches Python.
       return { success: false, message: 'Webhook received but processing failed' }
     }

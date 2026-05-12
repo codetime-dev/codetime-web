@@ -67,7 +67,7 @@ type I18NHolder = { _i18n?: Ref<Translation> }
 export function useI18N(): Ref<Translation> {
   const app = useNuxtApp() as unknown as I18NHolder
   if (!app._i18n) {
- app._i18n = ref(en as Translation)
+ app._i18n = shallowRef(en as Translation)
 }
   return app._i18n
 }

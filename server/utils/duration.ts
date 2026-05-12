@@ -14,7 +14,9 @@ export function getDurationText(minutes: number): string {
   }
 
   if (remaining > 0) {
-    if (result) result += ' '
+    if (result) {
+ result += ' '
+}
     result += `${remaining}min${remaining > 1 ? 's' : ''}`
   }
 
@@ -27,11 +29,26 @@ export function getShieldMessage(resultMinutes: number, minutes: number): string
   let message = getDurationText(resultMinutes)
   if (minutes > 0) {
     let timeDesc = ''
-    if (minutes === 60 * 24) timeDesc = 'Day'
-    else if (minutes === 60 * 24 * 7) timeDesc = 'Week'
-    else if (minutes === 60 * 24 * 30) timeDesc = 'Month'
-    else if (minutes === 60 * 24 * 365) timeDesc = 'Year'
-    else timeDesc = getDurationText(minutes)
+    switch (minutes) {
+    case 60 * 24: {
+    timeDesc = 'Day'
+    break
+    }
+    case 60 * 24 * 7: {
+    timeDesc = 'Week'
+    break
+    }
+    case 60 * 24 * 30: {
+    timeDesc = 'Month'
+    break
+    }
+    case 60 * 24 * 365: {
+    timeDesc = 'Year'
+    break
+    }
+    default: { timeDesc = getDurationText(minutes)
+    }
+    }
     message += ` / ${timeDesc}`
   }
   return message

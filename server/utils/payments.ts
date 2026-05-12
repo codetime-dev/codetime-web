@@ -36,15 +36,23 @@ export function isDevPaymentsMode(): boolean {
 // the manual checkout/webhook flow can be exercised end-to-end during
 // testing. Matches the Python `is_dev` branches.
 export function renewExpiry(renewsAt: string | undefined | null): Date | null {
-  if (!renewsAt) return null
-  if (isDevPaymentsMode()) return new Date(Date.now() + DEV_RENEW_WINDOW_MS)
+  if (!renewsAt) {
+ return null
+}
+  if (isDevPaymentsMode()) {
+ return new Date(Date.now() + DEV_RENEW_WINDOW_MS)
+}
   const t = new Date(renewsAt)
   return Number.isNaN(t.getTime()) ? null : t
 }
 
 export function endsExpiry(endsAt: string | undefined | null): Date | null {
-  if (!endsAt) return null
-  if (isDevPaymentsMode()) return new Date(Date.now() + DEV_RENEW_WINDOW_MS)
+  if (!endsAt) {
+ return null
+}
+  if (isDevPaymentsMode()) {
+ return new Date(Date.now() + DEV_RENEW_WINDOW_MS)
+}
   const t = new Date(endsAt)
   return Number.isNaN(t.getTime()) ? null : t
 }
@@ -54,7 +62,7 @@ export function endsExpiry(endsAt: string | undefined | null): Date | null {
 // normalise overflows (Feb 30 → Mar 2, same as relativedelta in those
 // edge cases).
 function addCalendar(base: Date, years: number, months: number): Date {
-  const d = new Date(base.getTime())
+  const d = new Date(base)
   d.setUTCFullYear(d.getUTCFullYear() + years, d.getUTCMonth() + months, d.getUTCDate())
   return d
 }
@@ -64,12 +72,18 @@ function addCalendar(base: Date, years: number, months: number): Date {
 export function calcExpirationFromVariant(variantId: string | null | undefined, currentExpiresAt: Date | null): Date {
   const now = new Date()
   const baseTime = currentExpiresAt && currentExpiresAt > now ? currentExpiresAt : now
-  if (!variantId) return addCalendar(baseTime, 0, 1)
+  if (!variantId) {
+ return addCalendar(baseTime, 0, 1)
+}
 
   const monthlyId = process.env.LEMONSQUEEZY_ONETIME_ID_MONTHLY
   const yearlyId = process.env.LEMONSQUEEZY_ONETIME_ID_YEARLY
-  if (variantId === yearlyId) return addCalendar(baseTime, 1, 0)
-  if (variantId === monthlyId) return addCalendar(baseTime, 0, 1)
+  if (variantId === yearlyId) {
+ return addCalendar(baseTime, 1, 0)
+}
+  if (variantId === monthlyId) {
+ return addCalendar(baseTime, 0, 1)
+}
   return addCalendar(baseTime, 0, 1)
 }
 
@@ -82,7 +96,9 @@ export function isSubscriptionOrder(webhook: Record<string, any>): boolean {
   if (variantId !== undefined && variantId !== null) {
     const monthly = process.env.LEMONSQUEEZY_SUBSCRIPTION_ID_MONTHLY
     const yearly = process.env.LEMONSQUEEZY_SUBSCRIPTION_ID_YEARLY
-    if ([monthly, yearly].includes(String(variantId))) return true
+    if ([monthly, yearly].includes(String(variantId))) {
+ return true
+}
   }
   const productName = String(attributes.product_name || '').toLowerCase()
   return productName.includes('subscription')

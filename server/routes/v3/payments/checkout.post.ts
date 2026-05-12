@@ -69,7 +69,9 @@ const isDev = process.env.NUXT_PUBLIC_MODE !== 'production' || !!import.meta.dev
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
 
   const body = await readBody<{ type?: string, product?: string }>(event).catch(() => null)
   const type = (body?.type ?? '').toLowerCase()
@@ -93,7 +95,9 @@ export default defineEventHandler(async (event) => {
     .from(users)
     .where(eq(users.id, session.id))
     .limit(1)
-  if (!user) return sendPyError(event, 404, 'User not found')
+  if (!user) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   const { storeId } = useLemonSqueezy()
   const email = user.email?.trim()

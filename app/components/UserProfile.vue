@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { refreshNuxtData } from '#app'
-import {
-  v3GetUserByUserId,
-  v3GetUserCodingHistory,
-  v3GetUserOverallRank,
-  v3GetUserTopLanguagesRank,
-  v3UpdateBio,
-} from '~/api/v3'
+import { v3UpdateBio } from '~/api/v3'
 import ActivityCalendar from './UserProfile/ActivityCalendar.vue'
 import ActivityTrend from './UserProfile/ActivityTrend.vue'
 import Bio from './UserProfile/Bio.vue'
@@ -25,20 +19,15 @@ const isOwnProfile = computed(() => props.userId === currentUser.value?.id)
 const BIO_MAX_LENGTH = 280
 const HISTORY_DAYS = 90
 
+// Mirror the parent page's key/handler exactly. The fetch handlers live in a
+// shared composable (app/composables/useUserProfileData.ts) so Nuxt's handler
+// hash matches when this component registers the same keys during hydration.
+const uid = computed(() => props.userId)
+
 const { data: userResult, error: userError, refresh: refreshUser } = await useAsyncData(
-  `up-user-${props.userId}`,
-  async () => {
-    try {
-      const response = await v3GetUserByUserId({ path: { user_id: props.userId } })
-      return { user: response.data, isHidden: false, notFound: false }
-    }
-    catch (error: any) {
-      if (error?.status_code === 403 || error?.status === 403) {
-        return { user: null, isHidden: true, notFound: false }
-      }
-      return { user: null, isHidden: false, notFound: true }
-    }
-  },
+  () => `up-user-${uid.value}`,
+  () => fetchUserProfile(uid.value),
+  { watch: [uid] },
 )
 
 const user = computed(() => userResult.value?.user || null)
@@ -50,54 +39,21 @@ if (userNotFound.value && userError.value && !userHidden.value) {
 }
 
 const { data: topLanguagesData, pending: languagesPending } = await useAsyncData(
-  `up-top-langs-${props.userId}`,
-  async () => {
-    if (userHidden.value) {
-      return null
-    }
-    try {
-      const response = await v3GetUserTopLanguagesRank({ path: { user_id: props.userId } })
-      return response.data
-    }
-    catch {
-      return null
-    }
-  },
+  () => `up-top-langs-${uid.value}`,
+  () => fetchUserTopLanguages(uid.value),
+  { watch: [uid] },
 )
 
 const { data: overallRankData } = await useAsyncData(
-  `up-overall-rank-${props.userId}`,
-  async () => {
-    if (userHidden.value) {
-      return null
-    }
-    try {
-      const response = await v3GetUserOverallRank({ path: { user_id: props.userId } })
-      return response.data
-    }
-    catch {
-      return null
-    }
-  },
+  () => `up-overall-rank-${uid.value}`,
+  () => fetchUserOverallRank(uid.value),
+  { watch: [uid] },
 )
 
 const { data: codingHistoryData, pending: historyPending } = await useAsyncData(
-  `up-coding-history-${props.userId}`,
-  async () => {
-    if (userHidden.value) {
-      return null
-    }
-    try {
-      const response = await v3GetUserCodingHistory({
-        path: { user_id: props.userId },
-        query: { days: HISTORY_DAYS },
-      })
-      return response.data
-    }
-    catch {
-      return null
-    }
-  },
+  () => `up-coding-history-${uid.value}`,
+  () => fetchUserCodingHistory(uid.value, HISTORY_DAYS),
+  { watch: [uid] },
 )
 
 const topLanguages = computed(() => topLanguagesData.value?.entries || [])

@@ -55,11 +55,15 @@ defineRouteMeta({
 export default defineEventHandler(async (event) => {
   const userIdStr = getRouterParam(event, 'user_id')
   const userId = Number(userIdStr)
-  if (!Number.isFinite(userId) || userId <= 0) return sendPyError(event, 404, 'User not found')
+  if (!Number.isFinite(userId) || userId <= 0) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   const db = useDb()
   const [row] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
-  if (!row) return sendPyError(event, 404, 'User not found')
+  if (!row) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   const session = await tryUser(event)
   const isSelf = !!session && session.id === userId

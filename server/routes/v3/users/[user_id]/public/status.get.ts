@@ -53,8 +53,12 @@ defineRouteMeta({
 
 function effectivePlan(plan: string | null, planExpiresAt: Date | null): string {
   const p = (plan || 'free').toLowerCase()
-  if (p === 'free') return 'free'
-  if (planExpiresAt && Date.now() >= planExpiresAt.getTime()) return 'free'
+  if (p === 'free') {
+ return 'free'
+}
+  if (planExpiresAt && Date.now() >= planExpiresAt.getTime()) {
+ return 'free'
+}
   return p
 }
 
@@ -90,7 +94,7 @@ function todayStartUtc(tzName: string): Date {
 
 function isValidTimezone(tz: string): boolean {
   try {
-    new Intl.DateTimeFormat('en-US', { timeZone: tz })
+    Intl.DateTimeFormat('en-US', { timeZone: tz })
     return true
   }
   catch {
@@ -118,7 +122,9 @@ export default defineEventHandler(async (event) => {
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  if (!user) return sendPyError(event, 404, 'User not found')
+  if (!user) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   const plan = effectivePlan(user.plan, user.planExpiresAt)
   const isPro = plan === 'pro'

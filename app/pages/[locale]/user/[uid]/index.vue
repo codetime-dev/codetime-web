@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { v3GetUserByUserId, v3GetUserOverallRank, v3GetUserTopLanguagesRank } from '~/api/v3'
-
 definePageMeta({
   middleware: ['i18n'],
 })
@@ -10,22 +8,12 @@ const locale = useLocale()
 const t = useI18N()
 const uid = computed(() => Number(route.params.uid))
 
-// Fetched here at the page level so SEO/OG metadata is set before render.
-// Inner UserProfile.vue uses the same useAsyncData keys and will hydrate from cache.
+// Page-level fetch is split into a shared composable (handlers live at module
+// scope) so the inner UserProfile.vue can register the same useAsyncData keys
+// without Nuxt warning "different handler" on hydration.
 const { data: userResult } = await useAsyncData(
   () => `up-user-${uid.value}`,
-  async () => {
-    try {
-      const response = await v3GetUserByUserId({ path: { user_id: uid.value } })
-      return { user: response.data, isHidden: false, notFound: false }
-    }
-    catch (error: any) {
-      if (error?.status_code === 403 || error?.status === 403) {
-        return { user: null, isHidden: true, notFound: false }
-      }
-      return { user: null, isHidden: false, notFound: true }
-    }
-  },
+  () => fetchUserProfile(uid.value),
   { watch: [uid] },
 )
 const user = computed(() => userResult.value?.user || null)
@@ -33,35 +21,13 @@ const userHidden = computed(() => userResult.value?.isHidden || false)
 
 const { data: overallRank } = await useAsyncData(
   () => `up-overall-rank-${uid.value}`,
-  async () => {
-    if (userHidden.value || !user.value) {
-      return null
-    }
-    try {
-      const resp = await v3GetUserOverallRank({ path: { user_id: uid.value } })
-      return resp.data
-    }
-    catch {
-      return null
-    }
-  },
+  () => fetchUserOverallRank(uid.value),
   { watch: [uid] },
 )
 
 const { data: topLanguages } = await useAsyncData(
   () => `up-top-langs-${uid.value}`,
-  async () => {
-    if (userHidden.value || !user.value) {
-      return null
-    }
-    try {
-      const resp = await v3GetUserTopLanguagesRank({ path: { user_id: uid.value } })
-      return resp.data
-    }
-    catch {
-      return null
-    }
-  },
+  () => fetchUserTopLanguages(uid.value),
   { watch: [uid] },
 )
 
@@ -84,7 +50,7 @@ watchEffect(() => {
 })
 
 if (user.value && !userHidden.value) {
-  defineOgImageComponent('UserProfile', {
+  defineOgImage('UserProfile', {
     username: user.value.username,
     avatar: user.value.avatar ?? '',
     bio: (user.value.bio ?? '').slice(0, 140),
