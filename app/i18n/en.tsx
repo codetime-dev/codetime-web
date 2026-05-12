@@ -536,6 +536,8 @@ export const en: Translation = {
         createTag: 'Create Tag',
         freeUserLimit: 'Free users can create up to',
         upgradeForMore: 'Upgrade to create more tags',
+        editTag: 'Edit tag',
+        deleteTag: 'Delete tag',
       },
       tagForm: {
         name: 'Name',

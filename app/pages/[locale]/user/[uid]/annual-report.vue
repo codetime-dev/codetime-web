@@ -157,14 +157,13 @@ const activeDays = computed(() => {
 // Declared after `sumMinutes` / `activeDays` so the OG image template can
 // reference their values without tripping the use-before-define rule.
 defineOgImageComponent('AnnualReport', {
-  username: user.value?.username ?? '',
-  avatar: user.value?.avatar ?? '',
+  username: user?.username ?? '',
+  avatar: user?.avatar ?? '',
   year: reportYear.value,
   totalHours: Math.round(sumMinutes.value / 60),
   activeDays: activeDays.value,
   title: t.value.annualReport.annualCodeTimeReport(reportYear.value),
   description: t.value.meta.description,
-  locale: locale.value,
 }, {
   width: 1200,
   height: 630,

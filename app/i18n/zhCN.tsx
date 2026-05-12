@@ -537,6 +537,8 @@ export const zhCN: Partial<Translation> = {
         createTag: '创建标签',
         freeUserLimit: '免费用户限制：',
         upgradeForMore: '升级以创建更多标签',
+        editTag: '编辑标签',
+        deleteTag: '删除标签',
       },
       tagForm: {
         name: '名称',

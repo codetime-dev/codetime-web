@@ -1,4 +1,4 @@
-import { bigint, boolean, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { bigint, bigserial, boolean, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 // Drizzle schema — must match codetime-server-v3/src/db.py exactly.
 // Alembic owns migrations; this file is read-only against the live schema.
@@ -89,3 +89,15 @@ export const workspaceMetaV2 = pgTable('workspace_meta_v2', {
 })
 
 export type WorkspaceMetaV2Row = typeof workspaceMetaV2.$inferSelect
+
+export const lemonsqueezyRawWebhooks = pgTable('lemonsqueezy_raw_webhooks', {
+  // Python migration creates this as `BIGSERIAL` via SQLAlchemy's auto-PK
+  // behaviour; Drizzle's `bigserial` matches so inserts can omit `id`.
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  data: jsonb('data').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+})
+
+export type LemonsqueezyRawWebhookRow = typeof lemonsqueezyRawWebhooks.$inferSelect

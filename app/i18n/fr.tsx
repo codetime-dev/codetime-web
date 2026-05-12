@@ -471,6 +471,8 @@ export const fr: Partial<Translation> = {
         createTag: 'Créer une étiquette',
         freeUserLimit: 'Les utilisateurs gratuits peuvent créer jusqu\'à',
         upgradeForMore: 'Mettre à jour pour créer plus d\'étiquettes',
+        editTag: 'Modifier l\'étiquette',
+        deleteTag: 'Supprimer l\'étiquette',
       },
       tagForm: {
         name: 'Nom',

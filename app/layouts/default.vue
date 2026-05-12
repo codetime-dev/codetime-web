@@ -17,16 +17,6 @@ watchEffect(() => {
     })
   }
 })
-
-// Site-wide default OG image. Per-page overrides (e.g. annual-report,
-// user profile) call defineOgImageComponent themselves and take precedence.
-defineOgImage('NuxtSeo', {
-  title: t.value.meta.title,
-  description: t.value.meta.description,
-  colorMode: 'dark',
-  theme: '#0067cc',
-  siteLogo: 'https://codetime.dev/icon.png',
-})
 </script>
 
 <template>

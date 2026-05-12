@@ -471,6 +471,8 @@ export const es: Partial<Translation> = {
         createTag: 'Crear etiqueta',
         freeUserLimit: 'Los usuarios gratuitos pueden crear hasta',
         upgradeForMore: 'Actualizar para crear más etiquetas',
+        editTag: 'Editar etiqueta',
+        deleteTag: 'Eliminar etiqueta',
       },
       tagForm: {
         name: 'Nombre',

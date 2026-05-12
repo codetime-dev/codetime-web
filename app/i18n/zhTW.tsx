@@ -504,6 +504,8 @@ export const zhTW: Partial<Translation> = {
         createTag: '創建標籤',
         freeUserLimit: '免費用戶可以創建至多',
         upgradeForMore: '升級以創建更多標籤',
+        editTag: '編輯標籤',
+        deleteTag: '刪除標籤',
       },
       tagForm: {
         name: '名稱',

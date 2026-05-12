@@ -411,6 +411,8 @@ export type Translation = {
         createTag: string
         freeUserLimit: string
         upgradeForMore: string
+        editTag: string
+        deleteTag: string
       }
       tagForm: {
         name: string

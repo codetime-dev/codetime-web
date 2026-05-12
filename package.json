@@ -20,6 +20,7 @@
     "@nuxtjs/sitemap": "^8.0.15",
     "@observablehq/plot": "^0.6.17",
     "@resvg/resvg-js": "^2.6.2",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@roku-ui/preset": "0.31.0",
     "@roku-ui/vue": "0.31.0",
     "@sentry/nuxt": "^10.52.0",

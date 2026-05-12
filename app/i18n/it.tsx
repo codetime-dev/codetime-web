@@ -471,6 +471,8 @@ export const it: Partial<Translation> = {
         createTag: 'Crea tag',
         freeUserLimit: 'Gli utenti gratuiti possono creare fino a',
         upgradeForMore: 'Aggiorna per creare più tag',
+        editTag: 'Modifica tag',
+        deleteTag: 'Elimina tag',
       },
       tagForm: {
         name: 'Nome',

@@ -504,6 +504,8 @@ export const de: Partial<Translation> = {
         createTag: 'Tag erstellen',
         freeUserLimit: 'Kostenlose Benutzer können bis zu',
         upgradeForMore: 'Upgrade für mehr Tags',
+        editTag: 'Tag bearbeiten',
+        deleteTag: 'Tag löschen',
       },
       tagForm: {
         name: 'Name',

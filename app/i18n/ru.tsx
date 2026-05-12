@@ -495,6 +495,8 @@ export const ru: Partial<Translation> = {
         createTag: 'Создать тег',
         freeUserLimit: 'Бесплатные пользователи могут создать до',
         upgradeForMore: 'Обновить для создания большего количества тегов',
+        editTag: 'Редактировать тег',
+        deleteTag: 'Удалить тег',
       },
       tagForm: {
         name: 'Название',

@@ -494,6 +494,8 @@ export const ua: Partial<Translation> = {
         createTag: 'Створити тег',
         freeUserLimit: 'Безкоштовні користувачі можуть створити до',
         upgradeForMore: 'Оновіть для створення більшої кількості тегів',
+        editTag: 'Редагувати тег',
+        deleteTag: 'Видалити тег',
       },
       tagForm: {
         name: 'Назва',

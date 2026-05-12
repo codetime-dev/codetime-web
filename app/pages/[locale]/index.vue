@@ -6,6 +6,15 @@ definePageMeta({
 const t = useI18N()
 const route = useRoute()
 
+// Landing-page OG image. Dashboard/private routes deliberately get no OG —
+// they require login and are not crawled. Other public pages (user profile,
+// annual report) call defineOgImageComponent themselves.
+defineOgImage('NuxtSeoSatori', {
+  title: t.value.meta.title,
+  description: t.value.meta.description,
+  colorMode: 'dark',
+})
+
 // Hand-tokenised JSON snippet for the 03 EXPORT card. Injected via v-html so
 // Vue's template whitespace-condense pass doesn't eat the column alignment
 // between the spans.

@@ -496,6 +496,8 @@ export const ja: Partial<Translation> = {
         createTag: 'タグを作成',
         freeUserLimit: '無料ユーザーは最大',
         upgradeForMore: 'より多くのタグを作成するにはアップグレード',
+        editTag: 'タグを編集',
+        deleteTag: 'タグを削除',
       },
       tagForm: {
         name: '名前',

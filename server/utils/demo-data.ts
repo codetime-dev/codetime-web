@@ -348,7 +348,7 @@ export function generateDailyByField(
       for (const ws of orderedWs) {
         const wsShare = ws.raw / sumWsRaw
         const wsMinutes = state.totalMinutes * wsShare
-        const langSum = Object.values(ws.profile.languages).reduce((acc, v) => acc + (v ?? 0), 0)
+        const langSum = Object.values(ws.profile.languages).reduce<number>((acc, v) => acc + (v ?? 0), 0)
         if (langSum <= 0) {
           continue
         }

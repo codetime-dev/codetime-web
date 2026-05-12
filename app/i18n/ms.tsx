@@ -504,6 +504,8 @@ export const ms: Partial<Translation> = {
         createTag: 'Cipta Tag',
         freeUserLimit: 'Pengguna percuma boleh mencipta sehingga',
         upgradeForMore: 'Naik taraf untuk mencipta lebih banyak tag',
+        editTag: 'Edit tag',
+        deleteTag: 'Padam tag',
       },
       tagForm: {
         name: 'Nama',
