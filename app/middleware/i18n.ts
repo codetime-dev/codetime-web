@@ -4,6 +4,8 @@ const AGENT_PATH_PREFIXES = [
   '/.well-known/',
   '/api/',
   '/ask',
+  '/docs/api',
+  '/v3/',
   '/mcp',
   '/llms.txt',
   '/index.md',

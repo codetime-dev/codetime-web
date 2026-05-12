@@ -10,6 +10,11 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiHost: 'https://api.codetime.dev',
+      // Origin serving Nuxt-backed routes listed in shared/migrated-routes.ts.
+      // Empty string => same origin as the page (browser) / same Nitro
+      // process (server). Override with NUXT_PUBLIC_NUXT_API_HOST when the
+      // Nuxt backend lives on a different host than the page.
+      nuxtApiHost: process.env.NUXT_PUBLIC_NUXT_API_HOST || '',
       githubClientId: process.env.NUXT_PUBLIC_GITHUB_CLIENT_ID || '978fe1a6f0c5d12f5beb',
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '1020029657488-f66ubcmj6qqg4h4ptjk505ljmkv55jkv.apps.googleusercontent.com',
       sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || '',
@@ -71,6 +76,20 @@ export default defineNuxtConfig({
     },
   ], '@nuxt/fonts'],
 
+  // Nitro auto-generates the OpenAPI spec at /_nitro/openapi.json from
+  // each route's defineRouteMeta({ openAPI: ... }). Our handler at
+  // /v3/docs/openapi.json filters that to only the migrated /v3 routes.
+  nitro: {
+    experimental: { openAPI: true },
+    openAPI: {
+      meta: {
+        title: 'Code Time',
+        version: '0.1.0',
+      },
+      ui: { swagger: false, scalar: false },
+    },
+  },
+
   // Preload Inter (body copy). The mono LCP font (Berkeley Mono) is
   // self-hosted via @font-face in app.vue and preloaded explicitly in
   // app/app.vue's <Head> so @nuxt/fonts doesn't need to manage it.
@@ -81,6 +100,9 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    // Scalar runs in an iframe — neither host page nor shell need SSR.
+    '/docs/api': { ssr: false },
+    '/docs/api/**': { ssr: false },
     // Widget SVG endpoints set their own cache headers in the handler. Override
     // any CDN page-cache defaults so an occasional SPA-fallback HTML response
     // (e.g. during a deploy) is not pinned at the edge for hours.

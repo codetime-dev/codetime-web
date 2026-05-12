@@ -1,15 +1,35 @@
 <script setup lang="ts">
 import { client } from '@/api/v3/client.gen'
+import { isMigratedRoute } from '~~/shared/migrated-routes'
 
 // Configure the API client BEFORE any data fetching.
 // Must run first so that all subsequent API calls (including the
 // initial user fetch) use the correct base URL, credentials, and
 // error handling.
 const config = useRuntimeConfig()
+
+// Dual-backend dispatch. Default to the legacy Python host; for paths
+// listed in shared/migrated-routes.ts, rewrite to the Nuxt origin so the
+// request is served by server/routes/v3/...  Cookies flow to both because
+// both hosts share the eTLD+1 (.codetime.dev) and credentials:include.
+const upstreamHost = config.public.apiHost
+const nuxtHost = (config.public.nuxtApiHost as string | undefined) || ''
+
 client.setConfig({
-  baseUrl: config.public.apiHost,
+  baseUrl: upstreamHost,
   credentials: 'include',
   throwOnError: true,
+  fetch: (req) => {
+    const url = new URL(req.url)
+    if (isMigratedRoute(url.pathname)) {
+      const origin = nuxtHost || (import.meta.client ? location.origin : '')
+      if (origin) {
+        const rewritten = new URL(url.pathname + url.search, origin)
+        req = new Request(rewritten.toString(), req)
+      }
+    }
+    return globalThis.fetch(req)
+  },
 })
 
 const { data: user, status } = await fetchUser()

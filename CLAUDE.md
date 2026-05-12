@@ -9,7 +9,8 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
 ## Development Commands
 
 - **Install dependencies:** `pnpm install` (preferred package manager)
-- **Development server:** `pnpm run dev` (runs on port 3001 with .env.dev)
+- **Development server:** `pnpm run dev` (binds port 3002 with .env.dev;
+  production PM2 holds 3001)
 - **Build for production:** `pnpm run build`
 - **Lint and fix:** `pnpm run lint` (uses @jannchie/eslint-config with UnoCSS support)
 - **Generate static site:** `pnpm run generate`
@@ -24,6 +25,9 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
 - **Frontend:** Nuxt.js 4 with Vue 3 and TypeScript
 - **Styling:** UnoCSS with @roku-ui/preset and @roku-ui/vue components
 - **API:** Auto-generated TypeScript SDK from OpenAPI spec
+- **Backend:** Hybrid — legacy Python service at `apiHost`, gradually
+  migrating endpoint-by-endpoint to Nuxt/Nitro routes under `server/`
+  (see `server/CLAUDE.md`). Drizzle ORM over the same Postgres.
 - **Deployment:** PM2 cluster mode with health checks
 - **Visualization:** Observable Plot for charts and data visualization
 
@@ -38,7 +42,11 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
   - `pages/` - File-based routing with locale support
   - `utils/` - Helper functions and data formatters
 - `public/` - Static assets including VSCode icons
-- `server/` - Server-side code
+- `server/` - Nitro server: middleware, routes, and the **Nuxt-backend
+  migration target** for `/v3/*` endpoints (see `server/CLAUDE.md`)
+- `shared/` - Code visible to both app and server. Currently holds
+  `migrated-routes.ts` (single source of truth for which `/v3/*` paths
+  the Nuxt backend serves vs. proxy to the legacy Python service)
 
 ### Key Patterns
 
@@ -61,8 +69,23 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
 ### API Integration
 
 - Auto-generated SDK from OpenAPI spec at `https://test.codetime.dev/v3/docs/openapi.json`
-- Client configured with credentials and error handling in `app.vue`
-- Base URL configurable via `NUXT_PUBLIC_API_HOST` environment variable
+- Client configured in `app/app.vue` with credentials, error handling,
+  and a **dual-backend fetch shim** that dispatches each request to
+  either the Python service (`NUXT_PUBLIC_API_HOST`) or the Nuxt origin
+  (`NUXT_PUBLIC_NUXT_API_HOST`, defaults to `location.origin`) based on
+  `shared/migrated-routes.ts`. Cookies flow to both because they share
+  the eTLD+1 in production.
+- Migrated Nuxt routes have their own OpenAPI surface at
+  `/v3/docs/openapi.json` (filtered from Nitro's auto-generated
+  `/_openapi.json`) and a Scalar UI at `/docs/api`.
+- Base URL configurable via `NUXT_PUBLIC_API_HOST` environment variable.
+
+### Backend Migration (`server/`)
+
+Endpoints are moved from the Python service (`../codetime-server-v3`) to
+Nuxt one at a time. The full workflow — auth, Drizzle, error shape,
+OpenAPI metadata, and the things to deliberately NOT do — lives in
+`server/CLAUDE.md`. Read it before touching anything under `server/`.
 
 ### Styling Conventions
 
@@ -76,7 +99,9 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
 - PM2 cluster mode with 2 instances
 - Health checks on port 3000 at `/en` endpoint
 - Memory limit: 500MB with automatic restart
-- Production server runs on port 3001
+- Production server runs on port 3001 (dev server uses 3002)
+- Postgres credentials (`POSTGRES_*` env) must be present at runtime —
+  the Nuxt backend connects to the same DB as the Python service
 
 ## Development Guidelines
 
