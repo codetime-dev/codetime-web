@@ -24,6 +24,7 @@ const EmojiPicker = defineAsyncComponent(async () => {
   }
   const [{ default: Picker }] = await Promise.all([
     import('vue3-emoji-picker'),
+    // @ts-expect-error - css side-effect import, no type declarations
     import('vue3-emoji-picker/css'),
   ])
   return Picker

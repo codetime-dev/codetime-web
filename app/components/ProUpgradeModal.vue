@@ -14,7 +14,9 @@ const t = useI18N()
 const user = useUser()
 
 const variant = ref<Variant>(props.initialVariant)
-watch(() => props.initialVariant, (v) => { variant.value = v })
+watch(() => props.initialVariant, (v) => {
+ variant.value = v
+})
 
 const isAnnual = computed(() => variant.value === 'annual')
 const isOneTime = computed(() => variant.value === 'one-time')
@@ -79,23 +81,18 @@ watch(open, (v) => {
   if (globalThis.document === undefined) {
     return
   }
-  if (v) {
-    document.body.style.overflow = 'hidden'
-  }
-  else {
-    document.body.style.overflow = ''
-  }
+  document.body.style.overflow = v ? 'hidden' : ''
 })
 
 onMounted(() => {
-  window.addEventListener('keydown', onKey)
+  globalThis.addEventListener('keydown', onKey)
 })
 
 onBeforeUnmount(() => {
   if (globalThis.document) {
     document.body.style.overflow = ''
   }
-  window.removeEventListener('keydown', onKey)
+  globalThis.removeEventListener('keydown', onKey)
 })
 </script>
 
@@ -111,7 +108,7 @@ onBeforeUnmount(() => {
       >
         <div class="pum-overlay" @click="close" />
         <div class="pum-card" @wheel="onScroll">
-          <button type="button" class="pum-close" :aria-label="'Close'" @click="close">
+          <button type="button" class="pum-close" aria-label="Close" @click="close">
             <i class="i-tabler-x" />
           </button>
 

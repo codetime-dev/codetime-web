@@ -43,11 +43,15 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
 
   const body = await readBody<{ bio?: string | null }>(event).catch(() => null)
   let nextBio: string | null = body?.bio?.trim() ?? null
-  if (nextBio === '') nextBio = null
+  if (nextBio === '') {
+ nextBio = null
+}
   if (nextBio && nextBio.length > BIO_MAX_LENGTH) {
     return sendPyError(event, 400, `Bio must be ${BIO_MAX_LENGTH} characters or fewer`)
   }
@@ -58,6 +62,8 @@ export default defineEventHandler(async (event) => {
     .set({ bio: nextBio })
     .where(eq(users.id, session.id))
     .returning()
-  if (!row) return sendPyError(event, 404, 'User not found')
+  if (!row) {
+ return sendPyError(event, 404, 'User not found')
+}
   return toUserSelfPublic(row)
 })

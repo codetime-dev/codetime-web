@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { client } from '@/api/v3/client.gen'
 import { isMigratedRoute } from '~~/shared/migrated-routes'
+import { client } from '@/api/v3/client.gen'
 
 // Configure the API client BEFORE any data fetching.
 // Must run first so that all subsequent API calls (including the
@@ -19,16 +19,17 @@ client.setConfig({
   baseUrl: upstreamHost,
   credentials: 'include',
   throwOnError: true,
-  fetch: (req) => {
-    const url = new URL(req.url)
+  fetch: (input, init) => {
+    let request = input instanceof Request ? input : new Request(input, init)
+    const url = new URL(request.url)
     if (isMigratedRoute(url.pathname)) {
       const origin = nuxtHost || (import.meta.client ? location.origin : '')
       if (origin) {
         const rewritten = new URL(url.pathname + url.search, origin)
-        req = new Request(rewritten.toString(), req)
+        request = new Request(rewritten.toString(), request)
       }
     }
-    return globalThis.fetch(req)
+    return globalThis.fetch(request)
   },
 })
 

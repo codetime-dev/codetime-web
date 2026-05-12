@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
-
 const route = useRoute()
 const router = useRouter()
 const locale = computed(

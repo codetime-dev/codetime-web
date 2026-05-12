@@ -85,10 +85,14 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
 
   const db = useDb()
   const [row] = await db.select().from(users).where(eq(users.id, session.id)).limit(1)
-  if (!row) return sendPyError(event, 404, 'User not found')
+  if (!row) {
+ return sendPyError(event, 404, 'User not found')
+}
   return toUserSelfPublic(row)
 })

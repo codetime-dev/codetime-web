@@ -40,7 +40,7 @@ defineRouteMeta({
               emoji: { type: 'string', nullable: true },
               created_at: { type: 'string', format: 'date-time' },
               updated_at: { type: 'string', format: 'date-time' },
-              rules: { nullable: true },
+              rules: { type: 'object', nullable: true, additionalProperties: true },
             },
           },
           TagCreateRequest: {
@@ -58,7 +58,7 @@ defineRouteMeta({
               name: { type: 'string', nullable: true },
               color: { type: 'string', nullable: true },
               emoji: { type: 'string', nullable: true },
-              rules: { nullable: true },
+              rules: { type: 'object', nullable: true, additionalProperties: true },
             },
           },
         },
@@ -75,7 +75,9 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
   const db = useDb()
   const rows = await db
     .select()

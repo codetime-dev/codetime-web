@@ -38,7 +38,9 @@ type CreateBody = { name?: string, color?: string, emoji?: string | null }
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
 
   const body = await readBody<CreateBody>(event).catch(() => null)
   if (!body?.name || !body.color) {
@@ -48,11 +50,12 @@ export default defineEventHandler(async (event) => {
   const db = useDb()
 
   if (session.plan === 'free') {
-    const [{ value: existing }] = await db
+    const rows = await db
       .select({ value: count() })
       .from(tags)
       .where(eq(tags.uid, session.id))
-    if ((existing ?? 0) >= FREE_PLAN_TAG_LIMIT) {
+    const existing = rows[0]?.value ?? 0
+    if (existing >= FREE_PLAN_TAG_LIMIT) {
       return sendPyError(
         event,
         403,
@@ -66,7 +69,9 @@ export default defineEventHandler(async (event) => {
     .from(tags)
     .where(and(eq(tags.uid, session.id), eq(tags.name, body.name)))
     .limit(1)
-  if (dup) return sendPyError(event, 400, 'Tag name already exists')
+  if (dup) {
+ return sendPyError(event, 400, 'Tag name already exists')
+}
 
   const now = new Date()
   const [row] = await db
@@ -81,6 +86,9 @@ export default defineEventHandler(async (event) => {
       updatedAt: now,
     })
     .returning()
+  if (!row) {
+ return sendPyError(event, 500, 'Failed to create tag')
+}
   event.node.res.statusCode = 201
   return toTagResponse(row)
 })

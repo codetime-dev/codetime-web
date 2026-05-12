@@ -38,7 +38,9 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
 
   const body = await readBody<{ show_github?: boolean }>(event).catch(() => null)
   const showGithub = Boolean(body?.show_github)
@@ -49,6 +51,8 @@ export default defineEventHandler(async (event) => {
     .set({ showGithub })
     .where(eq(users.id, session.id))
     .returning({ showGithub: users.showGithub })
-  if (!row) return sendPyError(event, 401, 'Not authenticated')
+  if (!row) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
   return { show_email: false, show_github: row.showGithub }
 })

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
 import { v3RecentWorkspaces, v3SearchWorkspaces } from '~/api/v3'
 
 type ProjectOption = { label: string, id: string }

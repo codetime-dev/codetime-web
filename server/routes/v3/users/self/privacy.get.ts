@@ -37,6 +37,8 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
   return { show_email: false, show_github: session.showGithub }
 })

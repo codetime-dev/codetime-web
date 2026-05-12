@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
 import { v3RecentLanguages } from '~/api/v3'
 
 const modelValue = defineModel<string>({ default: '' })

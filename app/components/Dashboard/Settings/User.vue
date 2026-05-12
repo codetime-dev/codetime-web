@@ -2,7 +2,7 @@
 const user = useUser()
 const t = useI18N()
 const { getCheckoutLink } = await useCheckoutLink(ref(false), ref(true))
-const checkoutLink = await getCheckoutLink()
+const checkoutLink = (await getCheckoutLink()) ?? undefined
 
 const planLabel = computed(() => String(user.value?.plan ?? 'free').toUpperCase())
 const isPro = computed(() => String(user.value?.plan ?? '').toLowerCase() === 'pro')

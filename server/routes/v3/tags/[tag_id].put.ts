@@ -45,12 +45,18 @@ type UpdateBody = {
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
   const tagId = getRouterParam(event, 'tag_id')
-  if (!tagId) return sendPyError(event, 404, 'Tag not found')
+  if (!tagId) {
+ return sendPyError(event, 404, 'Tag not found')
+}
 
   const body = await readBody<UpdateBody>(event).catch(() => null)
-  if (!body) return sendPyError(event, 400, 'Invalid request body')
+  if (!body) {
+ return sendPyError(event, 400, 'Invalid request body')
+}
 
   const db = useDb()
   const [existing] = await db
@@ -58,7 +64,9 @@ export default defineEventHandler(async (event) => {
     .from(tags)
     .where(and(eq(tags.id, tagId), eq(tags.uid, session.id)))
     .limit(1)
-  if (!existing) return sendPyError(event, 404, 'Tag not found')
+  if (!existing) {
+ return sendPyError(event, 404, 'Tag not found')
+}
 
   const patch: Partial<typeof tags.$inferInsert> = { updatedAt: new Date() }
 
@@ -68,11 +76,17 @@ export default defineEventHandler(async (event) => {
       .from(tags)
       .where(and(eq(tags.uid, session.id), eq(tags.name, body.name), ne(tags.id, tagId)))
       .limit(1)
-    if (dup) return sendPyError(event, 400, 'Tag name already exists')
+    if (dup) {
+ return sendPyError(event, 400, 'Tag name already exists')
+}
     patch.name = body.name
   }
-  if (typeof body.color === 'string') patch.color = body.color
-  if ('emoji' in body) patch.emoji = body.emoji ?? null
+  if (typeof body.color === 'string') {
+ patch.color = body.color
+}
+  if ('emoji' in body) {
+ patch.emoji = body.emoji ?? null
+}
   if ('rules' in body) {
     const r = body.rules
     if (r === null || (typeof r === 'string' && (r === 'null' || r === ''))) {
@@ -88,5 +102,8 @@ export default defineEventHandler(async (event) => {
     .set(patch)
     .where(eq(tags.id, tagId))
     .returning()
+  if (!row) {
+ return sendPyError(event, 404, 'Tag not found')
+}
   return toTagResponse(row)
 })

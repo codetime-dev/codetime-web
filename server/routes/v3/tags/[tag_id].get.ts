@@ -30,9 +30,13 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
   const tagId = getRouterParam(event, 'tag_id')
-  if (!tagId) return sendPyError(event, 404, 'Tag not found')
+  if (!tagId) {
+ return sendPyError(event, 404, 'Tag not found')
+}
 
   const db = useDb()
   const [row] = await db
@@ -40,6 +44,8 @@ export default defineEventHandler(async (event) => {
     .from(tags)
     .where(and(eq(tags.id, tagId), eq(tags.uid, session.id)))
     .limit(1)
-  if (!row) return sendPyError(event, 404, 'Tag not found')
+  if (!row) {
+ return sendPyError(event, 404, 'Tag not found')
+}
   return toTagResponse(row)
 })

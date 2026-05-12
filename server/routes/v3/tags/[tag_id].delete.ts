@@ -27,16 +27,22 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
-  if (!session) return sendPyError(event, 401, 'Not authenticated')
+  if (!session) {
+ return sendPyError(event, 401, 'Not authenticated')
+}
   const tagId = getRouterParam(event, 'tag_id')
-  if (!tagId) return sendPyError(event, 404, 'Tag not found')
+  if (!tagId) {
+ return sendPyError(event, 404, 'Tag not found')
+}
 
   const db = useDb()
   const deleted = await db
     .delete(tags)
     .where(and(eq(tags.id, tagId), eq(tags.uid, session.id)))
     .returning({ id: tags.id })
-  if (!deleted.length) return sendPyError(event, 404, 'Tag not found')
+  if (deleted.length === 0) {
+ return sendPyError(event, 404, 'Tag not found')
+}
 
   setResponseStatus(event, 204)
   return null

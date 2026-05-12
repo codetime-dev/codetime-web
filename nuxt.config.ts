@@ -103,6 +103,15 @@ export default defineNuxtConfig({
     // Scalar runs in an iframe — neither host page nor shell need SSR.
     '/docs/api': { ssr: false },
     '/docs/api/**': { ssr: false },
+    // Dashboard is auth-gated and entirely user-specific — SSR has no SEO value
+    // and only produces hydration mismatches (localStorage/cookies/per-user data).
+    '/*/dashboard': { ssr: false },
+    '/*/dashboard/**': { ssr: false },
+    // Hide Nitro's raw auto-generated spec / built-in UIs. The public
+    // surface is `/v3/docs/openapi.json` which we curate.
+    '/_openapi.json': { redirect: { to: '/v3/docs/openapi.json', statusCode: 301 } },
+    '/_swagger': { redirect: { to: '/docs/api', statusCode: 301 } },
+    '/_scalar': { redirect: { to: '/docs/api', statusCode: 301 } },
     // Widget SVG endpoints set their own cache headers in the handler. Override
     // any CDN page-cache defaults so an occasional SPA-fallback HTML response
     // (e.g. during a deploy) is not pinned at the edge for hours.
