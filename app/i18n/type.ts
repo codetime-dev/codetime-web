@@ -275,6 +275,12 @@ export type Translation = {
         days: string
         project: string
         color: string
+        tag: string
+        scope: string
+      }
+      scope: {
+        tag: string
+        workspace: string
       }
     }
     widget?: {

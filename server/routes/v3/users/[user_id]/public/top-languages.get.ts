@@ -83,7 +83,9 @@ export default defineEventHandler(async (event) => {
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  if (!userRow) return sendPyError(event, 404, 'User not found')
+  if (!userRow) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   const plan = (userRow.plan || 'free').toLowerCase()
   const isPro = plan === 'pro'

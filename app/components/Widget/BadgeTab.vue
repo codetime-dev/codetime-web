@@ -26,7 +26,8 @@ function normalizedColor(value: string) {
   return /^[0-9a-f]{3,8}$/i.test(v) ? `#${v}` : v
 }
 const user = useUser()
-const project = ref<{ label: string, id: string } | null>(null)
+type ScopeOption = { label: string, id: string, kind: 'tag' | 'workspace', color?: string | null, emoji?: string | null }
+const scope = ref<ScopeOption | null>(null)
 const language = ref<string>('')
 const days = ref<string>('')
 const apiHost = 'https://api.codetime.dev'
@@ -43,7 +44,8 @@ function selectColor(hex: string) {
 
 const rawParams = computed(() => ({
   uid: user.value?.id,
-  project: project.value?.id,
+  project: scope.value?.kind === 'workspace' ? scope.value.label : '',
+  tag: scope.value?.kind === 'tag' ? scope.value.label : '',
   minutes: String(Number(days.value) * 24 * 60),
   color: normalizedColor(color.value).replace(/^#/, ''),
   style: styleObj.value?.id ?? '',
@@ -144,9 +146,9 @@ const link = computed(() => {
             </div>
             <div class="badge-filter-cell">
               <div class="badge-filter-label">
-                project
+                scope
               </div>
-              <ProjectSelect v-model="project" />
+              <WidgetScopeSelect v-model="scope" />
             </div>
             <div class="badge-filter-cell">
               <div class="badge-filter-label">

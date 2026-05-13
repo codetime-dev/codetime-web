@@ -294,6 +294,12 @@ export const it: Partial<Translation> = {
         days: 'Giorni',
         project: 'Progetto',
         color: 'Colore',
+        tag: 'Tag',
+        scope: 'Progetto o tag',
+      },
+      scope: {
+        tag: 'Tag',
+        workspace: 'Progetto',
       },
     },
     widget: {

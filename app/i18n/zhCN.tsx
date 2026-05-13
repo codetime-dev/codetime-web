@@ -360,6 +360,12 @@ export const zhCN: Partial<Translation> = {
         days: '天数',
         project: '项目',
         color: '颜色',
+        tag: '标签',
+        scope: '项目或标签',
+      },
+      scope: {
+        tag: '标签',
+        workspace: '项目',
       },
     },
     widget: {

@@ -315,6 +315,12 @@ export const ru: Partial<Translation> = {
         days: 'Дни',
         project: 'Проект',
         color: 'Цвет',
+        tag: 'Тег',
+        scope: 'Проект или тег',
+      },
+      scope: {
+        tag: 'Тег',
+        workspace: 'Проект',
       },
     },
     widget: {

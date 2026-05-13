@@ -327,6 +327,12 @@ export const ms: Partial<Translation> = {
         days: 'Hari',
         project: 'Projek',
         color: 'Warna',
+        tag: 'Tag',
+        scope: 'Projek atau tag',
+      },
+      scope: {
+        tag: 'Tag',
+        workspace: 'Projek',
       },
     },
     widget: {

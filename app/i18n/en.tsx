@@ -359,6 +359,12 @@ export const en: Translation = {
         days: 'Days',
         project: 'Project',
         color: 'Color',
+        tag: 'Tag',
+        scope: 'Workspace or tag',
+      },
+      scope: {
+        tag: 'Tag',
+        workspace: 'Workspace',
       },
     },
     widget: {

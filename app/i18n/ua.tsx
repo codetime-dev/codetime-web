@@ -314,6 +314,12 @@ export const ua: Partial<Translation> = {
         days: 'Дні',
         project: 'Проект',
         color: 'Колір',
+        tag: 'Тег',
+        scope: 'Проект або тег',
+      },
+      scope: {
+        tag: 'Тег',
+        workspace: 'Проект',
       },
     },
     widget: {

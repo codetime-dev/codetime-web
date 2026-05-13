@@ -327,6 +327,12 @@ export const zhTW: Partial<Translation> = {
         days: '天數',
         project: '專案',
         color: '顏色',
+        tag: '標籤',
+        scope: '專案或標籤',
+      },
+      scope: {
+        tag: '標籤',
+        workspace: '專案',
       },
     },
     widget: {

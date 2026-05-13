@@ -9,6 +9,12 @@ import { client } from '~/api/v3/client.gen'
 
 definePageMeta({
   layout: 'dashboard',
+  // The dashboard layout gates its slot on `user || pending`. For
+  // anonymous visitors that gate would never open (user stays null,
+  // pending flips to false after the user-self fetch errors), so the
+  // page's setup — which injects the synthetic FAKE_USER below — would
+  // never run. Opt out of the gate explicitly here.
+  skipAuthGate: true,
 })
 
 const t = useI18N()

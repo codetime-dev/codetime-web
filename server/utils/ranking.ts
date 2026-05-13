@@ -5,7 +5,9 @@ import { useDb } from './db'
 // places (e.g. 2.0833333333333335 → 2.0833333333). Without this we leak
 // trailing IEEE 754 noise digits that the Python service drops.
 function roundPct(x: number): number {
-  if (!Number.isFinite(x)) return 0
+  if (!Number.isFinite(x)) {
+ return 0
+}
   return Math.round(x * 1e10) / 1e10
 }
 
@@ -120,7 +122,9 @@ export async function fetchUserLanguageRank(uid: number, language: string, from:
     from ranked where uid = ${uid}
   `)
   const row = (result as any as any[])[0]
-  if (!row) return null
+  if (!row) {
+ return null
+}
   const totalUsers = await totalAllUsersTimes7()
   const rank = Number(row.rnk)
   return {
@@ -149,7 +153,9 @@ export async function fetchUserOverallRank(uid: number, from: Date, to: Date) {
     from ranked where uid = ${uid}
   `)
   const row = (result as any as any[])[0]
-  if (!row) return null
+  if (!row) {
+ return null
+}
   const totalUsers = await totalAllUsersTimes7()
   const rank = Number(row.rnk)
   return {
@@ -198,7 +204,9 @@ export async function fetchUserTopLanguagesRank(uid: number, topN: number, from:
     order by ut.user_minutes desc
   `)
   const rows = result as any as any[]
-  if (rows.length === 0) return []
+  if (rows.length === 0) {
+ return []
+}
   const totalUsers = await totalAllUsersTimes7()
   return rows.map((row: any) => {
     const rank = Number(row.rnk)

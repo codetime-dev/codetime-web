@@ -116,5 +116,5 @@ export default defineEventHandler(async (event) => {
 
   // Python sets expires_at = now + 24h regardless of LS' real expiry.
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-  return { checkoutUrl: data.data.attributes.url, expiresAt: expiresAt }
+  return { checkoutUrl: data.data.attributes.url, expiresAt }
 })

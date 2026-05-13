@@ -110,7 +110,9 @@ export default defineEventHandler(async (event) => {
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  if (!user) return sendPyError(event, 404, 'User not found')
+  if (!user) {
+ return sendPyError(event, 404, 'User not found')
+}
 
   // Python's expiration check is a no-op in practice (see top-languages.get.ts).
   const plan = (user.plan || 'free').toLowerCase()

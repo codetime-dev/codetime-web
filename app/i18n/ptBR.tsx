@@ -294,6 +294,12 @@ export const ptBR: Partial<Translation> = {
         days: 'Dias',
         project: 'Projeto',
         color: 'Cor',
+        tag: 'Tag',
+        scope: 'Projeto ou tag',
+      },
+      scope: {
+        tag: 'Tag',
+        workspace: 'Projeto',
       },
     },
     widget: {

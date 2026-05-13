@@ -31,6 +31,12 @@ const userPending = inject<ComputedRef<boolean>>(
 )
 const pending = computed(() => userPending.value && !user.value)
 
+// Pages can opt out of the auth gate (e.g. the public /demo page injects
+// a synthetic user inside its own setup — but that setup only runs when
+// the layout actually renders the slot, so we must let it through here).
+const route = useRoute()
+const skipAuthGate = computed(() => Boolean(route.meta.skipAuthGate))
+
 useHead({
   htmlAttrs: { lang: locale.value },
   link: [{ rel: 'icon', type: 'image/png', href: '/icon.png' }],
@@ -52,7 +58,7 @@ useHead({
              skeletons inside UnifiedUserDashboard) take over immediately,
              so there is no intermediate blank frame between the layout
              skeleton and the page content. -->
-        <slot v-if="user || pending" />
+        <slot v-if="user || pending || skipAuthGate" />
         <div
           v-else
           class="py-16 op75 flex flex-col h-full items-center justify-center"

@@ -327,6 +327,12 @@ export const ja: Partial<Translation> = {
         days: '日数',
         project: 'プロジェクト',
         color: '色',
+        tag: 'タグ',
+        scope: 'プロジェクトまたはタグ',
+      },
+      scope: {
+        tag: 'タグ',
+        workspace: 'プロジェクト',
       },
     },
     widget: {
