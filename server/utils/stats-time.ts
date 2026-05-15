@@ -18,7 +18,7 @@ export type Unit = 'days' | 'hours' | 'minutes'
 
 // Escape single quotes for inlining as a Postgres string literal.
 function pgLiteral(value: string): string {
-  return `'${value.replace(/'/g, '\'\'')}'`
+  return `'${value.replaceAll('\'', '\'\'')}'`
 }
 
 export function timeTruncExpr(unit: Unit, tz: string): SQL {

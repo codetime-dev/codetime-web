@@ -124,7 +124,7 @@ function pyDateKey(d: Date): string {
 }
 
 function titleCase(s: string): string {
-  return s.replace(/(?:^|\s)\S/g, c => c.toUpperCase())
+  return s.replaceAll(/(?:^|\s)\S/g, c => c.toUpperCase())
 }
 
 // pytz timezone offset lookup at a given instant. We rely on Intl to
@@ -168,8 +168,8 @@ function fold(line: string): string {
  return line
 }
   const chunks: string[] = []
-  let i = 0
-  let chunkStart = 0
+  const i = 0
+  const chunkStart = 0
   // Iterate over code points so we never cut mid-UTF-8.
   const decoder = new TextDecoder('utf8')
   const arr = [...line]
@@ -194,7 +194,9 @@ function fold(line: string): string {
     }
     cursor += 1
   }
-  if (acc) chunks.push(acc)
+  if (acc) {
+ chunks.push(acc)
+}
   // Silence unused locals; the encoded form is only needed for the size
   // check above.
   void buf
@@ -209,9 +211,9 @@ function fold(line: string): string {
 function esc(s: string): string {
   return s
     .replaceAll('\\', '\\\\')
-    .replaceAll(';', '\\;')
-    .replaceAll(',', '\\,')
-    .replaceAll('\n', '\\n')
+    .replaceAll(';', String.raw`\;`)
+    .replaceAll(',', String.raw`\,`)
+    .replaceAll('\n', String.raw`\n`)
 }
 
 type Row = {
@@ -303,7 +305,7 @@ export default defineEventHandler(async (event) => {
  current = [r]
 }
         else {
-          const last = current[current.length - 1]
+          const last = current.at(-1)
           const diffMin = (r.recorded_at.getTime() - last.recorded_at.getTime()) / 60_000
           if (diffMin <= 5) {
  current.push(r)
@@ -345,7 +347,7 @@ export default defineEventHandler(async (event) => {
   for (const b of blocks) {
     const duration = b.rows.length
     const first = b.rows[0]
-    const last = b.rows[b.rows.length - 1]
+    const last = b.rows.at(-1)
     const startTime = first.recorded_at
     const endTime = new Date(last.recorded_at.getTime() + 60_000)
     const startOffset = tzOffsetMinutes(tz, startTime)

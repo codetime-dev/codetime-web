@@ -98,7 +98,7 @@ export default defineEventHandler(async (event) => {
 
   // tz is inlined as a SQL string literal so SELECT and GROUP BY produce
   // byte-identical expressions; see stats-time.ts for the same reason.
-  const tzLit = `'${tz.replace(/'/g, '\'\'')}'`
+  const tzLit = `'${tz.replaceAll('\'', '\'\'')}'`
   const hour = sql<number>`${sql.raw(`extract(hour from timezone(${tzLit}, "workspace_minutes_v2"."recorded_at"))`)}`
   const minute = sql<number>`${sql.raw(`extract(minute from timezone(${tzLit}, "workspace_minutes_v2"."recorded_at"))`)}`
 

@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
   // Mirror Python's `Parameter(min_length=1)` validation on `q`. Litestar
   // raises ValidationException with this exact body shape for missing or
   // empty `q`; we emit the same envelope so the SDK error path is unified.
-  if (q.length < 1) {
+  if (q.length === 0) {
     return sendPyValidationError(event, 'GET', getRequestPath(event), [
       { key: 'q', message: 'Expected `str` of length >= 1', source: 'query' },
     ])

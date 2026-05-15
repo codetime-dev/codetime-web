@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
   const field = String(q.field)
   if (!META_FIELD[field]) {
     return sendPyValidationError(event, 'GET', path, [
-      { key: 'field', message: "Input should be 'language', 'workspace', 'editor' or 'platform'", source: 'query' },
+      { key: 'field', message: 'Input should be \'language\', \'workspace\', \'editor\' or \'platform\'', source: 'query' },
     ])
   }
 

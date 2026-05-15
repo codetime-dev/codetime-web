@@ -17,7 +17,7 @@ export type TagResponse = {
 }
 
 function snakeToCamelKey(k: string): string {
-  return k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())
+  return k.replaceAll(/_([a-z])/g, (_, c: string) => c.toUpperCase())
 }
 
 // Deep-camelCase only the *keys* of a plain object/array tree. Pydantic

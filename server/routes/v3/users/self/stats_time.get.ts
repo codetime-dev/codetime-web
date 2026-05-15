@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
   const unit = (typeof q.unit === 'string' ? q.unit : 'days') as Unit
   if (!['days', 'hours', 'minutes'].includes(unit)) {
     return sendPyValidationError(event, 'GET', getRequestPath(event), [
-      { key: 'unit', message: "Input should be 'days', 'hours' or 'minutes'", source: 'query' },
+      { key: 'unit', message: 'Input should be \'days\', \'hours\' or \'minutes\'', source: 'query' },
     ])
   }
   const tz = s(q.tz) || session.timezone || 'etc/UTC'

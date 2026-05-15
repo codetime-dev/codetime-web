@@ -99,13 +99,13 @@ export default defineEventHandler(async (event) => {
   const by = String(q.by)
   if (!META_BY[by]) {
     return sendPyValidationError(event, 'GET', path, [
-      { key: 'by', message: "Input should be 'language', 'workspace', 'editor' or 'platform'", source: 'query' },
+      { key: 'by', message: 'Input should be \'language\', \'workspace\', \'editor\' or \'platform\'', source: 'query' },
     ])
   }
   const unit = (typeof q.unit === 'string' ? q.unit : 'days') as Unit
   if (!['days', 'hours', 'minutes'].includes(unit)) {
     return sendPyValidationError(event, 'GET', path, [
-      { key: 'unit', message: "Input should be 'days', 'hours' or 'minutes'", source: 'query' },
+      { key: 'unit', message: 'Input should be \'days\', \'hours\' or \'minutes\'', source: 'query' },
     ])
   }
   const tz = s(q.tz) || session.timezone || 'etc/UTC'
@@ -169,12 +169,7 @@ isPro: session.plan === 'pro',
     data: rows.map((r) => {
       const raw = r.time as unknown
       let label: string
-      if (raw instanceof Date) {
-        label = `${raw.getUTCFullYear().toString().padStart(4, '0')}-${(raw.getUTCMonth() + 1).toString().padStart(2, '0')}-${raw.getUTCDate().toString().padStart(2, '0')}`
-      }
-      else {
-        label = String(raw).slice(0, 10)
-      }
+      label = raw instanceof Date ? `${raw.getUTCFullYear().toString().padStart(4, '0')}-${(raw.getUTCMonth() + 1).toString().padStart(2, '0')}-${raw.getUTCDate().toString().padStart(2, '0')}` : String(raw).slice(0, 10)
       return {
         duration: Number(r.duration),
         time: label,

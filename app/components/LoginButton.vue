@@ -34,7 +34,9 @@ const onloadEl = useTemplateRef<HTMLElement>('onloadEl')
 const gisInjected = ref(false)
 
 function injectGis() {
-  if (gisInjected.value) return
+  if (gisInjected.value) {
+ return
+}
   if (document.querySelector('script[data-gis-client]')) {
     gisInjected.value = true
     return
@@ -50,8 +52,12 @@ function injectGis() {
 watch(
   onloadEl,
   (el) => {
-    if (import.meta.server) return
-    if (!el) return
+    if (import.meta.server) {
+ return
+}
+    if (!el) {
+ return
+}
     injectGis()
   },
   { immediate: true, flush: 'post' },
@@ -71,10 +77,20 @@ async function handleGitHubLogin() {
     sessionStorage.setItem('github_oauth_state', state)
     sessionStorage.setItem('github_oauth_redirect', globalThis.location.href)
 
+    // GitHub app has more than one callback URL registered (codetime.dev
+    // for the Nuxt handler and api.codetime.dev for the legacy Python
+    // handler). When multiple URLs are registered, GitHub no longer
+    // infers a default and the token exchange returns bad_verification_code
+    // unless redirect_uri is sent explicitly at BOTH /authorize and
+    // /access_token. Pin both ends to this page's origin so the code
+    // stays bound to the Nuxt callback.
+    const redirectUri = `${globalThis.location.origin}/v3/auth/github`
+
     const authUrl = `https://github.com/login/oauth/authorize?`
       + `client_id=${clientId}&`
       + `scope=${encodeURIComponent(scope)}&`
-      + `state=${state}`
+      + `state=${state}&`
+      + `redirect_uri=${encodeURIComponent(redirectUri)}`
 
     globalThis.location.href = authUrl
   }

@@ -16,7 +16,7 @@ import process from 'node:process'
 type LabelDict = Record<string, string | number>
 
 function escapeLabel(v: string): string {
-  return v.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '\\n')
+  return v.replaceAll('\\', '\\\\').replaceAll('"', String.raw`\"`).replaceAll('\n', String.raw`\n`)
 }
 
 function fmtLabels(labels: LabelDict | undefined): string {
@@ -27,7 +27,7 @@ function fmtLabels(labels: LabelDict | undefined): string {
   for (const k of Object.keys(labels).sort()) {
     parts.push(`${k}="${escapeLabel(String(labels[k]))}"`)
   }
-  return parts.length ? `{${parts.join(',')}}` : ''
+  return parts.length > 0 ? `{${parts.join(',')}}` : ''
 }
 
 // Reasonable default buckets — matches the codetime-server config's
@@ -44,11 +44,11 @@ const DEFAULT_BUCKETS = [
   0.25,
   0.5,
   0.75,
-  1.0,
+  1,
   2.5,
-  5.0,
+  5,
   7.5,
-  10.0,
+  10,
 ]
 
 class Counter {
@@ -104,11 +104,13 @@ class Histogram {
     const key = fmtLabels(labels)
     let bucket = this.observations.get(key)
     if (!bucket) {
-      bucket = { buckets: new Array(this.buckets.length).fill(0), sum: 0, count: 0 }
+      bucket = { buckets: Array.from({ length: this.buckets.length }).fill(0), sum: 0, count: 0 }
       this.observations.set(key, bucket)
     }
     for (let i = 0; i < this.buckets.length; i++) {
-      if (value <= this.buckets[i]) bucket.buckets[i]++
+      if (value <= this.buckets[i]) {
+ bucket.buckets[i]++
+}
     }
     bucket.sum += value
     bucket.count += 1
@@ -128,9 +130,7 @@ class Histogram {
         cum += h.buckets[i]
         out.push(`${this.name}_bucket${base}${sep}le="${this.buckets[i]}"} ${cum}`)
       }
-      out.push(`${this.name}_bucket${base}${sep}le="+Inf"} ${h.count}`)
-      out.push(`${this.name}_sum${labelStr} ${h.sum}`)
-      out.push(`${this.name}_count${labelStr} ${h.count}`)
+      out.push(`${this.name}_bucket${base}${sep}le="+Inf"} ${h.count}`, `${this.name}_sum${labelStr} ${h.sum}`, `${this.name}_count${labelStr} ${h.count}`)
     }
     return out.join('\n')
   }
@@ -164,7 +164,7 @@ class Registry {
 // Singleton — Nuxt's dev server may HMR-reload modules but the registry
 // must outlive that to keep counter values monotonic across hot reloads.
 declare global {
-  // eslint-disable-next-line vars-on-top, no-var
+  // eslint-disable-next-line vars-on-top
   var __codetimeMetrics: {
     registry: Registry
     httpRequestsTotal: Counter
