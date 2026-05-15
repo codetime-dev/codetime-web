@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { eq } from 'drizzle-orm'
-import { defineEventHandler } from 'h3'
+import { defineEventHandler, setResponseStatus } from 'h3'
 import { users } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
@@ -60,5 +60,7 @@ export default defineEventHandler(async (event) => {
  return sendPyError(event, 404, 'User not found')
 }
 
+  // Litestar's @post default status is 201 — keep parity.
+  setResponseStatus(event, 201)
   return { token: row.uploadToken, tokenV1: row.tokenV1 }
 })

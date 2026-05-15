@@ -1,12 +1,12 @@
 import type { SQL } from 'drizzle-orm'
 import type { Unit } from '../../../../utils/stats-time'
 import { and, count, desc, eq } from 'drizzle-orm'
-import { defineEventHandler, getQuery } from 'h3'
+import { defineEventHandler, getQuery, getRequestPath } from 'h3'
 import { workspaceMetaV2, workspaceMinutesV2 } from '../../../../db/schema'
 import { tryUser } from '../../../../utils/auth'
 import { useDb } from '../../../../utils/db'
 import { denyIfOutsideFreeWindow } from '../../../../utils/plan-limits'
-import { sendPyError } from '../../../../utils/py-error'
+import { sendPyError, sendPyValidationError } from '../../../../utils/py-error'
 import {
   computeWindow,
   META_BY,
@@ -87,14 +87,27 @@ export default defineEventHandler(async (event) => {
 }
 
   const q = getQuery(event)
-  const by = String(q.by || '')
+  // Python defines `by: Literal[...]` with no default. Litestar emits a
+  // 400 with detail "Missing required query parameter 'by' for path ..."
+  // when absent, and a ValidationException envelope when supplied but not
+  // in the literal set. Mirror both shapes so SDK error handling is one
+  // code path across backends.
+  const path = getRequestPath(event)
+  if (q.by === undefined) {
+    return sendPyError(event, 400, `Missing required query parameter 'by' for path ${path}`)
+  }
+  const by = String(q.by)
   if (!META_BY[by]) {
- return sendPyError(event, 400, 'Invalid by field')
-}
+    return sendPyValidationError(event, 'GET', path, [
+      { key: 'by', message: "Input should be 'language', 'workspace', 'editor' or 'platform'", source: 'query' },
+    ])
+  }
   const unit = (typeof q.unit === 'string' ? q.unit : 'days') as Unit
   if (!['days', 'hours', 'minutes'].includes(unit)) {
- return sendPyError(event, 400, 'Invalid unit')
-}
+    return sendPyValidationError(event, 'GET', path, [
+      { key: 'unit', message: "Input should be 'days', 'hours' or 'minutes'", source: 'query' },
+    ])
+  }
   const tz = s(q.tz) || session.timezone || 'etc/UTC'
   const limit = Math.max(1, Math.trunc(Number(q.limit) || 30))
   const startTime = dt(q.start_time)
@@ -138,17 +151,35 @@ isPro: session.plan === 'pro',
   const stmt = join
     ? base.innerJoin(workspaceMetaV2, eq(workspaceMinutesV2.metaXxh3_64, workspaceMetaV2.xxh3_64))
     : base
+  // Python's list_self_stats does NOT apply a SQL LIMIT — `limit` only
+  // sizes the time window (limit * minutes_per_unit). The returned row
+  // count is therefore (buckets × by-cardinality). Mirror that: no
+  // `.limit(...)` here. `finalLimit` is unused at this layer.
+  void finalLimit
   const rows = await stmt
     .where(and(...where))
     .groupBy(byField, time)
     .orderBy(desc(time), desc(count()))
-    .limit(finalLimit)
 
+  // See stats_time.get.ts — Postgres returns a naive timestamp from
+  // date_trunc(...) which `new Date(...).toISOString()` would shift by
+  // the process timezone. Format the wall-clock components in UTC so the
+  // YYYY-MM-DD label stays aligned with Python's output.
   return {
-    data: rows.map(r => ({
-      duration: Number(r.duration),
-      time: new Date(r.time as any).toISOString().slice(0, 10),
-      by: String(r.by ?? 'Unknown'),
-    })),
+    data: rows.map((r) => {
+      const raw = r.time as unknown
+      let label: string
+      if (raw instanceof Date) {
+        label = `${raw.getUTCFullYear().toString().padStart(4, '0')}-${(raw.getUTCMonth() + 1).toString().padStart(2, '0')}-${raw.getUTCDate().toString().padStart(2, '0')}`
+      }
+      else {
+        label = String(raw).slice(0, 10)
+      }
+      return {
+        duration: Number(r.duration),
+        time: label,
+        by: String(r.by ?? 'Unknown'),
+      }
+    }),
   }
 })

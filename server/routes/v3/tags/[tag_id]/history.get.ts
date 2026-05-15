@@ -172,8 +172,10 @@ export default defineEventHandler(async (event) => {
     .sort((a, b) => (a[0] < b[0] ? -1 : 1))
     .map(([time, duration]) => ({ duration, time }))
 
+  // Python's services/tags.py::get_tag_history drops the rules payload
+  // on the wire (rules=None). Keep parity so the SDK sees the same shape.
   return {
-    tag: toTagResponse(tag),
+    tag: { ...toTagResponse(tag), rules: null },
     data,
     totalMinutes: total,
     periodStart: startDt.toISOString().slice(0, 10),

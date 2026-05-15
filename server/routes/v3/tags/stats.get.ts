@@ -135,7 +135,10 @@ export default defineEventHandler(async (event) => {
  total++
 }
     }
-    return { tag: toTagResponse(tag), totalMinutes: total }
+    // Python's services/tags.py:get_tag_time_stats deliberately drops
+    // the rules payload on this endpoint — keep parity so SDK output
+    // stays byte-equivalent.
+    return { tag: { ...toTagResponse(tag), rules: null }, totalMinutes: total }
   })
 
   return {

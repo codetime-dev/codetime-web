@@ -96,8 +96,11 @@ export default defineEventHandler(async (event) => {
   const language = s(q.language)
   const needsJoin = Boolean(platform || project || (language && (platform || project)))
 
-  const hour = sql<number>`extract(hour from timezone(${tz}, ${workspaceMinutesV2.recordedAt}))`
-  const minute = sql<number>`extract(minute from timezone(${tz}, ${workspaceMinutesV2.recordedAt}))`
+  // tz is inlined as a SQL string literal so SELECT and GROUP BY produce
+  // byte-identical expressions; see stats-time.ts for the same reason.
+  const tzLit = `'${tz.replace(/'/g, '\'\'')}'`
+  const hour = sql<number>`${sql.raw(`extract(hour from timezone(${tzLit}, "workspace_minutes_v2"."recorded_at"))`)}`
+  const minute = sql<number>`${sql.raw(`extract(minute from timezone(${tzLit}, "workspace_minutes_v2"."recorded_at"))`)}`
 
   const where: SQL[] = [
     eq(workspaceMinutesV2.uid, session.id),

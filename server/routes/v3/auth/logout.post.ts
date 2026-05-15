@@ -1,4 +1,4 @@
-import { defineEventHandler, deleteCookie } from 'h3'
+import { defineEventHandler, deleteCookie, setResponseStatus } from 'h3'
 
 // Mirrors POST /v3/auth/logout. Python also calls request.clear_session()
 // to wipe Litestar's server-side session cookie — that cookie isn't
@@ -29,5 +29,7 @@ defineRouteMeta({
 export default defineEventHandler((event) => {
   deleteCookie(event, 'auth_token', { path: '/' })
   deleteCookie(event, 'user_id', { path: '/' })
+  // Litestar's @post default status is 201 — keep parity.
+  setResponseStatus(event, 201)
   return { message: 'Logout successful' }
 })

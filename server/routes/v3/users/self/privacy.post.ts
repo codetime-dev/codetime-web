@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { defineEventHandler, readBody } from 'h3'
+import { defineEventHandler, readBody, setResponseStatus } from 'h3'
 import { users } from '../../../../db/schema'
 import { tryUser } from '../../../../utils/auth'
 import { useDb } from '../../../../utils/db'
@@ -54,5 +54,7 @@ export default defineEventHandler(async (event) => {
   if (!row) {
  return sendPyError(event, 401, 'Not authenticated')
 }
+  // Litestar's @post default status is 201 — keep parity.
+  setResponseStatus(event, 201)
   return { showEmail: false, showGithub: row.showGithub }
 })

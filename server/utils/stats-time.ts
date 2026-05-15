@@ -3,15 +3,27 @@ import { eq, gte, lte, sql } from 'drizzle-orm'
 import { workspaceMetaV2, workspaceMinutesV2 } from '../db/schema'
 
 // Shared helpers for the /v3/users/self/stats_time and /stats endpoints.
-// Python uses date_trunc(unit, timezone(tz, recorded_at)) — we pass the
-// `unit` and `tz` to Postgres directly. Postgres' timezone() converts a
-// timestamptz to a naive timestamp in the given zone, exactly what
-// date_trunc expects for local-day buckets.
+// Python uses date_trunc(unit, timezone(tz, recorded_at)) — we mirror that.
+// Postgres' timezone() converts a timestamptz to a naive timestamp in the
+// given zone, exactly what date_trunc expects for local-day buckets.
+//
+// Important: `unit` and `tz` are inlined as SQL string literals (not
+// prepared parameters). Drizzle assigns a fresh $N placeholder to every
+// `sql` interpolation, so the same logical expression in SELECT vs
+// GROUP BY ends up as `date_trunc($1, …, $2)` vs `date_trunc($6, …, $7)`.
+// Postgres' optimiser treats those as *different* expressions and rejects
+// the column as not-aggregated. Inlining the literals lets it match them.
 
 export type Unit = 'days' | 'hours' | 'minutes'
 
+// Escape single quotes for inlining as a Postgres string literal.
+function pgLiteral(value: string): string {
+  return `'${value.replace(/'/g, '\'\'')}'`
+}
+
 export function timeTruncExpr(unit: Unit, tz: string): SQL {
-  return sql`date_trunc(${unit === 'days' ? 'day' : unit === 'hours' ? 'hour' : 'minute'}, timezone(${tz}, ${workspaceMinutesV2.recordedAt}))`
+  const unitName = unit === 'days' ? 'day' : unit === 'hours' ? 'hour' : 'minute'
+  return sql.raw(`date_trunc(${pgLiteral(unitName)}, timezone(${pgLiteral(tz)}, "workspace_minutes_v2"."recorded_at"))`)
 }
 
 export function computeWindow(opts: {

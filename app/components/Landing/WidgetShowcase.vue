@@ -104,7 +104,7 @@ const tiles = computed(() => [
           <span>{{ t.landing.sections.widgets }}</span>
           <span class="eyebrow-bracket">]</span>
         </div>
-        <h2 class="section-heading text-ct-fg leading-[1.05] font-mono font-semibold max-w-3xl">
+        <h2 class="section-heading text-ct-fg leading-[1.05] font-semibold max-w-3xl">
           {{ t.landing.features.widgets.title }}
         </h2>
         <p class="text-[14px] text-ct-fg-muted leading-[1.7] mt-2 max-w-2xl">

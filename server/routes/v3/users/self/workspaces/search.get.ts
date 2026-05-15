@@ -1,9 +1,9 @@
 import { and, eq, ilike } from 'drizzle-orm'
-import { defineEventHandler, getQuery } from 'h3'
+import { defineEventHandler, getQuery, getRequestPath } from 'h3'
 import { workspaceMetaV2 } from '../../../../../db/schema'
 import { tryUser } from '../../../../../utils/auth'
 import { useDb } from '../../../../../utils/db'
-import { sendPyError } from '../../../../../utils/py-error'
+import { sendPyError, sendPyValidationError } from '../../../../../utils/py-error'
 
 // Mirrors GET /v3/users/self/workspaces/search. Distinct workspace
 // names matching `q` (ilike, case-insensitive), ordered alphabetically,
@@ -15,7 +15,7 @@ defineRouteMeta({
     summary: 'Search user workspace names',
     security: [{ bearerAuth: [] }, { cookieAuth: [] }],
     parameters: [
-      { name: 'q', in: 'query', schema: { type: 'string', default: '' } },
+      { name: 'q', in: 'query', required: true, schema: { type: 'string', minLength: 1 } },
       { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
     ],
     responses: {
@@ -23,6 +23,7 @@ defineRouteMeta({
         description: 'Workspace search response',
         content: { 'application/json': { schema: { $ref: '#/components/schemas/WorkspaceSearchResponse' } } },
       },
+      400: { $ref: '#/components/responses/BadRequest' },
       401: { $ref: '#/components/responses/Unauthorized' },
     },
   },
@@ -46,10 +47,20 @@ export default defineEventHandler(async (event) => {
   const q = typeof params.q === 'string' ? params.q : ''
   const limit = clampInt(params.limit, 1, 100, 20)
 
+  // Mirror Python's `Parameter(min_length=1)` validation on `q`. Litestar
+  // raises ValidationException with this exact body shape for missing or
+  // empty `q`; we emit the same envelope so the SDK error path is unified.
+  if (q.length < 1) {
+    return sendPyValidationError(event, 'GET', getRequestPath(event), [
+      { key: 'q', message: 'Expected `str` of length >= 1', source: 'query' },
+    ])
+  }
+
   const db = useDb()
-  const where = q
-    ? and(eq(workspaceMetaV2.uid, session.id), ilike(workspaceMetaV2.workspaceName, `%${q}%`))
-    : eq(workspaceMetaV2.uid, session.id)
+  const where = and(
+    eq(workspaceMetaV2.uid, session.id),
+    ilike(workspaceMetaV2.workspaceName, `%${q}%`),
+  )
 
   const rows = await db
     .selectDistinct({ workspaceName: workspaceMetaV2.workspaceName })

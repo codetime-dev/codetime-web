@@ -279,17 +279,13 @@ export default defineEventHandler(async (event) => {
 
   const message = onlyHours ? `${Math.floor(resultMinutes / 60)}h` : getShieldMessage(resultMinutes, minutes)
 
-  // Color resolution:
-  //   - tag set: use the tag's own color (always; tag identity dominates).
-  //   - no project/language/tag: blue only if a time window was requested.
-  //   - otherwise: blue when minutes > 0, with the language palette taking
-  //     precedence if a language filter was applied.
+  // Color resolution — mirrors codetime-server-v3 controllers/users.py.
+  //   - tag with explicit color: tag identity dominates.
+  //   - otherwise: blue when *measured* minutes > 0, else lightgrey;
+  //     a language filter wins via the known palette.
   let color: string
   if (tagRow && tagRow.color) {
     color = tagRow.color
-  }
-  else if (!project && !language && !tagName) {
-    color = minutes > 0 ? 'blue' : 'lightgrey'
   }
   else {
     color = resultMinutes > 0 ? 'blue' : 'lightgrey'

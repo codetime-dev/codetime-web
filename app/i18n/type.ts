@@ -288,6 +288,8 @@ export type Translation = {
         badge: string
         donut: string
         status: string
+        calendar?: string
+        trend?: string
       }
       theme: {
         label: string
@@ -318,12 +320,22 @@ export type Translation = {
           detailed: string
         }
       }
+      calendar?: {
+        title: string
+      }
+      trend?: {
+        title: string
+        days: string
+      }
       limit: {
         upgrade: string
         donutFree: string
         donutExceeds: string
         statusFree: string
         statusFreeStyle?: string
+        calendarFree?: string
+        trendFree?: string
+        trendExceeds?: string
       }
     }
     settings: {

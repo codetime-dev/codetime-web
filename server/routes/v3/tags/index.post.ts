@@ -1,10 +1,11 @@
 import { and, count, eq } from 'drizzle-orm'
-import { defineEventHandler, readBody } from 'h3'
+import { defineEventHandler, readBody, setResponseStatus } from 'h3'
 import { tags } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { sendPyError } from '../../../utils/py-error'
 import { toTagResponse } from '../../../utils/tag-dto'
+import { uuid7 } from '../../../utils/uuid7'
 
 // Mirrors POST /v3/tags. Plan-gated (free tier: 3 tags max) and rejects
 // duplicate names per user. `rules_json` is always null at creation —
@@ -77,6 +78,7 @@ export default defineEventHandler(async (event) => {
   const [row] = await db
     .insert(tags)
     .values({
+      id: uuid7(),
       uid: session.id,
       name: body.name,
       color: body.color,
@@ -89,6 +91,8 @@ export default defineEventHandler(async (event) => {
   if (!row) {
  return sendPyError(event, 500, 'Failed to create tag')
 }
-  event.node.res.statusCode = 201
+  // Python's Litestar @post returns 201 by default; mirror it so SDK
+  // success-status checks line up across backends.
+  setResponseStatus(event, 201)
   return toTagResponse(row)
 })

@@ -1,11 +1,11 @@
 import type { SQL } from 'drizzle-orm'
 import { and, count, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm'
-import { defineEventHandler, getQuery } from 'h3'
+import { defineEventHandler, getQuery, getRequestPath } from 'h3'
 import { workspaceMetaV2, workspaceMinutesV2 } from '../../../../db/schema'
 import { tryUser } from '../../../../utils/auth'
 import { useDb } from '../../../../utils/db'
 import { denyIfOutsideFreeWindow } from '../../../../utils/plan-limits'
-import { sendPyError } from '../../../../utils/py-error'
+import { sendPyError, sendPyValidationError } from '../../../../utils/py-error'
 
 // Mirrors GET /v3/users/self/top. Returns the top N field values
 // (language|workspace|editor|platform) for the authenticated user,
@@ -77,10 +77,20 @@ export default defineEventHandler(async (event) => {
 }
 
   const q = getQuery(event)
-  const field = String(q.field || '')
+  // Mirror Python's `field: Literal[...]` required parameter (see
+  // controllers/users.py::list_self_top). Litestar emits a "Missing
+  // required query parameter" error when absent and a validation
+  // envelope when present-but-invalid.
+  const path = getRequestPath(event)
+  if (q.field === undefined) {
+    return sendPyError(event, 400, `Missing required query parameter 'field' for path ${path}`)
+  }
+  const field = String(q.field)
   if (!META_FIELD[field]) {
- return sendPyError(event, 400, 'Invalid field')
-}
+    return sendPyValidationError(event, 'GET', path, [
+      { key: 'field', message: "Input should be 'language', 'workspace', 'editor' or 'platform'", source: 'query' },
+    ])
+  }
 
   const startTime = dt(q.start_time)
   const endTime = dt(q.end_time)

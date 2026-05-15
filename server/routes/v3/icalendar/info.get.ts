@@ -60,29 +60,50 @@ export default defineEventHandler(async (event) => {
       ))
       .where(eq(workspaceMetaV2.uid, session.id))
       .orderBy(asc(workspaceMetaV2.platform)),
-    db.select({ name: tags.name }).from(tags).where(eq(tags.uid, session.id)),
+    // Python's services/tags.py::get_user_tags orders by created_at asc;
+    // mirror that so the `tags` list arrives in the same order.
+    db.select({ name: tags.name }).from(tags).where(eq(tags.uid, session.id)).orderBy(asc(tags.createdAt)),
   ])
 
+  // Wire keys are camelCase across the entire response — including the
+  // `parameters` / `examples` doc blocks — to match the Python contract
+  // updated in controllers/icalendar.py. Query-parameter *values* in the
+  // example URLs stay snake_case because that is what the feed handler
+  // reads off the URL.
   return {
+    // Python returns every distinct value verbatim (including the empty
+    // string that appears for legacy minute rows without a language) so
+    // we don't filter falsy values here — that keeps the wire payload
+    // byte-equivalent to controllers/icalendar.py.
     availableOptions: {
-      languages: languages.map(r => r.value).filter(Boolean),
-      workspaces: workspaces.map(r => r.value).filter(Boolean),
-      editors: editors.map(r => r.value).filter(Boolean),
-      platforms: platforms.map(r => r.value).filter(Boolean),
-      tags: userTags.map(r => r.name).filter(Boolean),
+      languages: languages.map(r => r.value),
+      workspaces: workspaces.map(r => r.value),
+      editors: editors.map(r => r.value),
+      platforms: platforms.map(r => r.value),
+      tags: userTags.map(r => r.name),
     },
     feedUrl: '/v3/icalendar/feed.ics',
     parameters: {
       target: 'string - field to group by (language, workspace, editor, platform)',
-      start_date: 'YYYY-MM-DD format',
-      end_date: 'YYYY-MM-DD format',
+      startDate: 'YYYY-MM-DD format',
+      endDate: 'YYYY-MM-DD format',
       languages: 'comma-separated list',
       workspaces: 'comma-separated list',
       editors: 'comma-separated list',
       platforms: 'comma-separated list',
       tags: 'comma-separated list',
-      minimum_duration_minutes: 'integer >= 1 (default: 5)',
+      calendarName: 'string (default: \'Coding Time\')',
+      eventTitleTemplate: 'string (default: \'Coding Session\')',
+      minimumDurationMinutes: 'integer >= 1 (default: 5)',
       timezone: 'timezone string (default: \'UTC\')',
+    },
+    examples: {
+      languageCalendar: '/v3/icalendar/feed.ics?target=language',
+      workspaceCalendar: '/v3/icalendar/feed.ics?target=workspace',
+      pythonOnly: '/v3/icalendar/feed.ics?target=language&languages=Python',
+      specificWorkspace: '/v3/icalendar/feed.ics?target=workspace&workspaces=my-project',
+      dateRange: '/v3/icalendar/feed.ics?target=language&start_date=2024-01-01&end_date=2024-01-31',
+      editorCalendar: '/v3/icalendar/feed.ics?target=editor',
     },
   }
 })

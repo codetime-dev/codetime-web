@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import { and, count, desc, eq, gte, lte } from 'drizzle-orm'
-import { defineEventHandler, getQuery } from 'h3'
+import { defineEventHandler, getQuery, getRequestPath } from 'h3'
 import { workspaceMetaV2, workspaceMinutesV2 } from '../../../../db/schema'
 import { tryUser } from '../../../../utils/auth'
 import { useDb } from '../../../../utils/db'
@@ -68,8 +68,10 @@ export default defineEventHandler(async (event) => {
   const q = getQuery(event)
   const project = typeof q.project === 'string' ? q.project : ''
   if (!project) {
- return sendPyError(event, 400, 'project is required')
-}
+    // Litestar's "missing required query parameter" body — keep the wire
+    // shape identical to Python so SDK error parsing is single-codepath.
+    return sendPyError(event, 400, `Missing required query parameter 'project' for path ${getRequestPath(event)}`)
+  }
   const days = q.days ? Math.max(1, Math.trunc(Number(q.days))) : null
   const startTime = dt(q.start_time)
   const endTime = dt(q.end_time)

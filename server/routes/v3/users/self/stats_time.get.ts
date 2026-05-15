@@ -1,12 +1,12 @@
 import type { SQL } from 'drizzle-orm'
 import type { Unit } from '../../../../utils/stats-time'
 import { and, count, desc, eq } from 'drizzle-orm'
-import { defineEventHandler, getQuery } from 'h3'
+import { defineEventHandler, getQuery, getRequestPath } from 'h3'
 import { workspaceMetaV2, workspaceMinutesV2 } from '../../../../db/schema'
 import { tryUser } from '../../../../utils/auth'
 import { useDb } from '../../../../utils/db'
 import { denyIfOutsideFreeWindow } from '../../../../utils/plan-limits'
-import { sendPyError } from '../../../../utils/py-error'
+import { sendPyError, sendPyValidationError } from '../../../../utils/py-error'
 import {
   computeWindow,
   needsMetaJoin,
@@ -78,8 +78,10 @@ export default defineEventHandler(async (event) => {
   const q = getQuery(event)
   const unit = (typeof q.unit === 'string' ? q.unit : 'days') as Unit
   if (!['days', 'hours', 'minutes'].includes(unit)) {
- return sendPyError(event, 400, 'Invalid unit')
-}
+    return sendPyValidationError(event, 'GET', getRequestPath(event), [
+      { key: 'unit', message: "Input should be 'days', 'hours' or 'minutes'", source: 'query' },
+    ])
+  }
   const tz = s(q.tz) || session.timezone || 'etc/UTC'
   const limit = Math.max(1, Math.trunc(Number(q.limit) || 30))
   const startTime = dt(q.start_time)
@@ -127,10 +129,26 @@ isPro: session.plan === 'pro',
     .orderBy(desc(time))
     .limit(finalLimit)
 
+  // Postgres returns the truncated value as a timestamp-without-tz. If we
+  // wrap it in `new Date(...)` here, Node parses it in the *process* time
+  // zone, which then shifts the day label by ±1 once `toISOString()`
+  // converts back to UTC. Format the value as a YYYY-MM-DD string in
+  // memory using the raw row payload to keep the bucket label aligned
+  // with Python's `date_trunc(..., timezone(tz, recorded_at))` output.
   return {
-    data: rows.map(r => ({
-      duration: Number(r.duration),
-      time: new Date(r.time as any).toISOString().slice(0, 10),
-    })),
+    data: rows.map((r) => {
+      const raw = r.time as unknown
+      let label: string
+      if (raw instanceof Date) {
+        // postgres-js returned a Date — reconstruct the original
+        // wall-clock components in UTC (which matches the naive bucket
+        // value Postgres produced).
+        label = `${raw.getUTCFullYear().toString().padStart(4, '0')}-${(raw.getUTCMonth() + 1).toString().padStart(2, '0')}-${raw.getUTCDate().toString().padStart(2, '0')}`
+      }
+      else {
+        label = String(raw).slice(0, 10)
+      }
+      return { duration: Number(r.duration), time: label }
+    }),
   }
 })

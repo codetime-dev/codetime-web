@@ -372,6 +372,8 @@ export const en: Translation = {
         badge: 'Badge',
         donut: 'Languages',
         status: 'Status',
+        calendar: 'Calendar',
+        trend: 'Trend',
       },
       theme: {
         label: 'Theme',
@@ -382,6 +384,13 @@ export const en: Translation = {
         title: 'Top languages',
         days: 'Days',
         limit: 'Languages',
+      },
+      calendar: {
+        title: 'Activity calendar',
+      },
+      trend: {
+        title: 'Daily trend',
+        days: 'Days',
       },
       status: {
         title: 'Currently coding',
@@ -408,6 +417,9 @@ export const en: Translation = {
         donutExceeds: 'Free plan caps the chart at 30 days and 5 languages — values will be clamped.',
         statusFree: 'Free plan: pick project name OR language for the card. Pro shows both.',
         statusFreeStyle: 'Free plan: minimal style with default colors only. Pro unlocks the detailed card and custom accent / background colors.',
+        calendarFree: 'Free plan shows the last 90 days. Pro unlocks the full 365-day calendar.',
+        trendFree: 'Free plan: up to 90 days of trend. Pro extends the window to 365 days.',
+        trendExceeds: 'Free plan caps the trend at 90 days — values will be clamped.',
       },
     },
     settings: {

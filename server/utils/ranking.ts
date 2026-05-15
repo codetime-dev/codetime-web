@@ -1,14 +1,12 @@
 import { sql } from 'drizzle-orm'
 import { useDb } from './db'
 
-// Match Python's serialization of percent values: rounds to 10 decimal
-// places (e.g. 2.0833333333333335 → 2.0833333333). Without this we leak
-// trailing IEEE 754 noise digits that the Python service drops.
-function roundPct(x: number): number {
-  if (!Number.isFinite(x)) {
- return 0
-}
-  return Math.round(x * 1e10) / 1e10
+// Python emits raw IEEE 754 doubles for `percentile` (no rounding — see
+// services/logs.py, `(rank / total_users_for_percentile) * 100`). Keep
+// byte-parity by handing back the same raw multiplication here. The only
+// guard we need is against non-finite inputs.
+function rawPct(x: number): number {
+  return Number.isFinite(x) ? x : 0
 }
 
 // Window-function ranking helpers — mirror Python services/logs.py.
@@ -89,7 +87,7 @@ export async function fetchLanguageRanking(
     language,
     totalMinutes: Number(r.total_minutes),
     rank: Number(r.rnk),
-    percentile: roundPct(Number(r.pct_raw) * 100),
+    percentile: rawPct(Number(r.pct_raw) * 100),
   }))
 }
 
@@ -130,7 +128,7 @@ export async function fetchUserLanguageRank(uid: number, language: string, from:
   return {
     totalMinutes: Number(row.total_minutes),
     rank,
-    percentile: totalUsers > 0 ? roundPct((rank / totalUsers) * 100) : 100,
+    percentile: totalUsers > 0 ? rawPct((rank / totalUsers) * 100) : 100,
     totalUsers,
   }
 }
@@ -161,7 +159,7 @@ export async function fetchUserOverallRank(uid: number, from: Date, to: Date) {
   return {
     totalMinutes: Number(row.total_minutes),
     rank,
-    percentile: totalUsers > 0 ? roundPct((rank / totalUsers) * 100) : 100,
+    percentile: totalUsers > 0 ? rawPct((rank / totalUsers) * 100) : 100,
     totalUsers,
   }
 }
@@ -214,7 +212,7 @@ export async function fetchUserTopLanguagesRank(uid: number, topN: number, from:
       language: String(row.language),
       totalMinutes: Number(row.total_minutes),
       rank,
-      percentile: totalUsers > 0 ? roundPct((rank / totalUsers) * 100) : 100,
+      percentile: totalUsers > 0 ? rawPct((rank / totalUsers) * 100) : 100,
       totalUsers,
     }
   })

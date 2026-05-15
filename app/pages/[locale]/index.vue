@@ -267,7 +267,7 @@ useHead({
           <span>{{ t.landing.sections.visualization }}</span>
           <span class="eyebrow-bracket">]</span>
         </div>
-        <h2 class="section-heading text-ct-fg leading-[1.05] font-mono font-semibold max-w-3xl">
+        <h2 class="section-heading text-ct-fg leading-[1.05] font-semibold max-w-3xl">
           {{ t.landing.features.visualization.title }}
         </h2>
         <p class="text-[14px] text-ct-fg-muted leading-[1.7] mt-2 max-w-2xl">
@@ -331,7 +331,7 @@ useHead({
             <span>{{ t.landing.sections.alwaysSynced }}</span>
             <span class="eyebrow-bracket">]</span>
           </div>
-          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
+          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-semibold">
             {{ t.landing.features.save.title }}
           </h2>
           <p class="feature-desc text-ct-fg-muted leading-[1.7] max-w-2xl">
@@ -368,7 +368,7 @@ useHead({
             <span>{{ t.landing.sections.openData }}</span>
             <span class="eyebrow-bracket">]</span>
           </div>
-          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
+          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-semibold">
             {{ t.landing.features.export.title }}
           </h2>
           <p class="feature-desc text-ct-fg-muted leading-[1.7] max-w-xl">
@@ -400,7 +400,7 @@ useHead({
             <span>{{ t.landing.sections.editors }}</span>
             <span class="eyebrow-bracket">]</span>
           </div>
-          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-mono font-semibold">
+          <h2 class="section-heading feature-title text-ct-fg leading-[1.05] font-semibold">
             {{ t.landing.features.editor.title }}
           </h2>
           <p class="feature-desc text-ct-fg-muted leading-[1.7] max-w-2xl">
@@ -451,7 +451,7 @@ useHead({
           <span>{{ t.landing.sections.pricing }}</span>
           <span class="eyebrow-bracket">]</span>
         </div>
-        <h2 class="section-heading text-ct-fg leading-[1.05] font-mono font-semibold max-w-3xl">
+        <h2 class="section-heading text-ct-fg leading-[1.05] font-semibold max-w-3xl">
           {{ t.landing.pricing.heading }}
         </h2>
         <p class="text-[14px] text-ct-fg-muted leading-[1.7] mt-2 max-w-xl">

@@ -1,6 +1,6 @@
 import type { WorkspaceData } from '../../../utils/tag-rules'
 import { and, eq, isNotNull } from 'drizzle-orm'
-import { defineEventHandler, readBody } from 'h3'
+import { defineEventHandler, readBody, setResponseStatus } from 'h3'
 import { tags } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
@@ -92,5 +92,7 @@ export default defineEventHandler(async (event) => {
     .where(and(eq(tags.uid, session.id), isNotNull(tags.rulesJson)))
 
   const matching = rows.filter(r => r.rulesJson && evaluateRule(r.rulesJson, ws))
+  // Litestar's @post default status is 201 — keep parity.
+  setResponseStatus(event, 201)
   return { matchingTags: matching.map(toTagResponse) }
 })

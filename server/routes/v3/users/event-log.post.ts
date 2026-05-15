@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, setResponseStatus } from 'h3'
+import { defineEventHandler, readBody, send, setHeader, setResponseStatus } from 'h3'
 import { eventLogs } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
@@ -93,8 +93,13 @@ export default defineEventHandler(async (event) => {
       gitBranch: data.gitBranch ?? null,
       createdAt: new Date(),
     } as any)
+    // Python's handler returns None which Litestar serialises as the
+    // JSON literal "null" with Content-Type application/json. h3
+    // collapses returned null/undefined to an empty body, so emit the
+    // bytes explicitly to keep wire output byte-equivalent.
     setResponseStatus(event, 201)
-    return null
+    setHeader(event, 'Content-Type', 'application/json')
+    return send(event, 'null')
   }
   catch (error) {
     return sendPyError(event, 500, `Failed to log event: ${(error as Error).message}`)
