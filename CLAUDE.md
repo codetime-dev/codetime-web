@@ -25,9 +25,11 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
 - **Frontend:** Nuxt.js 4 with Vue 3 and TypeScript
 - **Styling:** UnoCSS with @roku-ui/preset and @roku-ui/vue components
 - **API:** Auto-generated TypeScript SDK from OpenAPI spec
-- **Backend:** Hybrid — legacy Python service at `apiHost`, gradually
-  migrating endpoint-by-endpoint to Nuxt/Nitro routes under `server/`
-  (see `server/CLAUDE.md`). Drizzle ORM over the same Postgres.
+- **Backend:** Nuxt/Nitro routes under `server/routes/v3/...` own every
+  `/v3/*` endpoint. The legacy Python service (`codetime-server-v3`,
+  still reachable at `api.codetime.dev`) survives only for the VSCode
+  plugin's event-log uploads and the LemonSqueezy webhook, until edge
+  routing proxies them across. Drizzle ORM over the same Postgres.
 - **Deployment:** PM2 cluster mode with health checks
 - **Visualization:** Observable Plot for charts and data visualization
 
@@ -42,11 +44,10 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
   - `pages/` - File-based routing with locale support
   - `utils/` - Helper functions and data formatters
 - `public/` - Static assets including VSCode icons
-- `server/` - Nitro server: middleware, routes, and the **Nuxt-backend
-  migration target** for `/v3/*` endpoints (see `server/CLAUDE.md`)
-- `shared/` - Code visible to both app and server. Currently holds
-  `migrated-routes.ts` (single source of truth for which `/v3/*` paths
-  the Nuxt backend serves vs. proxy to the legacy Python service)
+- `server/` - Nitro server: middleware, routes, and the **owner of every
+  `/v3/*` endpoint** (see `server/CLAUDE.md`)
+- `shared/` - Code visible to both app and server (empty after the
+  Python → Nuxt cutover removed `migrated-routes.ts`)
 
 ### Key Patterns
 
@@ -68,23 +69,18 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
 
 ### API Integration
 
-- Auto-generated SDK from OpenAPI spec at `https://test.codetime.dev/v3/docs/openapi.json`
-- Client configured in `app/app.vue` with credentials, error handling,
-  and a **dual-backend fetch shim** that dispatches each request to
-  either the Python service (`NUXT_PUBLIC_API_HOST`) or the Nuxt origin
-  (`NUXT_PUBLIC_NUXT_API_HOST`, defaults to `location.origin`) based on
-  `shared/migrated-routes.ts`. Cookies flow to both because they share
-  the eTLD+1 in production.
-- Migrated Nuxt routes have their own OpenAPI surface at
-  `/v3/docs/openapi.json` (filtered from Nitro's auto-generated
-  `/_openapi.json`) and a Scalar UI at `/docs/api`.
-- Base URL configurable via `NUXT_PUBLIC_API_HOST` environment variable.
+- Auto-generated SDK from OpenAPI spec at `https://codetime.dev/v3/docs/openapi.json`
+- Client configured in `app/app.vue` with `credentials: 'include'` and a
+  same-origin base URL — every request lands on the Nuxt backend that
+  serves the current page.
+- The curated OpenAPI surface at `/v3/docs/openapi.json` is built from
+  each route's `defineRouteMeta` block (server/routes/v3/docs/openapi.json.ts)
+  and rendered through Scalar at `/docs/api`.
 
-### Backend Migration (`server/`)
+### Backend (`server/`)
 
-Endpoints are moved from the Python service (`../codetime-server-v3`) to
-Nuxt one at a time. The full workflow — auth, Drizzle, error shape,
-OpenAPI metadata, and the things to deliberately NOT do — lives in
+Conventions for `/v3/*` handlers — auth, Drizzle, error shape, OpenAPI
+metadata, and the things to deliberately NOT do — live in
 `server/CLAUDE.md`. Read it before touching anything under `server/`.
 
 ### Styling Conventions

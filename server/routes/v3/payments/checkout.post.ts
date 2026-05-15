@@ -5,6 +5,7 @@ import { defineEventHandler, readBody } from 'h3'
 import { users } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
+import { isProduction } from '../../../utils/env'
 import { useLemonSqueezy } from '../../../utils/lemonsqueezy'
 import { sendPyError } from '../../../utils/py-error'
 
@@ -65,7 +66,7 @@ function resolveVariantId(billingType: string, product: string): string | null {
   return process.env[key] || null
 }
 
-const isDev = process.env.NUXT_PUBLIC_MODE !== 'production' || !!import.meta.dev
+const isDev = !isProduction() || !!import.meta.dev
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)

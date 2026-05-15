@@ -9,12 +9,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiHost: 'https://api.codetime.dev',
-      // Origin serving Nuxt-backed routes listed in shared/migrated-routes.ts.
-      // Empty string => same origin as the page (browser) / same Nitro
-      // process (server). Override with NUXT_PUBLIC_NUXT_API_HOST when the
-      // Nuxt backend lives on a different host than the page.
-      nuxtApiHost: process.env.NUXT_PUBLIC_NUXT_API_HOST || '',
+      // `apiHost` / `nuxtApiHost` were used by the dual-backend SDK shim
+      // during the Python → Nuxt cutover. The Nuxt backend now owns every
+      // `/v3/*` path so the SDK targets the page origin directly; both
+      // settings were removed along with `shared/migrated-routes.ts`.
       githubClientId: process.env.NUXT_PUBLIC_GITHUB_CLIENT_ID || '978fe1a6f0c5d12f5beb',
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '1020029657488-f66ubcmj6qqg4h4ptjk505ljmkv55jkv.apps.googleusercontent.com',
       sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || '',
@@ -78,7 +76,8 @@ export default defineNuxtConfig({
 
   // Nitro auto-generates the OpenAPI spec at /_nitro/openapi.json from
   // each route's defineRouteMeta({ openAPI: ... }). Our handler at
-  // /v3/docs/openapi.json filters that to only the migrated /v3 routes.
+  // /v3/docs/openapi.json builds a curated spec from the same metadata,
+  // scoped to /v3/* routes and pointed at the current origin.
   nitro: {
     experimental: { openAPI: true },
     openAPI: {
@@ -88,6 +87,9 @@ export default defineNuxtConfig({
       },
       ui: { swagger: false, scalar: false },
     },
+    // Bump esbuild target so BigInt literals (uuid7, icalendar feed) don't
+    // trigger "not available in es2019" warnings. Runtime is Node 22.
+    esbuild: { options: { target: 'es2022' } },
   },
 
   // Preload Inter (body copy). The mono LCP font (Berkeley Mono) is

@@ -30,7 +30,10 @@ type ScopeOption = { label: string, id: string, kind: 'tag' | 'workspace', color
 const scope = ref<ScopeOption | null>(null)
 const language = ref<string>('')
 const days = ref<string>('')
-const apiHost = 'https://api.codetime.dev'
+// Badge URL is what users copy into READMEs / status pages, so it has
+// to be an absolute URL that survives without the app. The Nuxt backend
+// now serves /v3/users/shield directly under the canonical origin.
+const apiHost = 'https://codetime.dev'
 
 function selectStyle(id: string) {
   const found = styleOptions.value.find(s => s.id === id)

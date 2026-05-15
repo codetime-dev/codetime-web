@@ -1,8 +1,7 @@
 <script setup lang="ts">
 // Scalar API Reference for the Nuxt-served endpoints. The spec at
-// /v3/docs/openapi.json is hand-curated to match exactly the routes
-// listed in shared/migrated-routes.ts — it deliberately does NOT include
-// the (much larger) legacy Python spec from /openapi.json.
+// /v3/docs/openapi.json is built directly from each route's
+// defineRouteMeta block in server/routes/v3/...
 //
 // Rendered in an <iframe> so Scalar runs in a clean document and is not
 // affected by the host page's UnoCSS reset, tokens.css, or layout

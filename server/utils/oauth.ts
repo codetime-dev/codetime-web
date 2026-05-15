@@ -3,16 +3,22 @@ import process from 'node:process'
 import { eq } from 'drizzle-orm'
 import { users } from '../db/schema'
 import { useDb } from './db'
+import { isProduction } from './env'
 
 // OAuth helpers — GitHub code exchange + Google ID-token verification.
 // Mirrors codetime-server-v3 services/auth.py. Cookies and downstream
 // user_guard checks live in utils/auth-cookie.ts and utils/auth.ts.
 
+// OAuth callback handlers redirect the browser back to the frontend
+// after a successful sign-in. `FRONTEND_URL` env overrides; otherwise
+// production resolves to https://codetime.dev (see utils/env.ts for the
+// production detection cascade), with a localhost fallback for dev.
 export function frontendUrl(): string {
-  if (process.env.NUXT_PUBLIC_MODE === 'production') {
- return 'https://codetime.dev'
+  const override = process.env.FRONTEND_URL
+  if (override) {
+ return override.replace(/\/$/, '')
 }
-  return 'http://localhost:3001'
+  return isProduction() ? 'https://codetime.dev' : 'http://localhost:3001'
 }
 
 export async function exchangeGithubCode(code: string): Promise<{ accessToken: string }> {

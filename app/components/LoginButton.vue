@@ -4,23 +4,58 @@ import NuxtLink from '~/i18n/NuxtLink'
 
 const locale = useRoute().params.locale as string
 const user = inject<Ref<UserSelfPublic | null>>('user', ref(null))
+const userPending = inject<Ref<boolean>>('user-pending', ref(false))
 const t = useI18N()
-
-const userPending = inject('user-pending')
-const notLogin = computed(() => user.value === null || !userPending)
 
 const isGitHubLoading = ref(false)
 
-watchEffect(() => {
-  if (notLogin.value && globalThis.window !== undefined) {
-    const script = document.createElement('script')
-    script.src = 'https://accounts.google.com/gsi/client'
-    script.async = true
-    setTimeout(() => {
-      document.head.append(script)
-    }, 1000)
+// Google Identity Services posts the JWT credential to `data-login_uri`
+// as an absolute URL. Use the current page origin so the request lands
+// on the Nuxt backend that owns `/v3/auth/google` (and now mints the
+// cross-subdomain auth cookie at codetime.dev).
+const googleLoginUri = computed(() => {
+  if (import.meta.client) {
+    return `${globalThis.location.origin}/v3/auth/google`
   }
+  return 'https://codetime.dev/v3/auth/google'
 })
+
+// Inject the GIS client script the moment the logged-out template branch
+// has actually mounted `#g_id_onload`. Using a template ref instead of
+// querying the document avoids the setup-time race we hit earlier where
+// `await nextTick()` inside an immediate watch ran before the v-else-if
+// branch was even chosen, so `document.querySelector('#g_id_onload')`
+// returned null and the watcher silently bailed out.
+//
+// GIS auto-renders the button when its bootstrap script finds an
+// `#g_id_onload` element already in the DOM, so we only need to make
+// sure the element exists *before* the script tag is appended.
+const onloadEl = useTemplateRef<HTMLElement>('onloadEl')
+const gisInjected = ref(false)
+
+function injectGis() {
+  if (gisInjected.value) return
+  if (document.querySelector('script[data-gis-client]')) {
+    gisInjected.value = true
+    return
+  }
+  gisInjected.value = true
+  const script = document.createElement('script')
+  script.src = 'https://accounts.google.com/gsi/client'
+  script.async = true
+  script.dataset.gisClient = '1'
+  document.head.append(script)
+}
+
+watch(
+  onloadEl,
+  (el) => {
+    if (import.meta.server) return
+    if (!el) return
+    injectGis()
+  },
+  { immediate: true, flush: 'post' },
+)
 
 // Handle GitHub OAuth
 async function handleGitHubLogin() {
@@ -72,10 +107,11 @@ async function handleGitHubLogin() {
             <div class="flex gap-2">
               <div
                 id="g_id_onload"
+                ref="onloadEl"
                 class="hidden"
                 data-itp_support="true"
                 :data-client_id="$config.public.googleClientId"
-                :data-login_uri="`${$config.public.apiHost}/v3/auth/google`"
+                :data-login_uri="googleLoginUri"
                 data-nonce=""
               />
               <div

@@ -1,90 +1,106 @@
-# Nuxt Backend Migration
+# Nuxt Backend
 
-The Nuxt backend in this directory gradually takes over endpoints from the
-Python service in `../../codetime-server-v3`. Both backends run against
-the **same** Postgres; Alembic in the Python repo still owns DDL.
+The Nuxt backend in this directory owns every `/v3/*` endpoint. The
+legacy Python service in `../../codetime-server-v3` still runs on
+`api.codetime.dev` for two reasons only:
 
-## Routing the SDK
+1. VSCode plugin `POST /v3/users/event-log` uploads (high frequency).
+2. The LemonSqueezy webhook (`POST /v3/payments/webhooks/lemonsqueezy`),
+   until the webhook URL is re-pointed in their dashboard.
 
-The auto-generated SDK in `app/api/v3/` is configured in `app/app.vue` with
-a custom `fetch` that consults `shared/migrated-routes.ts`. Paths that
-match the regex list are rewritten to the Nuxt origin
-(`runtimeConfig.public.nuxtApiHost` or `location.origin`); everything else
-goes to `apiHost` (the Python service).
+Both backends still talk to the **same** Postgres database; Alembic in
+the Python repo continues to own DDL.
 
-**To migrate an endpoint:**
+## SDK wiring
+
+`app/app.vue` calls `client.setConfig({ baseUrl: '', credentials:
+'include' })` — every API call is dispatched against the page origin
+and Nuxt's `server/routes/v3/*` handlers reply. There is no dual-backend
+fetch shim anymore; the `MIGRATED_ROUTES` regex list and the
+`apiHost` / `nuxtApiHost` runtime config entries were removed along
+with the cutover.
+
+## Adding a new endpoint
 
 1. Create the handler under `server/routes/v3/<path>.<method>.ts`. Path
-   and verb must match Python exactly so the SDK keeps working.
+   and verb must match the canonical `/v3/*` shape so the SDK names
+   stay stable.
 2. Authenticate with `tryUser(event)` from `server/utils/auth.ts`. It
-   returns `AuthUser | null` — do **not** throw; throwing leaks h3 error
-   shape. Use `sendPyError(event, 401, '...')` instead.
+   returns `AuthUser | null` — do **not** throw; throwing leaks h3
+   error shape. Use `sendPyError(event, 401, '...')` instead.
 3. Use Drizzle (`useDb()` from `server/utils/db.ts`) with the schema in
    `server/db/schema.ts`. Add new tables to the schema by introspecting
    Python's SQLAlchemy models (see `../../codetime-server-v3/src/db.py`).
-4. Response body **must** be byte-equivalent to the Python DTO. Compare
-   against `../../codetime-server-v3/src/dto.py`.
+4. Response body **must** be byte-equivalent to the Python DTO of the
+   same name. Compare against `../../codetime-server-v3/src/dto.py`.
 5. Add a `defineRouteMeta({ openAPI: ... })` block at the top of the
-   handler. Static-parsed by oxc — must be a literal object, no imported
-   spreads.
-6. Add the path's regex to `shared/migrated-routes.ts`.
-7. Smoke-test: `curl localhost:3002/<path>` plus dashboard hit, then
-   diff response against the live Python endpoint.
+   handler. Static-parsed by oxc — must be a literal object, no
+   imported spreads.
+6. Smoke-test: `curl localhost:3002/<path>` plus a dashboard hit; diff
+   the response against the same path served by the Python service
+   while it's still running.
 
 ## Conventions
 
 **Errors.** Litestar serialises errors as `{status_code, detail}`. h3's
 default body is `{statusCode, statusMessage, message, stack, url, ...}` —
-the SDK's error handling does not recognise that. Always go through
-`sendPyError`. Do not throw `createError`.
+SDK error handling does not recognise that shape. Always go through
+`sendPyError` (or `sendPyValidationError` for parameter validation
+errors that need an `extra` array). Do not throw `createError`.
 
-**Auth cookies.** The cookie pair `user_id` + `auth_token` is shared with
-Python. Python's `user_guard` checks only the presence of `auth_token`;
-Nuxt also verifies it matches `users.token_v1`. Cookie attributes are set
-in `server/utils/auth-cookie.ts` and must match
-`controllers/auth.py::create_auth_cookie` (httpOnly, samesite=lax,
-secure=prod, 30-day max-age).
+**Auth cookies.** The pair `user_id` + `auth_token` is shared with
+Python; both backends mint and read the same cookie. `setAuthCookies`
+in `server/utils/auth-cookie.ts` mirrors
+`controllers/auth.py::create_auth_cookie`: httpOnly, samesite=lax,
+secure=prod, max-age=30 days, **`Domain=.codetime.dev` in production**
+so the cookie traverses every subdomain. `isProduction()` lives in
+`server/utils/env.ts` — use it instead of checking `NUXT_PUBLIC_MODE`
+or `NODE_ENV` directly; both inputs feed into it.
 
 **Schema parity.** Drizzle column types in `server/db/schema.ts` are
 hand-written to match the SQLAlchemy `Mapped[…]` annotations on the
-Python side. When Python adds a column, add it here too — `drizzle-kit`
-is configured to introspect for verification but does not own migrations.
+Python side. When Python adds a column, add it here too —
+`drizzle-kit` is configured to introspect for verification but does
+not own migrations.
 
-**Naming.** Python keeps snake_case in JSON bodies. Drizzle rows are
-camelCase by convention; map them explicitly in the handler before
-returning (see `server/routes/v3/users/self.get.ts`).
+**Naming.** Wire JSON is camelCase. Drizzle rows are camelCase by
+convention; Python's pydantic models use `to_camel` aliases. Snake_case
+inside the DB (e.g. `rules_json`'s nested keys) is normalised on the
+way out — see `server/utils/tag-dto.ts::camelizeKeys`.
 
 ## OpenAPI
 
 `/_openapi.json` is auto-generated by Nitro from every route's
-`defineRouteMeta`. `/v3/docs/openapi.json` filters that to only the
-migrated routes (using `shared/migrated-routes.ts`). The Scalar UI at
-`/docs/api` (an `<iframe>` to `/docs/api/scalar.html`) renders that
-filtered spec. Title and version live in `nuxt.config.ts` under
-`nitro.openAPI.meta` — they apply to both the raw and filtered specs.
+`defineRouteMeta`. `/v3/docs/openapi.json` rebuilds the same spec but
+scoped to `/v3/*` routes and pointed at the current origin (see
+`server/routes/v3/docs/openapi.json.ts`). The Scalar UI at `/docs/api`
+(an `<iframe>` to `/docs/api/scalar.html`) renders that spec. Title and
+version live in `nuxt.config.ts` under `nitro.openAPI.meta`.
 
 The shared `$global.components` block (security schemes, `PyError`,
 `UserSelfPublic`, reusable responses) lives in
 `server/routes/v3/users/self.get.ts`. It only needs to appear on one
-route — Nitro merges it into the spec's components.
+route — the spec builder merges it into the spec's components.
 
 ## Local dev
 
 `pnpm run dev` binds **3002** explicitly (the production PM2 instance
-holds 3001 in this environment). The SDK uses `location.origin` so the
+holds 3001 in this environment). The SDK uses an empty `baseUrl` so the
 browser hits the same port automatically. Env vars (`POSTGRES_*`,
-`NUXT_PUBLIC_NUXT_API_HOST`) live in `.env.dev`.
+`GITHUB_CLIENT_*`, `GOOGLE_CLIENT_*`, `LEMONSQUEEZY_*`, `FRONTEND_URL`)
+live in `.env.dev` (dev) and `.env` (prod, loaded by PM2 via
+`--env-file`).
 
 ## Things to NOT do
 
-- Don't add a generic `/v3/[...path].ts` proxy. The user explicitly
-  declined the proxy approach; routes are migrated piece by piece and
-  must be present in `MIGRATED_ROUTES` to receive traffic.
 - Don't run `drizzle-kit push` / `migrate` / `generate`. Alembic owns
   the schema; only `introspect` is safe here.
 - Don't enable `@scalar/nuxt`. Its runtime imports `web-worker` at the
   module top level, which crashes under vite-node SSR. The standalone
   CDN bundle loaded from `server/routes/docs/api/scalar.html.ts` is the
   supported integration.
-- Don't throw h3 `createError` from `/v3/*` handlers — the response shape
-  diverges from Python and clients will misread errors.
+- Don't throw h3 `createError` from `/v3/*` handlers — the response
+  shape diverges from Python and clients will misread errors.
+- Don't check `NUXT_PUBLIC_MODE` or `NODE_ENV` directly for
+  prod-vs-dev branches; call `isProduction()` from `utils/env.ts` so
+  every path stays in sync.

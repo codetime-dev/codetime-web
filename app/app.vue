@@ -1,36 +1,23 @@
 <script setup lang="ts">
-import { isMigratedRoute } from '~~/shared/migrated-routes'
 import { client } from '@/api/v3/client.gen'
 
-// Configure the API client BEFORE any data fetching.
-// Must run first so that all subsequent API calls (including the
-// initial user fetch) use the correct base URL, credentials, and
-// error handling.
-const config = useRuntimeConfig()
-
-// Dual-backend dispatch. Default to the legacy Python host; for paths
-// listed in shared/migrated-routes.ts, rewrite to the Nuxt origin so the
-// request is served by server/routes/v3/...  Cookies flow to both because
-// both hosts share the eTLD+1 (.codetime.dev) and credentials:include.
-const upstreamHost = config.public.apiHost
-const nuxtHost = (config.public.nuxtApiHost as string | undefined) || ''
-
+// Configure the API client BEFORE any data fetching. Must run first so
+// that all subsequent API calls (including the initial user fetch) use
+// the correct base URL, credentials, and error handling.
+//
+// The Nuxt backend now owns every `/v3/*` path (see
+// `server/routes/v3/...`) and the SDK targets the same origin as the
+// page. The legacy `api.codetime.dev` host is still reachable for the
+// VSCode plugin and the LemonSqueezy webhook until edge routing flips
+// to a proxy, but the browser bundle no longer dispatches anything to
+// it directly.
 client.setConfig({
-  baseUrl: upstreamHost,
+  // Empty string = same origin as the current page. On the server side
+  // this falls through to relative fetch, which Nitro resolves against
+  // the request's own origin.
+  baseUrl: '',
   credentials: 'include',
   throwOnError: true,
-  fetch: (input, init) => {
-    let request = input instanceof Request ? input : new Request(input, init)
-    const url = new URL(request.url)
-    if (isMigratedRoute(url.pathname)) {
-      const origin = nuxtHost || (import.meta.client ? location.origin : '')
-      if (origin) {
-        const rewritten = new URL(url.pathname + url.search, origin)
-        request = new Request(rewritten.toString(), request)
-      }
-    }
-    return globalThis.fetch(request)
-  },
 })
 
 const { data: user, status } = await fetchUser()

@@ -1,4 +1,4 @@
-import process from 'node:process'
+import { isProduction } from './env'
 
 // Helpers shared between the checkout creator and the webhook handler.
 // Mirrors codetime-server-v3/src/services/payments.py — names align with
@@ -29,7 +29,7 @@ export const SUBSCRIPTION_STATUS_MAP: Record<string, string> = {
 const DEV_RENEW_WINDOW_MS = 5 * 60 * 1000
 
 export function isDevPaymentsMode(): boolean {
-  return process.env.NUXT_PUBLIC_MODE !== 'production' || !!import.meta.dev
+  return !isProduction() || !!import.meta.dev
 }
 
 // Dev environments use a fast 5-minute window for renewals/expirations so
