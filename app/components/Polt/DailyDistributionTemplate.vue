@@ -151,7 +151,7 @@ const options = computed<Plot.PlotOptions>(() => {
 </script>
 
 <template>
-  <div class="px-3 py-3 relative">
+  <div class="dd-wrap px-3 py-3 relative">
     <PoltChart
       ref="chart"
       :options="options"
@@ -162,3 +162,14 @@ const options = computed<Plot.PlotOptions>(() => {
     />
   </div>
 </template>
+
+<style scoped>
+/* Daily distribution renders a flat ridge — on narrow phones the
+   default 300px chart height eats too much vertical space, so squash
+   it to a more compact band while keeping the desktop proportion. */
+@media (max-width: 639px) {
+  .dd-wrap :deep(.polt-chart-wrapper) {
+    min-height: 180px;
+  }
+}
+</style>

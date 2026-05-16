@@ -182,7 +182,14 @@ const maxMinutes = computed(() => {
 </template>
 
 <style scoped>
-.top-flat { padding: 14px 16px; }
+.top-flat {
+  padding: 14px 16px;
+  /* Without these, a long workspace path or language name can paint past
+     the grid cell and push the dashboard wider than the viewport on
+     narrow phones. */
+  min-width: 0;
+  overflow: hidden;
+}
 .top-flat-head {
   display: flex;
   align-items: center;

@@ -611,7 +611,7 @@ watchEffect(() => {
           <template #icon>
             <i class="i-tabler-clock-hour-4 text-[15px] text-ct-fg-muted" />
           </template>
-          <div class="trend-pad">
+          <div class="trend-pad trend-pad-daily">
             <PoltDailyDistribution
               v-if="allDataResp.status.value === 'success' && hasData"
               :start-time="startTime"
@@ -620,7 +620,7 @@ watchEffect(() => {
             />
             <div
               v-else
-              class="trend-skel"
+              class="trend-skel trend-skel-daily"
             />
           </div>
         </PanelSection>
@@ -696,12 +696,12 @@ watchEffect(() => {
 <style scoped>
 .top-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @media (min-width: 640px) {
   .top-grid {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .top-grid > :where(:not(:first-child)) {
     border-left: 1px solid var(--ct-border);
@@ -719,4 +719,11 @@ watchEffect(() => {
    skeleton and the real chart never shifts the panel below it. */
 .trend-skel { height: 300px; width: 100%; background: var(--ct-surface-2); animation: trend-pulse 1.4s ease-in-out infinite; }
 @keyframes trend-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
+
+/* Daily distribution is a thin ridge — compress it on narrow phones so
+   it doesn't dominate the vertical scroll. The chart wrapper is matched
+   in DailyDistributionTemplate.vue. */
+@media (max-width: 639px) {
+  .trend-skel-daily { height: 180px; }
+}
 </style>
