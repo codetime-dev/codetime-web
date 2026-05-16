@@ -506,6 +506,16 @@ export const zhCN: Partial<Translation> = {
         expiresIn: '过期时间',
         manageSubscription: '管理订阅',
         subscribe: '订阅',
+        username: {
+          edit: '修改用户名',
+          title: '修改用户名',
+          description: '用户名长度需为 3-32 个字符，仅支持字母、数字、下划线和短横线。',
+          placeholder: '请输入新的用户名',
+          errorEmpty: '用户名不能为空',
+          errorLength: (min: number, max: number) => `用户名长度需为 ${min}-${max} 个字符`,
+          errorChars: '仅支持字母、数字、下划线和短横线',
+          errorGeneric: '修改用户名失败',
+        },
       },
       other: {
         title: '其他',

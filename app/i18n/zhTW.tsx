@@ -468,6 +468,16 @@ export const zhTW: Partial<Translation> = {
         expiresIn: '過期時間',
         manageSubscription: '管理訂閱',
         subscribe: '訂閱',
+        username: {
+          edit: '修改使用者名稱',
+          title: '修改使用者名稱',
+          description: '使用者名稱長度需為 3-32 個字元，僅支援字母、數字、底線與連字號。',
+          placeholder: '請輸入新的使用者名稱',
+          errorEmpty: '使用者名稱不能為空',
+          errorLength: (min: number, max: number) => `使用者名稱長度需為 ${min}-${max} 個字元`,
+          errorChars: '僅支援字母、數字、底線與連字號',
+          errorGeneric: '修改使用者名稱失敗',
+        },
       },
       other: {
         title: '其他',

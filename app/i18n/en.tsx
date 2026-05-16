@@ -517,6 +517,16 @@ export const en: Translation = {
         expiresIn: 'Expires in',
         manageSubscription: 'Manage Subscription',
         subscribe: 'Subscribe',
+        username: {
+          edit: 'Edit username',
+          title: 'Edit username',
+          description: 'Choose a username between 3 and 32 characters. Letters, digits, underscore, and hyphen only.',
+          placeholder: 'Enter a new username',
+          errorEmpty: 'Username is required',
+          errorLength: (min: number, max: number) => `Username must be ${min}-${max} characters`,
+          errorChars: 'Only letters, digits, underscore, and hyphen are allowed',
+          errorGeneric: 'Failed to update username',
+        },
       },
       other: {
         title: 'Other',

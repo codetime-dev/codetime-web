@@ -396,6 +396,16 @@ export type Translation = {
         expiresIn: string
         manageSubscription: string
         subscribe: string
+        username?: {
+          edit: string
+          title: string
+          description: string
+          placeholder: string
+          errorEmpty: string
+          errorLength: (min: number, max: number) => string
+          errorChars: string
+          errorGeneric: string
+        }
       }
       other: {
         title: string
