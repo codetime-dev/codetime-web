@@ -20,6 +20,10 @@ function snakeToCamelKey(k: string): string {
   return k.replaceAll(/_([a-z])/g, (_, c: string) => c.toUpperCase())
 }
 
+function camelToSnakeKey(k: string): string {
+  return k.replaceAll(/[A-Z]/g, m => `_${m.toLowerCase()}`)
+}
+
 // Deep-camelCase only the *keys* of a plain object/array tree. Pydantic
 // emits `conditionType` for RuleCondition; the column stores legacy
 // `condition_type`. Strings/numbers/booleans pass through unchanged.
@@ -31,6 +35,25 @@ export function camelizeKeys<T>(value: T): T {
     const out: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
       out[snakeToCamelKey(k)] = camelizeKeys(v)
+    }
+    return out as unknown as T
+  }
+  return value
+}
+
+// Inverse of camelizeKeys. Tag rules are stored snake_case in the DB
+// (Python's pydantic dumps field names, not aliases), so any rules
+// payload coming through the camelCase wire must be snakified before
+// it lands in `rules_json`. Otherwise the evaluator's
+// `condition_type` lookup misses and every condition silently fails.
+export function snakifyKeys<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map(v => snakifyKeys(v)) as unknown as T
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[camelToSnakeKey(k)] = snakifyKeys(v)
     }
     return out as unknown as T
   }

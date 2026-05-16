@@ -4,7 +4,7 @@ import { tags } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { sendPyError } from '../../../utils/py-error'
-import { toTagResponse } from '../../../utils/tag-dto'
+import { snakifyKeys, toTagResponse } from '../../../utils/tag-dto'
 import { invalidateMetaHashCacheForUser } from '../../../utils/tag-meta-hash'
 
 // Mirrors PUT /v3/tags/{tag_id}. Partial update — Python checks
@@ -94,7 +94,10 @@ export default defineEventHandler(async (event) => {
       patch.rulesJson = null
     }
     else if (typeof r === 'object') {
-      patch.rulesJson = r as object
+      // The DB stores rule keys snake_case (Python pydantic dumps field
+      // names). Wire JSON is camelCase, so snakify before persisting or
+      // the evaluator's `condition_type` lookup will miss.
+      patch.rulesJson = snakifyKeys(r) as object
     }
   }
 

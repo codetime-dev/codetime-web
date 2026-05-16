@@ -344,7 +344,9 @@ function removeRuleGroup(groupId: string) {
 
     <!-- Empty state -->
     <div v-if="displayRuleGroups.length === 0" class="rules-empty">
-      <i class="i-tabler-rules-off text-3xl text-ct-fg-muted" />
+      <div class="rules-empty-icon">
+        <i class="i-tabler-rules-off text-2xl" />
+      </div>
       <p class="rules-empty-text">
         {{ t.dashboard.tags.tagRules.noRules }}
       </p>
@@ -368,40 +370,44 @@ function removeRuleGroup(groupId: string) {
     <!-- Rule groups -->
     <div v-else class="rules-list">
       <template v-for="(group, groupIndex) in displayRuleGroups" :key="group.id">
-        <div v-if="groupIndex > 0" class="rules-or">
-          <span class="rules-or-line" />
-          <span class="rules-or-label">OR</span>
-          <span class="rules-or-line" />
+        <div v-if="groupIndex > 0" class="rules-connector rules-connector-or">
+          <span class="rules-connector-line" />
+          <span class="rules-connector-chip rules-connector-chip-or">OR</span>
+          <span class="rules-connector-line" />
         </div>
 
-        <div class="rules-group">
-          <div class="rules-group-conditions">
+        <div class="rules-group" :class="{ 'is-editing': isEditing }">
+          <div class="rules-group-body">
             <template v-for="(condition, conditionIndex) in group.conditions" :key="conditionIndex">
-              <div v-if="conditionIndex > 0" class="rules-and">
-                AND
+              <div v-if="conditionIndex > 0" class="rules-and-row">
+                <span class="rules-connector-chip rules-connector-chip-and">AND</span>
               </div>
 
               <div class="rules-condition">
                 <template v-if="isEditing">
-                  <select
-                    class="line-select"
-                    :value="condition.field"
-                    @change="(e) => updateCondition(group.id, conditionIndex, (e.target as HTMLSelectElement).value, condition.conditionType, condition.value)"
-                  >
-                    <option v-for="f in fieldOptions" :key="f.id" :value="f.id">
-                      {{ f.label }}
-                    </option>
-                  </select>
+                  <div class="rules-field-wrap">
+                    <select
+                      class="line-select"
+                      :value="condition.field"
+                      @change="(e) => updateCondition(group.id, conditionIndex, (e.target as HTMLSelectElement).value, condition.conditionType, condition.value)"
+                    >
+                      <option v-for="f in fieldOptions" :key="f.id" :value="f.id">
+                        {{ f.label }}
+                      </option>
+                    </select>
+                  </div>
 
-                  <select
-                    class="line-select"
-                    :value="condition.conditionType"
-                    @change="(e) => updateCondition(group.id, conditionIndex, condition.field, (e.target as HTMLSelectElement).value as RuleConditionType, condition.value)"
-                  >
-                    <option v-for="c in conditionTypeOptions" :key="c.id" :value="c.id">
-                      {{ c.label }}
-                    </option>
-                  </select>
+                  <div class="rules-field-wrap rules-field-wrap-op">
+                    <select
+                      class="line-select line-select-op"
+                      :value="condition.conditionType"
+                      @change="(e) => updateCondition(group.id, conditionIndex, condition.field, (e.target as HTMLSelectElement).value as RuleConditionType, condition.value)"
+                    >
+                      <option v-for="c in conditionTypeOptions" :key="c.id" :value="c.id">
+                        {{ c.label }}
+                      </option>
+                    </select>
+                  </div>
 
                   <input
                     type="text"
@@ -425,7 +431,7 @@ function removeRuleGroup(groupId: string) {
                 <template v-else>
                   <span class="rules-pill rules-pill-field">{{ fieldDisplayMap[condition.field] || condition.field }}</span>
                   <span class="rules-pill rules-pill-op">{{ conditionTypeDisplayMap[condition.conditionType] || condition.conditionType }}</span>
-                  <span class="rules-pill rules-pill-value">"{{ condition.value }}"</span>
+                  <span class="rules-pill rules-pill-value">{{ condition.value || '—' }}</span>
                 </template>
               </div>
             </template>
@@ -433,7 +439,7 @@ function removeRuleGroup(groupId: string) {
             <button
               v-if="isEditing"
               type="button"
-              class="line-btn line-btn-ghost rules-add-and"
+              class="rules-add-and"
               @click="addConditionToGroup(group.id)"
             >
               <i class="i-tabler-plus text-sm" />
@@ -451,7 +457,7 @@ function removeRuleGroup(groupId: string) {
           @click="createRuleGroup"
         >
           <i class="i-tabler-plus text-sm" />
-          <span>OR</span>
+          <span>OR {{ t.dashboard.tags.tagRules.createRule }}</span>
         </button>
       </div>
     </div>
@@ -464,20 +470,20 @@ function removeRuleGroup(groupId: string) {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 1.25rem;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--ct-border-subtle);
 }
 
 .rules-tag {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
   min-width: 0;
 }
 
 .rules-tag-glyph {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -485,19 +491,20 @@ function removeRuleGroup(groupId: string) {
   font-size: 12px;
   font-weight: 600;
   color: white;
+  border-radius: var(--ct-radius-md);
   flex-shrink: 0;
 }
 
 .rules-tag-meta {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 2px;
   min-width: 0;
 }
 
 .rules-tag-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--ct-text-base);
+  font-weight: var(--ct-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -505,16 +512,16 @@ function removeRuleGroup(groupId: string) {
 
 .rules-tag-hint {
   font-size: var(--ct-text-xs);
-      color: var(--ct-fg-subtle);
+  color: var(--ct-fg-subtle);
 }
 
 .rules-tag-quota {
-  color: color-mix(in srgb, var(--color-primary-1) 80%, transparent);
+  color: color-mix(in srgb, var(--ct-primary) 80%, transparent);
 }
 
 .rules-actions {
   display: inline-flex;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 /* Empty */
@@ -522,18 +529,29 @@ function removeRuleGroup(groupId: string) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.85rem;
-  padding: 3rem 1rem;
+  gap: 12px;
+  padding: 48px 16px;
+}
+
+.rules-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ct-radius-full);
+  background: var(--ct-surface-1);
+  color: var(--ct-fg-subtle);
+  margin-bottom: 4px;
 }
 
 .rules-empty-text {
-  font-size: var(--ct-text-xs);
-  letter-spacing: 0.2em;
-    color: var(--ct-fg-subtle);
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-muted);
 }
 
 .rules-empty-hint {
-  font-size: 11.5px;
+  font-size: var(--ct-text-xs);
   color: var(--ct-fg-subtle);
   text-align: center;
 }
@@ -542,97 +560,158 @@ function removeRuleGroup(groupId: string) {
 .rules-list {
   display: flex;
   flex-direction: column;
-  padding: 0.5rem 1.25rem 1rem;
-  gap: 0.5rem;
+  padding: 14px 18px 18px;
+  gap: 0;
 }
 
-.rules-or {
+/* Connectors (OR / AND) */
+.rules-connector {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0;
+  gap: 10px;
 }
 
-.rules-or-line {
+.rules-connector-or {
+  padding: 10px 0;
+}
+
+.rules-connector-line {
   flex: 1;
   height: 1px;
-  background: var(--ct-border);
+  background: var(--ct-border-subtle);
 }
 
-.rules-or-label {
-  font-size: var(--ct-text-xs);
-  font-weight: 600;
-  letter-spacing: 0.32em;
-  color: var(--color-primary-1);
-}
-
-.rules-group {
-  padding: 0.85rem 1rem;
-  background-color: var(--ct-surface-1);
-}
-
-.rules-group-conditions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.rules-connector-chip {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  height: 22px;
+  min-width: 36px;
+  padding: 0 8px;
+  font-family: var(--ct-font-mono);
+  font-size: 11px;
+  font-weight: var(--ct-weight-semibold);
+  letter-spacing: 0.12em;
+  border-radius: var(--ct-radius-full);
 }
 
-.rules-and {
-  font-size: var(--ct-text-xs);
-  font-weight: 600;
-    color: var(--ct-fg-subtle);
-  padding: 0 0.25rem;
+.rules-connector-chip-or {
+  color: var(--ct-primary);
+  background: color-mix(in srgb, var(--ct-primary) 12%, transparent);
+}
+
+.rules-connector-chip-and {
+  color: var(--ct-fg-muted);
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+}
+
+/* Group card */
+.rules-group {
+  position: relative;
+  display: flex;
+  padding: 14px;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: var(--ct-radius-lg);
+  transition: border-color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease);
+}
+
+.rules-group.is-editing {
+  background: var(--ct-surface);
+  border-color: var(--ct-border);
+}
+
+.rules-group-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rules-and-row {
+  display: flex;
+  align-items: center;
+  padding: 2px 0;
 }
 
 .rules-condition {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
+/* View-mode pills */
 .rules-pill {
   display: inline-flex;
   align-items: center;
-  height: 1.85rem;
-  padding: 0 0.7rem;
+  height: 26px;
+  padding: 0 10px;
   font-size: var(--ct-text-xs);
-  background-color: var(--ct-surface-2);
+  font-family: var(--ct-font-mono);
+  border-radius: var(--ct-radius-sm);
+  background: var(--ct-surface-1);
   color: var(--ct-fg);
+  border: 1px solid transparent;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rules-pill-field {
+  color: var(--ct-fg-muted);
+  font-weight: var(--ct-weight-medium);
 }
 
 .rules-pill-op {
-  color: var(--color-primary-1);
+  color: var(--ct-primary);
+  background: color-mix(in srgb, var(--ct-primary) 10%, transparent);
   letter-spacing: 0.08em;
-    font-size: 10.5px;
+  font-size: 11px;
 }
 
 .rules-pill-value {
-  color: color-mix(in srgb, var(--ct-fg) 90%, transparent);
+  color: var(--ct-fg);
+  background: var(--ct-surface);
+  border-color: var(--ct-border-subtle);
 }
 
-/* Inputs */
+/* Editor inputs */
+.rules-field-wrap {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+}
+
 .line-input {
   display: inline-block;
-  height: 2.25rem;
-  padding: 0 0.75rem;
+  height: 32px;
+  padding: 0 10px;
   font-family: var(--ct-font-mono);
-  font-size: 12px;
+  font-size: var(--ct-text-xs);
   color: var(--ct-fg);
-  background-color: var(--ct-surface-1);
-  border: 0;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: var(--ct-radius-md);
   outline: 0;
-  transition: background-color 180ms ease, box-shadow 180ms ease;
+  transition: border-color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease),
+              box-shadow var(--ct-duration-fast) var(--ct-ease);
 }
 
 .line-input:hover {
-  background-color: var(--ct-surface-2);
+  border-color: var(--ct-border);
 }
 
 .line-input:focus {
-  background-color: var(--ct-surface-2);
-  box-shadow: inset 0 -1px 0 var(--color-primary-1);
+  background: var(--ct-surface);
+  border-color: var(--ct-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-primary) 18%, transparent);
 }
 
 .line-input::placeholder {
@@ -640,30 +719,42 @@ function removeRuleGroup(groupId: string) {
 }
 
 .rules-value-input {
-  min-width: 10rem;
+  min-width: 12rem;
   flex: 1;
 }
 
 .line-select {
-  height: 2.25rem;
-  padding: 0 1.85rem 0 0.75rem;
+  height: 32px;
+  padding: 0 28px 0 10px;
   font-family: var(--ct-font-mono);
-  font-size: 12px;
+  font-size: var(--ct-text-xs);
   color: var(--ct-fg);
   background-color: var(--ct-surface-1);
-  border: 0;
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: var(--ct-radius-md);
   outline: 0;
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
   background-repeat: no-repeat;
-  background-position: right 0.6rem center;
+  background-position: right 8px center;
   background-size: 12px 12px;
-  transition: background-color 180ms ease;
+  transition: border-color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease);
 }
 
 .line-select:hover {
-  background-color: var(--ct-surface-2);
+  border-color: var(--ct-border);
+}
+
+.line-select:focus {
+  border-color: var(--ct-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-primary) 18%, transparent);
+}
+
+.line-select-op {
+  color: var(--ct-primary);
+  letter-spacing: 0.04em;
 }
 
 /* Remove btn */
@@ -671,28 +762,53 @@ function removeRuleGroup(groupId: string) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  background-color: var(--ct-surface-1);
-  border: 0;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--ct-radius-md);
   cursor: pointer;
-  color: var(--ct-fg-muted);
-  transition: color 180ms ease, background-color 180ms ease;
+  color: var(--ct-fg-subtle);
+  transition: color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease),
+              border-color var(--ct-duration-fast) var(--ct-ease);
 }
 
 .rules-remove:hover {
   color: var(--ct-danger);
-  background-color: color-mix(in srgb, var(--ct-danger) 18%, transparent);
+  background: color-mix(in srgb, var(--ct-danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--ct-danger) 30%, transparent);
 }
 
 .rules-add-and {
-  height: 1.85rem !important;
-  padding: 0 0.75rem !important;
-  font-size: 10.5px !important;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  margin-top: 4px;
+  font-family: var(--ct-font-sans);
+  font-size: var(--ct-text-xs);
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
+  background: transparent;
+  border: 1px dashed var(--ct-border);
+  border-radius: var(--ct-radius-sm);
+  cursor: pointer;
+  transition: color var(--ct-duration-fast) var(--ct-ease),
+              border-color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease);
+}
+
+.rules-add-and:hover {
+  color: var(--ct-primary);
+  border-color: var(--ct-primary);
+  background: color-mix(in srgb, var(--ct-primary) 8%, transparent);
 }
 
 .rules-add-or {
-  margin-top: 0.5rem;
+  margin-top: 12px;
   display: flex;
   justify-content: flex-start;
 }

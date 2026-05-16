@@ -193,13 +193,15 @@ const dailyAvgMs = computed(() => {
       </div>
 
       <!-- Segmented time range -->
-      <div class="stats-range">
+      <div class="stats-range" role="tablist">
         <button
           v-for="opt in timeRangeOptions"
           :key="opt.id"
           type="button"
+          role="tab"
           class="stats-range-btn"
-          :class="timeRange === opt.id ? 'stats-range-btn-active' : ''"
+          :class="{ 'is-active': timeRange === opt.id }"
+          :aria-selected="timeRange === opt.id"
           @click="timeRange = opt.id"
         >
           {{ opt.label }}
@@ -269,12 +271,12 @@ const dailyAvgMs = computed(() => {
 
       <!-- Chart -->
       <div class="stats-chart-wrap">
-        <div class="stats-chart-eyebrow">
-          <span class="stats-chart-eyebrow-bracket">[</span>
-          <span class="stats-chart-eyebrow-num">→</span>
-          <span class="stats-chart-eyebrow-sep">/</span>
+        <div class="eyebrow stats-chart-eyebrow">
+          <span class="eyebrow-bracket">[</span>
+          <span class="eyebrow-num">→</span>
+          <span class="eyebrow-sep">/</span>
           <span>{{ t.dashboard.tags.stats.timeTrend }}</span>
-          <span class="stats-chart-eyebrow-bracket">]</span>
+          <span class="eyebrow-bracket">]</span>
         </div>
         <div v-if="hasActualData" :key="`chart-${props.tag.id}-${timeRange}`" class="stats-chart">
           <PoltChart
@@ -333,35 +335,45 @@ const dailyAvgMs = computed(() => {
   min-width: 0;
 }
 
-/* Segmented range */
+/* Segmented range — mirrors Dashboard/DataRange's dr-shell look so the
+   two date controls share a vocabulary across the app. */
 .stats-range {
   display: inline-flex;
+  align-items: center;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
+  padding: 2px;
+  gap: 2px;
 }
 
 .stats-range-btn {
-  height: 2rem;
-  padding: 0 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 12px;
   font-size: var(--ct-text-xs);
-      color: var(--ct-fg-subtle);
-  background-color: transparent;
+  font-weight: var(--ct-weight-medium);
+  color: var(--ct-fg-muted);
+  background: transparent;
   border: 0;
-  border-left: 1px solid var(--ct-border-subtle);
+  border-radius: calc(var(--ct-radius-md) - 2px);
   cursor: pointer;
-  transition: color 180ms ease, background-color 180ms ease;
+  transition: color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease),
+              box-shadow var(--ct-duration-fast) var(--ct-ease);
 }
 
-.stats-range-btn:first-child {
-  border-left: 0;
-}
-
-.stats-range-btn:hover {
+.stats-range-btn:hover:not(.is-active) {
   color: var(--ct-fg);
-  background-color: var(--ct-surface-2);
+  background: var(--ct-surface-2);
 }
 
-.stats-range-btn-active {
-  color: var(--color-primary-1);
-  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
+.stats-range-btn.is-active {
+  color: var(--ct-fg);
+  background: var(--ct-surface);
+  box-shadow: var(--ct-shadow-sm);
 }
 
 /* Cells */
@@ -453,25 +465,9 @@ const dailyAvgMs = computed(() => {
   padding: 1rem 1.25rem 1.25rem;
 }
 
+/* Tighten the global .eyebrow's vertical rhythm for this chart header. */
 .stats-chart-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--ct-font-mono);
-  font-size: var(--ct-text-xs);
-  letter-spacing: 0.32em;
-  color: var(--color-primary-1);
-  margin-bottom: 0.85rem;
-}
-
-.stats-chart-eyebrow-bracket,
-.stats-chart-eyebrow-sep {
-  opacity: 0.55;
-}
-
-.stats-chart-eyebrow-num {
-  color: var(--ct-fg);
-  opacity: 0.85;
+  margin-bottom: 12px;
 }
 
 .stats-chart {

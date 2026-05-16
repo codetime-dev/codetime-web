@@ -323,6 +323,10 @@ useHead({
     <div class="mx-auto px-6 py-24 max-w-6xl space-y-28 sm:py-32 sm:space-y-32">
       <!-- 02 SAVE — wide hero card with calendar visual -->
       <div class="feature-card feature-card--wide">
+        <span class="feature-card-corner feature-card-corner--tl" aria-hidden="true" />
+        <span class="feature-card-corner feature-card-corner--tr" aria-hidden="true" />
+        <span class="feature-card-corner feature-card-corner--bl" aria-hidden="true" />
+        <span class="feature-card-corner feature-card-corner--br" aria-hidden="true" />
         <div class="feature-card-body">
           <div class="eyebrow feature-eyebrow">
             <span class="eyebrow-bracket">[</span>
@@ -572,10 +576,47 @@ useHead({
   position: relative;
   display: grid;
   gap: 0;
-  border: 1px solid var(--ct-border);
-  background: var(--ct-surface-1);
-  overflow: hidden;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--ct-surface-1) 100%, transparent) 0%,
+      color-mix(in srgb, var(--ct-surface) 100%, transparent) 100%);
+  padding: 14px;
 }
+.feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top: 1px dashed color-mix(in srgb, var(--ct-border) 80%, transparent);
+  border-bottom: 1px dashed color-mix(in srgb, var(--ct-border) 80%, transparent);
+}
+.feature-card-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  color: var(--ct-primary);
+}
+.feature-card-corner::before,
+.feature-card-corner::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+}
+.feature-card-corner::before { width: 100%; height: 1.5px; }
+.feature-card-corner::after  { width: 1.5px; height: 100%; }
+.feature-card-corner--tl { top: 0; left: 0; }
+.feature-card-corner--tl::before { top: 0; left: 0; }
+.feature-card-corner--tl::after  { top: 0; left: 0; }
+.feature-card-corner--tr { top: 0; right: 0; }
+.feature-card-corner--tr::before { top: 0; right: 0; }
+.feature-card-corner--tr::after  { top: 0; right: 0; }
+.feature-card-corner--bl { bottom: 0; left: 0; }
+.feature-card-corner--bl::before { bottom: 0; left: 0; }
+.feature-card-corner--bl::after  { bottom: 0; left: 0; }
+.feature-card-corner--br { bottom: 0; right: 0; }
+.feature-card-corner--br::before { bottom: 0; right: 0; }
+.feature-card-corner--br::after  { bottom: 0; right: 0; }
 .feature-card--wide {
   grid-template-columns: 1fr;
 }
@@ -620,12 +661,12 @@ useHead({
   background: linear-gradient(135deg,
     color-mix(in srgb, var(--ct-primary) 8%, transparent) 0%,
     transparent 70%);
-  border-top: 1px solid var(--ct-border);
+  border-top: 1px dashed color-mix(in srgb, var(--ct-border) 80%, transparent);
 }
 @media (min-width: 768px) {
   .feature-card-visual {
     border-top: 0;
-    border-left: 1px solid var(--ct-border);
+    border-left: 1px dashed color-mix(in srgb, var(--ct-border) 80%, transparent);
   }
 }
 .feature-card-visual-icon {

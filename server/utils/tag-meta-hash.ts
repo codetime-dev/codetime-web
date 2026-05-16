@@ -25,8 +25,12 @@ function stableStringify(value: unknown): string {
   return `{${keys.map(k => `${JSON.stringify(k)}:${stableStringify((value as Record<string, unknown>)[k])}`).join(',')}}`
 }
 
+// `v2:` prefix bumps the cache namespace after the camelCase/snake_case
+// rule-key compatibility fix in evalCondition — older entries computed
+// before the fix returned empty hash lists for camelCase rules, so we
+// can't let them keep serving zeros while their TTL bleeds out.
 export function fingerprintRule(rule: unknown): string {
-  return createHash('blake2b512').update(stableStringify(rule)).digest('hex').slice(0, 32)
+  return `v2:${createHash('blake2b512').update(stableStringify(rule)).digest('hex').slice(0, 32)}`
 }
 
 export function invalidateMetaHashCacheForUser(uid: number): void {

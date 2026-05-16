@@ -37,7 +37,11 @@ function evalCondition(cond: Record<string, any>, ws: WorkspaceData): boolean {
   const raw = ws[field]
   const fieldValue = raw == null ? '' : String(raw)
   const condValue = String(cond.value ?? '')
-  const type = String(cond.condition_type || '')
+  // Rules written by the Python service store `condition_type` (pydantic
+  // dumps the field name in snake_case). The Nuxt PUT handler historically
+  // passed wire camelCase through unchanged, so older rows may carry
+  // `conditionType`. Accept both so payloads from either era match.
+  const type = String(cond.condition_type ?? cond.conditionType ?? '')
   const isRegex = type === 'REGEX' || type === 'NOT_REGEX'
   const a = isRegex ? fieldValue : fieldValue.toLowerCase()
   const b = isRegex ? condValue : condValue.toLowerCase()
@@ -95,7 +99,7 @@ export function evaluateRule(rule: any, ws: WorkspaceData): boolean {
  return rule.conditions.some((c: any) => evaluateRule(c, ws))
 }
   }
-  if ('field' in rule && 'condition_type' in rule && 'value' in rule) {
+  if ('field' in rule && ('condition_type' in rule || 'conditionType' in rule) && 'value' in rule) {
     return evalCondition(rule, ws)
   }
   return false
