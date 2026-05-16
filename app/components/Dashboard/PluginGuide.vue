@@ -2,6 +2,17 @@
 const user = useUser()
 const token = computed(() => user.value?.uploadToken ?? '')
 const t = useI18N()
+
+const tokenVisible = ref(false)
+const tokenDisplay = computed(() => {
+  if (!token.value) {
+    return ''
+  }
+  if (tokenVisible.value) {
+    return token.value
+  }
+  return '•'.repeat(Math.min(48, token.value.length))
+})
 </script>
 
 <template>
@@ -10,10 +21,6 @@ const t = useI18N()
     <div class="onb-lead">
       <span class="onb-lead-stripe" aria-hidden="true" />
       <div class="onb-lead-body">
-        <span class="onb-lead-eyebrow tabular-nums">
-          <i class="i-tabler-rocket" />
-          onboarding · plugin
-        </span>
         <h2 class="onb-lead-title">
           {{ t.dashboard.pluginGuide.title }}
         </h2>
@@ -24,35 +31,42 @@ const t = useI18N()
     </div>
 
     <!-- Token -->
-    <PanelSection
-      num="01"
-      :title="t.dashboard.pluginGuide.token.title"
-      meta="credentials · plugin auth"
-    >
+    <PanelSection num="01" :title="t.dashboard.pluginGuide.token.title" flush>
       <template #icon>
         <i class="i-tabler-key text-[15px] text-ct-fg-muted" />
       </template>
-      <p class="onb-help">
-        {{ t.dashboard.pluginGuide.token.description }}
-      </p>
-      <div class="onb-token">
-        <UInput
-          :model-value="token"
-          readonly
-          type="password"
-          class="onb-token-field"
-        />
-        <UCopyBtn :value="token" />
+      <div class="onb-pad">
+        <p class="onb-desc">
+          {{ t.dashboard.pluginGuide.token.description }}
+        </p>
+
+        <div class="token-bar">
+          <div class="token-tag">
+            <i class="i-tabler-shield-lock" />
+            <span>token</span>
+          </div>
+          <input
+            :value="tokenDisplay"
+            readonly
+            class="token-field"
+            type="text"
+            @focus="(e) => (e.target as HTMLInputElement).select()"
+          >
+          <button
+            type="button"
+            class="token-eye"
+            :title="tokenVisible ? 'hide' : 'reveal'"
+            @click="tokenVisible = !tokenVisible"
+          >
+            <i :class="tokenVisible ? 'i-tabler-eye-off' : 'i-tabler-eye'" class="text-sm" />
+          </button>
+          <UCopyBtn :value="token" class="token-copy" />
+        </div>
       </div>
     </PanelSection>
 
     <!-- Plugins -->
-    <PanelSection
-      num="02"
-      :title="t.dashboard.pluginGuide.plugins.title"
-      meta="vscode · jetbrains"
-      flush
-    >
+    <PanelSection num="02" :title="t.dashboard.pluginGuide.plugins.title" flush>
       <template #icon>
         <i class="i-tabler-puzzle text-[15px] text-ct-fg-muted" />
       </template>
@@ -72,7 +86,7 @@ const t = useI18N()
               {{ t.dashboard.pluginGuide.vscode.description }}
             </div>
           </div>
-          <span class="onb-card-cta tabular-nums">
+          <span class="onb-card-cta">
             {{ t.dashboard.pluginGuide.downloadPlugin }}
             <i class="i-tabler-arrow-up-right" />
           </span>
@@ -92,7 +106,7 @@ const t = useI18N()
               {{ t.dashboard.pluginGuide.jetbrains.description }}
             </div>
           </div>
-          <span class="onb-card-cta tabular-nums">
+          <span class="onb-card-cta">
             {{ t.dashboard.pluginGuide.downloadPlugin }}
             <i class="i-tabler-arrow-up-right" />
           </span>
@@ -101,12 +115,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- Setup -->
-    <PanelSection
-      num="03"
-      :title="t.dashboard.pluginGuide.setup.title"
-      meta="4 · steps"
-      flush
-    >
+    <PanelSection num="03" :title="t.dashboard.pluginGuide.setup.title" flush>
       <template #icon>
         <i class="i-tabler-route text-[15px] text-ct-fg-muted" />
       </template>
@@ -123,12 +132,12 @@ const t = useI18N()
 <style scoped>
 .onb { width: 100%; display: flex; flex-direction: column; }
 
-/* Lead block — distinct from PanelSection but same visual family */
+/* Lead */
 .onb-lead {
   position: relative;
   display: flex;
-  gap: 18px;
-  padding: 24px 18px;
+  gap: 16px;
+  padding: 22px 18px;
   background: var(--ct-surface);
   border-bottom: 1px solid var(--ct-border);
 }
@@ -139,15 +148,6 @@ const t = useI18N()
   border-radius: 2px;
 }
 .onb-lead-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.onb-lead-eyebrow {
-  font-family: var(--ct-font-mono);
-  font-size: var(--ct-text-xs);
-  color: var(--ct-fg-subtle);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  letter-spacing: 0.02em;
-}
 .onb-lead-title {
   font-size: var(--ct-text-2xl);
   font-weight: var(--ct-weight-semibold);
@@ -162,23 +162,88 @@ const t = useI18N()
   max-width: 56ch;
 }
 
-.onb-help {
-  font-size: var(--ct-text-sm);
+.onb-pad {
+  padding: 1rem 1.25rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.onb-desc {
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  line-height: 1.7;
   color: var(--ct-fg-muted);
-  line-height: 1.55;
-  margin-bottom: 12px;
 }
 
-/* Token row */
-.onb-token {
-  display: flex;
-  gap: 8px;
-  max-width: 32rem;
+/* Token bar — mirrors Settings token design */
+.token-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: stretch;
+  height: 2.75rem;
+  padding: 4px;
+  gap: 2px;
+  background-color: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: 10px;
+  transition: background-color 180ms ease, border-color 180ms ease;
 }
-.onb-token-field { flex: 1; }
-.onb-token-field :deep(input) {
-  letter-spacing: 4px;
+.token-bar:hover {
+  background-color: var(--ct-surface-2);
+  border-color: var(--ct-border);
+}
+.token-bar:focus-within { border-color: var(--ct-primary); }
+[data-scheme="light"] .token-bar {
+  background-color: color-mix(in srgb, var(--ct-fg) 4%, transparent);
+}
+[data-scheme="light"] .token-bar:hover {
+  background-color: color-mix(in srgb, var(--ct-fg) 7%, transparent);
+}
+.token-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  font-size: var(--ct-text-xs);
+  font-weight: var(--ct-weight-medium);
+  letter-spacing: 0.05em;
+  color: var(--ct-primary);
+  background: var(--ct-primary-soft);
+  border-radius: 7px;
+}
+.token-field {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0 0.85rem;
   font-family: var(--ct-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.05em;
+  color: var(--ct-fg);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+.token-eye {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--ct-fg-subtle);
+  transition: color 180ms ease, background-color 180ms ease;
+}
+.token-eye:hover {
+  color: var(--ct-fg);
+  background-color: var(--ct-surface);
+}
+.token-copy {
+  height: 100% !important;
+  border-radius: 7px !important;
 }
 
 /* Plugins grid */
@@ -240,6 +305,7 @@ const t = useI18N()
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--ct-border-subtle);
+  border-bottom: 1px solid var(--ct-border-subtle);
 }
 .onb-step {
   display: flex;
