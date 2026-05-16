@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3GetWorkspaceFiles } from '~/api/v3'
+import { v3GetWorkspaceFiles, v3RecentWorkspaces } from '~/api/v3'
 
 definePageMeta({
   layout: 'dashboard',
@@ -18,13 +18,18 @@ const project = ref<{
 const router = useRouter()
 const projectName = computed(() => project.value?.label)
 
-const workspaceLRU = useLRU<string>('workspace-select', 5)
+const { data: recentWorkspacesData } = useAsyncData('workspace-recent', async () => {
+  const resp = await v3RecentWorkspaces({ query: { limit: 6 } })
+  return resp.data?.results?.map(r => r.workspaceName) ?? []
+}, { server: false, default: () => [] })
 
-const historyWorkspaceNameList = computed(() => workspaceLRU.values.value)
+const recentWorkspaceNameList = computed(() => {
+  const list = recentWorkspacesData.value ?? []
+  return list.filter(name => name !== projectName.value).slice(0, 5)
+})
 
 watch(project, (newVal) => {
   if (newVal) {
-    workspaceLRU.set(newVal.id, newVal.label)
     router.push({
       query: {
         project: newVal.id,
@@ -103,14 +108,14 @@ const height = 26
         <i class="i-tabler-app-window ws-icon" />
       </template>
       <ProjectSelect v-model="project" />
-      <div v-if="historyWorkspaceNameList.length > 0" class="ws-history">
+      <div v-if="recentWorkspaceNameList.length > 0" class="ws-history">
         <UButton
-          v-for="name in historyWorkspaceNameList"
+          v-for="name in recentWorkspaceNameList"
           :key="name"
           variant="secondary"
           size="md"
           icon-left="i-tabler-history"
-          @click="project = { label: name ?? '', id: name ?? '' }"
+          @click="project = { label: name, id: name }"
         >
           {{ name }}
         </UButton>
