@@ -148,8 +148,16 @@ isPro: session.plan === 'pro',
   const time = timeTruncExpr(unit, tz)
   const db = useDb()
   const base = db.select({ by: byField, time, duration: count() }).from(workspaceMinutesV2)
+  // Join on (uid, meta_xxh3_64) so an xxh3 collision across users
+  // cannot bleed rows in.
   const stmt = join
-    ? base.innerJoin(workspaceMetaV2, eq(workspaceMinutesV2.metaXxh3_64, workspaceMetaV2.xxh3_64))
+    ? base.innerJoin(
+        workspaceMetaV2,
+        and(
+          eq(workspaceMinutesV2.uid, workspaceMetaV2.uid),
+          eq(workspaceMinutesV2.metaXxh3_64, workspaceMetaV2.xxh3_64),
+        ),
+      )
     : base
   // Python's list_self_stats does NOT apply a SQL LIMIT — `limit` only
   // sizes the time window (limit * minutes_per_unit). The returned row
@@ -168,8 +176,7 @@ isPro: session.plan === 'pro',
   return {
     data: rows.map((r) => {
       const raw = r.time as unknown
-      let label: string
-      label = raw instanceof Date ? `${raw.getUTCFullYear().toString().padStart(4, '0')}-${(raw.getUTCMonth() + 1).toString().padStart(2, '0')}-${raw.getUTCDate().toString().padStart(2, '0')}` : String(raw).slice(0, 10)
+      const label = raw instanceof Date ? `${raw.getUTCFullYear().toString().padStart(4, '0')}-${(raw.getUTCMonth() + 1).toString().padStart(2, '0')}-${raw.getUTCDate().toString().padStart(2, '0')}` : String(raw).slice(0, 10)
       return {
         duration: Number(r.duration),
         time: label,

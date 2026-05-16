@@ -68,9 +68,11 @@ export default defineEventHandler(async (event) => {
   if (!data) {
  return sendPyError(event, 400, 'Invalid body')
 }
+  // Empty strings are valid — editors may legitimately upload
+  // relative_file="" for new buffers; only null/undefined is "missing".
   const required = ['eventTime', 'language', 'project', 'relativeFile', 'editor', 'platform'] as const
   for (const key of required) {
-    if (data[key] === undefined || data[key] === null || data[key] === '') {
+    if (data[key] === undefined || data[key] === null) {
       return sendPyError(event, 400, `${key} is required`)
     }
   }

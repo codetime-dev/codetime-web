@@ -76,7 +76,7 @@ export default defineEventHandler(async (event) => {
 }
 
   const calculatedDays = q.start_time && q.end_time
-    ? Math.round((endTime.getTime() - startTime.getTime()) / 86_400_000)
+    ? Math.floor((endTime.getTime() - startTime.getTime()) / 86_400_000)
     : (days ?? 30)
   const rank = await fetchUserOverallRank(session.id, startTime, endTime)
   if (!rank) {

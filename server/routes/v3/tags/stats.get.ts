@@ -1,17 +1,18 @@
-import type { WorkspaceData } from '../../../utils/tag-rules'
-import { and, eq, gte, isNotNull, lt, sql } from 'drizzle-orm'
+import { and, count, eq, gte, inArray, isNotNull, lt } from 'drizzle-orm'
 import { defineEventHandler, getQuery } from 'h3'
-import { tags, workspaceMetaV2, workspaceMinutesV2 } from '../../../db/schema'
+import { tags, workspaceMinutesV2 } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { sendPyError } from '../../../utils/py-error'
+import { parseDateParam } from '../../../utils/stats-time'
 import { toTagResponse } from '../../../utils/tag-dto'
-import { evaluateRule } from '../../../utils/tag-rules'
+import { findMetaHashesForRulesBatch } from '../../../utils/tag-meta-hash'
 
-// Mirrors GET /v3/tags/stats. For each user tag that has JSON rules,
-// counts the workspace_minutes_v2 rows in [start_datetime, end_datetime)
-// whose joined meta satisfies the rule. Free users limited to the last
-// 90 days. Returns a per-tag minutes breakdown.
+// Mirrors GET /v3/tags/stats. Returns per-tag minute totals for the
+// requested window. Free users limited to the last 90 days. Tags with
+// no rules contribute zero. Rules are evaluated per-meta (small set);
+// minute aggregation is a single GROUP BY query that we partition into
+// per-tag sums in memory.
 
 defineRouteMeta({
   openAPI: {
@@ -58,25 +59,17 @@ defineRouteMeta({
   },
 })
 
-function parseDate(v: unknown): Date | null {
-  if (typeof v !== 'string' || !v) {
- return null
-}
-  const d = new Date(v)
-  return Number.isNaN(d.getTime()) ? null : d
-}
-
 const NINETY_DAYS_MS = 90 * 86_400_000
 
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
   if (!session) {
- return sendPyError(event, 401, 'Not authenticated')
-}
+    return sendPyError(event, 401, 'Not authenticated')
+  }
 
   const q = getQuery(event)
-  const endDt = parseDate(q.end_datetime) ?? new Date()
-  const startDt = parseDate(q.start_datetime) ?? new Date(endDt.getTime() - 30 * 86_400_000)
+  const endDt = parseDateParam(q.end_datetime) ?? new Date()
+  const startDt = parseDateParam(q.start_datetime) ?? new Date(endDt.getTime() - 30 * 86_400_000)
 
   if (session.plan === 'free' && Date.now() - startDt.getTime() > NINETY_DAYS_MS) {
     return sendPyError(event, 403, 'Free plan users can only access the last 90 days of tag statistics.')
@@ -88,9 +81,9 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb()
   const tagWhere = [eq(tags.uid, session.id), isNotNull(tags.rulesJson)]
-  if (requestedIds) {
- tagWhere.push(sql`${tags.id} IN ${requestedIds}`)
-}
+  if (requestedIds && requestedIds.length > 0) {
+    tagWhere.push(inArray(tags.id, requestedIds))
+  }
   const tagRows = await db.select().from(tags).where(and(...tagWhere))
   if (tagRows.length === 0) {
     return {
@@ -101,43 +94,40 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Fetch each minute's meta in the window. Heavy for wide ranges; the
-  // Python code does the same scan.
-  const minutes = await db
-    .select({
-      workspace_name: workspaceMetaV2.workspaceName,
-      language: workspaceMetaV2.language,
-      git_origin: workspaceMetaV2.gitOrigin,
-      git_branch: workspaceMetaV2.gitBranch,
-      platform: workspaceMetaV2.platform,
-      editor: workspaceMetaV2.editor,
-      absolute_file: workspaceMetaV2.absoluteFile,
-      relative_file: workspaceMetaV2.relativeFile,
-    })
-    .from(workspaceMinutesV2)
-    .innerJoin(
-      workspaceMetaV2,
-      and(
-        eq(workspaceMinutesV2.uid, workspaceMetaV2.uid),
-        eq(workspaceMinutesV2.metaXxh3_64, workspaceMetaV2.xxh3_64),
-      ),
-    )
-    .where(and(
-      eq(workspaceMinutesV2.uid, session.id),
-      gte(workspaceMinutesV2.recordedAt, startDt),
-      lt(workspaceMinutesV2.recordedAt, endDt),
-    ))
+  const hashesByTag = await findMetaHashesForRulesBatch(
+    session.id,
+    tagRows.filter(t => t.rulesJson).map(t => ({ key: t.id, rulesJson: t.rulesJson })),
+  )
+  const allHashes = new Set<number>()
+  for (const hashes of hashesByTag.values()) {
+    for (const h of hashes) {
+      allHashes.add(h)
+    }
+  }
 
+  const countsByHash = new Map<number, number>()
+  if (allHashes.size > 0) {
+    const grouped = await db
+      .select({ hash: workspaceMinutesV2.metaXxh3_64, value: count() })
+      .from(workspaceMinutesV2)
+      .where(and(
+        eq(workspaceMinutesV2.uid, session.id),
+        gte(workspaceMinutesV2.recordedAt, startDt),
+        lt(workspaceMinutesV2.recordedAt, endDt),
+        inArray(workspaceMinutesV2.metaXxh3_64, [...allHashes]),
+      ))
+      .groupBy(workspaceMinutesV2.metaXxh3_64)
+    for (const row of grouped) {
+      countsByHash.set(row.hash, Number(row.value))
+    }
+  }
+
+  // Rules payload is dropped from the response by design (matches Python).
   const data = tagRows.map((tag) => {
     let total = 0
-    for (const m of minutes) {
-      if (evaluateRule(tag.rulesJson, m as WorkspaceData)) {
- total++
-}
+    for (const h of hashesByTag.get(tag.id) ?? []) {
+      total += countsByHash.get(h) ?? 0
     }
-    // Python's services/tags.py:get_tag_time_stats deliberately drops
-    // the rules payload on this endpoint — keep parity so SDK output
-    // stays byte-equivalent.
     return { tag: { ...toTagResponse(tag), rules: null }, totalMinutes: total }
   })
 

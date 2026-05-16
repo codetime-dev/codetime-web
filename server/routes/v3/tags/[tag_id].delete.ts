@@ -4,6 +4,7 @@ import { tags } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { sendPyError } from '../../../utils/py-error'
+import { invalidateMetaHashCacheForUser } from '../../../utils/tag-meta-hash'
 
 // Mirrors DELETE /v3/tags/{tag_id}. Python returns 204 No Content on
 // success (litestar @delete default). On missing/non-owned → 404 from
@@ -44,6 +45,7 @@ export default defineEventHandler(async (event) => {
  return sendPyError(event, 404, 'Tag not found')
 }
 
+  invalidateMetaHashCacheForUser(session.id)
   setResponseStatus(event, 204)
   return null
 })

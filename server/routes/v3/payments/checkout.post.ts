@@ -102,7 +102,7 @@ export default defineEventHandler(async (event) => {
 
   const { storeId } = useLemonSqueezy()
   const email = user.email?.trim()
-  const { data, error } = await createCheckout(storeId, variantId, {
+  const { data, error, statusCode: lsStatus } = await createCheckout(storeId, variantId, {
     testMode: isDev,
     checkoutData: {
       name: user.username || '',
@@ -112,10 +112,12 @@ export default defineEventHandler(async (event) => {
   })
 
   if (error || !data?.data?.attributes?.url) {
-    return sendPyError(event, 500, `Failed to create checkout session: ${error?.message ?? 'unknown error'}`)
+    // Forward LemonSqueezy's HTTP status so callers can distinguish
+    // bad-variant (4xx) from server fault (5xx).
+    const status = typeof lsStatus === 'number' && lsStatus >= 400 ? lsStatus : 500
+    return sendPyError(event, status, `Failed to create checkout session: ${error?.message ?? 'unknown error'}`)
   }
 
-  // Python sets expires_at = now + 24h regardless of LS' real expiry.
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
   return { checkoutUrl: data.data.attributes.url, expiresAt }
 })

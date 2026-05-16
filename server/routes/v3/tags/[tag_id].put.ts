@@ -5,6 +5,7 @@ import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { sendPyError } from '../../../utils/py-error'
 import { toTagResponse } from '../../../utils/tag-dto'
+import { invalidateMetaHashCacheForUser } from '../../../utils/tag-meta-hash'
 
 // Mirrors PUT /v3/tags/{tag_id}. Partial update — Python checks
 // `model_fields_set` so a missing key means "leave alone" while an
@@ -105,5 +106,6 @@ export default defineEventHandler(async (event) => {
   if (!row) {
  return sendPyError(event, 404, 'Tag not found')
 }
+  invalidateMetaHashCacheForUser(session.id)
   return toTagResponse(row)
 })

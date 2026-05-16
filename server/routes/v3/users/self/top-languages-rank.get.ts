@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
 
   const rows = await fetchUserTopLanguagesRank(session.id, topN, startTime, endTime)
   const calculatedDays = q.start_time && q.end_time
-    ? Math.round((endTime.getTime() - startTime.getTime()) / 86_400_000)
+    ? Math.floor((endTime.getTime() - startTime.getTime()) / 86_400_000)
     : (days ?? 30)
 
   return {

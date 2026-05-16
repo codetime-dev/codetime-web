@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import { defineEventHandler, getQuery, getRouterParam, setHeader } from 'h3'
 import { users } from '../../../../../db/schema'
 import { useDb } from '../../../../../utils/db'
-import { sendPyError } from '../../../../../utils/py-error'
+import { sendPyError, sendPyValidationError } from '../../../../../utils/py-error'
 import { fetchUserCodingHistory } from '../../../../../utils/ranking'
 
 // Mirrors GET /v3/public/users/{user_id}/coding-history. Per-day
@@ -49,7 +49,9 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  setHeader(event, 'Cache-Control', 'public, max-age=60, s-maxage=300')
+  // 60 s TTL — dashboard charts rebuild every minute; CDN should not
+  // serve longer staleness.
+  setHeader(event, 'Cache-Control', 'public, max-age=60, s-maxage=60')
   const uid = Number(getRouterParam(event, 'user_id'))
   if (!Number.isFinite(uid) || uid <= 0) {
  return sendPyError(event, 404, 'User not found')
@@ -66,7 +68,13 @@ export default defineEventHandler(async (event) => {
 }
 
   const q = getQuery(event)
-  const days = Math.max(1, Math.trunc(Number(q.days) || 30))
+  const rawDays = Math.trunc(Number(q.days) || 30)
+  if (!Number.isFinite(rawDays) || rawDays < 1 || rawDays > 365) {
+    return sendPyValidationError(event, 'GET', `/v3/public/users/${uid}/coding-history`, [
+      { key: 'days', message: 'days must be between 1 and 365', source: 'query' },
+    ])
+  }
+  const days = rawDays
   const maxDays = user.plan === 'pro' || user.plan === 'premium' ? 365 : 90
   if (days > maxDays) {
     return sendPyError(event, 403, `Non-pro users are limited to ${maxDays} days of history. Current plan: ${user.plan}`)

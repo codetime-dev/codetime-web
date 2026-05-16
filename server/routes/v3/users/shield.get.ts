@@ -1,26 +1,12 @@
-import type { WorkspaceData } from '../../../utils/tag-rules'
-import { createHash } from 'node:crypto'
 import { and, count, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { defineEventHandler, getQuery, setHeader } from 'h3'
 import languageColors from '../../../assets/LanguageColor.json'
 import languageIdentifiers from '../../../assets/LanguageIdentifiers.json'
 import { tags, users, workspaceMetaV2, workspaceMinutesV2 } from '../../../db/schema'
-import { TTLCache } from '../../../utils/cache'
 import { useDb } from '../../../utils/db'
 import { getShieldMessage } from '../../../utils/duration'
 import { sendPyError } from '../../../utils/py-error'
-import { evaluateRule } from '../../../utils/tag-rules'
-
-// Process-wide cache of matching meta xxh3_64 hashes per
-// (uid, rule fingerprint, project, language). Tag rule evaluation is
-// the only meaningful CPU cost on the badge hot path; with this cache
-// repeat hits skip the meta scan + per-meta predicate entirely and run
-// just one COUNT(*) by hash. See utils/cache.ts for semantics.
-const META_HASH_CACHE = new TTLCache<string, number[]>(4096, 60)
-
-function fingerprintRule(rule: unknown): string {
-  return createHash('blake2b512').update(JSON.stringify(rule)).digest('hex').slice(0, 32)
-}
+import { findMetaHashesMatchingRules } from '../../../utils/tag-meta-hash'
 
 // Mirrors GET /v3/users/shield. Returns the data block for a
 // shields.io-style badge — coding minutes within an optional time
@@ -167,52 +153,11 @@ export default defineEventHandler(async (event) => {
     resultMinutes = Number(rows[0]?.value ?? 0)
   }
   else if (tagName) {
-    // Tag path: evaluate the rule once per *meta* (small set per user)
-    // to collect matching xxh3_64 hashes, then let SQL count the minutes
-    // by hash. project/language are pushed into the meta scan so we eval
-    // even fewer rows.
     if (!tagRow || !tagRow.rulesJson) {
       resultMinutes = 0
     }
     else {
-      // Window is deliberately NOT part of the cache key — the meta scan
-      // is window-independent and the subsequent COUNT(*) re-applies the
-      // window, so the cache works for any badge URL on this tag.
-      const cacheKey = `${uid}|${fingerprintRule(tagRow.rulesJson)}|${project ?? ''}|${language ?? ''}`
-      let matchedHashes = META_HASH_CACHE.get(cacheKey)
-      if (matchedHashes === undefined) {
-        const metaWhere = [eq(workspaceMetaV2.uid, uid)]
-        if (project) {
-          metaWhere.push(eq(workspaceMetaV2.workspaceName, project))
-        }
-        if (language) {
-          metaWhere.push(eq(workspaceMetaV2.language, language))
-        }
-        const metaRows = await db
-          .select({
-            xxh3_64: workspaceMetaV2.xxh3_64,
-            workspace_name: workspaceMetaV2.workspaceName,
-            language: workspaceMetaV2.language,
-            git_origin: workspaceMetaV2.gitOrigin,
-            git_branch: workspaceMetaV2.gitBranch,
-            platform: workspaceMetaV2.platform,
-            editor: workspaceMetaV2.editor,
-            absolute_file: workspaceMetaV2.absoluteFile,
-            relative_file: workspaceMetaV2.relativeFile,
-          })
-          .from(workspaceMetaV2)
-          .where(and(...metaWhere))
-
-        const rules = tagRow.rulesJson
-        const hashes: number[] = []
-        for (const r of metaRows) {
-          if (evaluateRule(rules, r as WorkspaceData)) {
-            hashes.push(r.xxh3_64)
-          }
-        }
-        matchedHashes = hashes
-        META_HASH_CACHE.set(cacheKey, matchedHashes)
-      }
+      const matchedHashes = await findMetaHashesMatchingRules(uid, tagRow.rulesJson, { project, language })
       if (matchedHashes.length === 0) {
         resultMinutes = 0
       }

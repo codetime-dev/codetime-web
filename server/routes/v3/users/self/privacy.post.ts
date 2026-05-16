@@ -42,8 +42,9 @@ export default defineEventHandler(async (event) => {
  return sendPyError(event, 401, 'Not authenticated')
 }
 
-  const body = await readBody<{ showGithub?: boolean }>(event).catch(() => null)
-  const showGithub = Boolean(body?.showGithub)
+  // Accept both camel and snake case so older clients keep working.
+  const body = await readBody<{ showGithub?: unknown, show_github?: unknown }>(event).catch(() => null)
+  const showGithub = Boolean(body?.showGithub ?? body?.show_github)
 
   const db = useDb()
   const [row] = await db

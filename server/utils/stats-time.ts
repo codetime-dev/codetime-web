@@ -49,6 +49,16 @@ export function computeWindow(opts: {
   return { queryStart: start, queryEnd: end, limit }
 }
 
+// Parse a free-form date-time query parameter. Returns null on absent,
+// non-string, or unparseable input — callers fall back to a default window.
+export function parseDateParam(value: unknown): Date | null {
+  if (typeof value !== 'string' || !value) {
+    return null
+  }
+  const d = new Date(value)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
 export function statsBaseWhere(uid: number, start: Date, end: Date): SQL[] {
   return [
     eq(workspaceMinutesV2.uid, uid),
