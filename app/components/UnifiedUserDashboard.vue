@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import * as d3 from 'd3'
 import { refreshNuxtData } from '#app'
 import { v3GetUserByUserId, v3GetUserTopLanguagesRank, v3UpdateBio } from '~/api/v3'
 
@@ -37,10 +36,32 @@ const isOwnProfile = computed(() => {
 
 // 日期范围控制
 const days = useLocalStorage('days', ref(currentUser.value?.plan === 'pro' ? 365 : 28))
+const customStartTime = useLocalStorage<Date | null>('range-start', null, {
+  serializer: {
+    read: (v: string) => v ? new Date(v) : null,
+    write: (v: Date | null) => v ? v.toISOString() : '',
+  },
+})
+const customEndTime = useLocalStorage<Date | null>('range-end', null, {
+  serializer: {
+    read: (v: string) => v ? new Date(v) : null,
+    write: (v: Date | null) => v ? v.toISOString() : '',
+  },
+})
 const segments = ref(5)
 
-const endTime = computed(() => new Date())
+const isCustomRange = computed(() => !!customStartTime.value && !!customEndTime.value)
+
+const endTime = computed(() => {
+  if (isCustomRange.value) {
+    return customEndTime.value!
+  }
+  return new Date()
+})
 const startTime = computed(() => {
+  if (isCustomRange.value) {
+    return customStartTime.value!
+  }
   const start = new Date()
   start.setDate(start.getDate() - days.value)
   return start
@@ -135,9 +156,10 @@ const shouldFetchDashboardData = computed(() => {
 
 // Always initialize data fetching so that when isOwnProfile resolves after
 // the async user fetch (server: false), the data is already loading.
-const allDataResp = fetchStats(days, 'time', 'days')
-const allLanguageDataResp = fetchStats(days, 'language', 'days')
-const allProjectDataResp = fetchStats(days, 'workspace', 'days')
+const statsRange = { startTime: customStartTime, endTime: customEndTime }
+const allDataResp = fetchStats(days, 'time', 'days', statsRange)
+const allLanguageDataResp = fetchStats(days, 'language', 'days', statsRange)
+const allProjectDataResp = fetchStats(days, 'workspace', 'days', statsRange)
 
 const allLanguageData = computed(() => allLanguageDataResp.data.value?.data ?? [])
 const allProjectData = computed(() => allProjectDataResp.data.value?.data ?? [])
@@ -158,10 +180,9 @@ const pAllProjectData = useProcessedData(allProjectData)
 
 const filtedData = computed(() => {
   const data = unref(pAllData)
-  const res = data.filter((d) => {
-    return d.date.getTime() >= d3.utcDay.offset(new Date(), -days.value).getTime()
-  })
-  return res
+  const lo = startTime.value.getTime()
+  const hi = endTime.value.getTime()
+  return data.filter(d => d.date.getTime() >= lo && d.date.getTime() <= hi)
 })
 
 // 用户特定数据获取（语言排行和编程历史）
@@ -459,7 +480,11 @@ watchEffect(() => {
           <template #icon>
             <i class="i-tabler-calendar text-[15px] text-ct-fg-muted" />
           </template>
-          <DashboardDataRange v-model:days="days" />
+          <DashboardDataRange
+            v-model:days="days"
+            v-model:start-time="customStartTime"
+            v-model:end-time="customEndTime"
+          />
         </PanelSection>
 
         <PanelSection

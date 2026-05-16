@@ -23,8 +23,9 @@ withDefaults(defineProps<{
     <div
       v-if="loading"
       class="db-value db-skeleton"
-      :style="{ width: skeletonWidth }"
-    />
+    >
+      <span class="db-skeleton-bar" :style="{ width: skeletonWidth }" />
+    </div>
     <div v-else-if="value !== ''" class="db-value tabular-nums">
       {{ value }}
     </div>
@@ -47,6 +48,7 @@ withDefaults(defineProps<{
 .db-value {
   margin-top: 4px;
   font-size: var(--ct-text-lg);
+  line-height: var(--ct-leading-normal);
   font-weight: var(--ct-weight-semibold);
   color: var(--ct-fg);
   white-space: nowrap;
@@ -58,13 +60,25 @@ withDefaults(defineProps<{
   font-size: var(--ct-text-lg);
   color: var(--ct-fg-subtle);
 }
-/* Match the rendered .db-value height (font-size 18px ≈ 1.125rem with
-   line-height ~1.4) so the skeleton occupies the same vertical space
-   as the final number. */
+/* The skeleton wrapper keeps the same line-box as .db-value (font-size
+   × line-height), so toggling loading doesn't shift the surrounding
+   layout. The visible bar inside is intentionally shorter than the line
+   box, centered vertically, matching how the glyph ink-box sits within
+   its line. */
 .db-skeleton {
+  display: flex;
+  align-items: center;
+  /* Flex containers ignore line-height for sizing, so force the wrapper
+     to match the rendered line box (font-size × line-height). Without
+     this the wrapper collapses to the bar's height and the card looks
+     shorter while loading. */
+  min-height: calc(var(--ct-text-lg) * var(--ct-leading-normal));
+}
+.db-skeleton-bar {
+  display: block;
   background: var(--ct-surface-2);
   border-radius: 4px;
-  height: 1.25rem;
+  height: 1.1em;
   animation: db-pulse 1.4s ease-in-out infinite;
 }
 @keyframes db-pulse {

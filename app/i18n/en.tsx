@@ -225,6 +225,11 @@ export const en: Translation = {
           return `Past ${days} days`
         },
         allTime: 'All Time',
+        custom: 'Custom',
+        apply: 'Apply',
+        cancel: 'Cancel',
+        thisMonth: 'This month',
+        lastMonth: 'Last month',
       },
       statistic: {
         timeTotal: 'Time/Total',

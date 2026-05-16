@@ -190,6 +190,11 @@ export type Translation = {
       dataRange: {
         title: (days: number) => string
         allTime: string
+        custom?: string
+        apply?: string
+        cancel?: string
+        thisMonth?: string
+        lastMonth?: string
       }
       statistic: {
         timeTotal: string

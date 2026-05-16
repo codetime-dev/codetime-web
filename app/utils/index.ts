@@ -1,16 +1,34 @@
 import type { UserSelfPublic } from '~/api/v3/types.gen'
 import { v3GetUserSelf, v3ListSelfStats, v3ListSelfStatsTime, v3ListSelfTop } from '~/api/v3'
 
-export function fetchStats(limit: Ref<number>, by: string = 'time', unit: 'minutes' | 'days' | 'hours' = 'minutes') {
+export type StatsRange = {
+  startTime?: MaybeRefOrGetter<Date | null | undefined>
+  endTime?: MaybeRefOrGetter<Date | null | undefined>
+}
+
+export function fetchStats(
+  limit: Ref<number>,
+  by: string = 'time',
+  unit: 'minutes' | 'days' | 'hours' = 'minutes',
+  range?: StatsRange,
+) {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const startRef = computed(() => (range?.startTime ? toValue(range.startTime) : null) ?? null)
+  const endRef = computed(() => (range?.endTime ? toValue(range.endTime) : null) ?? null)
+  const hasRange = computed(() => !!startRef.value && !!endRef.value)
+  const rangeKey = computed(() => hasRange.value
+    ? `${startRef.value!.toISOString()}-${endRef.value!.toISOString()}`
+    : `limit-${limit.value}`)
 
   return by === 'time'
-    ? useAsyncData(`stats-time-${unit}-${tz}-${limit.value}`, async () => {
+    ? useAsyncData(`stats-time-${unit}-${tz}-${rangeKey.value}`, async () => {
         const resp = await v3ListSelfStatsTime({
           query: {
             unit,
             tz,
-            limit: limit.value,
+            limit: hasRange.value ? undefined : limit.value,
+            start_time: startRef.value ?? undefined,
+            end_time: endRef.value ?? undefined,
           },
         })
         return {
@@ -22,15 +40,17 @@ export function fetchStats(limit: Ref<number>, by: string = 'time', unit: 'minut
         }
       }, {
         server: false,
-        watch: [limit],
+        watch: [limit, startRef, endRef],
       })
-    : useAsyncData(`stats-${by}-${unit}-${tz}-${limit.value}`, async () => {
+    : useAsyncData(`stats-${by}-${unit}-${tz}-${rangeKey.value}`, async () => {
         const resp = await v3ListSelfStats({
           query: {
             by: by as any,
             unit,
             tz,
-            limit: limit.value,
+            limit: hasRange.value ? undefined : limit.value,
+            start_time: startRef.value ?? undefined,
+            end_time: endRef.value ?? undefined,
           },
         })
         return {
@@ -42,7 +62,7 @@ export function fetchStats(limit: Ref<number>, by: string = 'time', unit: 'minut
         }
       }, {
         server: false,
-        watch: [limit],
+        watch: [limit, startRef, endRef],
       })
 }
 
