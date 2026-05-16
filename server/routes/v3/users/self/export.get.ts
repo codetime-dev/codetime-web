@@ -23,7 +23,7 @@ type Row = {
   git_origin: string | null
   git_branch: string | null
   recorded_at: Date
-  meta_xxh3_64: number
+  meta_xxh3_64: bigint
 }
 
 defineRouteMeta({
@@ -63,7 +63,7 @@ function rowToCsv(r: Row): string {
   ].map(csvField).join(',')}\n`
 }
 
-function fetchChunk(uid: number, cursorAt: Date | null, cursorXxh: number | null): Promise<Row[]> {
+function fetchChunk(uid: number, cursorAt: Date | null, cursorXxh: bigint | null): Promise<Row[]> {
   const cursorClause: SQL | undefined = cursorAt !== null && cursorXxh !== null
     ? or(
         lt(workspaceMinutesV2.recordedAt, cursorAt),
@@ -113,7 +113,7 @@ export default defineEventHandler(async (event) => {
       controller.enqueue(encoder.encode(HEADER))
 
       let cursorAt: Date | null = null
-      let cursorXxh: number | null = null
+      let cursorXxh: bigint | null = null
       while (true) {
         const rows = await fetchChunk(uid, cursorAt, cursorXxh)
         if (rows.length === 0) {

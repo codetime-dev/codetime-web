@@ -11,8 +11,8 @@ import { evaluateRule } from './tag-rules'
 // distinct meta (small) and let SQL aggregate the minute rows.
 // Key: `${uid}|${ruleFingerprint}|${project}|${language}` — window is
 // applied by the caller, not baked into the cache.
-const META_HASH_CACHE = new TTLCache<string, number[]>(4096, 60)
-const INFLIGHT = new Map<string, Promise<number[]>>()
+const META_HASH_CACHE = new TTLCache<string, bigint[]>(4096, 60)
+const INFLIGHT = new Map<string, Promise<bigint[]>>()
 
 function stableStringify(value: unknown): string {
   if (value === null || typeof value !== 'object') {
@@ -46,8 +46,8 @@ export function invalidateMetaHashCacheForUser(uid: number): void {
 export async function findMetaHashesForRulesBatch(
   uid: number,
   rules: Array<{ key: string, rulesJson: unknown }>,
-): Promise<Map<string, number[]>> {
-  const result = new Map<string, number[]>()
+): Promise<Map<string, bigint[]>> {
+  const result = new Map<string, bigint[]>()
   const misses: Array<{ key: string, rulesJson: unknown, cacheKey: string }> = []
   for (const r of rules) {
     const cacheKey = `${uid}|${fingerprintRule(r.rulesJson)}||`
@@ -77,7 +77,7 @@ export async function findMetaHashesForRulesBatch(
     .from(workspaceMetaV2)
     .where(eq(workspaceMetaV2.uid, uid))
   for (const miss of misses) {
-    const hashes: number[] = []
+    const hashes: bigint[] = []
     for (const r of rows) {
       if (evaluateRule(miss.rulesJson, r as WorkspaceData)) {
         hashes.push(r.xxh3_64)
@@ -93,7 +93,7 @@ export async function findMetaHashesMatchingRules(
   uid: number,
   rulesJson: unknown,
   opts: { project?: string | null, language?: string | null } = {},
-): Promise<number[]> {
+): Promise<bigint[]> {
   const project = opts.project ?? null
   const language = opts.language ?? null
   const cacheKey = `${uid}|${fingerprintRule(rulesJson)}|${project ?? ''}|${language ?? ''}`
@@ -130,7 +130,7 @@ export async function findMetaHashesMatchingRules(
       })
       .from(workspaceMetaV2)
       .where(and(...where))
-    const hashes: number[] = []
+    const hashes: bigint[] = []
     for (const r of rows) {
       if (evaluateRule(rulesJson, r as WorkspaceData)) {
         hashes.push(r.xxh3_64)

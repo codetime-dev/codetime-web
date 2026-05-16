@@ -98,14 +98,14 @@ export default defineEventHandler(async (event) => {
     session.id,
     tagRows.filter(t => t.rulesJson).map(t => ({ key: t.id, rulesJson: t.rulesJson })),
   )
-  const allHashes = new Set<number>()
+  const allHashes = new Set<bigint>()
   for (const hashes of hashesByTag.values()) {
     for (const h of hashes) {
       allHashes.add(h)
     }
   }
 
-  const countsByHash = new Map<number, number>()
+  const countsByHash = new Map<bigint, number>()
   if (allHashes.size > 0) {
     const grouped = await db
       .select({ hash: workspaceMinutesV2.metaXxh3_64, value: count() })

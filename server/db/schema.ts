@@ -69,7 +69,11 @@ export type EventLogRow = typeof eventLogs.$inferSelect
 export const workspaceMinutesV2 = pgTable('workspace_minutes_v2', {
   uid: bigint('uid', { mode: 'number' }).notNull(),
   recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull(),
-  metaXxh3_64: bigint('meta_xxh3_64', { mode: 'number' }).notNull(),
+  // mode: 'bigint' — xxh3_64 is a full 64-bit hash whose magnitude
+  // routinely exceeds 2^53, so Number truncates the low digits and any
+  // round-trip through JS (e.g. select → push → inArray) silently loses
+  // matches. Keep as native bigint.
+  metaXxh3_64: bigint('meta_xxh3_64', { mode: 'bigint' }).notNull(),
   language: text('language').notNull(),
 })
 
@@ -85,7 +89,9 @@ export const workspaceMetaV2 = pgTable('workspace_meta_v2', {
   platform: text('platform').notNull(),
   gitOrigin: text('git_origin').notNull(),
   gitBranch: text('git_branch').notNull(),
-  xxh3_64: bigint('xxh3_64', { mode: 'number' }).notNull(),
+  // See note on workspace_minutes_v2.meta_xxh3_64 — kept as bigint to
+  // preserve the full 64-bit hash through JS land.
+  xxh3_64: bigint('xxh3_64', { mode: 'bigint' }).notNull(),
 })
 
 export type WorkspaceMetaV2Row = typeof workspaceMetaV2.$inferSelect
