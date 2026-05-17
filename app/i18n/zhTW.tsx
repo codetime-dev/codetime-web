@@ -683,6 +683,15 @@ export const zhTW: Partial<Translation> = {
     agent: {
       freeLimit: '免費版僅顯示最近 30 天的工作階段。升級 Pro 可查看完整歷史。',
       upgrade: '升級',
+      sections: {
+        overview: '概覽',
+        costTimeline: '成本 · 時間軸',
+        rhythm: '節奏 · 時段',
+        projects: '專案 · 成本',
+        models: '模型 · 成本',
+        tools: '工具',
+        sessions: '工作階段 · 列表',
+      },
     },
   },
   button: {

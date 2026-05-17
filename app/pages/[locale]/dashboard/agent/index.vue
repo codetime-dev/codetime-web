@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { VibeDashboard } from '~/components/Vibe/types'
 import { getV3AgentSessions } from '~/api/v3'
+import { compact, fmtUsd } from '~/components/Vibe/types'
 
 // Vibe page. Top half is an agent-time-style telemetry dashboard
 // (KPIs + cost timeline + rhythm heatmap + project/model/tool
@@ -23,18 +24,50 @@ type AgentSession = NonNullable<
   Awaited<ReturnType<typeof getV3AgentSessions>>['data']
 >['sessions'][number]
 
-type RangeKey = '24h' | '7d' | '30d' | 'all'
-const range = ref<RangeKey>('30d')
+// Mirrors the date controls on Overview / Workspace etc. so the Agent
+// page reads with the same time chrome as the rest of the dashboard.
+const days = ref<number>(28)
+const startTime = ref<Date | null>(null)
+const endTime = ref<Date | null>(null)
 
+// Browser IANA timezone (e.g. "Asia/Shanghai"). Server uses this to
+// bucket weekday/hour for the rhythm heatmap so the grid reflects the
+// user's local schedule, not UTC. Falls back to UTC during SSR where
+// `Intl` resolves to the server's zone.
+const userTz = computed<string>(() => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  }
+  catch {
+    return 'UTC'
+  }
+})
+
+// Forward the picker's state to the backend either as an explicit
+// since/until pair (custom mode) or as a `days=N` preset, so the
+// server side can pick the matching bucket grain.
+const dashboardParams = computed<Record<string, string>>(() => {
+  const base: Record<string, string> = { tz: userTz.value }
+  if (startTime.value && endTime.value) {
+    base.since = startTime.value.toISOString()
+    base.until = endTime.value.toISOString()
+    return base
+  }
+  base.days = String(days.value)
+  return base
+})
+
+// useFetch (not useAsyncData) so the request automatically re-fires
+// whenever any reactive value in `query` changes — switching the
+// DataRange picker rebuilds the URL with the new days/since/until and
+// every section (including the heatmap) gets fresh numbers.
 const { data: dashboard, pending: dashboardPending, error: dashboardError, refresh: refreshDashboard }
-  = useAsyncData<VibeDashboard>(
-    'vibe-dashboard',
-    () => $fetch<VibeDashboard>('/v3/agent/dashboard', {
-      params: { range: range.value },
-      credentials: 'include',
-    }),
-    { watch: [range] },
-  )
+  = await useFetch<VibeDashboard>('/v3/agent/dashboard', {
+    key: 'vibe-dashboard',
+    query: dashboardParams,
+    credentials: 'include',
+    watch: [days, startTime, endTime],
+  })
 
 const cursor = ref<string | null>(null)
 const sessions = ref<AgentSession[]>([])
@@ -104,35 +137,37 @@ function fmtDuration(ms: number): string {
 }
 
 function fmtTokens(n: number): string {
-  if (n >= 1_000_000) {
- return `${(n / 1_000_000).toFixed(1)}M`
-}
-  if (n >= 1000) {
- return `${(n / 1000).toFixed(1)}k`
-}
-  return String(n)
+  return compact(n)
 }
 
-const RANGE_OPTIONS: { key: RangeKey, label: string }[] = [
-  { key: '24h', label: '24h' },
-  { key: '7d', label: '7d' },
-  { key: '30d', label: '30d' },
-  { key: 'all', label: 'all' },
-]
+// Section titles — i18n with English fallback during translation rollout.
+// `useI18N()` returns Ref<Translation>; access via `t.value.*` in setup.
+const sectionTitles = computed(() => {
+  const s = t.value.dashboard?.agent?.sections
+  return {
+    overview: s?.overview ?? 'Overview',
+    costTimeline: s?.costTimeline ?? 'Cost · Timeline',
+    rhythm: s?.rhythm ?? 'Rhythm · When',
+    projects: s?.projects ?? 'Projects · Costs',
+    models: s?.models ?? 'Models · Costs',
+    tools: s?.tools ?? 'Tools',
+    sessions: s?.sessions ?? 'Sessions · List',
+  }
+})
 
 const rangeMeta = computed(() => {
   const d = dashboard.value
   if (!d) {
- return ''
-}
-  if (d.range.key === 'all') {
- return 'all-time window'
-}
-  const since = d.range.since ? new Date(d.range.since) : null
+    return ''
+  }
+  if (!d.range.since) {
+    return 'all-time window'
+  }
+  const since = new Date(d.range.since)
   const until = new Date(d.range.until)
   const fmt = (date: Date) =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-  return `${since ? fmt(since) : ''} → ${fmt(until)}`
+  return `${fmt(since)} → ${fmt(until)}`
 })
 
 const bucketMeta = computed(() => {
@@ -158,28 +193,20 @@ const bucketMeta = computed(() => {
   />
   <DashboardPageContent>
     <div class="vibe-rangebar">
-      <div class="vibe-rangebar-left">
-        <span>RANGE</span>
-        <span class="op55">{{ rangeMeta }}</span>
-      </div>
-      <div class="vibe-rangebar-right">
-        <button
-          v-for="opt in RANGE_OPTIONS"
-          :key="opt.key"
-          class="range-pill"
-          :class="{ active: range === opt.key }"
-          @click="range = opt.key"
-        >
-          {{ opt.label }}
-        </button>
-        <button
-          class="range-pill refresh"
-          :disabled="dashboardPending"
-          @click="refreshDashboard()"
-        >
-          {{ dashboardPending ? '…' : '↻' }}
-        </button>
-      </div>
+      <DashboardDataRange
+        v-model:days="days"
+        v-model:start-time="startTime"
+        v-model:end-time="endTime"
+      />
+      <button
+        class="range-refresh"
+        :disabled="dashboardPending"
+        title="Refresh"
+        @click="refreshDashboard()"
+      >
+        <i v-if="dashboardPending" class="i-tabler-loader-2 spinning" />
+        <i v-else class="i-tabler-refresh" />
+      </button>
     </div>
 
     <div v-if="dashboardError" class="vibe-error">
@@ -188,7 +215,8 @@ const bucketMeta = computed(() => {
 
     <template v-if="dashboard && hasData">
       <VibeSection
-        title="OVERVIEW"
+        num="01"
+        :title="sectionTitles.overview"
         :meta="rangeMeta"
         flush
       >
@@ -200,42 +228,53 @@ const bucketMeta = computed(() => {
       </VibeSection>
 
       <VibeSection
-        title="COST · TIMELINE"
+        num="02"
+        :title="sectionTitles.costTimeline"
         :meta="`estimated · ${bucketMeta} · ${rangeMeta}`"
       >
-        <VibeTokenTimeline :buckets="dashboard.tokenBuckets" :bucket="dashboard.bucket" />
+        <VibeTokenTimeline
+          :buckets="dashboard.tokenBuckets"
+          :bucket="dashboard.bucket"
+          :since="dashboard.range.since"
+          :until="dashboard.range.until"
+        />
       </VibeSection>
 
       <VibeSection
-        title="RHYTHM · WHEN"
+        num="03"
+        :title="sectionTitles.rhythm"
         :meta="`estimated cost · hour × weekday · local time · ${rangeMeta}`"
       >
         <VibeRhythmHeatmap :cells="dashboard.heatmap" />
       </VibeSection>
 
       <VibeSection
-        title="PROJECTS · COSTS"
+        num="04"
+        :title="sectionTitles.projects"
         :meta="`${dashboard.projectTokens.length} projects`"
       >
         <VibeProjectTokens :rows="dashboard.projectTokens" />
       </VibeSection>
 
       <VibeSection
-        title="MODELS · COSTS"
-        :meta="`$${totalCostUsd.toFixed(2)}`"
+        num="05"
+        :title="sectionTitles.models"
+        :meta="fmtUsd(totalCostUsd)"
       >
         <VibeModelCosts :rows="dashboard.modelCosts" />
       </VibeSection>
 
       <VibeSection
-        title="TOOLS"
-        :meta="`${totalToolCalls.toLocaleString()} calls`"
+        num="06"
+        :title="sectionTitles.tools"
+        :meta="`${compact(totalToolCalls)} calls`"
       >
         <VibeToolPerformance :rows="dashboard.tools" />
       </VibeSection>
 
       <VibeSection
-        title="SESSIONS · LIST"
+        num="07"
+        :title="sectionTitles.sessions"
         :meta="`${sessions.length} loaded`"
         flush
       >
@@ -273,7 +312,7 @@ const bucketMeta = computed(() => {
               <tr v-for="s in sessions" :key="s.rollupKey">
                 <td><span class="mono">{{ s.source }}</span></td>
                 <td>{{ s.project ?? '—' }}</td>
-                <td class="op75 tnum">
+                <td class="tnum op75">
                   {{ new Date(s.startedAt).toLocaleString() }}
                 </td>
                 <td class="num">
@@ -327,48 +366,37 @@ const bucketMeta = computed(() => {
 .vibe-rangebar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   padding: 12px 22px;
   border-bottom: 1px solid var(--ct-border);
   background: var(--ct-surface-1);
-  font-size: 12px;
+  flex-wrap: wrap;
 }
-.vibe-rangebar-left {
+.range-refresh {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  letter-spacing: 0.16em;
-  color: var(--ct-fg-muted);
-  text-transform: uppercase;
-}
-.vibe-rangebar-right {
-  display: inline-flex;
-  gap: 6px;
-}
-.range-pill {
-  padding: 4px 12px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border: 1px solid var(--ct-border);
-  background: transparent;
+  background: var(--ct-surface-1);
   color: var(--ct-fg-muted);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
+  border-radius: var(--ct-radius-md);
   cursor: pointer;
   transition: all 140ms ease;
-  border-radius: 4px;
 }
-.range-pill:hover:not(:disabled) {
+.range-refresh:hover:not(:disabled) {
   border-color: var(--ct-primary);
   color: var(--ct-primary);
 }
-.range-pill.active {
-  border-color: var(--ct-primary);
-  background: color-mix(in srgb, var(--ct-primary) 12%, transparent);
-  color: var(--ct-primary);
+.range-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+.range-refresh .i-tabler-refresh,
+.range-refresh .i-tabler-loader-2 { width: 16px; height: 16px; font-size: 16px; }
+.spinning { animation: vibe-spin 0.9s linear infinite; }
+@keyframes vibe-spin {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
 }
-.range-pill.refresh { padding: 4px 10px; }
-.range-pill:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .vibe-error {
   padding: 16px 24px;
@@ -414,6 +442,10 @@ const bucketMeta = computed(() => {
 .vibe-table td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+.vibe-table td.num,
+.vibe-table td.tnum {
+  font-family: var(--ct-font-mono);
 }
 .vibe-table tbody tr {
   border-bottom: 1px solid var(--ct-border-subtle);

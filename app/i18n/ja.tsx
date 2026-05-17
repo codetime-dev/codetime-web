@@ -665,6 +665,15 @@ export const ja: Partial<Translation> = {
     agent: {
       freeLimit: '無料プランでは過去30日間のセッションのみ表示されます。Proにアップグレードすると全履歴を表示できます。',
       upgrade: 'アップグレード',
+      sections: {
+        overview: '概要',
+        costTimeline: 'コスト · タイムライン',
+        rhythm: 'リズム · 時間帯',
+        projects: 'プロジェクト · コスト',
+        models: 'モデル · コスト',
+        tools: 'ツール',
+        sessions: 'セッション · 一覧',
+      },
     },
     leaderboard: {
       title(days: number) {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { VibeOverviewBucket, VibeSummary } from './types'
 import { computed } from 'vue'
-import { compactParts as compact, fmtDurationParts, fmtUsd } from './types'
+import { compactParts as compact, fmtDurationParts, fmtUsdCompact } from './types'
 
 // Six KPI tiles laid out as a 6-col grid (collapses to 3-col then
 // 2-col on narrower viewports). The shape and sparkline behaviour
@@ -104,8 +104,10 @@ const kpis = computed<Kpi[]>(() => {
     {
       index: '04',
       label: 'cost',
-      value: cost > 0 ? fmtUsd(cost).replace(/^\$/, '') : '—',
-      unit: cost > 0 ? 'USD' : undefined,
+      // Use the compact form so high totals fit ($18.4k, not
+      // $18,441.68 USD which overruns the column on narrow viewports).
+      value: cost > 0 ? fmtUsdCompact(cost).replace(/^\$/, '') : '—',
+      unit: undefined,
       delta: trend(costBucket),
       caption: cost > 0 ? 'estimated' : '—',
       spark: costBucket,
@@ -141,7 +143,6 @@ const kpis = computed<Kpi[]>(() => {
       class="kpi"
     >
       <div class="head">
-        <span class="kpi-index">{{ kpi.index }}</span>
         <span class="kpi-label">{{ kpi.label }}</span>
         <span
           v-if="kpi.delta"
@@ -191,16 +192,9 @@ const kpis = computed<Kpi[]>(() => {
 
 .head {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 8px;
-}
-
-.kpi-index {
-  font-size: 13px;
-  letter-spacing: 0.18em;
-  color: var(--ct-fg-subtle);
-  font-variant-numeric: tabular-nums;
 }
 
 .kpi-label {
@@ -217,6 +211,7 @@ const kpis = computed<Kpi[]>(() => {
   font-size: 12.5px;
   letter-spacing: 0.04em;
   color: var(--ct-fg-muted);
+  font-family: var(--ct-font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -237,17 +232,20 @@ const kpis = computed<Kpi[]>(() => {
 }
 
 .value-num {
-  font-size: 26px;
+  font-size: 22px;
   letter-spacing: -0.02em;
   color: var(--ct-primary);
-  line-height: 1.02;
+  line-height: 1.05;
+  font-family: var(--ct-font-mono);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .value-unit {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ct-fg-muted);
-  margin-left: 1px;
+  margin-left: 2px;
+  font-family: var(--ct-font-mono);
 }
 
 .caption {

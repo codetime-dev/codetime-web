@@ -1,18 +1,39 @@
 <script setup lang="ts">
-import type { VibeProjectRow } from './types'
+import type { VibeProjectRow, VibeProjectSourceSegment } from './types'
 import { computed } from 'vue'
-import { compactParts, fmtDurationShort, fmtUsd } from './types'
+import { agentColor, compactParts, fmtDurationShort, fmtUsd } from './types'
 
 // Top-N project leaderboard ranked by estimated cost. Each row gets a
-// horizontal bar whose width is relative to the top project — same
-// visual idiom as agent-time, just minus the per-source colour
-// segments (our dashboard endpoint doesn't break down by source).
+// horizontal bar whose width is relative to the top project, segmented
+// by agent source (codex / claude-code / opencode / pi) so the share
+// of each agent inside one project reads at a glance — matches
+// agent-time's project leaderboard idiom.
 
 const props = defineProps<{ rows: VibeProjectRow[] }>()
 
 const TOP = 12
 
 const totalCost = computed(() => props.rows.reduce((s, r) => s + r.estimatedCostUsd, 0))
+
+type Segment = VibeProjectSourceSegment & {
+  color: string
+  // Width as a percentage of the project's total cost (not of the
+  // global max — the parent bar already encodes that via widthPct).
+  segPct: number
+}
+
+function buildSegments(row: VibeProjectRow): Segment[] {
+  const raw = (row.sourceSegments ?? []).filter(s => s.estimatedCostUsd > 0)
+  if (raw.length === 0) {
+    return []
+  }
+  const total = raw.reduce((s, x) => s + x.estimatedCostUsd, 0)
+  return raw.map(seg => ({
+    ...seg,
+    color: agentColor(seg.source),
+    segPct: total > 0 ? (seg.estimatedCostUsd / total) * 100 : 0,
+  }))
+}
 
 const view = computed(() => {
   const rows = props.rows.slice(0, TOP)
@@ -28,7 +49,22 @@ const view = computed(() => {
     sessions: row.sessions,
     cost: row.estimatedCostUsd,
     agentDurationMs: row.agentDurationMs,
+    segments: buildSegments(row),
   }))
+})
+
+// Distinct agent sources in the rendered view — surfaced as a small
+// legend so the colour map is readable.
+const legend = computed(() => {
+  const seen = new Map<string, { source: string, color: string }>()
+  for (const row of view.value) {
+    for (const seg of row.segments) {
+      if (!seen.has(seg.source)) {
+        seen.set(seg.source, { source: seg.source, color: seg.color })
+      }
+    }
+  }
+  return [...seen.values()]
 })
 </script>
 
@@ -53,7 +89,18 @@ const view = computed(() => {
       <span class="idx">{{ row.index }}</span>
       <span class="name" :title="row.project">{{ row.project }}</span>
       <span class="bar-wrap">
-        <span class="bar" :style="{ width: `${row.widthPct}%` }" />
+        <span class="bar-track" :style="{ width: `${row.widthPct}%` }">
+          <template v-if="row.segments.length > 0">
+            <span
+              v-for="seg in row.segments"
+              :key="seg.source"
+              class="bar-seg"
+              :style="{ width: `${seg.segPct}%`, background: seg.color }"
+              :title="`${seg.source} · ${fmtUsd(seg.estimatedCostUsd)}`"
+            />
+          </template>
+          <span v-else class="bar-seg fallback" :style="{ width: '100%' }" />
+        </span>
       </span>
       <span class="num cost">{{ fmtUsd(row.cost) }}</span>
       <span class="num share">{{ row.sharePct.toFixed(1) }}%</span>
@@ -68,6 +115,12 @@ const view = computed(() => {
     </li>
     <li v-if="view.length === 0" class="empty">
       — no project token data in window —
+    </li>
+  </ul>
+  <ul v-if="legend.length > 1" class="model-legend">
+    <li v-for="item in legend" :key="item.source" class="legend-item">
+      <span class="legend-swatch" :style="{ background: item.color }" />
+      <span class="legend-label">{{ item.source }}</span>
     </li>
   </ul>
 </template>
@@ -105,7 +158,11 @@ const view = computed(() => {
 }
 .hcell.num { text-align: right; }
 
-.idx { color: var(--ct-fg-subtle); font-variant-numeric: tabular-nums; }
+.idx {
+  color: var(--ct-fg-subtle);
+  font-family: var(--ct-font-mono);
+  font-variant-numeric: tabular-nums;
+}
 .name {
   color: var(--ct-fg);
   overflow: hidden;
@@ -119,17 +176,50 @@ const view = computed(() => {
   background: var(--ct-surface-1);
   border: 1px solid var(--ct-border-subtle);
   border-radius: 2px;
+  overflow: hidden;
 }
-.bar {
+.bar-track {
   position: absolute;
   inset: 0 auto 0 0;
   height: 100%;
-  background: var(--ct-primary);
+  display: flex;
   transition: width 400ms ease;
-  border-radius: 1px;
 }
+.bar-seg {
+  display: inline-block;
+  height: 100%;
+  transition: width 400ms ease;
+}
+.bar-seg.fallback { background: var(--ct-primary); opacity: 0.5; }
 
-.num { text-align: right; font-variant-numeric: tabular-nums; }
+.model-legend {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ct-fg-muted);
+}
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.legend-label { letter-spacing: 0.02em; }
+
+.num {
+  text-align: right;
+  font-family: var(--ct-font-mono);
+  font-variant-numeric: tabular-nums;
+}
 .tokens { color: var(--ct-fg); }
 .cost   { color: var(--ct-primary); }
 .share  { color: var(--ct-fg-muted); }

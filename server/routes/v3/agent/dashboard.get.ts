@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { defineEventHandler, getQuery } from 'h3'
+import { ensurePricingLoaded, estimateCostUsd, pricingState } from '../../../utils/agent-pricing'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { agentVisibilityCutoff } from '../../../utils/plan-limits'
@@ -109,7 +110,7 @@ defineRouteMeta({
   },
 })
 
-type RangeKey = '24h' | '7d' | '30d' | 'all'
+type RangeKey = '24h' | '7d' | '30d' | 'all' | 'custom'
 type BucketGrain = 'hour' | 'day' | 'week'
 
 const DAY_MS = 86_400_000
@@ -121,9 +122,55 @@ type RangeSpec = {
   bucket: BucketGrain
 }
 
-function resolveRange(raw: unknown, cutoff: Date | null): RangeSpec {
-  const key: RangeKey = raw === '24h' || raw === '7d' || raw === 'all' ? raw : raw === '30d' ? '30d' : '30d'
+// Pick a bucket grain from a span in days. Matches the DataRange
+// component's cycle thresholds so a 7-day window always reads as
+// daily, a 24-hour window as hourly, multi-month as weekly.
+function bucketForSpan(days: number): BucketGrain {
+  if (days <= 1.1) {
+    return 'hour'
+  }
+  if (days <= 45) {
+    return 'day'
+  }
+  return 'week'
+}
+
+function parseIsoDate(value: unknown): Date | null {
+  if (typeof value !== 'string' || value.length === 0) {
+    return null
+  }
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function resolveRange(q: Record<string, unknown>, cutoff: Date | null): RangeSpec {
   const until = new Date()
+  // Custom window via explicit since/until — takes precedence over
+  // legacy `range` / `days` query forms.
+  const sinceParam = parseIsoDate(q.since)
+  const untilParam = parseIsoDate(q.until) ?? until
+  if (sinceParam) {
+    const spanDays = Math.max(1, (untilParam.getTime() - sinceParam.getTime()) / DAY_MS)
+    let since: Date | null = sinceParam
+    if (cutoff && since < cutoff) {
+      since = cutoff
+    }
+    return { key: 'custom', since, until: untilParam, bucket: bucketForSpan(spanDays) }
+  }
+  // `days=N` form — used by the DataRange picker's preset cycle.
+  const daysRaw = Number(q.days)
+  if (Number.isFinite(daysRaw) && daysRaw > 0) {
+    const days = Math.min(36_500, daysRaw)
+    let since: Date | null = days >= 36_500 ? null : new Date(until.getTime() - days * DAY_MS)
+    if (cutoff && (!since || since < cutoff)) {
+      since = cutoff
+    }
+    return { key: 'custom', since, until, bucket: bucketForSpan(days) }
+  }
+  // Legacy `range=24h|7d|30d|all` form — kept for callers that haven't
+  // migrated to the DataRange picker yet.
+  const raw = q.range
+  const key: RangeKey = raw === '24h' || raw === '7d' || raw === 'all' ? raw : '30d'
   let since: Date | null = null
   let bucket: BucketGrain = 'day'
   switch (key) {
@@ -147,10 +194,9 @@ function resolveRange(raw: unknown, cutoff: Date | null): RangeSpec {
   }
   default: {
     since = null
-    bucket = 'week'
+    bucket = 'day'
   }
   }
-  // Free plan cap: never query past the cutoff.
   if (cutoff && (!since || since < cutoff)) {
     since = cutoff
   }
@@ -170,15 +216,53 @@ function microsToUsd(value: unknown): number {
   return toN(value) / 1_000_000
 }
 
+// Postgres serialises timestamptz as "2026-05-05 00:00:00+00" when
+// returned through `db.execute(sql\`...\`)` raw queries — not the ISO
+// form `new Date()` accepts everywhere. Normalise to ISO so the
+// frontend can `new Date(ts)` without browser-by-browser surprises.
+function tsToIso(value: unknown): string {
+  if (value instanceof Date) {
+    return value.toISOString()
+  }
+  if (typeof value === 'string') {
+    // postgres-js sometimes hands back the literal text. Two fixups:
+    //   1. Replace the space separator with 'T' (ISO requires it).
+    //   2. Pad bare 2-digit offsets (`+00`) to `+00:00` — JS Date
+    //      rejects the bare form even though Postgres emits it.
+    const normalised = value
+      .replace(' ', 'T')
+      .replace(/([+-])(\d{2})$/, '$1$2:00')
+    const parsed = new Date(normalised)
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString()
+    }
+    return normalised
+  }
+  return String(value)
+}
+
 export default defineEventHandler(async (event) => {
   const user = await tryUser(event)
   if (!user) {
     return sendPyError(event, 401, 'Not authenticated')
   }
-  const q = getQuery(event)
+  const q = getQuery(event) as Record<string, unknown>
   const cutoff = agentVisibilityCutoff(user.plan)
-  const range = resolveRange(q.range, cutoff)
+  const range = resolveRange(q, cutoff)
+  // Optional client-provided IANA timezone (e.g. "Asia/Shanghai") so
+  // weekday/hour buckets in the rhythm heatmap reflect the user's
+  // local schedule instead of the server's UTC. Validated against a
+  // strict IANA-ish character set before being interpolated, so it
+  // can safely go inside `AT TIME ZONE`.
+  const rawTz = typeof q.tz === 'string' ? q.tz : ''
+  const tz = /^[A-Za-z][\w+\-/]{0,63}$/.test(rawTz) ? rawTz : 'UTC'
   const db = useDb()
+
+  // Refresh the OpenRouter price catalogue before doing any cost math.
+  // The promise is cached — first call hits the network, subsequent
+  // calls within REFRESH_MS resolve immediately. Failures fall back
+  // to the built-in price table.
+  await ensurePricingLoaded()
 
   const userId = user.id
   // postgres-js sends Date objects via JS's default toString(), which
@@ -239,29 +323,46 @@ export default defineEventHandler(async (event) => {
   `) as unknown as Record<string, unknown>[]
 
   // --- token buckets (timeline) --------------------------------------
+  // Group by (bucket, source, model) so the frontend can stack the cost
+  // timeline by agent source (codex / claude-code / opencode / pi) and
+  // we can recompute cost via the live OpenRouter pricing catalogue —
+  // matches agent-time's stacked bar chart. We pull from
+  // agent_session_models (not agent_time_buckets) because the bucket
+  // table's estimated_cost_micros is CLI-stamped and often 0 for codex
+  // / claude-code sessions, which would otherwise hide entire stacks.
+  // The bucket axis is derived from agent_sessions.last_event_at, which
+  // is the closest proxy to "when this model usage happened" available
+  // at the per-model granularity.
   const tokenRows = await db.execute(sql`
     select
-      date_trunc(${bucketTrunc}, b.ts) as ts,
-      coalesce(sum(b.input_tokens), 0)::bigint as input_tokens,
-      coalesce(sum(b.cached_input_tokens), 0)::bigint as cached_input_tokens,
-      coalesce(sum(b.output_tokens), 0)::bigint as output_tokens,
-      coalesce(sum(b.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,
-      coalesce(sum(b.model_calls), 0)::bigint as model_calls,
-      coalesce(sum(b.estimated_cost_micros), 0)::bigint as cost_micros
-    from agent_time_buckets b
-    where b.user_id = ${userId}
-    ${sinceClause}
-    group by 1
-    order by 1
+      date_trunc(${bucketTrunc}, s.last_event_at) as ts,
+      coalesce(nullif(s.source, ''), 'unknown') as source,
+      coalesce(m.model, 'unknown') as model,
+      coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
+      coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
+      coalesce(sum(m.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(m.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
+      coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
+      coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,
+      coalesce(sum(m.call_count), 0)::bigint as model_calls
+    from agent_session_models m
+    join agent_sessions s on s.rollup_key = m.rollup_key
+    where m.user_id = ${userId}
+    ${sessSinceClause}
+    group by 1, 2, 3
+    order by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
 
   // --- heatmap (hour × weekday) --------------------------------------
   // Postgres: extract(dow) returns 0=Sun..6=Sat. We want Mon=0..Sun=6
   // to match agent-time's HourWeekdayCell shape.
+  // `AT TIME ZONE ${tz}` converts the stored timestamptz to a naive
+  // timestamp at the user's local zone, then extract(dow/hour) reads
+  // weekday/hour as the user perceives them.
   const heatmapRows = await db.execute(sql`
     select
-      ((extract(dow from b.ts)::int + 6) % 7) as weekday,
-      extract(hour from b.ts)::int as hour,
+      ((extract(dow from (b.ts at time zone ${tz}))::int + 6) % 7) as weekday,
+      extract(hour from (b.ts at time zone ${tz}))::int as hour,
       coalesce(sum(b.model_calls), 0)::bigint as count,
       coalesce(sum(b.estimated_cost_micros), 0)::bigint as cost_micros
     from agent_time_buckets b
@@ -271,59 +372,284 @@ export default defineEventHandler(async (event) => {
     order by 1, 2
   `) as unknown as Record<string, unknown>[]
 
-  // --- project tokens ------------------------------------------------
-  const projectRows = await db.execute(sql`
+  // --- per-(project, model) breakdown ---------------------------------
+  // Pulled once at the (project, model) grain so we can recompute cost
+  // via the live pricing catalogue (estimateCostUsd) instead of trusting
+  // the CLI's stored estimated_cost_micros, which uses a frozen fallback
+  // table. We then fold this matrix two ways: by model (for the model
+  // leaderboard) and by project (for the project leaderboard) below.
+  const breakdownRows = await db.execute(sql`
     select
       coalesce(nullif(m.project, ''), 'unknown') as project,
+      coalesce(nullif(m.source, ''), 'unknown') as source,
+      coalesce(m.model, 'unknown') as model,
       coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
       coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
+      coalesce(sum(m.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(m.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
       coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
       coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,
       coalesce(sum(m.total_tokens), 0)::bigint as total_tokens,
       coalesce(sum(m.call_count), 0)::bigint as model_calls,
-      count(distinct m.session_id)::bigint as sessions,
-      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms,
-      coalesce(sum(m.estimated_cost_micros), 0)::bigint as cost_micros
+      count(distinct m.session_id)::bigint as sessions
     from agent_session_models m
     join agent_sessions s on s.rollup_key = m.rollup_key
     where m.user_id = ${userId}
     ${sessSinceClause}
-    group by 1
-    order by cost_micros desc, sum(m.total_tokens) desc
-    limit 50
+    group by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
 
-  // --- model costs ---------------------------------------------------
-  const modelRows = await db.execute(sql`
+  // Per-project agent wall-clock duration — joined separately because
+  // agent_session_models has no duration column and JOIN-then-SUM on
+  // s.duration_ms would multiply-count when a session has more than
+  // one model.
+  const durationRows = await db.execute(sql`
     select
-      m.model as model,
-      coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
-      coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
-      coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
-      coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,
-      coalesce(sum(m.call_count), 0)::bigint as model_calls,
-      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms,
-      coalesce(sum(m.estimated_cost_micros), 0)::bigint as cost_micros
-    from agent_session_models m
-    join agent_sessions s on s.rollup_key = m.rollup_key
-    where m.user_id = ${userId}
+      coalesce(nullif(s.project, ''), 'unknown') as project,
+      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms
+    from agent_sessions s
+    where s.user_id = ${userId}
     ${sessSinceClause}
     group by 1
-    order by cost_micros desc, sum(m.input_tokens) + sum(m.output_tokens) desc
-    limit 30
   `) as unknown as Record<string, unknown>[]
+  const durationByProject = new Map<string, number>()
+  for (const r of durationRows) {
+    durationByProject.set(String(r.project ?? 'unknown'), toN(r.duration_ms))
+  }
 
-  // --- tools ---------------------------------------------------------
+  // --- fold breakdown → model leaderboard -----------------------------
+  type ModelAgg = {
+    model: string
+    inputTokens: number
+    cachedInputTokens: number
+    cacheCreationInputTokens: number
+    cacheReadInputTokens: number
+    outputTokens: number
+    reasoningOutputTokens: number
+    totalTokens: number
+    modelCalls: number
+    cost: number
+    pricing: ReturnType<typeof estimateCostUsd>['pricing']
+  }
+  const modelAggs = new Map<string, ModelAgg>()
+  for (const r of breakdownRows) {
+    const model = String(r.model ?? 'unknown')
+    const inputTokens = toN(r.input_tokens)
+    const cachedInputTokens = toN(r.cached_input_tokens)
+    const cacheCreationInputTokens = toN(r.cache_creation_input_tokens)
+    const cacheReadInputTokens = toN(r.cache_read_input_tokens)
+    const outputTokens = toN(r.output_tokens)
+    const reasoningOutputTokens = toN(r.reasoning_output_tokens)
+    const totalTokens = toN(r.total_tokens)
+    const modelCalls = toN(r.model_calls)
+    const { cost, pricing } = estimateCostUsd({
+      model,
+      inputTokens,
+      cachedInputTokens,
+      cacheCreationInputTokens,
+      cacheReadInputTokens,
+      outputTokens,
+      reasoningOutputTokens,
+    })
+    const existing = modelAggs.get(model) ?? {
+      model,
+      inputTokens: 0,
+      cachedInputTokens: 0,
+      cacheCreationInputTokens: 0,
+      cacheReadInputTokens: 0,
+      outputTokens: 0,
+      reasoningOutputTokens: 0,
+      totalTokens: 0,
+      modelCalls: 0,
+      cost: 0,
+      pricing,
+    }
+    existing.inputTokens += inputTokens
+    existing.cachedInputTokens += cachedInputTokens
+    existing.cacheCreationInputTokens += cacheCreationInputTokens
+    existing.cacheReadInputTokens += cacheReadInputTokens
+    existing.outputTokens += outputTokens
+    existing.reasoningOutputTokens += reasoningOutputTokens
+    existing.totalTokens += totalTokens
+    existing.modelCalls += modelCalls
+    existing.cost += cost
+    // Latest non-null pricing wins; identical across same-model rows.
+    if (pricing) {
+      existing.pricing = pricing
+    }
+    modelAggs.set(model, existing)
+  }
+  const modelRows = [...modelAggs.values()]
+    .sort((a, b) => b.cost - a.cost || b.modelCalls - a.modelCalls)
+    .slice(0, 30)
+
+  // --- fold breakdown → project leaderboard ---------------------------
+  // Track each project's agent-source-level cost map so the bar in
+  // PROJECTS · COSTS can be segmented by agent (codex / claude-code /
+  // opencode / pi / …) — the dimension users care about when deciding
+  // which agent to keep on a project.
+  type ProjectAgg = {
+    project: string
+    inputTokens: number
+    cachedInputTokens: number
+    cacheCreationInputTokens: number
+    cacheReadInputTokens: number
+    outputTokens: number
+    reasoningOutputTokens: number
+    totalTokens: number
+    modelCalls: number
+    sessions: number
+    cost: number
+    bySource: Map<string, number>
+  }
+  const projectAggs = new Map<string, ProjectAgg>()
+  for (const r of breakdownRows) {
+    const project = String(r.project ?? 'unknown')
+    const source = String(r.source ?? 'unknown')
+    const model = String(r.model ?? 'unknown')
+    const inputTokens = toN(r.input_tokens)
+    const cachedInputTokens = toN(r.cached_input_tokens)
+    const cacheCreationInputTokens = toN(r.cache_creation_input_tokens)
+    const cacheReadInputTokens = toN(r.cache_read_input_tokens)
+    const outputTokens = toN(r.output_tokens)
+    const reasoningOutputTokens = toN(r.reasoning_output_tokens)
+    const totalTokens = toN(r.total_tokens)
+    const modelCalls = toN(r.model_calls)
+    const sessions = toN(r.sessions)
+    const { cost } = estimateCostUsd({
+      model,
+      inputTokens,
+      cachedInputTokens,
+      cacheCreationInputTokens,
+      cacheReadInputTokens,
+      outputTokens,
+      reasoningOutputTokens,
+    })
+    const existing = projectAggs.get(project) ?? {
+      project,
+      inputTokens: 0,
+      cachedInputTokens: 0,
+      cacheCreationInputTokens: 0,
+      cacheReadInputTokens: 0,
+      outputTokens: 0,
+      reasoningOutputTokens: 0,
+      totalTokens: 0,
+      modelCalls: 0,
+      sessions: 0,
+      cost: 0,
+      bySource: new Map<string, number>(),
+    }
+    existing.inputTokens += inputTokens
+    existing.cachedInputTokens += cachedInputTokens
+    existing.cacheCreationInputTokens += cacheCreationInputTokens
+    existing.cacheReadInputTokens += cacheReadInputTokens
+    existing.outputTokens += outputTokens
+    existing.reasoningOutputTokens += reasoningOutputTokens
+    existing.totalTokens += totalTokens
+    existing.modelCalls += modelCalls
+    existing.sessions += sessions
+    existing.cost += cost
+    existing.bySource.set(source, (existing.bySource.get(source) ?? 0) + cost)
+    projectAggs.set(project, existing)
+  }
+  const projectAggList = [...projectAggs.values()]
+    .sort((a, b) => b.cost - a.cost || b.totalTokens - a.totalTokens)
+    .slice(0, 50)
+
+  // --- tools (normalized into categories) -----------------------------
+  // Buckets raw tool names into the same eight categories agent-time
+  // uses (Shell / File read / File search / File edit / File write /
+  // Web / Planning / Agent / Integration / Other) via SQL CASE. Mirror
+  // of normalizedToolSql() in agent-time/apps/api/src/storage/helpers.ts.
   const toolRows = await db.execute(sql`
+    with norm as (
+      select
+        case lower(coalesce(t.tool, ''))
+          when 'bash' then 'Shell'
+          when 'command' then 'Shell'
+          when 'exec_command' then 'Shell'
+          when 'functions.exec_command' then 'Shell'
+          when 'shell_command' then 'Shell'
+          when 'shell' then 'Shell'
+          when 'write_stdin' then 'Shell'
+          when 'js_repl' then 'Shell'
+          when 'js_repl_reset' then 'Shell'
+          when 'wait' then 'Shell'
+          when 'monitor' then 'Shell'
+          when 'read' then 'File read'
+          when 'notebookread' then 'File read'
+          when 'view_image' then 'File read'
+          when 'functions.view_image' then 'File read'
+          when 'grep' then 'File search'
+          when 'glob' then 'File search'
+          when 'ls' then 'File search'
+          when 'search' then 'File search'
+          when 'rg' then 'File search'
+          when 'ag' then 'File search'
+          when 'find' then 'File search'
+          when 'edit' then 'File edit'
+          when 'multiedit' then 'File edit'
+          when 'notebookedit' then 'File edit'
+          when 'apply_patch' then 'File edit'
+          when 'applypatch' then 'File edit'
+          when 'functions.apply_patch' then 'File edit'
+          when 'write' then 'File write'
+          when 'webfetch' then 'Web'
+          when 'web_fetch' then 'Web'
+          when 'websearch' then 'Web'
+          when 'web_search' then 'Web'
+          when 'web_search_preview' then 'Web'
+          when 'update_plan' then 'Planning'
+          when 'request_user_input' then 'Planning'
+          when 'askuserquestion' then 'Planning'
+          when 'schedulewakeup' then 'Planning'
+          when 'taskcreate' then 'Planning'
+          when 'taskupdate' then 'Planning'
+          when 'taskstop' then 'Planning'
+          when 'tasklist' then 'Planning'
+          when 'enterplanmode' then 'Planning'
+          when 'exitplanmode' then 'Planning'
+          when 'agent' then 'Agent'
+          when 'task' then 'Agent'
+          when 'spawn_agent' then 'Agent'
+          when 'functions.spawn_agent' then 'Agent'
+          when 'wait_agent' then 'Agent'
+          when 'close_agent' then 'Agent'
+          when 'send_input' then 'Agent'
+          when 'taskoutput' then 'Agent'
+          when 'toolsearch' then 'Integration'
+          when 'skill' then 'Integration'
+          when 'search_icons' then 'Integration'
+          when 'list_mcp_resources' then 'Integration'
+          when 'list_mcp_resource_templates' then 'Integration'
+          else (
+            case
+              when lower(coalesce(t.tool, '')) like '%exec_command%' then 'Shell'
+              when lower(coalesce(t.tool, '')) like '%apply_patch%' then 'File edit'
+              when lower(coalesce(t.tool, '')) like '%web_search%' then 'Web'
+              when lower(coalesce(t.tool, '')) like '%todo%' then 'Planning'
+              when lower(coalesce(t.tool, '')) like '%spawn_agent%' then 'Agent'
+              when lower(coalesce(t.tool, '')) like 'mcp__%' then 'Integration'
+              when lower(coalesce(t.tool, '')) like 'mcp.%' then 'Integration'
+              when substr(lower(coalesce(t.tool, '')), 1, 1) = '_' then 'Integration'
+              else 'Other'
+            end
+          )
+        end as tool,
+        t.call_count,
+        t.failure_count,
+        t.total_duration_ms
+      from agent_tool_calls t
+      join agent_sessions s on s.rollup_key = t.rollup_key
+      where t.user_id = ${userId}
+      ${sessSinceClause}
+    )
     select
-      t.tool as tool,
-      coalesce(sum(t.call_count), 0)::bigint as calls,
-      coalesce(sum(t.failure_count), 0)::bigint as failures,
-      coalesce(sum(t.total_duration_ms), 0)::bigint as total_duration_ms
-    from agent_tool_calls t
-    join agent_sessions s on s.rollup_key = t.rollup_key
-    where t.user_id = ${userId}
-    ${sessSinceClause}
+      tool,
+      coalesce(sum(call_count), 0)::bigint as calls,
+      coalesce(sum(failure_count), 0)::bigint as failures,
+      coalesce(sum(total_duration_ms), 0)::bigint as total_duration_ms
+    from norm
     group by 1
     order by calls desc
     limit 30
@@ -352,56 +678,141 @@ export default defineEventHandler(async (event) => {
       totalLinesRemoved: toN(summaryRow.total_lines_removed),
     },
     overviewBuckets: overviewRows.map(r => ({
-      ts: r.ts instanceof Date ? r.ts.toISOString() : String(r.ts),
+      ts: tsToIso(r.ts),
       activity: toN(r.activity),
       sessions: toN(r.sessions),
       tokens: toN(r.tokens),
       linesChanged: toN(r.lines_changed),
       estimatedCostUsd: microsToUsd(r.cost_micros),
     })),
-    tokenBuckets: tokenRows.map(r => ({
-      ts: r.ts instanceof Date ? r.ts.toISOString() : String(r.ts),
-      inputTokens: toN(r.input_tokens),
-      cachedInputTokens: toN(r.cached_input_tokens),
-      outputTokens: toN(r.output_tokens),
-      reasoningOutputTokens: toN(r.reasoning_output_tokens),
-      modelCalls: toN(r.model_calls),
-      estimatedCostUsd: microsToUsd(r.cost_micros),
-    })),
+    tokenBuckets: (() => {
+      // Fold the (bucket, source, model) rows into one entry per bucket
+      // with a bySource breakdown. Cost is recomputed per row via the
+      // live pricing catalogue so the stacked timeline reads from the
+      // same numbers as the MODELS leaderboard.
+      type SourceTotals = { inputTokens: number, cachedInputTokens: number, outputTokens: number, reasoningOutputTokens: number, modelCalls: number, estimatedCostUsd: number }
+      type Bucket = { ts: string, bySource: Record<string, SourceTotals> } & SourceTotals
+      const emptyCell = (): SourceTotals => ({
+        inputTokens: 0,
+        cachedInputTokens: 0,
+        outputTokens: 0,
+        reasoningOutputTokens: 0,
+        modelCalls: 0,
+        estimatedCostUsd: 0,
+      })
+      const out = new Map<string, Bucket>()
+      for (const r of tokenRows) {
+        const ts = tsToIso(r.ts)
+        const source = String(r.source ?? 'unknown')
+        const model = String(r.model ?? 'unknown')
+        const inputTokens = toN(r.input_tokens)
+        const cachedInputTokens = toN(r.cached_input_tokens)
+        const cacheCreationInputTokens = toN(r.cache_creation_input_tokens)
+        const cacheReadInputTokens = toN(r.cache_read_input_tokens)
+        const outputTokens = toN(r.output_tokens)
+        const reasoningOutputTokens = toN(r.reasoning_output_tokens)
+        const modelCalls = toN(r.model_calls)
+        const { cost } = estimateCostUsd({
+          model,
+          inputTokens,
+          cachedInputTokens,
+          cacheCreationInputTokens,
+          cacheReadInputTokens,
+          outputTokens,
+          reasoningOutputTokens,
+        })
+        const existing = out.get(ts) ?? {
+          ts,
+          inputTokens: 0,
+          cachedInputTokens: 0,
+          outputTokens: 0,
+          reasoningOutputTokens: 0,
+          modelCalls: 0,
+          estimatedCostUsd: 0,
+          bySource: {},
+        }
+        const cell = existing.bySource[source] ?? emptyCell()
+        cell.inputTokens += inputTokens
+        cell.cachedInputTokens += cachedInputTokens
+        cell.outputTokens += outputTokens
+        cell.reasoningOutputTokens += reasoningOutputTokens
+        cell.modelCalls += modelCalls
+        cell.estimatedCostUsd += cost
+        existing.bySource[source] = cell
+        existing.inputTokens += inputTokens
+        existing.cachedInputTokens += cachedInputTokens
+        existing.outputTokens += outputTokens
+        existing.reasoningOutputTokens += reasoningOutputTokens
+        existing.modelCalls += modelCalls
+        existing.estimatedCostUsd += cost
+        out.set(ts, existing)
+      }
+      return [...out.values()].sort((a, b) => a.ts.localeCompare(b.ts))
+    })(),
     heatmap: heatmapRows.map(r => ({
       weekday: toN(r.weekday),
       hour: toN(r.hour),
       count: toN(r.count),
       estimatedCostUsd: microsToUsd(r.cost_micros),
     })),
-    projectTokens: projectRows.map(r => ({
-      project: String(r.project ?? 'unknown'),
-      inputTokens: toN(r.input_tokens),
-      cachedInputTokens: toN(r.cached_input_tokens),
-      outputTokens: toN(r.output_tokens),
-      reasoningOutputTokens: toN(r.reasoning_output_tokens),
-      totalTokens: toN(r.total_tokens),
-      modelCalls: toN(r.model_calls),
-      sessions: toN(r.sessions),
-      agentDurationMs: toN(r.duration_ms),
-      estimatedCostUsd: microsToUsd(r.cost_micros),
+    projectTokens: projectAggList.map(p => ({
+      project: p.project,
+      inputTokens: p.inputTokens,
+      cachedInputTokens: p.cachedInputTokens,
+      outputTokens: p.outputTokens,
+      reasoningOutputTokens: p.reasoningOutputTokens,
+      totalTokens: p.totalTokens,
+      modelCalls: p.modelCalls,
+      sessions: p.sessions,
+      agentDurationMs: durationByProject.get(p.project) ?? 0,
+      estimatedCostUsd: p.cost,
+      // Sorted descending by cost; the frontend renders this as a
+      // stacked horizontal bar so reading per-agent share is one glance.
+      sourceSegments: [...p.bySource.entries()]
+        .filter(([, cost]) => cost > 0)
+        .sort((a, b) => b[1] - a[1])
+        .map(([source, cost]) => ({ source, estimatedCostUsd: cost })),
     })),
-    modelCosts: modelRows.map(r => ({
-      model: String(r.model ?? 'unknown'),
-      inputTokens: toN(r.input_tokens),
-      cachedInputTokens: toN(r.cached_input_tokens),
-      outputTokens: toN(r.output_tokens),
-      reasoningOutputTokens: toN(r.reasoning_output_tokens),
-      modelCalls: toN(r.model_calls),
-      durationMs: toN(r.duration_ms),
-      estimatedCostUsd: microsToUsd(r.cost_micros),
+    modelCosts: modelRows.map(m => ({
+      model: m.model,
+      inputTokens: m.inputTokens,
+      cachedInputTokens: m.cachedInputTokens,
+      outputTokens: m.outputTokens,
+      reasoningOutputTokens: m.reasoningOutputTokens,
+      modelCalls: m.modelCalls,
+      // duration_ms is not meaningful per model (one session can use
+      // multiple models); we leave it at zero so the table doesn't
+      // imply otherwise. Agent-time approximates this via token-weighted
+      // share — punt until we need it.
+      durationMs: 0,
+      estimatedCostUsd: m.cost,
+      pricing: m.pricing
+        ? {
+            displayName: m.pricing.displayName,
+            source: m.pricing.source,
+            inputPerMillion: m.pricing.inputCostPerToken * 1_000_000,
+            cacheCreationInputPerMillion: m.pricing.cacheCreationInputCostPerToken * 1_000_000,
+            cacheReadInputPerMillion: m.pricing.cacheReadInputCostPerToken * 1_000_000,
+            cachedInputPerMillion: m.pricing.cachedInputCostPerToken * 1_000_000,
+            outputPerMillion: m.pricing.outputCostPerToken * 1_000_000,
+          }
+        : {
+            displayName: undefined,
+            source: 'missing' as const,
+            inputPerMillion: 0,
+            cacheCreationInputPerMillion: 0,
+            cacheReadInputPerMillion: 0,
+            cachedInputPerMillion: 0,
+            outputPerMillion: 0,
+          },
     })),
     tools: toolRows.map(r => ({
-      tool: String(r.tool ?? 'unknown'),
+      tool: String(r.tool ?? 'Other'),
       calls: toN(r.calls),
       failures: toN(r.failures),
       totalDurationMs: toN(r.total_duration_ms),
       avgDurationMs: toN(r.calls) > 0 ? toN(r.total_duration_ms) / toN(r.calls) : 0,
     })),
+    pricing: pricingState(),
   }
 })

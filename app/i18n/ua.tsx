@@ -696,6 +696,15 @@ export const ua: Partial<Translation> = {
     agent: {
       freeLimit: 'Безкоштовний план: показано сесії за останні 30 днів. Перейдіть на Pro для повної історії.',
       upgrade: 'Оновити',
+      sections: {
+        overview: 'Огляд',
+        costTimeline: 'Вартість · Хронологія',
+        rhythm: 'Ритм · Коли',
+        projects: 'Проєкти · Вартість',
+        models: 'Моделі · Вартість',
+        tools: 'Інструменти',
+        sessions: 'Сесії · Список',
+      },
     },
   },
   button: {

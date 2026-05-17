@@ -673,6 +673,15 @@ export const it: Partial<Translation> = {
     agent: {
       freeLimit: 'Piano gratuito: mostrando le sessioni degli ultimi 30 giorni. Passa a Pro per la cronologia completa.',
       upgrade: 'Aggiorna',
+      sections: {
+        overview: 'Panoramica',
+        costTimeline: 'Costo · Cronologia',
+        rhythm: 'Ritmo · Quando',
+        projects: 'Progetti · Costi',
+        models: 'Modelli · Costi',
+        tools: 'Strumenti',
+        sessions: 'Sessioni · Elenco',
+      },
     },
   },
   button: {

@@ -611,6 +611,17 @@ export type Translation = {
     agent: {
       freeLimit: string
       upgrade: string
+      // Section titles inside the Agent dashboard. Optional during the
+      // translation rollout — fall back to English when absent.
+      sections?: {
+        overview: string
+        costTimeline: string
+        rhythm: string
+        projects: string
+        models: string
+        tools: string
+        sessions: string
+      }
     }
   }
   common: {

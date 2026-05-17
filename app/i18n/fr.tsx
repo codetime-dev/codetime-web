@@ -673,6 +673,15 @@ export const fr: Partial<Translation> = {
     agent: {
       freeLimit: 'Plan gratuit : affichage des sessions des 30 derniers jours. Passez à Pro pour l\'historique complet.',
       upgrade: 'Mettre à niveau',
+      sections: {
+        overview: 'Aperçu',
+        costTimeline: 'Coût · Chronologie',
+        rhythm: 'Rythme · Quand',
+        projects: 'Projets · Coûts',
+        models: 'Modèles · Coûts',
+        tools: 'Outils',
+        sessions: 'Sessions · Liste',
+      },
     },
   },
   button: {

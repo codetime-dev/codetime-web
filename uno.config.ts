@@ -4,7 +4,7 @@ import { defineConfig, presetIcons, presetWind4 } from 'unocss'
 
 // In-house brand icons that no iconify collection ships. Add new files
 // to `app/assets/icons/<name>.svg`, then reference as `i-brand-<name>`.
-const brandIconsDir = fileURLToPath(new URL('./app/assets/icons/', import.meta.url))
+const brandIconsDir = fileURLToPath(new URL('app/assets/icons/', import.meta.url))
 function loadBrand(name: string): string {
   return readFileSync(`${brandIconsDir}${name}.svg`, 'utf8')
 }

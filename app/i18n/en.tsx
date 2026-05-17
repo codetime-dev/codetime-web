@@ -340,6 +340,15 @@ export const en: Translation = {
     agent: {
       freeLimit: 'Free plan: showing sessions from the last 30 days. Upgrade to Pro for full history.',
       upgrade: 'Upgrade',
+      sections: {
+        overview: 'Overview',
+        costTimeline: 'Cost · Timeline',
+        rhythm: 'Rhythm · When',
+        projects: 'Projects · Costs',
+        models: 'Models · Costs',
+        tools: 'Tools',
+        sessions: 'Sessions · List',
+      },
     },
   profile: {
     identity: {

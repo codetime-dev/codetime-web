@@ -673,6 +673,15 @@ export const ms: Partial<Translation> = {
     agent: {
       freeLimit: 'Pelan percuma: menunjukkan sesi 30 hari terakhir. Naik taraf ke Pro untuk sejarah penuh.',
       upgrade: 'Naik Taraf',
+      sections: {
+        overview: 'Gambaran',
+        costTimeline: 'Kos · Garis Masa',
+        rhythm: 'Irama · Bila',
+        projects: 'Projek · Kos',
+        models: 'Model · Kos',
+        tools: 'Alat',
+        sessions: 'Sesi · Senarai',
+      },
     },
   },
   button: {

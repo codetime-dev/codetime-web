@@ -673,6 +673,15 @@ export const ptBR: Partial<Translation> = {
     agent: {
       freeLimit: 'Plano gratuito: mostrando sessões dos últimos 30 dias. Atualize para Pro para ver o histórico completo.',
       upgrade: 'Atualizar',
+      sections: {
+        overview: 'Visão geral',
+        costTimeline: 'Custo · Linha do tempo',
+        rhythm: 'Ritmo · Quando',
+        projects: 'Projetos · Custos',
+        models: 'Modelos · Custos',
+        tools: 'Ferramentas',
+        sessions: 'Sessões · Lista',
+      },
     },
   },
   button: {

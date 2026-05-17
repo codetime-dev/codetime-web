@@ -1,34 +1,70 @@
 <script setup lang="ts">
 import type { VibeModelRow } from './types'
 import { computed } from 'vue'
-import { compactParts, fmtDurationShort, fmtUsd } from './types'
+import { compact, fmtUsd, formatModelName } from './types'
 
-// Per-model cost breakdown. Rows are sorted server-side by descending
-// cost; the bar visualises share of total spend across models so the
-// "which model is eating my budget" question is one glance away.
+// Per-model cost breakdown — column layout mirrors agent-time's
+// ModelCosts.vue so the two dashboards read identical:
+//   MODEL · CACHE % · IN % · OUT % · CALLS · TOKENS · COST · SHARE
+// The token mix percentages (cache vs fresh input vs output) give a
+// quick read on how a model is being used; the cost figure relies on
+// the same pricing.ts logic agent-time uses (recomputed server-side
+// from the live OpenRouter catalogue with a frozen fallback table).
 
 const props = defineProps<{ rows: VibeModelRow[] }>()
 
+const TOP = 12
+
 const totalCost = computed(() => props.rows.reduce((s, r) => s + r.estimatedCostUsd, 0))
 
+const maxCost = computed(() => Math.max(1, ...props.rows.map(r => r.estimatedCostUsd)))
+
 const view = computed(() => {
-  const max = Math.max(1, ...props.rows.map(r => r.estimatedCostUsd))
-  return props.rows.map((row, index) => {
-    const cacheHit = row.inputTokens > 0 ? row.cachedInputTokens / row.inputTokens : 0
+  return props.rows.slice(0, TOP).map((row, index) => {
+    // Match agent-time's totals exactly: fresh = inputTokens - cached;
+    // outputTotal = output + reasoning; totalTokens = fresh + cached
+    // + outputTotal. Pricing rows pull from the same numbers.
+    const freshInput = Math.max(0, row.inputTokens - row.cachedInputTokens)
+    const outputTotal = row.outputTokens + row.reasoningOutputTokens
+    const totalTokens = freshInput + row.cachedInputTokens + outputTotal
+    const denom = Math.max(1, totalTokens)
+    const cachePct = (row.cachedInputTokens / denom) * 100
+    const inputPct = (freshInput / denom) * 100
+    const outputPct = (outputTotal / denom) * 100
+    const share = totalCost.value > 0 ? (row.estimatedCostUsd / totalCost.value) * 100 : 0
+    const name = row.pricing?.displayName ?? formatModelName(row.model)
+    const pricingSource = row.pricing?.source ?? 'missing'
     return {
       index: String(index + 1).padStart(2, '0'),
       model: row.model,
-      cost: row.estimatedCostUsd,
-      sharePct: totalCost.value > 0 ? (row.estimatedCostUsd / totalCost.value) * 100 : 0,
-      widthPct: max > 0 ? (row.estimatedCostUsd / max) * 100 : 0,
+      name,
+      cachePct,
+      inputPct,
+      outputPct,
       modelCalls: row.modelCalls,
-      cacheHit,
-      durationMs: row.durationMs,
-      inputTokens: row.inputTokens,
-      outputTokens: row.outputTokens,
+      totalTokens,
+      cost: row.estimatedCostUsd,
+      share,
+      pricingSource,
+      // Width relative to the top spender, so the bar at-a-glance
+      // shows "this model costs X% of what the biggest one does".
+      widthPct: (row.estimatedCostUsd / maxCost.value) * 100,
     }
   })
 })
+
+function fmtPct(value: number): string {
+  if (value <= 0) {
+    return '0%'
+  }
+  if (value < 0.1) {
+    return '<0.1%'
+  }
+  if (value >= 99.95) {
+    return '100%'
+  }
+  return `${value.toFixed(1)}%`
+}
 </script>
 
 <template>
@@ -37,12 +73,13 @@ const view = computed(() => {
       <span />
       <span class="hcell">MODEL</span>
       <span class="hcell" />
+      <span class="hcell num">CACHE</span>
+      <span class="hcell num">IN</span>
+      <span class="hcell num">OUT</span>
+      <span class="hcell num">CALLS</span>
+      <span class="hcell num">TOKENS</span>
       <span class="hcell num">COST</span>
       <span class="hcell num">SHARE</span>
-      <span class="hcell num">CALLS</span>
-      <span class="hcell num">CACHE</span>
-      <span class="hcell num">IN/OUT</span>
-      <span class="hcell num">TIME</span>
     </li>
     <li
       v-for="row in view"
@@ -50,21 +87,22 @@ const view = computed(() => {
       class="row"
     >
       <span class="idx">{{ row.index }}</span>
-      <span class="name" :title="row.model">{{ row.model }}</span>
+      <span class="name" :title="row.model">{{ row.name }}</span>
       <span class="bar-wrap">
         <span class="bar" :style="{ width: `${row.widthPct}%` }" />
       </span>
-      <span class="num cost">{{ fmtUsd(row.cost) }}</span>
-      <span class="num share">{{ row.sharePct.toFixed(1) }}%</span>
-      <span class="num calls">
-        {{ compactParts(row.modelCalls).value }}{{ compactParts(row.modelCalls).unit ?? '' }}
+      <span class="num mix cache">{{ fmtPct(row.cachePct) }}</span>
+      <span class="num mix input">{{ fmtPct(row.inputPct) }}</span>
+      <span class="num mix output">{{ fmtPct(row.outputPct) }}</span>
+      <span class="num">{{ compact(row.modelCalls) }}</span>
+      <span class="num">{{ compact(row.totalTokens) }}</span>
+      <span
+        class="num cost"
+        :class="{ missing: row.pricingSource === 'missing' }"
+      >
+        {{ row.pricingSource === 'missing' ? '—' : fmtUsd(row.cost) }}
       </span>
-      <span class="num hit">{{ (row.cacheHit * 100).toFixed(0) }}%</span>
-      <span class="num io">
-        {{ compactParts(row.inputTokens).value }}{{ compactParts(row.inputTokens).unit ?? '' }} /
-        {{ compactParts(row.outputTokens).value }}{{ compactParts(row.outputTokens).unit ?? '' }}
-      </span>
-      <span class="num time">{{ fmtDurationShort(row.durationMs) }}</span>
+      <span class="num share">{{ row.share.toFixed(1) }}%</span>
     </li>
     <li v-if="view.length === 0" class="empty">
       — no model usage in window —
@@ -77,13 +115,29 @@ const view = computed(() => {
 
 .row {
   display: grid;
-  grid-template-columns: 28px 1.5fr 1.4fr 80px 56px 60px 50px 110px 70px;
+  grid-template-columns: 28px 1.4fr 1.4fr 64px 60px 60px 70px 78px 90px 60px;
   gap: 10px;
   align-items: center;
   padding: 8px 6px;
   margin: 0 -6px;
   border-bottom: 1px solid var(--ct-border-subtle);
   font-size: 13px;
+}
+
+.bar-wrap {
+  position: relative;
+  height: 10px;
+  background: var(--ct-surface-1);
+  border: 1px solid var(--ct-border-subtle);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  background: var(--ct-primary);
+  transition: width 400ms ease;
 }
 .row:not(.head):hover { background: var(--ct-surface-1); }
 .row:last-child { border-bottom: none; }
@@ -100,36 +154,31 @@ const view = computed(() => {
 }
 .hcell.num { text-align: right; }
 
-.idx { color: var(--ct-fg-subtle); font-variant-numeric: tabular-nums; }
-/* Model id (e.g. claude-opus-4-7) is an identifier — mono helps it
-   line up next to its sibling rows and reads as code. */
+.idx {
+  color: var(--ct-fg-subtle);
+  font-family: var(--ct-font-mono);
+  font-variant-numeric: tabular-nums;
+}
 .name {
   color: var(--ct-fg);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 13px;
+}
+
+.num {
+  text-align: right;
   font-family: var(--ct-font-mono);
-  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
 }
-
-.bar-wrap {
-  position: relative;
-  height: 10px;
-  background: var(--ct-surface-1);
-  border: 1px solid var(--ct-border-subtle);
-  border-radius: 2px;
-}
-.bar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  height: 100%;
-  background: var(--ct-primary);
-  border-radius: 1px;
-}
-
-.num { text-align: right; font-variant-numeric: tabular-nums; }
+.mix { font-size: 12.5px; }
+.mix.cache { color: var(--ct-fg-muted); }
+.mix.input { color: var(--ct-fg); }
+.mix.output { color: var(--ct-primary); }
 .cost { color: var(--ct-primary); }
-.share, .hit, .calls, .time, .io { color: var(--ct-fg-muted); }
+.cost.missing { color: var(--ct-fg-subtle); }
+.share { color: var(--ct-fg-muted); }
 
 .empty {
   text-align: center;
@@ -138,16 +187,17 @@ const view = computed(() => {
 }
 
 @media (max-width: 980px) {
-  .row { grid-template-columns: 28px minmax(112px, 1fr) minmax(52px, 0.8fr) 70px 56px 50px 50px; }
-  .row > :nth-child(8),
-  .row > :nth-child(9) { display: none; }
+  .row { grid-template-columns: 28px minmax(120px, 1fr) minmax(60px, 1fr) 56px 56px 56px 68px 78px; }
+  .row > :nth-child(9),
+  .row > :nth-child(10) { display: none; }
 }
 
 @media (max-width: 700px) {
-  .row { grid-template-columns: 28px minmax(96px, 1fr) minmax(44px, 0.7fr) 70px 56px; }
+  .row { grid-template-columns: 28px minmax(96px, 1fr) minmax(40px, 0.6fr) 56px 56px 78px; }
+  .row > :nth-child(5),
   .row > :nth-child(6),
   .row > :nth-child(7),
   .row > :nth-child(8),
-  .row > :nth-child(9) { display: none; }
+  .row > :nth-child(10) { display: none; }
 }
 </style>

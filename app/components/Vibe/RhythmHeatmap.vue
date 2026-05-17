@@ -27,29 +27,35 @@ type Built = {
 }
 
 function makeRow(length: number): number[] {
-  return Array.from({ length }, () => 0)
+  return Array.from({ length }).fill(0)
 }
 
+// Cell intensity is driven by `count` (model call volume) instead of
+// `estimatedCostUsd` because `agent_time_buckets.estimated_cost_micros`
+// is CLI-stamped and frequently zero — using it produced a heatmap
+// with all-or-nothing cells. Cost still rides along for the tooltip
+// and the peak-hour/peak-day summary tiles.
 function build(cells: VibeHeatmapCell[]): Built {
   const grid: number[][] = Array.from({ length: DAYS }, () => makeRow(HOURS))
-  const calls: number[][] = Array.from({ length: DAYS }, () => makeRow(HOURS))
+  const costs: number[][] = Array.from({ length: DAYS }, () => makeRow(HOURS))
   const hourTotals = makeRow(HOURS)
   const dayTotals = makeRow(DAYS)
-  const hourCalls = makeRow(HOURS)
-  const dayCalls = makeRow(DAYS)
+  const hourCost = makeRow(HOURS)
+  const dayCost = makeRow(DAYS)
   let total = 0
   for (const cell of cells) {
     if (cell.weekday < 0 || cell.weekday > 6 || cell.hour < 0 || cell.hour > 23) {
       continue
     }
+    const calls = cell.count
     const cost = cell.estimatedCostUsd
-    grid[cell.weekday]![cell.hour] = (grid[cell.weekday]![cell.hour] ?? 0) + cost
-    calls[cell.weekday]![cell.hour] = (calls[cell.weekday]![cell.hour] ?? 0) + cell.count
-    hourTotals[cell.hour] = (hourTotals[cell.hour] ?? 0) + cost
-    dayTotals[cell.weekday] = (dayTotals[cell.weekday] ?? 0) + cost
-    hourCalls[cell.hour] = (hourCalls[cell.hour] ?? 0) + cell.count
-    dayCalls[cell.weekday] = (dayCalls[cell.weekday] ?? 0) + cell.count
-    total += cost
+    grid[cell.weekday]![cell.hour] = (grid[cell.weekday]![cell.hour] ?? 0) + calls
+    costs[cell.weekday]![cell.hour] = (costs[cell.weekday]![cell.hour] ?? 0) + cost
+    hourTotals[cell.hour] = (hourTotals[cell.hour] ?? 0) + calls
+    dayTotals[cell.weekday] = (dayTotals[cell.weekday] ?? 0) + calls
+    hourCost[cell.hour] = (hourCost[cell.hour] ?? 0) + cost
+    dayCost[cell.weekday] = (dayCost[cell.weekday] ?? 0) + cost
+    total += calls
   }
   let max = 0
   for (const row of grid) {
@@ -59,7 +65,16 @@ function build(cells: VibeHeatmapCell[]): Built {
       }
     }
   }
-  return { grid, calls, max: max || 1, total, hourTotals, dayTotals, hourCalls, dayCalls }
+  return {
+    grid,
+    calls: costs, // alias kept so the tooltip lookup below still resolves
+    max: max || 1,
+    total,
+    hourTotals,
+    dayTotals,
+    hourCalls: hourCost,
+    dayCalls: dayCost,
+  }
 }
 
 const built = computed(() => build(props.cells))
@@ -152,7 +167,7 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
           class="cell"
           :style="{ '--i': intensity(value) }"
           :class="{ empty: value === 0 }"
-          :title="`${DAY_LABELS[dayIdx]} ${pad(hour)}:00 · ${fmtUsd(value)} · ${compactParts(built.calls[dayIdx]?.[hour] ?? 0).value} calls`"
+          :title="`${DAY_LABELS[dayIdx]} ${pad(hour)}:00 · ${compactParts(value).value} calls · ${fmtUsd(built.calls[dayIdx]?.[hour] ?? 0)}`"
         />
       </template>
     </div>
@@ -161,12 +176,12 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
       <li>
         <span class="lbl">PEAK HOUR</span>
         <span class="val">{{ peakHour.label }}</span>
-        <span class="sub">{{ fmtUsd(peakHour.value) }} · {{ compactParts(peakHour.calls).value }} calls</span>
+        <span class="sub">{{ compactParts(peakHour.value).value }} calls · {{ fmtUsd(peakHour.calls) }}</span>
       </li>
       <li>
         <span class="lbl">PEAK DAY</span>
         <span class="val">{{ peakDay.label }}</span>
-        <span class="sub">{{ fmtUsd(peakDay.value) }} · {{ compactParts(peakDay.calls).value }} calls</span>
+        <span class="sub">{{ compactParts(peakDay.value).value }} calls · {{ fmtUsd(peakDay.calls) }}</span>
       </li>
       <li>
         <span class="lbl">ACTIVE</span>
@@ -175,8 +190,8 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
       </li>
       <li>
         <span class="lbl">AVG/SLOT</span>
-        <span class="val">{{ fmtUsd(avgPerActiveSlot) }}</span>
-        <span class="sub">per active slot</span>
+        <span class="val">{{ compactParts(avgPerActiveSlot).value }}</span>
+        <span class="sub">calls per active slot</span>
       </li>
     </ul>
 
@@ -217,6 +232,7 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
   text-align: center;
   letter-spacing: 0.08em;
   visibility: hidden;
+  font-family: var(--ct-font-mono);
   font-variant-numeric: tabular-nums;
 }
 .hour-label.visible { visibility: visible; }
@@ -227,7 +243,7 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
   letter-spacing: 0.16em;
   text-align: right;
   padding-right: 10px;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--ct-font-mono);
 }
 
 .cell {
@@ -276,6 +292,7 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
   font-size: 17px;
   color: var(--ct-fg);
   letter-spacing: -0.01em;
+  font-family: var(--ct-font-mono);
   font-variant-numeric: tabular-nums;
 }
 

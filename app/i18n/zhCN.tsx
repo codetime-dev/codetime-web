@@ -374,6 +374,15 @@ export const zhCN: Partial<Translation> = {
     agent: {
       freeLimit: '免费版仅显示最近 30 天的会话。升级 Pro 可查看完整历史。',
       upgrade: '升级',
+      sections: {
+        overview: '概览',
+        costTimeline: '成本 · 时间线',
+        rhythm: '节奏 · 时段',
+        projects: '项目 · 成本',
+        models: '模型 · 成本',
+        tools: '工具',
+        sessions: '会话 · 列表',
+      },
     },
     badge: {
       configure: '配置',

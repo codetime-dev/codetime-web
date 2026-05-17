@@ -31,7 +31,6 @@ const view = computed(() => {
       <span class="hcell" />
       <span class="hcell num">CALLS</span>
       <span class="hcell num">FAIL%</span>
-      <span class="hcell num">AVG</span>
       <span class="hcell num">TOTAL</span>
     </li>
     <li
@@ -50,7 +49,6 @@ const view = computed(() => {
       <span class="num" :class="{ bad: row.failureRate > 0.05 }">
         {{ (row.failureRate * 100).toFixed(1) }}%
       </span>
-      <span class="num">{{ fmtDurationShort(row.avgMs) }}</span>
       <span class="num">{{ fmtDurationShort(row.totalMs) }}</span>
     </li>
     <li v-if="view.length === 0" class="empty">
@@ -64,7 +62,7 @@ const view = computed(() => {
 
 .row {
   display: grid;
-  grid-template-columns: 28px 1.5fr 2fr 70px 60px 70px 70px;
+  grid-template-columns: 28px 1.5fr 2fr 70px 60px 70px;
   gap: 10px;
   align-items: center;
   padding: 8px 6px;
@@ -86,7 +84,11 @@ const view = computed(() => {
 }
 .hcell.num { text-align: right; }
 
-.idx { color: var(--ct-fg-subtle); font-variant-numeric: tabular-nums; }
+.idx {
+  color: var(--ct-fg-subtle);
+  font-family: var(--ct-font-mono);
+  font-variant-numeric: tabular-nums;
+}
 /* Tool name (Bash/Read/Edit/...) is an identifier — keep mono. */
 .name {
   color: var(--ct-fg);
@@ -112,7 +114,12 @@ const view = computed(() => {
   border-radius: 1px;
 }
 
-.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--ct-fg-muted); }
+.num {
+  text-align: right;
+  font-family: var(--ct-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ct-fg-muted);
+}
 .calls { color: var(--ct-fg); }
 .bad { color: var(--ct-danger); }
 

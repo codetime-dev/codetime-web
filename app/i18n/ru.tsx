@@ -697,6 +697,15 @@ export const ru: Partial<Translation> = {
     agent: {
       freeLimit: 'Бесплатный план: показаны сессии за последние 30 дней. Перейдите на Pro для полной истории.',
       upgrade: 'Обновить',
+      sections: {
+        overview: 'Обзор',
+        costTimeline: 'Стоимость · Хронология',
+        rhythm: 'Ритм · Когда',
+        projects: 'Проекты · Стоимость',
+        models: 'Модели · Стоимость',
+        tools: 'Инструменты',
+        sessions: 'Сессии · Список',
+      },
     },
   },
   button: {

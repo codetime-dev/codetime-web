@@ -673,6 +673,15 @@ export const de: Partial<Translation> = {
     agent: {
       freeLimit: 'Kostenloser Plan: Es werden nur Sitzungen der letzten 30 Tage angezeigt. Auf Pro upgraden für vollständige Historie.',
       upgrade: 'Upgrade',
+      sections: {
+        overview: 'Übersicht',
+        costTimeline: 'Kosten · Zeitachse',
+        rhythm: 'Rhythmus · Wann',
+        projects: 'Projekte · Kosten',
+        models: 'Modelle · Kosten',
+        tools: 'Werkzeuge',
+        sessions: 'Sitzungen · Liste',
+      },
     },
   },
   button: {
