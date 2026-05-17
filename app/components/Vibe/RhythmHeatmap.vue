@@ -11,6 +11,9 @@ import { compactParts, fmtUsd } from './types'
 
 const props = defineProps<{ cells: VibeHeatmapCell[] }>()
 
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.rhythm)
+
 const HOURS = 24
 const DAYS = 7
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
@@ -174,29 +177,29 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
 
     <ul class="summary">
       <li>
-        <span class="lbl">PEAK HOUR</span>
+        <span class="lbl">{{ L?.peakHour ?? 'Peak hour' }}</span>
         <span class="val">{{ peakHour.label }}</span>
-        <span class="sub">{{ compactParts(peakHour.value).value }} calls · {{ fmtUsd(peakHour.calls) }}</span>
+        <span class="sub">{{ compactParts(peakHour.value).value }} {{ L?.calls ?? 'calls' }} · {{ fmtUsd(peakHour.calls) }}</span>
       </li>
       <li>
-        <span class="lbl">PEAK DAY</span>
+        <span class="lbl">{{ L?.peakDay ?? 'Peak day' }}</span>
         <span class="val">{{ peakDay.label }}</span>
-        <span class="sub">{{ compactParts(peakDay.value).value }} calls · {{ fmtUsd(peakDay.calls) }}</span>
+        <span class="sub">{{ compactParts(peakDay.value).value }} {{ L?.calls ?? 'calls' }} · {{ fmtUsd(peakDay.calls) }}</span>
       </li>
       <li>
-        <span class="lbl">ACTIVE</span>
+        <span class="lbl">{{ L?.active ?? 'Active' }}</span>
         <span class="val">{{ activeHours }}h · {{ activeDays }}d</span>
-        <span class="sub">of 24h × 7d</span>
+        <span class="sub">{{ L?.ofWindow ?? 'of 24h × 7d' }}</span>
       </li>
       <li>
-        <span class="lbl">AVG/SLOT</span>
+        <span class="lbl">{{ L?.avgSlot ?? 'Avg/slot' }}</span>
         <span class="val">{{ compactParts(avgPerActiveSlot).value }}</span>
-        <span class="sub">calls per active slot</span>
+        <span class="sub">{{ L?.perSlot ?? 'calls per active slot' }}</span>
       </li>
     </ul>
 
     <div class="scale">
-      <span class="lbl">cost</span>
+      <span class="lbl">{{ L?.scaleLabel ?? 'cost' }}</span>
       <span class="scale-bar">
         <span
           v-for="step in 8"
@@ -205,7 +208,7 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
           :style="{ '--i': step / 8 }"
         />
       </span>
-      <span class="lbl">low → high</span>
+      <span class="lbl">{{ L?.scaleLow ?? 'low → high' }}</span>
     </div>
   </div>
 </template>

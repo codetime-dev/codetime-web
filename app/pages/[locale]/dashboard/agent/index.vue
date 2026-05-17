@@ -155,13 +155,16 @@ const sectionTitles = computed(() => {
   }
 })
 
+const Lsess = computed(() => t.value.dashboard.agent?.labels?.sessions)
+const Lmeta = computed(() => t.value.dashboard.agent?.labels?.meta)
+
 const rangeMeta = computed(() => {
   const d = dashboard.value
   if (!d) {
     return ''
   }
   if (!d.range.since) {
-    return 'all-time window'
+    return Lmeta.value?.allTime ?? 'all-time window'
   }
   const since = new Date(d.range.since)
   const until = new Date(d.range.until)
@@ -172,15 +175,16 @@ const rangeMeta = computed(() => {
 
 const bucketMeta = computed(() => {
   const b = dashboard.value?.bucket
+  const m = Lmeta.value
   if (b === 'hour') {
- return '1h buckets'
-}
+    return m?.bucketHour ?? '1h buckets'
+  }
   if (b === 'day') {
- return '1d buckets'
-}
+    return m?.bucketDay ?? '1d buckets'
+  }
   if (b === 'week') {
- return '1w buckets'
-}
+    return m?.bucketWeek ?? '1w buckets'
+  }
   return ''
 })
 </script>
@@ -230,7 +234,7 @@ const bucketMeta = computed(() => {
       <VibeSection
         num="02"
         :title="sectionTitles.costTimeline"
-        :meta="`estimated · ${bucketMeta} · ${rangeMeta}`"
+        :meta="Lmeta?.estimatedBuckets ? Lmeta.estimatedBuckets(bucketMeta, rangeMeta) : `estimated · ${bucketMeta} · ${rangeMeta}`"
       >
         <VibeTokenTimeline
           :buckets="dashboard.tokenBuckets"
@@ -243,7 +247,7 @@ const bucketMeta = computed(() => {
       <VibeSection
         num="03"
         :title="sectionTitles.rhythm"
-        :meta="`estimated cost · hour × weekday · local time · ${rangeMeta}`"
+        :meta="Lmeta?.rhythmMeta ? Lmeta.rhythmMeta(rangeMeta) : `hour × weekday · local time · ${rangeMeta}`"
       >
         <VibeRhythmHeatmap :cells="dashboard.heatmap" />
       </VibeSection>
@@ -251,7 +255,7 @@ const bucketMeta = computed(() => {
       <VibeSection
         num="04"
         :title="sectionTitles.projects"
-        :meta="`${dashboard.projectTokens.length} projects`"
+        :meta="Lmeta?.projects ? Lmeta.projects(dashboard.projectTokens.length) : `${dashboard.projectTokens.length} projects`"
       >
         <VibeProjectTokens :rows="dashboard.projectTokens" />
       </VibeSection>
@@ -267,7 +271,7 @@ const bucketMeta = computed(() => {
       <VibeSection
         num="06"
         :title="sectionTitles.tools"
-        :meta="`${compact(totalToolCalls)} calls`"
+        :meta="Lmeta?.calls ? Lmeta.calls(compact(totalToolCalls)) : `${compact(totalToolCalls)} calls`"
       >
         <VibeToolPerformance :rows="dashboard.tools" />
       </VibeSection>
@@ -275,7 +279,7 @@ const bucketMeta = computed(() => {
       <VibeSection
         num="07"
         :title="sectionTitles.sessions"
-        :meta="`${sessions.length} loaded`"
+        :meta="Lsess?.loaded ? Lsess.loaded(sessions.length) : `${sessions.length} loaded`"
         flush
       >
         <div v-if="sessionsError" class="vibe-error">
@@ -285,26 +289,26 @@ const bucketMeta = computed(() => {
           <table class="vibe-table">
             <thead>
               <tr>
-                <th>Source</th>
-                <th>Project</th>
-                <th>Started</th>
+                <th>{{ Lsess?.source ?? 'Source' }}</th>
+                <th>{{ Lsess?.project ?? 'Project' }}</th>
+                <th>{{ Lsess?.started ?? 'Started' }}</th>
                 <th class="num">
-                  Duration
+                  {{ Lsess?.duration ?? 'Duration' }}
                 </th>
                 <th class="num">
-                  Turns
+                  {{ Lsess?.turns ?? 'Turns' }}
                 </th>
                 <th class="num">
-                  Tools
+                  {{ Lsess?.tools ?? 'Tools' }}
                 </th>
                 <th class="num">
-                  In tok
+                  {{ Lsess?.inTok ?? 'In tok' }}
                 </th>
                 <th class="num">
-                  Out tok
+                  {{ Lsess?.outTok ?? 'Out tok' }}
                 </th>
                 <th class="num">
-                  Lines +/-
+                  {{ Lsess?.lines ?? 'Lines +/-' }}
                 </th>
               </tr>
             </thead>
@@ -345,10 +349,10 @@ const bucketMeta = computed(() => {
             :disabled="sessionsPending"
             @click="loadPage(false)"
           >
-            {{ sessionsPending ? 'Loading…' : 'Load more' }}
+            {{ sessionsPending ? (Lsess?.loading ?? 'Loading…') : (Lsess?.loadMore ?? 'Load more') }}
           </button>
           <div v-else-if="sessionsPending" class="op75">
-            Loading…
+            {{ Lsess?.loading ?? 'Loading…' }}
           </div>
         </div>
       </VibeSection>

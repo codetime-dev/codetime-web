@@ -622,6 +622,87 @@ export type Translation = {
         tools: string
         sessions: string
       }
+      // All other in-component labels (KPI tiles, table headers, etc.).
+      // Optional so locales without translations still render.
+      labels?: {
+        kpi: {
+          events: string
+          sessions: string
+          tokens: string
+          cost: string
+          time: string
+          linesNet: string
+          tools: string
+          cmd: string
+          projects: string
+          inSuffix: string
+          outSuffix: string
+          estimated: string
+          agentActive: string
+        }
+        timeline: {
+          cost: string
+          modelCalls: string
+          cacheHit: string
+          tokensFoot: (buckets: number, tokens: string) => string
+          empty: string
+        }
+        rhythm: {
+          peakHour: string
+          peakDay: string
+          active: string
+          avgSlot: string
+          ofWindow: string
+          perSlot: string
+          calls: string
+          scaleLabel: string
+          scaleLow: string
+          metaPrefix: string
+        }
+        table: {
+          project: string
+          model: string
+          tool: string
+          cost: string
+          share: string
+          tokens: string
+          cache: string
+          calls: string
+          time: string
+          inputPct: string
+          outputPct: string
+          fail: string
+          total: string
+          noProject: string
+          noModel: string
+          noTool: string
+        }
+        sessions: {
+          source: string
+          project: string
+          started: string
+          duration: string
+          turns: string
+          tools: string
+          inTok: string
+          outTok: string
+          lines: string
+          loadMore: string
+          loading: string
+          loaded: (n: number) => string
+          empty: string
+        }
+        meta: {
+          projects: (n: number) => string
+          calls: (n: string) => string
+          estimatedBuckets: (bucket: string, range: string) => string
+          rhythmMeta: (range: string) => string
+          bucketHour: string
+          bucketDay: string
+          bucketWeek: string
+          allTime: string
+        }
+      }
     }
   }
   common: {

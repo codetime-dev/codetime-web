@@ -3,6 +3,9 @@ import type { VibeProjectRow, VibeProjectSourceSegment } from './types'
 import { computed } from 'vue'
 import { agentColor, compactParts, fmtDurationShort, fmtUsd } from './types'
 
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.table)
+
 // Top-N project leaderboard ranked by estimated cost. Each row gets a
 // horizontal bar whose width is relative to the top project, segmented
 // by agent source (codex / claude-code / opencode / pi) so the share
@@ -72,14 +75,14 @@ const legend = computed(() => {
   <ul class="rows">
     <li class="row head">
       <span />
-      <span class="hcell">PROJECT</span>
+      <span class="hcell">{{ L?.project ?? 'Project' }}</span>
       <span class="hcell" />
-      <span class="hcell num">COST</span>
-      <span class="hcell num">SHARE</span>
-      <span class="hcell num">TOKENS</span>
-      <span class="hcell num">CACHE</span>
-      <span class="hcell num">CALLS</span>
-      <span class="hcell num">TIME</span>
+      <span class="hcell num">{{ L?.cost ?? 'Cost' }}</span>
+      <span class="hcell num">{{ L?.share ?? 'Share' }}</span>
+      <span class="hcell num">{{ L?.tokens ?? 'Tokens' }}</span>
+      <span class="hcell num">{{ L?.cache ?? 'Cache' }}</span>
+      <span class="hcell num">{{ L?.calls ?? 'Calls' }}</span>
+      <span class="hcell num">{{ L?.time ?? 'Time' }}</span>
     </li>
     <li
       v-for="row in view"
@@ -114,7 +117,7 @@ const legend = computed(() => {
       <span class="num time">{{ fmtDurationShort(row.agentDurationMs) }}</span>
     </li>
     <li v-if="view.length === 0" class="empty">
-      — no project token data in window —
+      {{ L?.noProject ?? '— no project data in window —' }}
     </li>
   </ul>
   <ul v-if="legend.length > 1" class="model-legend">

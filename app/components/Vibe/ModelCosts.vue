@@ -3,6 +3,9 @@ import type { VibeModelRow } from './types'
 import { computed } from 'vue'
 import { compact, fmtUsd, formatModelName } from './types'
 
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.table)
+
 // Per-model cost breakdown — column layout mirrors agent-time's
 // ModelCosts.vue so the two dashboards read identical:
 //   MODEL · CACHE % · IN % · OUT % · CALLS · TOKENS · COST · SHARE
@@ -71,15 +74,15 @@ function fmtPct(value: number): string {
   <ul class="rows">
     <li class="row head">
       <span />
-      <span class="hcell">MODEL</span>
+      <span class="hcell">{{ L?.model ?? 'Model' }}</span>
       <span class="hcell" />
-      <span class="hcell num">CACHE</span>
-      <span class="hcell num">IN</span>
-      <span class="hcell num">OUT</span>
-      <span class="hcell num">CALLS</span>
-      <span class="hcell num">TOKENS</span>
-      <span class="hcell num">COST</span>
-      <span class="hcell num">SHARE</span>
+      <span class="hcell num">{{ L?.cache ?? 'Cache' }}</span>
+      <span class="hcell num">{{ L?.inputPct ?? 'In' }}</span>
+      <span class="hcell num">{{ L?.outputPct ?? 'Out' }}</span>
+      <span class="hcell num">{{ L?.calls ?? 'Calls' }}</span>
+      <span class="hcell num">{{ L?.tokens ?? 'Tokens' }}</span>
+      <span class="hcell num">{{ L?.cost ?? 'Cost' }}</span>
+      <span class="hcell num">{{ L?.share ?? 'Share' }}</span>
     </li>
     <li
       v-for="row in view"
@@ -105,7 +108,7 @@ function fmtPct(value: number): string {
       <span class="num share">{{ row.share.toFixed(1) }}%</span>
     </li>
     <li v-if="view.length === 0" class="empty">
-      — no model usage in window —
+      {{ L?.noModel ?? '— no model usage in window —' }}
     </li>
   </ul>
 </template>

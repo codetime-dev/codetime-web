@@ -3,6 +3,9 @@ import type { VibeToolRow } from './types'
 import { computed } from 'vue'
 import { compactParts, fmtDurationShort } from './types'
 
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.table)
+
 const props = defineProps<{ rows: VibeToolRow[] }>()
 
 const view = computed(() => {
@@ -27,11 +30,11 @@ const view = computed(() => {
   <ul class="rows">
     <li class="row head">
       <span />
-      <span class="hcell">TOOL</span>
+      <span class="hcell">{{ L?.tool ?? 'Tool' }}</span>
       <span class="hcell" />
-      <span class="hcell num">CALLS</span>
-      <span class="hcell num">FAIL%</span>
-      <span class="hcell num">TOTAL</span>
+      <span class="hcell num">{{ L?.calls ?? 'Calls' }}</span>
+      <span class="hcell num">{{ L?.fail ?? 'Fail%' }}</span>
+      <span class="hcell num">{{ L?.total ?? 'Total' }}</span>
     </li>
     <li
       v-for="row in view"
@@ -52,7 +55,7 @@ const view = computed(() => {
       <span class="num">{{ fmtDurationShort(row.totalMs) }}</span>
     </li>
     <li v-if="view.length === 0" class="empty">
-      — no tool calls in window —
+      {{ L?.noTool ?? '— no tool calls in window —' }}
     </li>
   </ul>
 </template>

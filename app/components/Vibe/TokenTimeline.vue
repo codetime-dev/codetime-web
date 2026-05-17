@@ -5,6 +5,9 @@ import * as Plot from '@observablehq/plot'
 import { computed } from 'vue'
 import { agentColor, compactParts, fmtUsd } from './types'
 
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.timeline)
+
 // Stacked cost-per-bucket bar timeline, coloured by agent source
 // (codex / claude-code / opencode / pi / …). Mirrors agent-time's
 // TokenTimeline.vue: one rectY per (bucket, source) pair, stacked
@@ -143,6 +146,25 @@ const legend = computed(() => sourceOrder.value.map(source => ({
 // `interval` so each bar gets a width (otherwise Plot falls back to a
 // band scale and throws "utc !== band"). The interval also lets Plot
 // fill gaps with zero-height bars so the timeline reads as a series.
+// Tooltip date formatter — emits a human-readable label in the user's
+// local timezone at the bucket grain. The bucket Date arrives as a UTC
+// instant (server-side date_trunc + ISO serialisation); Intl renders
+// it in whatever zone the browser is set to.
+function pad2(n: number): string {
+  return n.toString().padStart(2, '0')
+}
+
+function formatBucketTs(date: Date): string {
+  const y = date.getFullYear()
+  const m = pad2(date.getMonth() + 1)
+  const d = pad2(date.getDate())
+  const bucket = props.bucket ?? 'day'
+  if (bucket === 'hour') {
+    return `${y}-${m}-${d} ${pad2(date.getHours())}:00`
+  }
+  return `${y}-${m}-${d}`
+}
+
 const intervalFor = computed(() => {
   switch (props.bucket) {
     case 'hour': { return 'hour'
@@ -188,7 +210,7 @@ const options = computed<PlotOptions>(() => ({
       fillOpacity: 0.9,
       tip: true,
       title: (d: { ts: Date, source: string, cost: number }) =>
-        `${d.source}\n${d.ts.toISOString()}\n${fmtUsd(d.cost)}`,
+        `${d.source}\n${formatBucketTs(d.ts)}\n${fmtUsd(d.cost)}`,
     }),
     Plot.ruleY([0], { stroke: 'var(--ct-border-strong)' }),
   ],
@@ -199,17 +221,17 @@ const options = computed<PlotOptions>(() => ({
   <div class="timeline">
     <div class="timeline-meta">
       <div class="meta-cell">
-        <span class="meta-label">cost</span>
+        <span class="meta-label">{{ L?.cost ?? 'cost' }}</span>
         <span class="meta-value">{{ fmtUsd(totals.cost) }}</span>
       </div>
       <div class="meta-cell">
-        <span class="meta-label">model calls</span>
+        <span class="meta-label">{{ L?.modelCalls ?? 'model calls' }}</span>
         <span class="meta-value">
           {{ compactParts(totals.modelCalls).value }}{{ compactParts(totals.modelCalls).unit ?? '' }}
         </span>
       </div>
       <div class="meta-cell">
-        <span class="meta-label">cache hit</span>
+        <span class="meta-label">{{ L?.cacheHit ?? 'cache hit' }}</span>
         <span class="meta-value">{{ (totals.cacheHitRate * 100).toFixed(0) }}%</span>
       </div>
       <ul v-if="legend.length > 1" class="meta-legend">
@@ -226,11 +248,13 @@ const options = computed<PlotOptions>(() => ({
     <div class="timeline-chart">
       <PoltChart v-if="rows.length > 0" :options="options" />
       <div v-else class="empty">
-        no model usage in this window
+        {{ L?.empty ?? 'no model usage in this window' }}
       </div>
     </div>
     <div v-if="rows.length > 0" class="timeline-foot">
-      {{ props.buckets.length }} buckets · {{ compactParts(totals.tokens).value }}{{ compactParts(totals.tokens).unit ?? '' }} tokens
+      {{ L?.tokensFoot
+        ? L.tokensFoot(props.buckets.length, `${compactParts(totals.tokens).value}${compactParts(totals.tokens).unit ?? ''}`)
+        : `${props.buckets.length} buckets · ${compactParts(totals.tokens).value}${compactParts(totals.tokens).unit ?? ''} tokens` }}
     </div>
   </div>
 </template>

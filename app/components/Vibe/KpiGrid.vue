@@ -49,6 +49,9 @@ function trend(buckets: number[]): { sign: 1 | -1 | 0, label: string } {
   return { sign, label: `${change > 0 ? '+' : ''}${(change * 100).toFixed(0)}%` }
 }
 
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.kpi)
+
 const kpis = computed<Kpi[]>(() => {
   const overview = props.overview
   const activityBucket = overview.map(item => item.activity)
@@ -73,58 +76,57 @@ const kpis = computed<Kpi[]>(() => {
   const inCompact = compact(props.summary.totalInputTokens)
   const outCompact = compact(props.summary.totalOutputTokens)
 
+  const l = L.value
   return [
     {
       index: '01',
-      label: 'events',
+      label: l?.events ?? 'events',
       value: eventsCompact.value,
       unit: eventsCompact.unit,
       delta: trend(activityBucket),
-      caption: `${totalTools.toLocaleString()} tool · ${totalCommands.toLocaleString()} cmd`,
+      caption: `${totalTools.toLocaleString()} ${l?.tools ?? 'tool'} · ${totalCommands.toLocaleString()} ${l?.cmd ?? 'cmd'}`,
       spark: activityBucket,
     },
     {
       index: '02',
-      label: 'sessions',
+      label: l?.sessions ?? 'sessions',
       value: sessionsCompact.value,
       unit: sessionsCompact.unit,
       delta: trend(sessionsBucket),
-      caption: `${props.summary.totalProjects} projects`,
+      caption: `${props.summary.totalProjects} ${l?.projects ?? 'projects'}`,
       spark: sessionsBucket,
     },
     {
       index: '03',
-      label: 'tokens',
+      label: l?.tokens ?? 'tokens',
       value: tokensCompact.value,
       unit: tokensCompact.unit,
       delta: trend(tokensBucket),
-      caption: `${inCompact.value}${inCompact.unit ?? ''} in · ${outCompact.value}${outCompact.unit ?? ''} out`,
+      caption: `${inCompact.value}${inCompact.unit ?? ''} ${l?.inSuffix ?? 'in'} · ${outCompact.value}${outCompact.unit ?? ''} ${l?.outSuffix ?? 'out'}`,
       spark: tokensBucket,
     },
     {
       index: '04',
-      label: 'cost',
-      // Use the compact form so high totals fit ($18.4k, not
-      // $18,441.68 USD which overruns the column on narrow viewports).
+      label: l?.cost ?? 'cost',
       value: cost > 0 ? fmtUsdCompact(cost).replace(/^\$/, '') : '—',
       unit: undefined,
       delta: trend(costBucket),
-      caption: cost > 0 ? 'estimated' : '—',
+      caption: cost > 0 ? (l?.estimated ?? 'estimated') : '—',
       spark: costBucket,
       accentValue: true,
     },
     {
       index: '05',
-      label: 'time',
+      label: l?.time ?? 'time',
       value: timeCompact.value,
       unit: timeCompact.unit,
       delta: trend(sessionsBucket),
-      caption: 'agent active',
+      caption: l?.agentActive ?? 'agent active',
       spark: sessionsBucket,
     },
     {
       index: '06',
-      label: 'lines net',
+      label: l?.linesNet ?? 'lines net',
       value: `${linesNet >= 0 ? '+' : ''}${linesNetCompact.value}`,
       unit: linesNetCompact.unit,
       delta: trend(linesChangedBucket),
