@@ -49,7 +49,7 @@ const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/tr
     :cta-text="w?.limit.upgrade ?? 'Upgrade'"
   />
 
-  <WidgetPreviewCard :link="previewLink" :title="w?.trend.title ?? 'Daily trend'" :height="220" />
+  <WidgetPreviewCard :link="previewLink" :title="w?.trend?.title ?? 'Daily trend'" :height="220" />
 
   <PanelSection num="02" :title="t.dashboard.badge.configure" meta="window · theme" flush>
     <template #icon>
@@ -59,7 +59,7 @@ const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/tr
     <div class="form-grid">
       <div class="form-cell">
         <div class="form-label">
-          {{ w?.trend.days ?? 'Days' }}
+          {{ w?.trend?.days ?? 'Days' }}
         </div>
         <input v-model.number="days" class="line-input" type="number" min="7" max="365">
       </div>

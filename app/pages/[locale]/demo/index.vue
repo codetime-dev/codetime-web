@@ -23,19 +23,22 @@ const t = useI18N()
 // "demo" user so the page body renders even when the visitor isn't signed
 // in. We restore whatever value was there when leaving the page.
 const user = useUser()
+// SDK DTOs (auto-generated from the Nuxt backend) no longer mark
+// optional fields as nullable — they're plain `T | undefined`. Use
+// undefined for absent attributes; null would no longer typecheck.
 const FAKE_USER: UserSelfPublic = {
   id: 0,
   username: 'demo',
-  email: null,
-  avatar: null,
+  email: undefined,
+  avatar: undefined,
   plan: 'pro',
   timezone: 'UTC',
   uploadToken: '',
-  bio: null,
-  githubId: null,
-  googleId: null,
-  planExpiresAt: null,
-  planStatus: null,
+  bio: undefined,
+  githubId: undefined,
+  googleId: undefined,
+  planExpiresAt: undefined,
+  planStatus: undefined,
   createdAt: new Date(),
   updatedAt: new Date(),
 }

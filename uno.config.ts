@@ -1,9 +1,35 @@
-import { defineConfig } from 'unocss'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { defineConfig, presetIcons, presetWind4 } from 'unocss'
+
+// In-house brand icons that no iconify collection ships. Add new files
+// to `app/assets/icons/<name>.svg`, then reference as `i-brand-<name>`.
+const brandIconsDir = fileURLToPath(new URL('./app/assets/icons/', import.meta.url))
+function loadBrand(name: string): string {
+  return readFileSync(`${brandIconsDir}${name}.svg`, 'utf8')
+}
 
 // Codetime design tokens are declared in app/assets/tokens.css.
 // The theme below exposes them to UnoCSS utilities so authoring stays
 // short (e.g. `bg-ct-surface`, `text-ct-fg`, `rounded-ct-lg`).
 export default defineConfig({
+  presets: [
+    presetWind4(),
+    presetIcons({
+      scale: 1.2,
+      warn: true,
+      extraProperties: {
+        'display': 'inline-block',
+        'vertical-align': 'middle',
+      },
+      collections: {
+        brand: {
+          opencode: () => loadBrand('opencode'),
+          pi: () => loadBrand('pi'),
+        },
+      },
+    }),
+  ],
   theme: {
     colors: {
       ct: {
@@ -52,5 +78,12 @@ export default defineConfig({
     'i-mdi-microsoft-windows',
     'i-codicon-terminal-linux',
     'i-mdi-desktop-classic',
+    // Supported AI agents shown as chips in DashboardAgentGuide —
+    // icon classes are interpolated at runtime so UnoCSS can't
+    // statically discover them.
+    'i-simple-icons-anthropic',
+    'i-simple-icons-openai',
+    'i-brand-opencode',
+    'i-brand-pi',
   ],
 })

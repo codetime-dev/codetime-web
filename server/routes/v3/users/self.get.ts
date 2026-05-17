@@ -73,6 +73,19 @@ defineRouteMeta({
             description: 'Not found',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/PyError' } } },
           },
+          // Forbidden + Conflict are referenced by /v3/agent/* routes.
+          // The shared $global components block is the only one merged
+          // into the curated spec, so new error responses MUST be
+          // declared here or openapi-ts will fail with "Reference not
+          // found" on the next regen.
+          Forbidden: {
+            description: 'Insufficient permissions',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/PyError' } } },
+          },
+          Conflict: {
+            description: 'Request conflicts with current state',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/PyError' } } },
+          },
         },
       },
     },

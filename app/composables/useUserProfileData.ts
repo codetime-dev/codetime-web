@@ -1,8 +1,8 @@
 import {
-  v3GetUserByUserId,
-  v3GetUserCodingHistory,
-  v3GetUserOverallRank,
-  v3GetUserTopLanguagesRank,
+  getV3PublicUsersByUserIdCodingHistory,
+  getV3PublicUsersByUserIdOverallRank,
+  getV3PublicUsersByUserIdTopLanguagesRank,
+  getV3UsersByUserId,
 } from '~/api/v3'
 
 // Handlers extracted to module scope so their `.toString()` is identical at
@@ -12,14 +12,14 @@ import {
 // (pages/[locale]/user/[uid]/index.vue) and the inner UserProfile.vue agree.
 
 export type UserProfileFetchResult = {
-  user: Awaited<ReturnType<typeof v3GetUserByUserId>>['data'] | null
+  user: Awaited<ReturnType<typeof getV3UsersByUserId>>['data'] | null
   isHidden: boolean
   notFound: boolean
 }
 
 export async function fetchUserProfile(userId: number): Promise<UserProfileFetchResult> {
   try {
-    const response = await v3GetUserByUserId({ path: { user_id: userId } })
+    const response = await getV3UsersByUserId({ path: { user_id: userId } })
     return { user: response.data, isHidden: false, notFound: false }
   }
   catch (error: any) {
@@ -32,7 +32,7 @@ export async function fetchUserProfile(userId: number): Promise<UserProfileFetch
 
 export async function fetchUserOverallRank(userId: number) {
   try {
-    const response = await v3GetUserOverallRank({ path: { user_id: userId } })
+    const response = await getV3PublicUsersByUserIdOverallRank({ path: { user_id: userId } })
     return response.data ?? null
   }
   catch {
@@ -42,7 +42,7 @@ export async function fetchUserOverallRank(userId: number) {
 
 export async function fetchUserTopLanguages(userId: number) {
   try {
-    const response = await v3GetUserTopLanguagesRank({ path: { user_id: userId } })
+    const response = await getV3PublicUsersByUserIdTopLanguagesRank({ path: { user_id: userId } })
     return response.data ?? null
   }
   catch {
@@ -52,7 +52,7 @@ export async function fetchUserTopLanguages(userId: number) {
 
 export async function fetchUserCodingHistory(userId: number, days: number) {
   try {
-    const response = await v3GetUserCodingHistory({
+    const response = await getV3PublicUsersByUserIdCodingHistory({
       path: { user_id: userId },
       query: { days },
     })

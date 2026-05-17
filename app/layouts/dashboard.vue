@@ -3,6 +3,11 @@ const t = useI18N()
 const locale = useLocale()
 const headerTabs = computed(() => [
   { label: t.value.dashboard.pageHeader.title.overview, id: 'overview', path: `/dashboard` },
+  // Vibe sits right after Overview — vibe coding telemetry is the
+  // headline feature alongside the IDE-side overview. The `agent` i18n
+  // key isn't declared on every locale yet, so fall back to the English
+  // literal during the translation rollout.
+  { label: t.value.dashboard.pageHeader.title.agent ?? 'Vibe', id: 'agent', path: `/dashboard/agent` },
   { label: t.value.dashboard.pageHeader.title.widget ?? 'Widgets', id: 'widgets', path: `/dashboard/widgets` },
   { label: t.value.dashboard.pageHeader.title.workspace, id: 'workspace', path: `/dashboard/workspace` },
   { label: t.value.dashboard.pageHeader.title.tags, id: 'tags', path: `/dashboard/tags` },

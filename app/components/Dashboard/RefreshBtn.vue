@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3RefreshToken } from '~/api/v3'
+import { postV3AuthRefreshToken } from '~/api/v3'
 
 const user = useUser()
 const t = useI18N()
@@ -10,7 +10,7 @@ async function refreshToken() {
   modal.value = false
   status.value = 'pending'
   try {
-    const resp = await v3RefreshToken()
+    const resp = await postV3AuthRefreshToken()
     if (resp.data && user.value) {
       user.value.uploadToken = resp.data.token ?? ''
       status.value = 'success'

@@ -93,8 +93,12 @@ live in `.env.dev` (dev) and `.env` (prod, loaded by PM2 via
 
 ## Things to NOT do
 
-- Don't run `drizzle-kit push` / `migrate` / `generate`. Alembic owns
-  the schema; only `introspect` is safe here.
+- Don't run `drizzle-kit push` against production. Drizzle now owns DDL
+  for the new tables (`machines`, `projects`, `agent_*`) — generate SQL
+  with `pnpm drizzle-kit generate` and review under
+  `server/db/migrations/` before applying. Legacy tables (`event_logs`,
+  `workspace_minutes_v2`, etc.) were created by the retired Alembic
+  migrations and must not be re-created or altered by `push`.
 - Don't enable `@scalar/nuxt`. Its runtime imports `web-worker` at the
   module top level, which crashes under vite-node SSR. The standalone
   CDN bundle loaded from `server/routes/docs/api/scalar.html.ts` is the

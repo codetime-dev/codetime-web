@@ -202,6 +202,7 @@ export const zhCN: Partial<Translation> = {
         leaderboard: '排行榜',
         workspace: '工作区',
         tags: '标签',
+        agent: 'Agents',
       },
       description: {
         overview: '查看您的所有 CodeTime 数据。',
@@ -211,6 +212,7 @@ export const zhCN: Partial<Translation> = {
         leaderboard: '查看 CodeTime 用户的排行榜。',
         workspace: '查看特定工作区的数据。',
         tags: '管理标签和规则，实现工作区的自动分类。',
+        agent: 'AI 编程 agent 的 turn、tool 与 token 用量统计。',
       },
     },
     overview: {
@@ -345,6 +347,33 @@ export const zhCN: Partial<Translation> = {
         step3: '复制并粘贴上方的令牌',
         step4: '开始编程，数据将在 2-3 分钟内显示',
       },
+    },
+    agentGuide: {
+      title: '尚未收到 vibe 数据',
+      description: '在任一台机器上安装并配置 codetime CLI 后，您的 Claude Code、Codex、OpenCode、Pi 会话即会出现在此。',
+      token: {
+        title: '您的令牌',
+        description: '复制此令牌，最后一步将其填入 CLI。',
+      },
+      install: {
+        title: '安装 CLI',
+        description: '使用 npm 全局安装 codetime（或您喜欢的 Node 包管理器）。',
+      },
+      configure: {
+        title: '配置令牌',
+        description: '运行此命令，下次 agent 会话开始即自动上传。',
+        hint: '将 <token> 替换为上方复制的值。',
+      },
+      hook: {
+        title: '挂钩到 Agent',
+        description: '运行 codetime install，CLI 会自动检测本机所有支持的 AI agent，并自动配置钩子。',
+        supports: '目前支持以下 Agent：',
+        latency: '正常使用任意 agent。会话结束后约 2 分钟内即可在此查看。',
+      },
+    },
+    agent: {
+      freeLimit: '免费版仅显示最近 30 天的会话。升级 Pro 可查看完整历史。',
+      upgrade: '升级',
     },
     badge: {
       configure: '配置',

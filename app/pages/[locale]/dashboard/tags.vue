@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TagResponse } from '~/api/v3/types.gen'
-import { v3CreateTag, v3DeleteTag, v3GetTags, v3UpdateTag } from '~/api/v3'
+import { deleteV3TagsByTagId, getV3Tags, postV3Tags, putV3TagsByTagId } from '~/api/v3'
 
 definePageMeta({
   layout: 'dashboard',
@@ -14,7 +14,7 @@ const tagStatsRef = ref()
 // 获取标签列表
 const { data: tags, refresh: refreshTags } = useAsyncData('tags', async () => {
   try {
-    const response = await v3GetTags()
+    const response = await getV3Tags()
     return response.data || []
   }
   catch (error_) {
@@ -29,14 +29,14 @@ const { data: tags, refresh: refreshTags } = useAsyncData('tags', async () => {
 async function saveTag(tagData: { name: string, color: string, emoji?: string | null }) {
   try {
     await (editingTag.value
-      ? v3UpdateTag({
+      ? putV3TagsByTagId({
           path: { tag_id: editingTag.value.id },
           body: {
             ...tagData,
             rules: (editingTag.value.rules || null) as unknown,
           } as any,
         })
-      : v3CreateTag({
+      : postV3Tags({
           body: {
             ...tagData,
             rules: null as unknown,
@@ -70,7 +70,7 @@ function editTag(tag: TagResponse) {
 // 删除标签
 async function deleteTag(tagId: string) {
   try {
-    await v3DeleteTag({
+    await deleteV3TagsByTagId({
       path: { tag_id: tagId },
     } as any)
     await refreshTags()

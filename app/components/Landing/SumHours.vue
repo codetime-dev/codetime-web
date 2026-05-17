@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { v3GetTotalMinutes } from '~/api/v3'
+import { getV3TotalMinutes } from '~/api/v3'
 import { locales } from '~/i18n'
 
 const locale = useLocale()
 const { data, status } = await useAsyncData('landing-total-minutes', async () => {
-  const { data } = await v3GetTotalMinutes()
+  const { data } = await getV3TotalMinutes()
   return data
 }, { server: false })
 

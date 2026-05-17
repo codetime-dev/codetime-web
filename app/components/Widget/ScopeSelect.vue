@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3GetTags, v3RecentWorkspaces, v3SearchWorkspaces } from '~/api/v3'
+import { getV3Tags, getV3UsersSelfWorkspacesRecent, getV3UsersSelfWorkspacesSearch } from '~/api/v3'
 
 // Combined picker that surfaces both user tags and workspaces in one
 // dropdown. The selected option carries its `kind` so callers can route
@@ -19,7 +19,7 @@ const t = useI18N()
 
 // Tags are a small per-user list — fetch once and filter in memory.
 const { data: tagData } = await useAsyncData('badge-scope-tags', async () => {
-  const resp = await v3GetTags()
+  const resp = await getV3Tags()
   return resp.data ?? []
 }, {
   server: false,
@@ -41,7 +41,7 @@ let recentPromise: Promise<ScopeOption[]> | null = null
 async function getRecentWorkspaces(): Promise<ScopeOption[]> {
   if (!recentPromise) {
     recentPromise = (async () => {
-      const resp = await v3RecentWorkspaces({ query: { limit: 10 } })
+      const resp = await getV3UsersSelfWorkspacesRecent({ query: { limit: 10 } })
       return (resp.data?.results ?? []).map(r => ({
         label: r.workspaceName,
         id: `workspace:${r.workspaceName}`,
@@ -60,7 +60,7 @@ async function loader(q: string): Promise<ScopeOption[]> {
     return [...tagOptions.value, ...recent]
   }
   const matchedTags = tagOptions.value.filter(o => o.label.toLowerCase().includes(trimmed))
-  const resp = await v3SearchWorkspaces({ query: { q, limit: 10 } })
+  const resp = await getV3UsersSelfWorkspacesSearch({ query: { q, limit: 10 } })
   const workspaces: ScopeOption[] = (resp.data?.results ?? []).map(item => ({
     label: item.workspaceName,
     id: `workspace:${item.workspaceName}`,

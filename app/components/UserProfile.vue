@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { refreshNuxtData } from '#app'
-import { v3UpdateBio } from '~/api/v3'
+import { postV3UsersSelfBio } from '~/api/v3'
 import ActivityCalendar from './UserProfile/ActivityCalendar.vue'
 import ActivityTrend from './UserProfile/ActivityTrend.vue'
 import Bio from './UserProfile/Bio.vue'
@@ -234,20 +234,23 @@ async function saveBio() {
   bioSaving.value = true
   bioStatus.value = null
   bioStatusMessage.value = ''
-  const newBio = bioDraft.value.trim().length > 0 ? bioDraft.value.trim() : null
+  // SDK now types `bio` as `string | undefined` (Nuxt-generated DTOs
+  // skip OpenAPI `nullable`). Use undefined for "clear bio" so the
+  // request body matches the regenerated SDK.
+  const newBio = bioDraft.value.trim().length > 0 ? bioDraft.value.trim() : undefined
 
   try {
-    const response = await v3UpdateBio({ body: { bio: newBio } })
+    const response = await postV3UsersSelfBio({ body: { bio: newBio } })
     const updatedUser = (response as any)?.data as { bio?: string | null } | undefined
     if (updatedUser) {
       if (userResult.value?.user) {
         userResult.value = {
           ...userResult.value,
-          user: { ...userResult.value.user, bio: updatedUser.bio ?? null },
+          user: { ...userResult.value.user, bio: updatedUser.bio ?? undefined },
         }
       }
       if (currentUser.value) {
-        currentUser.value = { ...currentUser.value, bio: updatedUser.bio ?? null }
+        currentUser.value = { ...currentUser.value, bio: updatedUser.bio ?? undefined }
       }
     }
     Promise.all([

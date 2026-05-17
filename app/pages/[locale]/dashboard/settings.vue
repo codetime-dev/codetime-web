@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3ExportUserData, v3Logout } from '@/api/v3/sdk.gen'
+import { getV3UsersSelfExport, postV3AuthLogout } from '@/api/v3/sdk.gen'
 
 definePageMeta({
   layout: 'dashboard',
@@ -29,7 +29,7 @@ async function exportData() {
   }
   try {
     exporting.value = true
-    const resp = await v3ExportUserData({ throwOnError: true })
+    const resp = await getV3UsersSelfExport({ throwOnError: true })
     exporting.value = false
     exportSucceed.value = true
     exportFailed.value = false
@@ -49,7 +49,7 @@ async function exportData() {
 }
 
 async function logout() {
-  await v3Logout({ throwOnError: false })
+  await postV3AuthLogout({ throwOnError: false })
   globalThis.location.href = '/'
 }
 

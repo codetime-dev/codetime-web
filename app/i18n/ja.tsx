@@ -639,6 +639,33 @@ export const ja: Partial<Translation> = {
         step4: 'コーディングを開始すると、2〜3分でデータが表示されます',
       },
     },
+    agentGuide: {
+      title: 'AIエージェントセッションを追跡',
+      description: 'codetime CLIをインストールして、Claude Codeセッションを自動的に記録しましょう。',
+      token: {
+        title: 'あなたのトークン',
+        description: 'このトークンをコピーしてください。最終ステップでCLIに入力します。',
+      },
+      install: {
+        title: 'CLIをインストール',
+        description: 'npmでcodetimeをグローバルにインストールします（お好みのNodeパッケージマネージャーでも可）。',
+      },
+      configure: {
+        title: 'トークンを設定',
+        description: 'このコマンドを実行します。次回のエージェントセッションから自動的にアップロードされます。',
+        hint: '<token>を上記でコピーした値に置き換えてください。',
+      },
+      hook: {
+        title: 'エージェントにフック',
+        description: 'codetime install を実行すると、CLI がマシン上のサポート対象 AI エージェントを自動検出し、フックを自動設定します。',
+        supports: '現在サポートしている Agent：',
+        latency: 'エージェントを通常通り使用してください。セッション終了から約 2 分以内にここに表示されます。',
+      },
+    },
+    agent: {
+      freeLimit: '無料プランでは過去30日間のセッションのみ表示されます。Proにアップグレードすると全履歴を表示できます。',
+      upgrade: 'アップグレード',
+    },
     leaderboard: {
       title(days: number) {
         return `${days} 日間のコーディング時間リーダーボード`

@@ -1,5 +1,5 @@
 import type { UserSelfPublic } from '~/api/v3/types.gen'
-import { v3GetUserSelf, v3ListSelfStats, v3ListSelfStatsTime, v3ListSelfTop } from '~/api/v3'
+import { getV3UsersSelf, getV3UsersSelfStats, getV3UsersSelfStatsTime, getV3UsersSelfTop } from '~/api/v3'
 
 export type StatsRange = {
   startTime?: MaybeRefOrGetter<Date | null | undefined>
@@ -22,7 +22,7 @@ export function fetchStats(
 
   return by === 'time'
     ? useAsyncData(`stats-time-${unit}-${tz}-${rangeKey.value}`, async () => {
-        const resp = await v3ListSelfStatsTime({
+        const resp = await getV3UsersSelfStatsTime({
           query: {
             unit,
             tz,
@@ -43,7 +43,7 @@ export function fetchStats(
         watch: [limit, startRef, endRef],
       })
     : useAsyncData(`stats-${by}-${unit}-${tz}-${rangeKey.value}`, async () => {
-        const resp = await v3ListSelfStats({
+        const resp = await getV3UsersSelfStats({
           query: {
             by: by as any,
             unit,
@@ -68,7 +68,7 @@ export function fetchStats(
 
 export function fetchUser() {
   return useAsyncData('user-self', async () => {
-    const resp = await v3GetUserSelf()
+    const resp = await getV3UsersSelf()
     return resp.data
   }, {
     server: false,
@@ -98,15 +98,15 @@ export function fetchTop(field: string, minutes: ComputedRef<number>, limit: num
     const languageFilters = activeFilters.filter(f => f.key === 'language').map(f => f.value)
     const editorFilters = activeFilters.filter(f => f.key === 'editor').map(f => f.value)
 
-    const resp = await v3ListSelfTop({
+    const resp = await getV3UsersSelfTop({
       query: {
         field: field as any,
         minutes: minutes.value,
         limit,
-        platforms: platformFilters.length > 0 ? platformFilters : null,
-        workspaces: workspaceFilters.length > 0 ? workspaceFilters : null,
-        languages: languageFilters.length > 0 ? languageFilters : null,
-        editors: editorFilters.length > 0 ? editorFilters : null,
+        platforms: platformFilters.length > 0 ? platformFilters : undefined,
+        workspaces: workspaceFilters.length > 0 ? workspaceFilters : undefined,
+        languages: languageFilters.length > 0 ? languageFilters : undefined,
+        editors: editorFilters.length > 0 ? editorFilters : undefined,
       },
     })
     return resp.data?.map(item => ({

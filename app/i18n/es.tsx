@@ -647,6 +647,33 @@ export const es: Partial<Translation> = {
         step4: 'Comienza a programar y los datos aparecerán en 2-3 minutos',
       },
     },
+    agentGuide: {
+      title: 'Rastrea tus sesiones de agente IA',
+      description: 'Instala el CLI codetime para capturar cada sesión de Claude Code automáticamente.',
+      token: {
+        title: 'Tu Token',
+        description: 'Copia este token. Lo introducirás en el CLI en el último paso.',
+      },
+      install: {
+        title: 'Instalar el CLI',
+        description: 'Instala codetime globalmente con npm (o tu gestor de paquetes Node preferido).',
+      },
+      configure: {
+        title: 'Configurar Token',
+        description: 'Ejecuta este comando. El CLI comenzará a subir en tu próxima sesión de agente.',
+        hint: 'Reemplaza <token> con el valor copiado arriba.',
+      },
+      hook: {
+        title: 'Conectar Agentes',
+        description: 'Ejecuta codetime install — el CLI detecta automáticamente cada agente IA compatible en tu máquina y configura los hooks por ti.',
+        supports: 'Compatibles actualmente:',
+        latency: 'Usa cualquier agente normalmente. Las sesiones aparecen aquí en unos 2 minutos después de que termine el agente.',
+      },
+    },
+    agent: {
+      freeLimit: 'Plan gratuito: mostrando sesiones de los últimos 30 días. Actualiza a Pro para ver el historial completo.',
+      upgrade: 'Actualizar',
+    },
   },
   button: {
     copy: 'Copiar',

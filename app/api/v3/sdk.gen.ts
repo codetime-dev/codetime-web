@@ -2,8 +2,8 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import { v3CreateCheckoutResponseTransformer, v3CreateTagResponseTransformer, v3EvaluateWorkspaceTagsResponseTransformer, v3GetActiveDiscountsResponseTransformer, v3GetLanguageRankingResponseTransformer, v3GetLeaderboardResponseTransformer, v3GetSelfOverallRankResponseTransformer, v3GetSelfTopLanguagesRankResponseTransformer, v3GetTagHistoryResponseTransformer, v3GetTagResponseTransformer, v3GetTagsResponseTransformer, v3GetTagTimeStatsResponseTransformer, v3GetTotalMinutesResponseTransformer, v3GetUserByUserIdResponseTransformer, v3GetUserCodingHistoryResponseTransformer, v3GetUserLanguageRankResponseTransformer, v3GetUserOverallRankResponseTransformer, v3GetUserSelfResponseTransformer, v3GetUserTopLanguagesRankResponseTransformer, v3UpdateBioResponseTransformer, v3UpdateTagResponseTransformer } from './transformers.gen';
-import type { V3BeAnyUserData, V3BeAnyUserErrors, V3BeAnyUserResponses, V3CreateCheckoutData, V3CreateCheckoutErrors, V3CreateCheckoutResponses, V3CreateTagData, V3CreateTagErrors, V3CreateTagResponses, V3DeleteTagData, V3DeleteTagErrors, V3DeleteTagResponses, V3DeleteUserAccountData, V3DeleteUserAccountResponses, V3DeleteUserDataData, V3DeleteUserDataResponses, V3EvaluateWorkspaceTagsData, V3EvaluateWorkspaceTagsErrors, V3EvaluateWorkspaceTagsResponses, V3ExportUserDataData, V3ExportUserDataResponses, V3GetActiveDiscountsData, V3GetActiveDiscountsResponses, V3GetCalendarFeedData, V3GetCalendarFeedErrors, V3GetCalendarFeedResponses, V3GetCalendarInfoData, V3GetCalendarInfoResponses, V3GetData, V3GetLanguageRankingData, V3GetLanguageRankingErrors, V3GetLanguageRankingResponses, V3GetLeaderboardData, V3GetLeaderboardErrors, V3GetLeaderboardResponses, V3GetPrivacySettingsData, V3GetPrivacySettingsResponses, V3GetProductsData, V3GetProductsResponses, V3GetResponses, V3GetRootData, V3GetRootResponses, V3GetSelfMinutesData, V3GetSelfMinutesErrors, V3GetSelfMinutesResponses, V3GetSelfOverallRankData, V3GetSelfOverallRankErrors, V3GetSelfOverallRankResponses, V3GetSelfTopLanguagesRankData, V3GetSelfTopLanguagesRankErrors, V3GetSelfTopLanguagesRankResponses, V3GetTagData, V3GetTagErrors, V3GetTagHistoryData, V3GetTagHistoryErrors, V3GetTagHistoryResponses, V3GetTagResponses, V3GetTagsData, V3GetTagsResponses, V3GetTagTimeStatsData, V3GetTagTimeStatsErrors, V3GetTagTimeStatsResponses, V3GetTimeDistributionData, V3GetTimeDistributionErrors, V3GetTimeDistributionResponses, V3GetTotalMinutesData, V3GetTotalMinutesResponses, V3GetUserByUserIdData, V3GetUserByUserIdErrors, V3GetUserByUserIdResponses, V3GetUserCodingHistoryData, V3GetUserCodingHistoryErrors, V3GetUserCodingHistoryResponses, V3GetUserLanguageRankData, V3GetUserLanguageRankErrors, V3GetUserLanguageRankResponses, V3GetUserOverallRankData, V3GetUserOverallRankErrors, V3GetUserOverallRankResponses, V3GetUserPublicStatusData, V3GetUserPublicStatusErrors, V3GetUserPublicStatusResponses, V3GetUserPublicTopLanguagesData, V3GetUserPublicTopLanguagesErrors, V3GetUserPublicTopLanguagesResponses, V3GetUserSelfData, V3GetUserSelfResponses, V3GetUserShieldData, V3GetUserShieldErrors, V3GetUserShieldResponses, V3GetUserTopLanguagesRankData, V3GetUserTopLanguagesRankErrors, V3GetUserTopLanguagesRankResponses, V3GetWorkspaceFilesData, V3GetWorkspaceFilesErrors, V3GetWorkspaceFilesResponses, V3GetYearlyReportDataData, V3GetYearlyReportDataErrors, V3GetYearlyReportDataResponses, V3GithubCallbackData, V3GithubCallbackErrors, V3GithubCallbackResponses, V3GoogleAuthData, V3GoogleAuthErrors, V3GoogleAuthResponses, V3HandleLemonsqueezyWebhookData, V3HandleLemonsqueezyWebhookResponses, V3ListSelfLatestLogsData, V3ListSelfLatestLogsErrors, V3ListSelfLatestLogsResponses, V3ListSelfStatsData, V3ListSelfStatsErrors, V3ListSelfStatsResponses, V3ListSelfStatsTimeData, V3ListSelfStatsTimeErrors, V3ListSelfStatsTimeResponses, V3ListSelfTopData, V3ListSelfTopErrors, V3ListSelfTopResponses, V3LogoutData, V3LogoutResponses, V3PostEventLogData, V3PostEventLogErrors, V3PostEventLogResponses, V3RecentLanguagesData, V3RecentLanguagesErrors, V3RecentLanguagesResponses, V3RecentWorkspacesData, V3RecentWorkspacesErrors, V3RecentWorkspacesResponses, V3RefreshTokenData, V3RefreshTokenResponses, V3SearchWorkspacesData, V3SearchWorkspacesErrors, V3SearchWorkspacesResponses, V3UpdateBioData, V3UpdateBioErrors, V3UpdateBioResponses, V3UpdatePrivacySettingsData, V3UpdatePrivacySettingsErrors, V3UpdatePrivacySettingsResponses, V3UpdateTagData, V3UpdateTagErrors, V3UpdateTagResponses } from './types.gen';
+import { getV3AgentDashboardResponseTransformer, getV3AgentSessionsResponseTransformer, getV3DiscountsActiveResponseTransformer, getV3PublicLanguageRankingResponseTransformer, getV3PublicLeaderboardResponseTransformer, getV3PublicUsersByUserIdCodingHistoryResponseTransformer, getV3PublicUsersByUserIdLanguageRankResponseTransformer, getV3PublicUsersByUserIdOverallRankResponseTransformer, getV3PublicUsersByUserIdTopLanguagesRankResponseTransformer, getV3TagsByTagIdHistoryResponseTransformer, getV3TagsByTagIdResponseTransformer, getV3TagsResponseTransformer, getV3TagsStatsResponseTransformer, getV3TotalMinutesResponseTransformer, getV3UsersByUserIdResponseTransformer, getV3UsersSelfOverallRankResponseTransformer, getV3UsersSelfResponseTransformer, getV3UsersSelfTopLanguagesRankResponseTransformer, postV3PaymentsCheckoutResponseTransformer, postV3TagsEvaluateResponseTransformer, postV3TagsResponseTransformer, postV3UsersSelfBioResponseTransformer, postV3UsersSelfUsernameResponseTransformer, putV3TagsByTagIdResponseTransformer } from './transformers.gen';
+import type { DeleteV3AgentSessionsData, DeleteV3AgentSessionsErrors, DeleteV3AgentSessionsResponses, DeleteV3MachinesByMachineIdData, DeleteV3MachinesByMachineIdErrors, DeleteV3MachinesByMachineIdResponses, DeleteV3TagsByTagIdData, DeleteV3TagsByTagIdErrors, DeleteV3TagsByTagIdResponses, DeleteV3UsersSelfData, DeleteV3UsersSelfDataData, DeleteV3UsersSelfDataErrors, DeleteV3UsersSelfDataResponses, DeleteV3UsersSelfErrors, DeleteV3UsersSelfResponses, GetV3AgentDashboardData, GetV3AgentDashboardErrors, GetV3AgentDashboardResponses, GetV3AgentSessionsByRollupKeyData, GetV3AgentSessionsByRollupKeyErrors, GetV3AgentSessionsByRollupKeyResponses, GetV3AgentSessionsByRollupKeyTurnsData, GetV3AgentSessionsByRollupKeyTurnsErrors, GetV3AgentSessionsByRollupKeyTurnsResponses, GetV3AgentSessionsData, GetV3AgentSessionsErrors, GetV3AgentSessionsResponses, GetV3AuthGithubData, GetV3DiscountsActiveData, GetV3DiscountsActiveErrors, GetV3DiscountsActiveResponses, GetV3IcalendarFeedIcsData, GetV3IcalendarFeedIcsErrors, GetV3IcalendarFeedIcsResponses, GetV3IcalendarInfoData, GetV3IcalendarInfoErrors, GetV3IcalendarInfoResponses, GetV3LogsYearlyReportDataData, GetV3LogsYearlyReportDataErrors, GetV3LogsYearlyReportDataResponses, GetV3MachinesData, GetV3MachinesErrors, GetV3MachinesResponses, GetV3MetricsData, GetV3MetricsResponses, GetV3PaymentsProductsData, GetV3PaymentsProductsResponses, GetV3PublicLanguageRankingData, GetV3PublicLanguageRankingErrors, GetV3PublicLanguageRankingResponses, GetV3PublicLeaderboardData, GetV3PublicLeaderboardResponses, GetV3PublicUsersByUserIdCodingHistoryData, GetV3PublicUsersByUserIdCodingHistoryErrors, GetV3PublicUsersByUserIdCodingHistoryResponses, GetV3PublicUsersByUserIdLanguageRankData, GetV3PublicUsersByUserIdLanguageRankErrors, GetV3PublicUsersByUserIdLanguageRankResponses, GetV3PublicUsersByUserIdOverallRankData, GetV3PublicUsersByUserIdOverallRankErrors, GetV3PublicUsersByUserIdOverallRankResponses, GetV3PublicUsersByUserIdTopLanguagesRankData, GetV3PublicUsersByUserIdTopLanguagesRankErrors, GetV3PublicUsersByUserIdTopLanguagesRankResponses, GetV3TagsByTagIdData, GetV3TagsByTagIdErrors, GetV3TagsByTagIdHistoryData, GetV3TagsByTagIdHistoryErrors, GetV3TagsByTagIdHistoryResponses, GetV3TagsByTagIdResponses, GetV3TagsData, GetV3TagsErrors, GetV3TagsResponses, GetV3TagsStatsData, GetV3TagsStatsErrors, GetV3TagsStatsResponses, GetV3TotalMinutesData, GetV3TotalMinutesResponses, GetV3UsersByUserIdData, GetV3UsersByUserIdErrors, GetV3UsersByUserIdPublicStatusData, GetV3UsersByUserIdPublicStatusErrors, GetV3UsersByUserIdPublicStatusResponses, GetV3UsersByUserIdPublicTopLanguagesData, GetV3UsersByUserIdPublicTopLanguagesErrors, GetV3UsersByUserIdPublicTopLanguagesResponses, GetV3UsersByUserIdResponses, GetV3UsersSelfData, GetV3UsersSelfErrors, GetV3UsersSelfExportData, GetV3UsersSelfExportErrors, GetV3UsersSelfExportResponses, GetV3UsersSelfLanguagesRecentData, GetV3UsersSelfLanguagesRecentErrors, GetV3UsersSelfLanguagesRecentResponses, GetV3UsersSelfLatestLogsData, GetV3UsersSelfLatestLogsErrors, GetV3UsersSelfLatestLogsResponses, GetV3UsersSelfMinutesData, GetV3UsersSelfMinutesErrors, GetV3UsersSelfMinutesResponses, GetV3UsersSelfOverallRankData, GetV3UsersSelfOverallRankErrors, GetV3UsersSelfOverallRankResponses, GetV3UsersSelfPrivacyData, GetV3UsersSelfPrivacyErrors, GetV3UsersSelfPrivacyResponses, GetV3UsersSelfResponses, GetV3UsersSelfStatsData, GetV3UsersSelfStatsErrors, GetV3UsersSelfStatsResponses, GetV3UsersSelfStatsTimeData, GetV3UsersSelfStatsTimeErrors, GetV3UsersSelfStatsTimeResponses, GetV3UsersSelfTimeDistributionData, GetV3UsersSelfTimeDistributionErrors, GetV3UsersSelfTimeDistributionResponses, GetV3UsersSelfTopData, GetV3UsersSelfTopErrors, GetV3UsersSelfTopLanguagesRankData, GetV3UsersSelfTopLanguagesRankErrors, GetV3UsersSelfTopLanguagesRankResponses, GetV3UsersSelfTopResponses, GetV3UsersSelfWorkspaceData, GetV3UsersSelfWorkspaceErrors, GetV3UsersSelfWorkspaceResponses, GetV3UsersSelfWorkspacesRecentData, GetV3UsersSelfWorkspacesRecentErrors, GetV3UsersSelfWorkspacesRecentResponses, GetV3UsersSelfWorkspacesSearchData, GetV3UsersSelfWorkspacesSearchErrors, GetV3UsersSelfWorkspacesSearchResponses, GetV3UsersShieldData, GetV3UsersShieldErrors, GetV3UsersShieldResponses, PatchV3MachinesByMachineIdData, PatchV3MachinesByMachineIdErrors, PatchV3MachinesByMachineIdResponses, PostV3AgentIngestData, PostV3AgentIngestErrors, PostV3AgentIngestResponses, PostV3AuthGoogleData, PostV3AuthLogoutData, PostV3AuthLogoutResponses, PostV3AuthRefreshTokenData, PostV3AuthRefreshTokenErrors, PostV3AuthRefreshTokenResponses, PostV3DevBeData, PostV3DevBeErrors, PostV3DevBeResponses, PostV3PaymentsCheckoutData, PostV3PaymentsCheckoutErrors, PostV3PaymentsCheckoutResponses, PostV3PaymentsWebhooksLemonsqueezyData, PostV3PaymentsWebhooksLemonsqueezyErrors, PostV3PaymentsWebhooksLemonsqueezyResponses, PostV3TagsData, PostV3TagsErrors, PostV3TagsEvaluateData, PostV3TagsEvaluateErrors, PostV3TagsEvaluateResponses, PostV3TagsResponses, PostV3UsersEventLogData, PostV3UsersEventLogErrors, PostV3UsersEventLogResponses, PostV3UsersSelfBioData, PostV3UsersSelfBioErrors, PostV3UsersSelfBioResponses, PostV3UsersSelfPrivacyData, PostV3UsersSelfPrivacyErrors, PostV3UsersSelfPrivacyResponses, PostV3UsersSelfUsernameData, PostV3UsersSelfUsernameErrors, PostV3UsersSelfUsernameResponses, PutV3TagsByTagIdData, PutV3TagsByTagIdErrors, PutV3TagsByTagIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -20,42 +20,59 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * GetRoot
- *
- * Root endpoint handler.
+ * Vibe dashboard aggregates for the authenticated user
  */
-export const v3GetRoot = <ThrowOnError extends boolean = false>(options?: Options<V3GetRootData, ThrowOnError>) => (options?.client ?? client).get<V3GetRootResponses, unknown, ThrowOnError>({ url: '/v3', ...options });
-
-/**
- * GetTotalMinutes
- *
- * Total minutes endpoint handler with background cache refresh.
- */
-export const v3GetTotalMinutes = <ThrowOnError extends boolean = false>(options?: Options<V3GetTotalMinutesData, ThrowOnError>) => (options?.client ?? client).get<V3GetTotalMinutesResponses, unknown, ThrowOnError>({
-    responseTransformer: v3GetTotalMinutesResponseTransformer,
-    url: '/v3/total-minutes',
+export const getV3AgentDashboard = <ThrowOnError extends boolean = false>(options?: Options<GetV3AgentDashboardData, ThrowOnError>) => (options?.client ?? client).get<GetV3AgentDashboardResponses, GetV3AgentDashboardErrors, ThrowOnError>({
+    responseTransformer: getV3AgentDashboardResponseTransformer,
+    url: '/v3/agent/dashboard',
     ...options
 });
 
 /**
- * GithubCallback
- *
- * Handle GitHub OAuth callback.
- *
- * This endpoint receives the authorization code from GitHub and redirects
- * to the frontend with user authentication information.
+ * Submit agent session rollups
  */
-export const v3GithubCallback = <ThrowOnError extends boolean = false>(options: Options<V3GithubCallbackData, ThrowOnError>) => (options.client ?? client).get<V3GithubCallbackResponses, V3GithubCallbackErrors, ThrowOnError>({ url: '/v3/auth/github', ...options });
+export const postV3AgentIngest = <ThrowOnError extends boolean = false>(options: Options<PostV3AgentIngestData, ThrowOnError>) => (options.client ?? client).post<PostV3AgentIngestResponses, PostV3AgentIngestErrors, ThrowOnError>({
+    url: '/v3/agent/ingest',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
- * GoogleAuth
- *
- * Handle Google OAuth authentication flow.
- *
- * This endpoint processes Google Sign-In credentials (JWT tokens)
- * and either creates a new user or logs in an existing user.
+ * Get a single agent session with rolled-up children
  */
-export const v3GoogleAuth = <ThrowOnError extends boolean = false>(options: Options<V3GoogleAuthData, ThrowOnError>) => (options.client ?? client).post<V3GoogleAuthResponses, V3GoogleAuthErrors, ThrowOnError>({
+export const getV3AgentSessionsByRollupKey = <ThrowOnError extends boolean = false>(options: Options<GetV3AgentSessionsByRollupKeyData, ThrowOnError>) => (options.client ?? client).get<GetV3AgentSessionsByRollupKeyResponses, GetV3AgentSessionsByRollupKeyErrors, ThrowOnError>({ url: '/v3/agent/sessions/{rollup_key}', ...options });
+
+/**
+ * List turns within an agent session
+ */
+export const getV3AgentSessionsByRollupKeyTurns = <ThrowOnError extends boolean = false>(options: Options<GetV3AgentSessionsByRollupKeyTurnsData, ThrowOnError>) => (options.client ?? client).get<GetV3AgentSessionsByRollupKeyTurnsResponses, GetV3AgentSessionsByRollupKeyTurnsErrors, ThrowOnError>({ url: '/v3/agent/sessions/{rollup_key}/turns', ...options });
+
+/**
+ * Delete agent session rollups by source for the current machine
+ */
+export const deleteV3AgentSessions = <ThrowOnError extends boolean = false>(options: Options<DeleteV3AgentSessionsData, ThrowOnError>) => (options.client ?? client).delete<DeleteV3AgentSessionsResponses, DeleteV3AgentSessionsErrors, ThrowOnError>({ url: '/v3/agent/sessions', ...options });
+
+/**
+ * List agent sessions for the authenticated user
+ */
+export const getV3AgentSessions = <ThrowOnError extends boolean = false>(options?: Options<GetV3AgentSessionsData, ThrowOnError>) => (options?.client ?? client).get<GetV3AgentSessionsResponses, GetV3AgentSessionsErrors, ThrowOnError>({
+    responseTransformer: getV3AgentSessionsResponseTransformer,
+    url: '/v3/agent/sessions',
+    ...options
+});
+
+/**
+ * GitHub OAuth callback
+ */
+export const getV3AuthGithub = <ThrowOnError extends boolean = false>(options: Options<GetV3AuthGithubData, ThrowOnError>) => (options.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/v3/auth/github', ...options });
+
+/**
+ * Google Sign-In callback
+ */
+export const postV3AuthGoogle = <ThrowOnError extends boolean = false>(options: Options<PostV3AuthGoogleData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({
     ...urlSearchParamsBodySerializer,
     url: '/v3/auth/google',
     ...options,
@@ -66,85 +83,80 @@ export const v3GoogleAuth = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 /**
- * Logout
- *
- * Log out the current user.
- *
- * Clears the user's session and removes authentication cookies.
+ * Log out the current user
  */
-export const v3Logout = <ThrowOnError extends boolean = false>(options?: Options<V3LogoutData, ThrowOnError>) => (options?.client ?? client).post<V3LogoutResponses, unknown, ThrowOnError>({ url: '/v3/auth/logout', ...options });
+export const postV3AuthLogout = <ThrowOnError extends boolean = false>(options?: Options<PostV3AuthLogoutData, ThrowOnError>) => (options?.client ?? client).post<PostV3AuthLogoutResponses, unknown, ThrowOnError>({ url: '/v3/auth/logout', ...options });
 
 /**
- * RefreshToken
- *
- * Refresh user authentication tokens.
- *
- * Generates new upload_token and token_v1 for the authenticated user.
+ * Refresh user authentication tokens
  */
-export const v3RefreshToken = <ThrowOnError extends boolean = false>(options?: Options<V3RefreshTokenData, ThrowOnError>) => (options?.client ?? client).post<V3RefreshTokenResponses, unknown, ThrowOnError>({ url: '/v3/auth/refresh-token', ...options });
-
-/**
- * DeleteUserAccount
- *
- * Delete the current user's account and all associated data.
- */
-export const v3DeleteUserAccount = <ThrowOnError extends boolean = false>(options?: Options<V3DeleteUserAccountData, ThrowOnError>) => (options?.client ?? client).delete<V3DeleteUserAccountResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self',
+export const postV3AuthRefreshToken = <ThrowOnError extends boolean = false>(options?: Options<PostV3AuthRefreshTokenData, ThrowOnError>) => (options?.client ?? client).post<PostV3AuthRefreshTokenResponses, PostV3AuthRefreshTokenErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/auth/refresh-token',
     ...options
 });
 
 /**
- * GetUserSelf
+ * Impersonate a user (test only)
+ *
+ * Sets the (user_id, auth_token) cookie pair so the caller authenticates as the given uid. Disabled in production.
  */
-export const v3GetUserSelf = <ThrowOnError extends boolean = false>(options?: Options<V3GetUserSelfData, ThrowOnError>) => (options?.client ?? client).get<V3GetUserSelfResponses, unknown, ThrowOnError>({
-    responseTransformer: v3GetUserSelfResponseTransformer,
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self',
+export const postV3DevBe = <ThrowOnError extends boolean = false>(options: Options<PostV3DevBeData, ThrowOnError>) => (options.client ?? client).post<PostV3DevBeResponses, PostV3DevBeErrors, ThrowOnError>({ url: '/v3/dev/be', ...options });
+
+/**
+ * List published, non-100% discounts
+ */
+export const getV3DiscountsActive = <ThrowOnError extends boolean = false>(options?: Options<GetV3DiscountsActiveData, ThrowOnError>) => (options?.client ?? client).get<GetV3DiscountsActiveResponses, GetV3DiscountsActiveErrors, ThrowOnError>({
+    responseTransformer: getV3DiscountsActiveResponseTransformer,
+    url: '/v3/discounts/active',
     ...options
 });
 
 /**
- * DeleteUserData
- *
- * Delete all user data but keep the account.
+ * Coding-time iCalendar feed
  */
-export const v3DeleteUserData = <ThrowOnError extends boolean = false>(options?: Options<V3DeleteUserDataData, ThrowOnError>) => (options?.client ?? client).delete<V3DeleteUserDataResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/data',
+export const getV3IcalendarFeedIcs = <ThrowOnError extends boolean = false>(options?: Options<GetV3IcalendarFeedIcsData, ThrowOnError>) => (options?.client ?? client).get<GetV3IcalendarFeedIcsResponses, GetV3IcalendarFeedIcsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/icalendar/feed.ics',
     ...options
 });
 
 /**
- * ExportUserData
- *
- * Export user data directly as CSV file.
+ * Available iCalendar feed options
  */
-export const v3ExportUserData = <ThrowOnError extends boolean = false>(options?: Options<V3ExportUserDataData, ThrowOnError>) => (options?.client ?? client).get<V3ExportUserDataResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/export',
+export const getV3IcalendarInfo = <ThrowOnError extends boolean = false>(options?: Options<GetV3IcalendarInfoData, ThrowOnError>) => (options?.client ?? client).get<GetV3IcalendarInfoResponses, GetV3IcalendarInfoErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/icalendar/info',
     ...options
 });
 
 /**
- * GetPrivacySettings
- *
- * Get current user's privacy settings.
+ * Annual coding rollup for a user
  */
-export const v3GetPrivacySettings = <ThrowOnError extends boolean = false>(options?: Options<V3GetPrivacySettingsData, ThrowOnError>) => (options?.client ?? client).get<V3GetPrivacySettingsResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/privacy',
-    ...options
-});
+export const getV3LogsYearlyReportData = <ThrowOnError extends boolean = false>(options: Options<GetV3LogsYearlyReportDataData, ThrowOnError>) => (options.client ?? client).get<GetV3LogsYearlyReportDataResponses, GetV3LogsYearlyReportDataErrors, ThrowOnError>({ url: '/v3/logs/yearly-report-data', ...options });
 
 /**
- * UpdatePrivacySettings
- *
- * Update current user's privacy settings.
+ * Delete a machine and its agent rollups
  */
-export const v3UpdatePrivacySettings = <ThrowOnError extends boolean = false>(options: Options<V3UpdatePrivacySettingsData, ThrowOnError>) => (options.client ?? client).post<V3UpdatePrivacySettingsResponses, V3UpdatePrivacySettingsErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/privacy',
+export const deleteV3MachinesByMachineId = <ThrowOnError extends boolean = false>(options: Options<DeleteV3MachinesByMachineIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteV3MachinesByMachineIdResponses, DeleteV3MachinesByMachineIdErrors, ThrowOnError>({ url: '/v3/machines/{machine_id}', ...options });
+
+/**
+ * Rename a machine
+ */
+export const patchV3MachinesByMachineId = <ThrowOnError extends boolean = false>(options: Options<PatchV3MachinesByMachineIdData, ThrowOnError>) => (options.client ?? client).patch<PatchV3MachinesByMachineIdResponses, PatchV3MachinesByMachineIdErrors, ThrowOnError>({
+    url: '/v3/machines/{machine_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -153,243 +165,25 @@ export const v3UpdatePrivacySettings = <ThrowOnError extends boolean = false>(op
 });
 
 /**
- * GetSelfMinutes
- *
- * Get user daily coding minutes for the specified time range.
+ * List machines belonging to the authenticated user
  */
-export const v3GetSelfMinutes = <ThrowOnError extends boolean = false>(options?: Options<V3GetSelfMinutesData, ThrowOnError>) => (options?.client ?? client).get<V3GetSelfMinutesResponses, V3GetSelfMinutesErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/minutes',
-    ...options
-});
+export const getV3Machines = <ThrowOnError extends boolean = false>(options?: Options<GetV3MachinesData, ThrowOnError>) => (options?.client ?? client).get<GetV3MachinesResponses, GetV3MachinesErrors, ThrowOnError>({ url: '/v3/machines', ...options });
 
 /**
- * GetSelfOverallRank
- *
- * Get current user's overall ranking across all languages.
+ * Prometheus scrape endpoint
  */
-export const v3GetSelfOverallRank = <ThrowOnError extends boolean = false>(options?: Options<V3GetSelfOverallRankData, ThrowOnError>) => (options?.client ?? client).get<V3GetSelfOverallRankResponses, V3GetSelfOverallRankErrors, ThrowOnError>({
-    responseTransformer: v3GetSelfOverallRankResponseTransformer,
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/overall-rank',
-    ...options
-});
+export const getV3Metrics = <ThrowOnError extends boolean = false>(options?: Options<GetV3MetricsData, ThrowOnError>) => (options?.client ?? client).get<GetV3MetricsResponses, unknown, ThrowOnError>({ url: '/v3/metrics', ...options });
 
 /**
- * GetSelfTopLanguagesRank
- *
- * Get current user's ranking information for their top N languages.
+ * Create a checkout session for the authenticated user
  */
-export const v3GetSelfTopLanguagesRank = <ThrowOnError extends boolean = false>(options?: Options<V3GetSelfTopLanguagesRankData, ThrowOnError>) => (options?.client ?? client).get<V3GetSelfTopLanguagesRankResponses, V3GetSelfTopLanguagesRankErrors, ThrowOnError>({
-    responseTransformer: v3GetSelfTopLanguagesRankResponseTransformer,
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/top-languages-rank',
-    ...options
-});
-
-/**
- * GetTimeDistribution
- *
- * Get user coding time distribution by hour and minute.
- */
-export const v3GetTimeDistribution = <ThrowOnError extends boolean = false>(options?: Options<V3GetTimeDistributionData, ThrowOnError>) => (options?.client ?? client).get<V3GetTimeDistributionResponses, V3GetTimeDistributionErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/time-distribution',
-    ...options
-});
-
-/**
- * GetUserByUserId
- *
- * Get user information filtered by privacy settings.
- *
- * Only users with DETAIL_PUBLIC privacy level can be accessed by external users.
- * Users with PRIVATE or STATS_PUBLIC levels will return 403 error unless accessing their own data.
- * Individual contact settings (show_email/show_github) control visibility of contact information.
- */
-export const v3GetUserByUserId = <ThrowOnError extends boolean = false>(options: Options<V3GetUserByUserIdData, ThrowOnError>) => (options.client ?? client).get<V3GetUserByUserIdResponses, V3GetUserByUserIdErrors, ThrowOnError>({
-    responseTransformer: v3GetUserByUserIdResponseTransformer,
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/{user_id}',
-    ...options
-});
-
-/**
- * GetUserPublicStatus
- *
- * Public status snapshot: latest event + today's minutes (in user's timezone).
- */
-export const v3GetUserPublicStatus = <ThrowOnError extends boolean = false>(options: Options<V3GetUserPublicStatusData, ThrowOnError>) => (options.client ?? client).get<V3GetUserPublicStatusResponses, V3GetUserPublicStatusErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/{user_id}/public/status',
-    ...options
-});
-
-/**
- * GetUserPublicTopLanguages
- *
- * Public top-languages for embeddable widgets. Sums coding minutes per language.
- *
- * Free users get the recent 30 days and up to 5 languages; Pro users get
- * up to 365 days and 12 languages.
- */
-export const v3GetUserPublicTopLanguages = <ThrowOnError extends boolean = false>(options: Options<V3GetUserPublicTopLanguagesData, ThrowOnError>) => (options.client ?? client).get<V3GetUserPublicTopLanguagesResponses, V3GetUserPublicTopLanguagesErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/{user_id}/public/top-languages',
-    ...options
-});
-
-/**
- * GetUserShield
- *
- * Get a shield with user's coding time information.
- *
- * Args:
- * session: The database session.
- * uid: The user ID.
- * minutes: Optional time range in minutes to filter by.
- * project: Optional project name to filter by.
- * language: Optional language to filter by. If provided, only statistics for this language will be counted.
- * only_hours: If True, the message will only show hours (e.g., '2h').
- *
- * Returns:
- * A ShieldResponse object with badge data.
- */
-export const v3GetUserShield = <ThrowOnError extends boolean = false>(options: Options<V3GetUserShieldData, ThrowOnError>) => (options.client ?? client).get<V3GetUserShieldResponses, V3GetUserShieldErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/shield',
-    ...options
-});
-
-/**
- * GetWorkspaceFiles
- *
- * Get file activities for a specific workspace/project.
- */
-export const v3GetWorkspaceFiles = <ThrowOnError extends boolean = false>(options: Options<V3GetWorkspaceFilesData, ThrowOnError>) => (options.client ?? client).get<V3GetWorkspaceFilesResponses, V3GetWorkspaceFilesErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/workspace',
-    ...options
-});
-
-/**
- * ListSelfLatestLogs
- */
-export const v3ListSelfLatestLogs = <ThrowOnError extends boolean = false>(options?: Options<V3ListSelfLatestLogsData, ThrowOnError>) => (options?.client ?? client).get<V3ListSelfLatestLogsResponses, V3ListSelfLatestLogsErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/latest-logs',
-    ...options
-});
-
-/**
- * ListSelfStats
- *
- * Get user stats by field aggregated over time periods.
- */
-export const v3ListSelfStats = <ThrowOnError extends boolean = false>(options: Options<V3ListSelfStatsData, ThrowOnError>) => (options.client ?? client).get<V3ListSelfStatsResponses, V3ListSelfStatsErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/stats',
-    ...options
-});
-
-/**
- * ListSelfStatsTime
- *
- * Get user stats by time unit only (no by field).
- */
-export const v3ListSelfStatsTime = <ThrowOnError extends boolean = false>(options?: Options<V3ListSelfStatsTimeData, ThrowOnError>) => (options?.client ?? client).get<V3ListSelfStatsTimeResponses, V3ListSelfStatsTimeErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/stats_time',
-    ...options
-});
-
-/**
- * ListSelfTop
- *
- * Get top N items for the given field with optional filtering by multiple criteria.
- */
-export const v3ListSelfTop = <ThrowOnError extends boolean = false>(options: Options<V3ListSelfTopData, ThrowOnError>) => (options.client ?? client).get<V3ListSelfTopResponses, V3ListSelfTopErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/top',
-    ...options
-});
-
-/**
- * PostEventLog
- *
- * Submit a single event log entry with comprehensive metrics tracking.
- */
-export const v3PostEventLog = <ThrowOnError extends boolean = false>(options: Options<V3PostEventLogData, ThrowOnError>) => (options.client ?? client).post<V3PostEventLogResponses, V3PostEventLogErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/event-log',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * RecentLanguages
- *
- * List current user's most recently used programming languages.
- */
-export const v3RecentLanguages = <ThrowOnError extends boolean = false>(options?: Options<V3RecentLanguagesData, ThrowOnError>) => (options?.client ?? client).get<V3RecentLanguagesResponses, V3RecentLanguagesErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/languages/recent',
-    ...options
-});
-
-/**
- * RecentWorkspaces
- *
- * List current user's workspaces with the most recent event activity.
- */
-export const v3RecentWorkspaces = <ThrowOnError extends boolean = false>(options?: Options<V3RecentWorkspacesData, ThrowOnError>) => (options?.client ?? client).get<V3RecentWorkspacesResponses, V3RecentWorkspacesErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/workspaces/recent',
-    ...options
-});
-
-/**
- * SearchWorkspaces
- *
- * Search current user's unique workspace names.
- */
-export const v3SearchWorkspaces = <ThrowOnError extends boolean = false>(options?: Options<V3SearchWorkspacesData, ThrowOnError>) => (options?.client ?? client).get<V3SearchWorkspacesResponses, V3SearchWorkspacesErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/workspaces/search',
-    ...options
-});
-
-/**
- * UpdateBio
- *
- * Allow the authenticated user to update their bio.
- */
-export const v3UpdateBio = <ThrowOnError extends boolean = false>(options: Options<V3UpdateBioData, ThrowOnError>) => (options.client ?? client).post<V3UpdateBioResponses, V3UpdateBioErrors, ThrowOnError>({
-    responseTransformer: v3UpdateBioResponseTransformer,
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/users/self/bio',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * GetYearlyReportData
- */
-export const v3GetYearlyReportData = <ThrowOnError extends boolean = false>(options: Options<V3GetYearlyReportDataData, ThrowOnError>) => (options.client ?? client).get<V3GetYearlyReportDataResponses, V3GetYearlyReportDataErrors, ThrowOnError>({ url: '/v3/logs/yearly-report-data', ...options });
-
-/**
- * CreateCheckout
- *
- * Create a checkout session for the authenticated user.
- */
-export const v3CreateCheckout = <ThrowOnError extends boolean = false>(options: Options<V3CreateCheckoutData, ThrowOnError>) => (options.client ?? client).post<V3CreateCheckoutResponses, V3CreateCheckoutErrors, ThrowOnError>({
-    responseTransformer: v3CreateCheckoutResponseTransformer,
+export const postV3PaymentsCheckout = <ThrowOnError extends boolean = false>(options: Options<PostV3PaymentsCheckoutData, ThrowOnError>) => (options.client ?? client).post<PostV3PaymentsCheckoutResponses, PostV3PaymentsCheckoutErrors, ThrowOnError>({
+    responseTransformer: postV3PaymentsCheckoutResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
     url: '/v3/payments/checkout',
     ...options,
     headers: {
@@ -399,156 +193,108 @@ export const v3CreateCheckout = <ThrowOnError extends boolean = false>(options: 
 });
 
 /**
- * GetProducts
- *
- * Get list of available products for purchase.
+ * List available products
  */
-export const v3GetProducts = <ThrowOnError extends boolean = false>(options?: Options<V3GetProductsData, ThrowOnError>) => (options?.client ?? client).get<V3GetProductsResponses, unknown, ThrowOnError>({ url: '/v3/payments/products', ...options });
+export const getV3PaymentsProducts = <ThrowOnError extends boolean = false>(options?: Options<GetV3PaymentsProductsData, ThrowOnError>) => (options?.client ?? client).get<GetV3PaymentsProductsResponses, unknown, ThrowOnError>({ url: '/v3/payments/products', ...options });
 
 /**
- * HandleLemonsqueezyWebhook
+ * LemonSqueezy webhook receiver
  *
- * Handle webhooks from LemonSqueezy for payment status updates.
- *
- * Includes retry logic for timeout errors via the PaymentService.
+ * Public endpoint; auth is by HMAC signature in X-Signature.
  */
-export const v3HandleLemonsqueezyWebhook = <ThrowOnError extends boolean = false>(options?: Options<V3HandleLemonsqueezyWebhookData, ThrowOnError>) => (options?.client ?? client).post<V3HandleLemonsqueezyWebhookResponses, unknown, ThrowOnError>({ url: '/v3/payments/webhooks/lemonsqueezy', ...options });
+export const postV3PaymentsWebhooksLemonsqueezy = <ThrowOnError extends boolean = false>(options?: Options<PostV3PaymentsWebhooksLemonsqueezyData, ThrowOnError>) => (options?.client ?? client).post<PostV3PaymentsWebhooksLemonsqueezyResponses, PostV3PaymentsWebhooksLemonsqueezyErrors, ThrowOnError>({ url: '/v3/payments/webhooks/lemonsqueezy', ...options });
 
 /**
- * Get published discounts
- *
- * Get all published discounts available for use.
- *
- * Returns:
- * List of published discount objects.
+ * Top users for a specific programming language
  */
-export const v3GetActiveDiscounts = <ThrowOnError extends boolean = false>(options?: Options<V3GetActiveDiscountsData, ThrowOnError>) => (options?.client ?? client).get<V3GetActiveDiscountsResponses, unknown, ThrowOnError>({
-    responseTransformer: v3GetActiveDiscountsResponseTransformer,
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v3/discounts/active',
-    ...options
-});
-
-/**
- * GetLanguageRanking
- *
- * Get language-specific coding time ranking for public users.
- */
-export const v3GetLanguageRanking = <ThrowOnError extends boolean = false>(options: Options<V3GetLanguageRankingData, ThrowOnError>) => (options.client ?? client).get<V3GetLanguageRankingResponses, V3GetLanguageRankingErrors, ThrowOnError>({
-    responseTransformer: v3GetLanguageRankingResponseTransformer,
+export const getV3PublicLanguageRanking = <ThrowOnError extends boolean = false>(options: Options<GetV3PublicLanguageRankingData, ThrowOnError>) => (options.client ?? client).get<GetV3PublicLanguageRankingResponses, GetV3PublicLanguageRankingErrors, ThrowOnError>({
+    responseTransformer: getV3PublicLanguageRankingResponseTransformer,
     url: '/v3/public/language-ranking',
     ...options
 });
 
 /**
- * GetLeaderboard
- *
- * Get coding time leaderboard for public users.
+ * Top users by coding time
  */
-export const v3GetLeaderboard = <ThrowOnError extends boolean = false>(options?: Options<V3GetLeaderboardData, ThrowOnError>) => (options?.client ?? client).get<V3GetLeaderboardResponses, V3GetLeaderboardErrors, ThrowOnError>({
-    responseTransformer: v3GetLeaderboardResponseTransformer,
+export const getV3PublicLeaderboard = <ThrowOnError extends boolean = false>(options?: Options<GetV3PublicLeaderboardData, ThrowOnError>) => (options?.client ?? client).get<GetV3PublicLeaderboardResponses, unknown, ThrowOnError>({
+    responseTransformer: getV3PublicLeaderboardResponseTransformer,
     url: '/v3/public/leaderboard',
     ...options
 });
 
 /**
- * GetUserCodingHistory
- *
- * Get user's daily coding time history.
- *
- * Non-pro users are limited to maximum 90 days of history.
- * Pro users can access up to 365 days of history.
+ * User's daily coding-minute history
  */
-export const v3GetUserCodingHistory = <ThrowOnError extends boolean = false>(options: Options<V3GetUserCodingHistoryData, ThrowOnError>) => (options.client ?? client).get<V3GetUserCodingHistoryResponses, V3GetUserCodingHistoryErrors, ThrowOnError>({
-    responseTransformer: v3GetUserCodingHistoryResponseTransformer,
+export const getV3PublicUsersByUserIdCodingHistory = <ThrowOnError extends boolean = false>(options: Options<GetV3PublicUsersByUserIdCodingHistoryData, ThrowOnError>) => (options.client ?? client).get<GetV3PublicUsersByUserIdCodingHistoryResponses, GetV3PublicUsersByUserIdCodingHistoryErrors, ThrowOnError>({
+    responseTransformer: getV3PublicUsersByUserIdCodingHistoryResponseTransformer,
     url: '/v3/public/users/{user_id}/coding-history',
     ...options
 });
 
 /**
- * GetUserLanguageRank
- *
- * Get a specific user's rank and percentile for a language.
+ * User's rank in a specific language
  */
-export const v3GetUserLanguageRank = <ThrowOnError extends boolean = false>(options: Options<V3GetUserLanguageRankData, ThrowOnError>) => (options.client ?? client).get<V3GetUserLanguageRankResponses, V3GetUserLanguageRankErrors, ThrowOnError>({
-    responseTransformer: v3GetUserLanguageRankResponseTransformer,
+export const getV3PublicUsersByUserIdLanguageRank = <ThrowOnError extends boolean = false>(options: Options<GetV3PublicUsersByUserIdLanguageRankData, ThrowOnError>) => (options.client ?? client).get<GetV3PublicUsersByUserIdLanguageRankResponses, GetV3PublicUsersByUserIdLanguageRankErrors, ThrowOnError>({
+    responseTransformer: getV3PublicUsersByUserIdLanguageRankResponseTransformer,
     url: '/v3/public/users/{user_id}/language-rank',
     ...options
 });
 
 /**
- * GetUserOverallRank
- *
- * Get user's overall ranking across all languages.
+ * User's overall coding-time rank (public)
  */
-export const v3GetUserOverallRank = <ThrowOnError extends boolean = false>(options: Options<V3GetUserOverallRankData, ThrowOnError>) => (options.client ?? client).get<V3GetUserOverallRankResponses, V3GetUserOverallRankErrors, ThrowOnError>({
-    responseTransformer: v3GetUserOverallRankResponseTransformer,
+export const getV3PublicUsersByUserIdOverallRank = <ThrowOnError extends boolean = false>(options: Options<GetV3PublicUsersByUserIdOverallRankData, ThrowOnError>) => (options.client ?? client).get<GetV3PublicUsersByUserIdOverallRankResponses, GetV3PublicUsersByUserIdOverallRankErrors, ThrowOnError>({
+    responseTransformer: getV3PublicUsersByUserIdOverallRankResponseTransformer,
     url: '/v3/public/users/{user_id}/overall-rank',
     ...options
 });
 
 /**
- * GetUserTopLanguagesRank
- *
- * Get user's ranking information for their top N languages.
+ * User's rank in each of their top languages (public)
  */
-export const v3GetUserTopLanguagesRank = <ThrowOnError extends boolean = false>(options: Options<V3GetUserTopLanguagesRankData, ThrowOnError>) => (options.client ?? client).get<V3GetUserTopLanguagesRankResponses, V3GetUserTopLanguagesRankErrors, ThrowOnError>({
-    responseTransformer: v3GetUserTopLanguagesRankResponseTransformer,
+export const getV3PublicUsersByUserIdTopLanguagesRank = <ThrowOnError extends boolean = false>(options: Options<GetV3PublicUsersByUserIdTopLanguagesRankData, ThrowOnError>) => (options.client ?? client).get<GetV3PublicUsersByUserIdTopLanguagesRankResponses, GetV3PublicUsersByUserIdTopLanguagesRankErrors, ThrowOnError>({
+    responseTransformer: getV3PublicUsersByUserIdTopLanguagesRankResponseTransformer,
     url: '/v3/public/users/{user_id}/top-languages-rank',
     ...options
 });
 
 /**
- * GetTags
- *
- * Get all tags for the current user
+ * Delete a tag
  */
-export const v3GetTags = <ThrowOnError extends boolean = false>(options?: Options<V3GetTagsData, ThrowOnError>) => (options?.client ?? client).get<V3GetTagsResponses, unknown, ThrowOnError>({
-    responseTransformer: v3GetTagsResponseTransformer,
-    url: '/v3/tags',
-    ...options
-});
-
-/**
- * CreateTag
- *
- * Create a new tag for the user
- */
-export const v3CreateTag = <ThrowOnError extends boolean = false>(options: Options<V3CreateTagData, ThrowOnError>) => (options.client ?? client).post<V3CreateTagResponses, V3CreateTagErrors, ThrowOnError>({
-    responseTransformer: v3CreateTagResponseTransformer,
-    url: '/v3/tags',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * DeleteTag
- *
- * Delete a tag and all its rules
- */
-export const v3DeleteTag = <ThrowOnError extends boolean = false>(options: Options<V3DeleteTagData, ThrowOnError>) => (options.client ?? client).delete<V3DeleteTagResponses, V3DeleteTagErrors, ThrowOnError>({ url: '/v3/tags/{tag_id}', ...options });
-
-/**
- * GetTag
- *
- * Get a specific tag by ID
- */
-export const v3GetTag = <ThrowOnError extends boolean = false>(options: Options<V3GetTagData, ThrowOnError>) => (options.client ?? client).get<V3GetTagResponses, V3GetTagErrors, ThrowOnError>({
-    responseTransformer: v3GetTagResponseTransformer,
+export const deleteV3TagsByTagId = <ThrowOnError extends boolean = false>(options: Options<DeleteV3TagsByTagIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteV3TagsByTagIdResponses, DeleteV3TagsByTagIdErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
     url: '/v3/tags/{tag_id}',
     ...options
 });
 
 /**
- * UpdateTag
- *
- * Update a tag's properties
+ * Get a tag by id
  */
-export const v3UpdateTag = <ThrowOnError extends boolean = false>(options: Options<V3UpdateTagData, ThrowOnError>) => (options.client ?? client).put<V3UpdateTagResponses, V3UpdateTagErrors, ThrowOnError>({
-    responseTransformer: v3UpdateTagResponseTransformer,
+export const getV3TagsByTagId = <ThrowOnError extends boolean = false>(options: Options<GetV3TagsByTagIdData, ThrowOnError>) => (options.client ?? client).get<GetV3TagsByTagIdResponses, GetV3TagsByTagIdErrors, ThrowOnError>({
+    responseTransformer: getV3TagsByTagIdResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/tags/{tag_id}',
+    ...options
+});
+
+/**
+ * Update a tag
+ */
+export const putV3TagsByTagId = <ThrowOnError extends boolean = false>(options: Options<PutV3TagsByTagIdData, ThrowOnError>) => (options.client ?? client).put<PutV3TagsByTagIdResponses, PutV3TagsByTagIdErrors, ThrowOnError>({
+    responseTransformer: putV3TagsByTagIdResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
     url: '/v3/tags/{tag_id}',
     ...options,
     headers: {
@@ -558,12 +304,29 @@ export const v3UpdateTag = <ThrowOnError extends boolean = false>(options: Optio
 });
 
 /**
- * EvaluateWorkspaceTags
- *
- * Evaluate which tags match the given workspace data
+ * Time history for a tag grouped by day/week/month
  */
-export const v3EvaluateWorkspaceTags = <ThrowOnError extends boolean = false>(options: Options<V3EvaluateWorkspaceTagsData, ThrowOnError>) => (options.client ?? client).post<V3EvaluateWorkspaceTagsResponses, V3EvaluateWorkspaceTagsErrors, ThrowOnError>({
-    responseTransformer: v3EvaluateWorkspaceTagsResponseTransformer,
+export const getV3TagsByTagIdHistory = <ThrowOnError extends boolean = false>(options: Options<GetV3TagsByTagIdHistoryData, ThrowOnError>) => (options.client ?? client).get<GetV3TagsByTagIdHistoryResponses, GetV3TagsByTagIdHistoryErrors, ThrowOnError>({
+    responseTransformer: getV3TagsByTagIdHistoryResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/tags/{tag_id}/history',
+    ...options
+});
+
+/**
+ * Evaluate matching tags for a workspace context
+ */
+export const postV3TagsEvaluate = <ThrowOnError extends boolean = false>(options: Options<PostV3TagsEvaluateData, ThrowOnError>) => (options.client ?? client).post<PostV3TagsEvaluateResponses, PostV3TagsEvaluateErrors, ThrowOnError>({
+    responseTransformer: postV3TagsEvaluateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
     url: '/v3/tags/evaluate',
     ...options,
     headers: {
@@ -573,49 +336,374 @@ export const v3EvaluateWorkspaceTags = <ThrowOnError extends boolean = false>(op
 });
 
 /**
- * GetTagHistory
- *
- * Get historical time data for a specific tag with time grouping options
+ * List the authenticated user's tags
  */
-export const v3GetTagHistory = <ThrowOnError extends boolean = false>(options: Options<V3GetTagHistoryData, ThrowOnError>) => (options.client ?? client).get<V3GetTagHistoryResponses, V3GetTagHistoryErrors, ThrowOnError>({
-    responseTransformer: v3GetTagHistoryResponseTransformer,
-    url: '/v3/tags/{tag_id}/history',
+export const getV3Tags = <ThrowOnError extends boolean = false>(options?: Options<GetV3TagsData, ThrowOnError>) => (options?.client ?? client).get<GetV3TagsResponses, GetV3TagsErrors, ThrowOnError>({
+    responseTransformer: getV3TagsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/tags',
     ...options
 });
 
 /**
- * GetTagTimeStats
- *
- * Get time statistics for user's tags within a specified period
+ * Create a tag
  */
-export const v3GetTagTimeStats = <ThrowOnError extends boolean = false>(options?: Options<V3GetTagTimeStatsData, ThrowOnError>) => (options?.client ?? client).get<V3GetTagTimeStatsResponses, V3GetTagTimeStatsErrors, ThrowOnError>({
-    responseTransformer: v3GetTagTimeStatsResponseTransformer,
+export const postV3Tags = <ThrowOnError extends boolean = false>(options: Options<PostV3TagsData, ThrowOnError>) => (options.client ?? client).post<PostV3TagsResponses, PostV3TagsErrors, ThrowOnError>({
+    responseTransformer: postV3TagsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/tags',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Time statistics per tag within a window
+ */
+export const getV3TagsStats = <ThrowOnError extends boolean = false>(options?: Options<GetV3TagsStatsData, ThrowOnError>) => (options?.client ?? client).get<GetV3TagsStatsResponses, GetV3TagsStatsErrors, ThrowOnError>({
+    responseTransformer: getV3TagsStatsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
     url: '/v3/tags/stats',
     ...options
 });
 
 /**
- * Generate iCalendar feed
- *
- * Generate an iCalendar (.ics) feed of coding activity for calendar applications
+ * Global coding-minute totals
  */
-export const v3GetCalendarFeed = <ThrowOnError extends boolean = false>(options?: Options<V3GetCalendarFeedData, ThrowOnError>) => (options?.client ?? client).get<V3GetCalendarFeedResponses, V3GetCalendarFeedErrors, ThrowOnError>({ url: '/v3/icalendar/feed.ics', ...options });
+export const getV3TotalMinutes = <ThrowOnError extends boolean = false>(options?: Options<GetV3TotalMinutesData, ThrowOnError>) => (options?.client ?? client).get<GetV3TotalMinutesResponses, unknown, ThrowOnError>({
+    responseTransformer: getV3TotalMinutesResponseTransformer,
+    url: '/v3/total-minutes',
+    ...options
+});
 
 /**
- * Calendar feed information
- *
- * Get information about available options for the iCalendar feed
+ * Get public profile for a user
  */
-export const v3GetCalendarInfo = <ThrowOnError extends boolean = false>(options?: Options<V3GetCalendarInfoData, ThrowOnError>) => (options?.client ?? client).get<V3GetCalendarInfoResponses, unknown, ThrowOnError>({ url: '/v3/icalendar/info', ...options });
+export const getV3UsersByUserId = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersByUserIdData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersByUserIdResponses, GetV3UsersByUserIdErrors, ThrowOnError>({
+    responseTransformer: getV3UsersByUserIdResponseTransformer,
+    url: '/v3/users/{user_id}',
+    ...options
+});
 
 /**
- * BeAnyUser
- *
- * This endpoint is for testing purposes only. It allows you to impersonate any user.
+ * Public coding status snapshot
  */
-export const v3BeAnyUser = <ThrowOnError extends boolean = false>(options: Options<V3BeAnyUserData, ThrowOnError>) => (options.client ?? client).post<V3BeAnyUserResponses, V3BeAnyUserErrors, ThrowOnError>({ url: '/v3/dev/be', ...options });
+export const getV3UsersByUserIdPublicStatus = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersByUserIdPublicStatusData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersByUserIdPublicStatusResponses, GetV3UsersByUserIdPublicStatusErrors, ThrowOnError>({ url: '/v3/users/{user_id}/public/status', ...options });
 
 /**
- * Get
+ * Public top languages for embeddable widgets
  */
-export const v3Get = <ThrowOnError extends boolean = false>(options?: Options<V3GetData, ThrowOnError>) => (options?.client ?? client).get<V3GetResponses, unknown, ThrowOnError>({ url: '/v3/metrics', ...options });
+export const getV3UsersByUserIdPublicTopLanguages = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersByUserIdPublicTopLanguagesData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersByUserIdPublicTopLanguagesResponses, GetV3UsersByUserIdPublicTopLanguagesErrors, ThrowOnError>({ url: '/v3/users/{user_id}/public/top-languages', ...options });
+
+/**
+ * Submit a single editor event
+ */
+export const postV3UsersEventLog = <ThrowOnError extends boolean = false>(options: Options<PostV3UsersEventLogData, ThrowOnError>) => (options.client ?? client).post<PostV3UsersEventLogResponses, PostV3UsersEventLogErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/event-log',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete the authenticated user account
+ */
+export const deleteV3UsersSelf = <ThrowOnError extends boolean = false>(options?: Options<DeleteV3UsersSelfData, ThrowOnError>) => (options?.client ?? client).delete<DeleteV3UsersSelfResponses, DeleteV3UsersSelfErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self',
+    ...options
+});
+
+/**
+ * Get current authenticated user
+ */
+export const getV3UsersSelf = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfResponses, GetV3UsersSelfErrors, ThrowOnError>({
+    responseTransformer: getV3UsersSelfResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self',
+    ...options
+});
+
+/**
+ * Update the authenticated user's bio
+ */
+export const postV3UsersSelfBio = <ThrowOnError extends boolean = false>(options: Options<PostV3UsersSelfBioData, ThrowOnError>) => (options.client ?? client).post<PostV3UsersSelfBioResponses, PostV3UsersSelfBioErrors, ThrowOnError>({
+    responseTransformer: postV3UsersSelfBioResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/bio',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete all data for the authenticated user (keep account)
+ */
+export const deleteV3UsersSelfData = <ThrowOnError extends boolean = false>(options?: Options<DeleteV3UsersSelfDataData, ThrowOnError>) => (options?.client ?? client).delete<DeleteV3UsersSelfDataResponses, DeleteV3UsersSelfDataErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/data',
+    ...options
+});
+
+/**
+ * Stream a CSV export of all coding-minute records
+ */
+export const getV3UsersSelfExport = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfExportData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfExportResponses, GetV3UsersSelfExportErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/export',
+    ...options
+});
+
+/**
+ * Recently used programming languages
+ */
+export const getV3UsersSelfLanguagesRecent = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfLanguagesRecentData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfLanguagesRecentResponses, GetV3UsersSelfLanguagesRecentErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/languages/recent',
+    ...options
+});
+
+/**
+ * Most recent editor events
+ */
+export const getV3UsersSelfLatestLogs = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfLatestLogsData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfLatestLogsResponses, GetV3UsersSelfLatestLogsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/latest-logs',
+    ...options
+});
+
+/**
+ * Total coding minutes in a window
+ */
+export const getV3UsersSelfMinutes = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfMinutesData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfMinutesResponses, GetV3UsersSelfMinutesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/minutes',
+    ...options
+});
+
+/**
+ * Authenticated user's overall coding-time rank
+ */
+export const getV3UsersSelfOverallRank = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfOverallRankData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfOverallRankResponses, GetV3UsersSelfOverallRankErrors, ThrowOnError>({
+    responseTransformer: getV3UsersSelfOverallRankResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/overall-rank',
+    ...options
+});
+
+/**
+ * Get the authenticated user's privacy settings
+ */
+export const getV3UsersSelfPrivacy = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfPrivacyData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfPrivacyResponses, GetV3UsersSelfPrivacyErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/privacy',
+    ...options
+});
+
+/**
+ * Update the authenticated user's privacy settings
+ */
+export const postV3UsersSelfPrivacy = <ThrowOnError extends boolean = false>(options: Options<PostV3UsersSelfPrivacyData, ThrowOnError>) => (options.client ?? client).post<PostV3UsersSelfPrivacyResponses, PostV3UsersSelfPrivacyErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/privacy',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Coding minutes bucketed by day/hour/minute
+ */
+export const getV3UsersSelfStatsTime = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfStatsTimeData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfStatsTimeResponses, GetV3UsersSelfStatsTimeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/stats_time',
+    ...options
+});
+
+/**
+ * Coding minutes bucketed by time and a categorical axis
+ */
+export const getV3UsersSelfStats = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersSelfStatsData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersSelfStatsResponses, GetV3UsersSelfStatsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/stats',
+    ...options
+});
+
+/**
+ * Coding minutes distribution across the local clock
+ */
+export const getV3UsersSelfTimeDistribution = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfTimeDistributionData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfTimeDistributionResponses, GetV3UsersSelfTimeDistributionErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/time-distribution',
+    ...options
+});
+
+/**
+ * User's rank in each of their top languages
+ */
+export const getV3UsersSelfTopLanguagesRank = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfTopLanguagesRankData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfTopLanguagesRankResponses, GetV3UsersSelfTopLanguagesRankErrors, ThrowOnError>({
+    responseTransformer: getV3UsersSelfTopLanguagesRankResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/top-languages-rank',
+    ...options
+});
+
+/**
+ * Top N by language/workspace/editor/platform
+ */
+export const getV3UsersSelfTop = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersSelfTopData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersSelfTopResponses, GetV3UsersSelfTopErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/top',
+    ...options
+});
+
+/**
+ * Update the authenticated user's username
+ */
+export const postV3UsersSelfUsername = <ThrowOnError extends boolean = false>(options: Options<PostV3UsersSelfUsernameData, ThrowOnError>) => (options.client ?? client).post<PostV3UsersSelfUsernameResponses, PostV3UsersSelfUsernameErrors, ThrowOnError>({
+    responseTransformer: postV3UsersSelfUsernameResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/username',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * File activity within a workspace
+ */
+export const getV3UsersSelfWorkspace = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersSelfWorkspaceData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersSelfWorkspaceResponses, GetV3UsersSelfWorkspaceErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/workspace',
+    ...options
+});
+
+/**
+ * Recently active workspaces
+ */
+export const getV3UsersSelfWorkspacesRecent = <ThrowOnError extends boolean = false>(options?: Options<GetV3UsersSelfWorkspacesRecentData, ThrowOnError>) => (options?.client ?? client).get<GetV3UsersSelfWorkspacesRecentResponses, GetV3UsersSelfWorkspacesRecentErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/workspaces/recent',
+    ...options
+});
+
+/**
+ * Search user workspace names
+ */
+export const getV3UsersSelfWorkspacesSearch = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersSelfWorkspacesSearchData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersSelfWorkspacesSearchResponses, GetV3UsersSelfWorkspacesSearchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/users/self/workspaces/search',
+    ...options
+});
+
+/**
+ * Shields.io-compatible badge payload
+ */
+export const getV3UsersShield = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersShieldData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersShieldResponses, GetV3UsersShieldErrors, ThrowOnError>({ url: '/v3/users/shield', ...options });

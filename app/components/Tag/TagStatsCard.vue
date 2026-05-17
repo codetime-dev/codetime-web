@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TagTimeData } from '~/api/v3/types.gen'
-import { v3GetTagTimeStats } from '~/api/v3'
+import { getV3TagsStats } from '~/api/v3'
 import { getDurationString } from '~/utils/format'
 import { getTagDisplay } from '~/utils/tag'
 
@@ -24,7 +24,7 @@ const { data: allTagStats, pending: loading } = await useAsyncData(
       const startDate = new Date()
       startDate.setDate(endDate.getDate() - days)
 
-      const response = await v3GetTagTimeStats({
+      const response = await getV3TagsStats({
         query: {
           start_datetime: startDate,
           end_datetime: endDate,

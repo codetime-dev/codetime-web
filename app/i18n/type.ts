@@ -168,6 +168,9 @@ export type Translation = {
         leaderboard: string
         workspace: string
         tags: string
+        // `agent` is optional during the translation rollout — the
+        // dashboard layout falls back to "Agent" when absent.
+        agent?: string
       }
       description: {
         overview: string
@@ -177,6 +180,7 @@ export type Translation = {
         leaderboard: string
         workspace: string
         tags: string
+        agent?: string
       }
     }
     overview: {
@@ -580,6 +584,33 @@ export type Translation = {
         step3: string
         step4: string
       }
+    }
+    agentGuide: {
+      title: string
+      description: string
+      token: {
+        title: string
+        description: string
+      }
+      install: {
+        title: string
+        description: string
+      }
+      configure: {
+        title: string
+        description: string
+        hint: string
+      }
+      hook: {
+        title: string
+        description: string
+        supports: string
+        latency: string
+      }
+    }
+    agent: {
+      freeLimit: string
+      upgrade: string
     }
   }
   common: {

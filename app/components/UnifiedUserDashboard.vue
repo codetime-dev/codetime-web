@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { refreshNuxtData } from '#app'
-import { v3GetUserByUserId, v3GetUserTopLanguagesRank, v3UpdateBio } from '~/api/v3'
+import { getV3PublicUsersByUserIdTopLanguagesRank, getV3UsersByUserId, postV3UsersSelfBio } from '~/api/v3'
 
 type UnifiedUserDashboardProps = {
   userId?: number
@@ -76,7 +76,7 @@ const { data: userResult, error: userError, refresh: refreshUser } = await useAs
 }
 
   try {
-    const response = await v3GetUserByUserId({
+    const response = await getV3UsersByUserId({
       path: {
         user_id: targetUserId.value,
       },
@@ -192,7 +192,7 @@ const { data: topLanguagesData, pending: languagesPending } = await useAsyncData
   }
 
   try {
-    const response = await v3GetUserTopLanguagesRank({
+    const response = await getV3PublicUsersByUserIdTopLanguagesRank({
       path: {
         user_id: targetUserId.value,
       },
@@ -279,11 +279,12 @@ async function saveBio() {
   bioStatus.value = null
   bioStatusMessage.value = ''
 
-  const newBio = bioDraft.value.trim().length > 0 ? bioDraft.value.trim() : null
+  // SDK now types `bio` as `string | undefined`. Use undefined for "clear".
+  const newBio = bioDraft.value.trim().length > 0 ? bioDraft.value.trim() : undefined
 
   try {
     // Call the API and capture the response, which includes the updated UserSelfPublic
-    const response = await v3UpdateBio({
+    const response = await postV3UsersSelfBio({
       body: {
         bio: newBio,
       },
@@ -300,7 +301,7 @@ async function saveBio() {
           ...userResult.value,
           user: {
             ...userResult.value.user,
-            bio: updatedUser.bio ?? null,
+            bio: updatedUser.bio ?? undefined,
           },
         }
       }
@@ -308,7 +309,7 @@ async function saveBio() {
       if (currentUser.value) {
         currentUser.value = {
           ...currentUser.value,
-          bio: updatedUser.bio ?? null,
+          bio: updatedUser.bio ?? undefined,
         }
       }
     }

@@ -657,6 +657,33 @@ export const zhTW: Partial<Translation> = {
         step4: '開始編程，數據將在 2-3 分鐘內出現',
       },
     },
+    agentGuide: {
+      title: '追蹤您的 AI Agent 工作階段',
+      description: '安裝 codetime CLI，自動記錄每次 Claude Code 工作階段。',
+      token: {
+        title: '您的令牌',
+        description: '複製此令牌，最後一步將其填入 CLI。',
+      },
+      install: {
+        title: '安裝 CLI',
+        description: '使用 npm 全域安裝 codetime（或您慣用的 Node 套件管理器）。',
+      },
+      configure: {
+        title: '設定令牌',
+        description: '執行此指令，下次 agent 工作階段開始即自動上傳。',
+        hint: '將 <token> 替換為上方複製的值。',
+      },
+      hook: {
+        title: '掛鉤到 Agent',
+        description: '執行 codetime install，CLI 會自動偵測本機所有支援的 AI agent，並自動設定鉤子。',
+        supports: '目前支援以下 Agent：',
+        latency: '正常使用任意 agent。工作階段結束後約 2 分鐘內即可在此查看。',
+      },
+    },
+    agent: {
+      freeLimit: '免費版僅顯示最近 30 天的工作階段。升級 Pro 可查看完整歷史。',
+      upgrade: '升級',
+    },
   },
   button: {
     copy: '複製',

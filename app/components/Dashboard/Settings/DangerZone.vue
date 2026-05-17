@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3DeleteUserData } from '~/api/v3'
+import { deleteV3UsersSelfData } from '~/api/v3'
 
 const t = useI18N()
 const modal = ref(false)
@@ -10,7 +10,7 @@ async function deleteAllData() {
     return
   }
   modal.value = false
-  await v3DeleteUserData()
+  await deleteV3UsersSelfData()
 }
 
 function closeModal() {

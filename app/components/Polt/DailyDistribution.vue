@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as d3 from 'd3'
-import { v3GetTimeDistribution } from '~/api/v3'
+import { getV3UsersSelfTimeDistribution } from '~/api/v3'
 
 type DataPoint = {
   time: number
@@ -71,7 +71,7 @@ const { data: timeDistributionData, pending: segmentsPending } = useAsyncData('t
     const segmentEndTime = new Date(props.endTime.getTime() - i * segmentMs)
     const segmentStartTime = new Date(segmentEndTime.getTime() - segmentMs)
 
-    const resp = v3GetTimeDistribution({
+    const resp = getV3UsersSelfTimeDistribution({
       query: {
         start_time: segmentStartTime,
         end_time: segmentEndTime,
@@ -95,7 +95,7 @@ const { data: timeDistributionData, pending: segmentsPending } = useAsyncData('t
 })
 
 const { data: summaryData, pending: summaryPending } = useAsyncData('time-distribution-summary', async () => {
-  const resp = await v3GetTimeDistribution({
+  const resp = await getV3UsersSelfTimeDistribution({
     query: {
       start_time: props.startTime,
       end_time: props.endTime,

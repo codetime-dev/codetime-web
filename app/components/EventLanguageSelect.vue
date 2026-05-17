@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3RecentLanguages } from '~/api/v3'
+import { getV3UsersSelfLanguagesRecent } from '~/api/v3'
 
 const modelValue = defineModel<string>({ default: '' })
 const t = useI18N()
@@ -11,7 +11,7 @@ const query = ref(modelValue.value ?? '')
 const activeIdx = ref(0)
 
 const { data: recentData } = await useAsyncData('event-language-recent', async () => {
-  const resp = await v3RecentLanguages({
+  const resp = await getV3UsersSelfLanguagesRecent({
     query: { limit: 15 },
   })
   return resp.data ?? []

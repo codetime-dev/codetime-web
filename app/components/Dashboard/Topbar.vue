@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3ListSelfLatestLogs } from '~/api/v3'
+import { getV3UsersSelfLatestLogs } from '~/api/v3'
 import VSCodeIcon from '~/components/VSCodeIcon.vue'
 
 withDefaults(defineProps<{
@@ -18,7 +18,7 @@ const pending = autoResetRef(false, 1000)
 pending.value = true
 
 const resp = useAsyncData('user-latest-logs', async () => {
-  const r = await v3ListSelfLatestLogs({ query: { limit: 1 } })
+  const r = await getV3UsersSelfLatestLogs({ query: { limit: 1 } })
   return r.data?.[0]
 }, { server: false })
 

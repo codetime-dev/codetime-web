@@ -15,7 +15,9 @@ defineRouteMeta({
     summary: 'Search user workspace names',
     security: [{ bearerAuth: [] }, { cookieAuth: [] }],
     parameters: [
-      { name: 'q', in: 'query', required: true, schema: { type: 'string', minLength: 1 } },
+      // Nuxt's openapi-types reject `minLength` on a string schema —
+      // the handler enforces non-empty via its own validation.
+      { name: 'q', in: 'query', required: true, schema: { type: 'string' } },
       { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
     ],
     responses: {

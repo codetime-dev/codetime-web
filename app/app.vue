@@ -31,18 +31,28 @@ provide('user-pending', computed(() => status.value === 'pending' || status.valu
 // Preload Berkeley Mono Bold — the font used by the LandingTitle (LCP element
 // on /). Fetching in parallel with HTML parsing avoids the late-discovery
 // FOIT that pushes LCP past 4s on cold loads.
-useHead({
+//
+// Scoped to the landing route only. Dashboard / docs / user-profile pages
+// don't render the bold mono face, so an unconditional preload triggered
+// Chrome's "preloaded but not used within a few seconds" warning everywhere
+// else. The preconnect stays global — the regular-weight @font-face below
+// still fetches from cdn.jannchie.com on every page.
+const route = useRoute()
+const isLanding = computed(() => /^\/?[a-z-]{2,7}\/?$/i.test(route.path))
+useHead(() => ({
   link: [
-    {
-      rel: 'preload',
-      as: 'font',
-      type: 'font/woff2',
-      href: 'https://cdn.jannchie.com/fonts/BerkeleyMono-Bold.woff2',
-      crossorigin: 'anonymous',
-    },
+    ...(isLanding.value
+      ? [{
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff2',
+          href: 'https://cdn.jannchie.com/fonts/BerkeleyMono-Bold.woff2',
+          crossorigin: 'anonymous',
+        }]
+      : []),
     { rel: 'preconnect', href: 'https://cdn.jannchie.com', crossorigin: 'anonymous' },
   ],
-})
+}))
 </script>
 
 <template>

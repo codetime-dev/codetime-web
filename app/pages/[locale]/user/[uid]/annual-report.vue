@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import * as Plot from '@observablehq/plot'
-import { v3GetUserByUserId, v3GetYearlyReportData } from '~/api/v3'
+import { getV3LogsYearlyReportData, getV3UsersByUserId } from '~/api/v3'
 
 const route = useRoute()
 const uid = computed(() => Number(route.params.uid))
 const t = useI18N()
 const locale = useLocale()
 
-const { data: user } = await v3GetUserByUserId({
+const { data: user } = await getV3UsersByUserId({
   path: { user_id: uid.value },
 })
 
@@ -39,7 +39,7 @@ watchEffect(() => {
 
 const { share } = useShare()
 
-const yearlyDataResp = await v3GetYearlyReportData({
+const yearlyDataResp = await getV3LogsYearlyReportData({
   query: {
     user_id: uid.value,
     year: reportYear.value,

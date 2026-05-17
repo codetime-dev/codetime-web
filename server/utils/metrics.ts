@@ -104,13 +104,17 @@ class Histogram {
     const key = fmtLabels(labels)
     let bucket = this.observations.get(key)
     if (!bucket) {
+      // Array.from(...).fill(0) loses the element type in strict mode;
+      // an explicit number[] avoids the `unknown[]` inference.
       bucket = { buckets: Array.from({ length: this.buckets.length }).fill(0), sum: 0, count: 0 }
       this.observations.set(key, bucket)
     }
     for (let i = 0; i < this.buckets.length; i++) {
-      if (value <= this.buckets[i]) {
- bucket.buckets[i]++
-}
+      // i is bounded by this.buckets.length; both arrays are the same
+      // length. Non-null assert to skip noUncheckedIndexedAccess noise.
+      if (value <= this.buckets[i]!) {
+        bucket.buckets[i]!++
+      }
     }
     bucket.sum += value
     bucket.count += 1
@@ -127,8 +131,8 @@ class Histogram {
       const sep = labelStr ? ',' : ''
       let cum = 0
       for (let i = 0; i < this.buckets.length; i++) {
-        cum += h.buckets[i]
-        out.push(`${this.name}_bucket${base}${sep}le="${this.buckets[i]}"} ${cum}`)
+        cum += h.buckets[i]!
+        out.push(`${this.name}_bucket${base}${sep}le="${this.buckets[i]!}"} ${cum}`)
       }
       out.push(`${this.name}_bucket${base}${sep}le="+Inf"} ${h.count}`, `${this.name}_sum${labelStr} ${h.sum}`, `${this.name}_count${labelStr} ${h.count}`)
     }

@@ -647,6 +647,33 @@ export const ms: Partial<Translation> = {
         step4: 'Mula mengaturcara dan data akan muncul dalam 2-3 minit',
       },
     },
+    agentGuide: {
+      title: 'Jejak Sesi Agent AI Anda',
+      description: 'Pasang CLI codetime untuk merakam setiap sesi Claude Code secara automatik.',
+      token: {
+        title: 'Token Anda',
+        description: 'Salin token ini. Anda akan memasukkannya ke dalam CLI pada langkah terakhir.',
+      },
+      install: {
+        title: 'Pasang CLI',
+        description: 'Pasang codetime secara global dengan npm (atau pengurus pakej Node pilihan anda).',
+      },
+      configure: {
+        title: 'Konfigurasikan Token',
+        description: 'Jalankan arahan ini. CLI akan mula memuat naik pada sesi agent seterusnya.',
+        hint: 'Gantikan <token> dengan nilai yang disalin di atas.',
+      },
+      hook: {
+        title: 'Sambungkan Agent',
+        description: 'Jalankan codetime install — CLI mengesan setiap AI agent yang disokong pada mesin anda secara automatik dan menyediakan hook untuk anda.',
+        supports: 'Disokong sekarang:',
+        latency: 'Gunakan mana-mana agent seperti biasa. Sesi muncul di sini dalam ~2 minit selepas agent selesai.',
+      },
+    },
+    agent: {
+      freeLimit: 'Pelan percuma: menunjukkan sesi 30 hari terakhir. Naik taraf ke Pro untuk sejarah penuh.',
+      upgrade: 'Naik Taraf',
+    },
   },
   button: {
     copy: 'Salin',

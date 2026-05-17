@@ -3,7 +3,7 @@ import type { PlotOptions } from '@observablehq/plot'
 import type { TagResponse } from '~/api/v3/types.gen'
 import * as Plot from '@observablehq/plot'
 import * as d3 from 'd3'
-import { v3GetTagHistory } from '~/api/v3'
+import { getV3TagsByTagIdHistory } from '~/api/v3'
 import { getDurationString } from '~/utils/format'
 import { getTagDisplay } from '~/utils/tag'
 
@@ -37,7 +37,7 @@ const { data: tagStats, pending: loadingStats, refresh } = await useAsyncData(
       const startDate = new Date()
       startDate.setDate(endDate.getDate() - days)
 
-      const response = await v3GetTagHistory({
+      const response = await getV3TagsByTagIdHistory({
         path: { tag_id: props.tag.id },
         query: {
           start_datetime: startDate,

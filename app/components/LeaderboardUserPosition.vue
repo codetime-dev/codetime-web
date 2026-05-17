@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3GetSelfOverallRank } from '~/api/v3'
+import { getV3UsersSelfOverallRank } from '~/api/v3'
 
 const props = defineProps<{
   days: number
@@ -7,7 +7,7 @@ const props = defineProps<{
 
 const userRankData = useAsyncData(`user-rank-${props.days}`, async () => {
   try {
-    const result = await v3GetSelfOverallRank({ query: { days: props.days } })
+    const result = await getV3UsersSelfOverallRank({ query: { days: props.days } })
     return result.data
   }
   catch (error) {

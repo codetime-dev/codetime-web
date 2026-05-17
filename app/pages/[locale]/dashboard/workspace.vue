@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3GetWorkspaceFiles, v3RecentWorkspaces } from '~/api/v3'
+import { getV3UsersSelfWorkspace, getV3UsersSelfWorkspacesRecent } from '~/api/v3'
 
 definePageMeta({
   layout: 'dashboard',
@@ -19,7 +19,7 @@ const router = useRouter()
 const projectName = computed(() => project.value?.label)
 
 const { data: recentWorkspacesData } = useAsyncData('workspace-recent', async () => {
-  const resp = await v3RecentWorkspaces({ query: { limit: 6 } })
+  const resp = await getV3UsersSelfWorkspacesRecent({ query: { limit: 6 } })
   return resp.data?.results?.map(r => r.workspaceName) ?? []
 }, { server: false, default: () => [] })
 
@@ -46,7 +46,7 @@ const { data, pending } = useAsyncData('workspace-files', async () => {
   if (!projectName.value) {
     return null
   }
-  const resp = await v3GetWorkspaceFiles({
+  const resp = await getV3UsersSelfWorkspace({
     query: {
       project: projectName.value,
       days: days.value,

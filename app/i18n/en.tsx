@@ -201,6 +201,7 @@ export const en: Translation = {
         leaderboard: 'Leaderboard',
         workspace: 'Workspace',
         tags: 'Tags',
+        agent: 'Agents',
       },
       description: {
         overview: 'View all your CodeTime data.',
@@ -210,6 +211,7 @@ export const en: Translation = {
         leaderboard: 'View the CodeTime leaderboard of all users.',
         workspace: 'View your workspace details.',
         tags: 'Manage tags and rules for automatic workspace categorization.',
+        agent: 'Turns, tools, and token usage from your AI coding agents.',
       },
     },
     overview: {
@@ -312,6 +314,33 @@ export const en: Translation = {
         step4: 'Start coding and data will appear in 2-3 minutes',
     },
   },
+    agentGuide: {
+      title: 'No vibe data yet',
+      description: 'Once the codetime CLI is installed and configured on a machine, your Claude Code, Codex, OpenCode, and Pi sessions will start appearing here.',
+      token: {
+        title: 'Your Token',
+        description: 'Copy this token. You will feed it into the CLI in the final step.',
+      },
+      install: {
+        title: 'Install the CLI',
+        description: 'Install codetime globally with npm (or your favorite Node package manager).',
+      },
+      configure: {
+        title: 'Configure Token',
+        description: 'Run this command. The CLI starts uploading on your next agent session.',
+        hint: 'Replace <token> with the value copied above.',
+      },
+      hook: {
+        title: 'Hook Into Agents',
+        description: 'Run codetime install — the CLI auto-detects every supported AI agent on your machine and wires up the hooks for you.',
+        supports: 'Currently supported:',
+        latency: 'Use any agent normally. Sessions appear here within ~2 minutes of the agent finishing.',
+      },
+    },
+    agent: {
+      freeLimit: 'Free plan: showing sessions from the last 30 days. Upgrade to Pro for full history.',
+      upgrade: 'Upgrade',
+    },
   profile: {
     identity: {
       title: 'Identity',

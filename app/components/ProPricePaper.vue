@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatDistanceToNow } from 'date-fns'
 import { de, es, fr, it, ja, ko, ms, ptBR, ru, zhCN, zhTW } from 'date-fns/locale'
-import { v3GetActiveDiscounts } from '~/api/v3/sdk.gen'
+import { getV3DiscountsActive } from '~/api/v3/sdk.gen'
 
 const props = defineProps<{
   variant: 'monthly' | 'annual' | 'one-time'
@@ -42,7 +42,7 @@ const { data: activeDiscounts } = await useAsyncData('activeDiscounts', async ()
     return []
   }
   try {
-    const result = await v3GetActiveDiscounts()
+    const result = await getV3DiscountsActive()
     return result.data
   }
   catch (error) {

@@ -305,7 +305,9 @@ export default defineEventHandler(async (event) => {
  current = [r]
 }
         else {
-          const last = current.at(-1)
+          // current.length > 0 here by the if-branch above; the non-null
+          // assertion is for TS's benefit only.
+          const last = current.at(-1)!
           const diffMin = (r.recorded_at.getTime() - last.recorded_at.getTime()) / 60_000
           if (diffMin <= 5) {
  current.push(r)
@@ -346,8 +348,10 @@ export default defineEventHandler(async (event) => {
 
   for (const b of blocks) {
     const duration = b.rows.length
-    const first = b.rows[0]
-    const last = b.rows.at(-1)
+    // blocks only contain non-empty row arrays (checked at push sites
+    // above) — first/last are guaranteed present.
+    const first = b.rows[0]!
+    const last = b.rows.at(-1)!
     const startTime = first.recorded_at
     const endTime = new Date(last.recorded_at.getTime() + 60_000)
     const startOffset = tzOffsetMinutes(tz, startTime)

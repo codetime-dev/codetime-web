@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TagResponse } from '~/api/v3/types.gen'
-import { v3UpdateTag } from '~/api/v3'
+import { putV3TagsByTagId } from '~/api/v3'
 import { useUser } from '~/utils'
 import { getTagDisplay } from '~/utils/tag'
 
@@ -254,7 +254,7 @@ async function saveChanges() {
   try {
     saving.value = true
     const newRules = convertEditingGroupsToRules(editingRuleGroups.value)
-    await v3UpdateTag({
+    await putV3TagsByTagId({
       path: { tag_id: props.tag.id },
       body: {
         name: props.tag.name,

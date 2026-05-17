@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { v3RecentWorkspaces, v3SearchWorkspaces } from '~/api/v3'
+import { getV3UsersSelfWorkspacesRecent, getV3UsersSelfWorkspacesSearch } from '~/api/v3'
 
 type ProjectOption = { label: string, id: string, isRecent?: boolean }
 
@@ -12,7 +12,7 @@ let recentPromise: Promise<ProjectOption[]> | null = null
 async function getRecent(): Promise<ProjectOption[]> {
   if (!recentPromise) {
     recentPromise = (async () => {
-      const resp = await v3RecentWorkspaces({ query: { limit: 15 } })
+      const resp = await getV3UsersSelfWorkspacesRecent({ query: { limit: 15 } })
       return (resp.data?.results ?? []).map(r => ({
         label: r.workspaceName,
         id: r.workspaceName,
@@ -27,7 +27,7 @@ async function loader(q: string): Promise<ProjectOption[]> {
   if (!q) {
     return getRecent()
   }
-  const resp = await v3SearchWorkspaces({ query: { q, limit: 10 } })
+  const resp = await getV3UsersSelfWorkspacesSearch({ query: { q, limit: 10 } })
   return (resp.data?.results ?? []).map(item => ({
     label: item.workspaceName,
     id: item.workspaceName,

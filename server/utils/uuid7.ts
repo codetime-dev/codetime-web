@@ -25,10 +25,12 @@ export function uuid7(now: number = Date.now()): string {
   buf[5] = Number(ms & 0xFFn)
   // 10 random bytes for the remaining bits
   randomBytes(10).copy(buf, 6)
-  // Set version (7) in the high nibble of byte 6
-  buf[6] = (buf[6] & 0x0F) | 0x70
+  // Set version (7) in the high nibble of byte 6. Indices 6 and 8 are
+  // guaranteed present (16-byte buffer) — the non-null asserts are for
+  // TS's noUncheckedIndexedAccess only.
+  buf[6] = (buf[6]! & 0x0F) | 0x70
   // Set variant (10xx) in the high bits of byte 8
-  buf[8] = (buf[8] & 0x3F) | 0x80
+  buf[8] = (buf[8]! & 0x3F) | 0x80
   const hex = buf.toString('hex')
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
 }

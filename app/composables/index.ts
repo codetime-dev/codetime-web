@@ -1,4 +1,4 @@
-import { v3CreateCheckout } from '~/api/v3'
+import { postV3PaymentsCheckout } from '~/api/v3'
 
 export function useCheckoutLink(isAnuual: Ref<boolean>, isOneTime: Ref<boolean>) {
   const user = useUser()
@@ -11,7 +11,7 @@ export function useCheckoutLink(isAnuual: Ref<boolean>, isOneTime: Ref<boolean>)
       return null
     }
 
-    const resp = await v3CreateCheckout({
+    const resp = await postV3PaymentsCheckout({
       body: {
         type: isAnuual.value ? 'yearly' : 'monthly',
         product: isOneTime.value ? 'onetime' : 'subscription',

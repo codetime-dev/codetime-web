@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as d3 from 'd3'
-import { v3GetLeaderboard } from '~/api/v3'
+import { getV3PublicLeaderboard } from '~/api/v3'
 
 const props = defineProps<{
   days: number
@@ -10,7 +10,7 @@ const days = computed(() => props.days)
 const t = useI18N()
 
 const resp = useAsyncData(`leaderboard-${days.value}`, async () => {
-  const result = await v3GetLeaderboard({
+  const result = await getV3PublicLeaderboard({
     query: {
       days: days.value,
     },
