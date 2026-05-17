@@ -1,17 +1,9 @@
-import * as fs from 'node:fs'
-import { rokuPreset } from '@roku-ui/preset'
 import { defineConfig } from 'unocss'
-
-const file = fs.readFileSync('node_modules/@roku-ui/vue/dist/index.js', 'utf8')
 
 // Codetime design tokens are declared in app/assets/tokens.css.
 // The theme below exposes them to UnoCSS utilities so authoring stays
-// short (e.g. `bg-ct-surface`, `text-ct-fg`, `rounded-ct-lg`) without a
-// hard dependency on @roku-ui's color recipes.
+// short (e.g. `bg-ct-surface`, `text-ct-fg`, `rounded-ct-lg`).
 export default defineConfig({
-  presets: [
-    rokuPreset(),
-  ],
   theme: {
     colors: {
       ct: {
@@ -61,7 +53,4 @@ export default defineConfig({
     'i-codicon-terminal-linux',
     'i-mdi-desktop-classic',
   ],
-  content: {
-    inline: [file],
-  },
 })

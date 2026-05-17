@@ -51,7 +51,7 @@ const WORKSPACE_PROFILES: WorkspaceProfile[] = [
     languages: { vue: 0.5, typescript: 0.35, markdown: 0.15 },
   },
   {
-    name: 'roku-ui',
+    name: 'design-system',
     weight: 0.34,
     languages: { vue: 0.4, typescript: 0.45, markdown: 0.15 },
   },

@@ -23,7 +23,7 @@ Codetime Web V3 is a Nuxt.js web application for code time analytics, running at
 ### Framework Stack
 
 - **Frontend:** Nuxt.js 4 with Vue 3 and TypeScript
-- **Styling:** UnoCSS with @roku-ui/preset and @roku-ui/vue components
+- **Styling:** UnoCSS with design tokens declared in `app/assets/tokens.css` and exposed via the `ct-*` theme block in `uno.config.ts`
 - **API:** Auto-generated TypeScript SDK from OpenAPI spec
 - **Backend:** Nuxt/Nitro routes under `server/routes/v3/...` own every
   `/v3/*` endpoint. The legacy Python service (`codetime-server-v3`,
@@ -85,7 +85,7 @@ metadata, and the things to deliberately NOT do — live in
 
 ### Styling Conventions
 
-- UnoCSS utility-first approach with Roku UI preset
+- UnoCSS utility-first approach driven by `ct-*` theme tokens
 - Safelist includes platform icons (`i-mdi-apple`, `i-mdi-microsoft-windows`, etc.)
 - Font stack: Inter for Latin, HarmonyOS Sans for CJK languages
 - VSCode file type icons available in `public/vscode-icons/`

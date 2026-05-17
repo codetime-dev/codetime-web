@@ -1,4 +1,4 @@
-/* Codetime design tokens. Independent of @roku-ui; both schemes mapped here. */
+/* Codetime design tokens. Both schemes mapped here. */
 
 /* Suppress all transitions/animations while the color scheme is being switched
    so dual-tone interpolations don't flash through ugly intermediate colors. */

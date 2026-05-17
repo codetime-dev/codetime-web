@@ -26,12 +26,6 @@ importers:
       '@resvg/resvg-js':
         specifier: ^2.6.2
         version: 2.6.2
-      '@roku-ui/preset':
-        specifier: 0.31.0
-        version: 0.31.0
-      '@roku-ui/vue':
-        specifier: 0.31.0
-        version: 0.31.0(typescript@6.0.3)
       '@sentry/nuxt':
         specifier: ^10.52.0
         version: 10.52.0(651b36c20f6d85acd5cfc01d064e54d3)
@@ -2935,12 +2929,6 @@ packages:
     resolution: {integrity: sha512-xBaJish5OeGmniDj9cW5PRa/PtmuVU3ziqrbr5xJj901ZDN4TosrVaNZpEiLZAxdfnhAe7uQ7QFWfjPe9d9K2Q==}
     engines: {node: '>= 10'}
 
-  '@roku-ui/preset@0.31.0':
-    resolution: {integrity: sha512-ew2aGG/pwXXmjrWDpPlzOhRA3fVuflM9OM2aIuVpuUIxw8v45VHM2zTuQ8UyC7Z038wlF83wEn5xhorHuEUFDw==}
-
-  '@roku-ui/vue@0.31.0':
-    resolution: {integrity: sha512-SDyqSDLxuo5uFNyIZJ0j8jMeoHlttXKgNgYWEmAjLc2qXWzqBTawcSvX420ZX06O4ZJktactnY52FJThlOQ3pg==}
-
   '@rolldown/debug@1.0.0':
     resolution: {integrity: sha512-u29og41IXsrW3Ky2wM0WSp7toxztv2xoDxtHl0I4Ek6YADQV0CAjUEM+/zRTzHo+o9gy/FhiOS54NukuEHPkgg==}
 
@@ -4132,9 +4120,6 @@ packages:
   '@unocss/preset-wind@66.6.8':
     resolution: {integrity: sha512-F0mdmwK/HelYOgBRMHl+Yx/VyARCQJtPlcgPBejI3E9ZWOZlKS7hvPqPrgvS63WTGMHgM3/22cGuYYFjpi/ugA==}
 
-  '@unocss/reset@66.5.10':
-    resolution: {integrity: sha512-xlydsCqbmVtA8QbVWv8+R66v4MJzeDXYsdoGDz7xsa2r65RD4UvJFZuyueY7+/bhzns9QhNOxltEiPi06j3Gvw==}
-
   '@unocss/reset@66.6.8':
     resolution: {integrity: sha512-H+YP3ltizUiPO9FzFgFhv8WGsefO7fTgT1If1/9ritPDqZlvzTqMmjelhcq8D8MGoQ1RQBUvtkZ5HJoKVY0Tgw==}
 
@@ -4285,11 +4270,6 @@ packages:
 
   '@vue/shared@3.5.34':
     resolution: {integrity: sha512-24uqU4OIiX29ryC3MeWid/Xf2fa2EFRUVLb77nRhk+UrTVrh/XiGtFAFmJBAtBRbjwNdsPRP+jj/OL27Eg1NDA==}
-
-  '@vueuse/components@13.9.0':
-    resolution: {integrity: sha512-0DDFpjG3hEEK+3YgSzE/OzOGqpo/KmxcXWzW2YdmgahZvaoUdegn68GmbdcHRJE7CH55dDj13Cz47iN8QoI3jQ==}
-    peerDependencies:
-      vue: ^3.5.0
 
   '@vueuse/components@14.3.0':
     resolution: {integrity: sha512-jnrJrecSfa8H+G6wtAwsCnMtKbKZDSpu5JZDuulZikWrHb6uuS5SyXP6M2b79tofxipm78VWDSzW+58pu1yglA==}
@@ -8554,11 +8534,6 @@ packages:
     peerDependencies:
       vue: ^3.3.0
 
-  vue-wf@0.7.0:
-    resolution: {integrity: sha512-G4VdBdeCBuuYI6o+UJsiYTguKII7nd52EigYLVH2Pol+AjRnGXF8ddxkqg6d1BbwpQfnt18/GpZYcKpAesKs1A==}
-    peerDependencies:
-      vue: ^3.0.0
-
   vue-wf@0.8.2:
     resolution: {integrity: sha512-1Pz1c69kysD/ns4BXTLrv5EOWv92mRgbWvIQo4Ny9Kb/L72hTfwt0VViskzlsSWPtveA7Oqj18o8ZxVz1HbO4A==}
     peerDependencies:
@@ -11460,19 +11435,6 @@ snapshots:
       '@resvg/resvg-js-win32-ia32-msvc': 2.6.2
       '@resvg/resvg-js-win32-x64-msvc': 2.6.2
 
-  '@roku-ui/preset@0.31.0': {}
-
-  '@roku-ui/vue@0.31.0(typescript@6.0.3)':
-    dependencies:
-      '@formkit/auto-animate': 0.9.0
-      '@unocss/reset': 66.5.10
-      '@vueuse/core': 14.3.0(vue@3.5.34(typescript@6.0.3))
-      culori: 4.0.2
-      vue: 3.5.34(typescript@6.0.3)
-      vue-wf: 0.7.0(vue@3.5.34(typescript@6.0.3))
-    transitivePeerDependencies:
-      - typescript
-
   '@rolldown/debug@1.0.0': {}
 
   '@rolldown/pluginutils@1.0.0': {}
@@ -12713,8 +12675,6 @@ snapshots:
       '@unocss/core': 66.6.8
       '@unocss/preset-wind3': 66.6.8
 
-  '@unocss/reset@66.5.10': {}
-
   '@unocss/reset@66.6.8': {}
 
   '@unocss/rule-utils@66.6.8':
@@ -13058,12 +13018,6 @@ snapshots:
       vue: 3.5.34(typescript@6.0.3)
 
   '@vue/shared@3.5.34': {}
-
-  '@vueuse/components@13.9.0(vue@3.5.34(typescript@6.0.3))':
-    dependencies:
-      '@vueuse/core': 13.9.0(vue@3.5.34(typescript@6.0.3))
-      '@vueuse/shared': 13.9.0(vue@3.5.34(typescript@6.0.3))
-      vue: 3.5.34(typescript@6.0.3)
 
   '@vueuse/components@14.3.0(vue@3.5.34(typescript@6.0.3))':
     dependencies:
@@ -18267,12 +18221,6 @@ snapshots:
 
   vue-virtual-scroller@3.0.3(vue@3.5.34(typescript@6.0.3)):
     dependencies:
-      vue: 3.5.34(typescript@6.0.3)
-
-  vue-wf@0.7.0(vue@3.5.34(typescript@6.0.3)):
-    dependencies:
-      '@vueuse/components': 13.9.0(vue@3.5.34(typescript@6.0.3))
-      '@vueuse/core': 13.9.0(vue@3.5.34(typescript@6.0.3))
       vue: 3.5.34(typescript@6.0.3)
 
   vue-wf@0.8.2(vue@3.5.34(typescript@6.0.3)):
