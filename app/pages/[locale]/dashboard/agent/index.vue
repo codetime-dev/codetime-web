@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { VibeDashboard } from '~/components/Vibe/types'
 import { getV3AgentSessions, getV3Machines } from '~/api/v3'
-import { compact, fmtUsd } from '~/components/Vibe/types'
+import { compact } from '~/components/Vibe/types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+
+const { format: fmtCurrency } = useExchangeRate()
 
 type Machine = {
   id: string
@@ -343,6 +346,7 @@ const bucketMeta = computed(() => {
         :items="sourceItems"
         empty-title="No agents yet"
       />
+      <VibeCurrencyPicker />
       <button
         class="range-refresh"
         :disabled="dashboardPending"
@@ -404,7 +408,7 @@ const bucketMeta = computed(() => {
       <VibeSection
         num="05"
         :title="sectionTitles.models"
-        :meta="fmtUsd(totalCostUsd)"
+        :meta="fmtCurrency(totalCostUsd)"
       >
         <VibeModelCosts :rows="dashboard.modelCosts" />
       </VibeSection>

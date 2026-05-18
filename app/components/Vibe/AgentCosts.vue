@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { VibeAgentModelSegment, VibeAgentRow } from './types'
 import { computed } from 'vue'
-import { agentSourceMeta, compactParts, fmtDurationShort, fmtUsd, modelColor } from './types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+import { agentSourceMeta, compactParts, fmtDurationShort, modelColor } from './types'
 
 // No legend below the bar: each segment already carries the model id
 // in its title tooltip, and the table itself doesn't need a colour
@@ -14,6 +15,8 @@ import { agentSourceMeta, compactParts, fmtDurationShort, fmtUsd, modelColor } f
 // mostly GPT-5" at a glance.
 
 const props = defineProps<{ rows: VibeAgentRow[] }>()
+
+const { format: fmtCurrency } = useExchangeRate()
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.table)
 
@@ -94,13 +97,13 @@ const view = computed(() => {
               :key="seg.model"
               class="bar-seg"
               :style="{ width: `${seg.segPct}%`, background: seg.color }"
-              :title="`${seg.model} · ${fmtUsd(seg.estimatedCostUsd)}`"
+              :title="`${seg.model} · ${fmtCurrency(seg.estimatedCostUsd)}`"
             />
           </template>
           <span v-else class="bar-seg fallback" :style="{ width: '100%' }" />
         </span>
       </span>
-      <span class="num cost">{{ fmtUsd(row.cost) }}</span>
+      <span class="num cost">{{ fmtCurrency(row.cost) }}</span>
       <span class="num share">{{ row.sharePct.toFixed(1) }}%</span>
       <span class="num tokens">
         {{ compactParts(row.total).value }}{{ compactParts(row.total).unit ?? '' }}

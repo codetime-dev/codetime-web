@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { VibeHeatmapCell } from './types'
 import { computed } from 'vue'
-import { compact, fmtUsd } from './types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+import { compact } from './types'
 
 // Hour × weekday heatmap of estimated agent cost. Color intensity is
 // log-scaled so a few high-spend cells don't flatten the rest of the
@@ -11,6 +12,7 @@ import { compact, fmtUsd } from './types'
 
 const props = defineProps<{ cells: VibeHeatmapCell[] }>()
 
+const { format: fmtCurrency } = useExchangeRate()
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.rhythm)
 const locale = useLocale()
@@ -202,7 +204,7 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
           class="cell"
           :style="{ '--i': intensity(value) }"
           :class="{ empty: value === 0 }"
-          :title="`${DAY_LABELS[dayIdx]} ${pad(hour)}:00 · ${compact(value)} calls · ${fmtUsd(built.calls[dayIdx]?.[hour] ?? 0)}`"
+          :title="`${DAY_LABELS[dayIdx]} ${pad(hour)}:00 · ${compact(value)} calls · ${fmtCurrency(built.calls[dayIdx]?.[hour] ?? 0)}`"
         />
       </template>
     </div>
@@ -211,12 +213,12 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
       <li>
         <span class="lbl">{{ L?.peakHour ?? 'Peak hour' }}</span>
         <span class="val">{{ peakHour.label }}</span>
-        <span class="sub">{{ compact(peakHour.value) }} {{ L?.calls ?? 'calls' }} · {{ fmtUsd(peakHour.calls) }}</span>
+        <span class="sub">{{ compact(peakHour.value) }} {{ L?.calls ?? 'calls' }} · {{ fmtCurrency(peakHour.calls) }}</span>
       </li>
       <li>
         <span class="lbl">{{ L?.peakDay ?? 'Peak day' }}</span>
         <span class="val">{{ peakDay.label }}</span>
-        <span class="sub">{{ compact(peakDay.value) }} {{ L?.calls ?? 'calls' }} · {{ fmtUsd(peakDay.calls) }}</span>
+        <span class="sub">{{ compact(peakDay.value) }} {{ L?.calls ?? 'calls' }} · {{ fmtCurrency(peakDay.calls) }}</span>
       </li>
       <li>
         <span class="lbl">{{ L?.active ?? 'Active' }}</span>

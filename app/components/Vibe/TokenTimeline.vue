@@ -3,7 +3,8 @@ import type { PlotOptions } from '@observablehq/plot'
 import type { VibeTokenBucket } from './types'
 import * as Plot from '@observablehq/plot'
 import { computed, ref } from 'vue'
-import { agentColor, compactParts, fmtUsd } from './types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+import { agentColor, compactParts } from './types'
 
 // Stacked per-bucket bar timeline, coloured by agent source (codex /
 // claude-code / opencode / pi / …). The user picks the metric the bars
@@ -22,6 +23,8 @@ const props = defineProps<{
   since?: string | null
   until?: string
 }>()
+
+const { format: fmtCurrency } = useExchangeRate()
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.timeline)
 
@@ -227,7 +230,7 @@ const options = computed<PlotOptions>(() => {
         fillOpacity: 0.9,
         tip: true,
         title: (d: Row) =>
-          `${d.source}\n${formatBucketTs(d.ts)}\n${fmtUsd(d.cost)} · ${fmtCompact(d.tokens)} ${tokensLabel.value}\n${fmtCompact(d.modelCalls)} ${callsLabel.value}`,
+          `${d.source}\n${formatBucketTs(d.ts)}\n${fmtCurrency(d.cost)} · ${fmtCompact(d.tokens)} ${tokensLabel.value}\n${fmtCompact(d.modelCalls)} ${callsLabel.value}`,
       }),
       Plot.ruleY([0], { stroke: 'var(--ct-border-strong)' }),
     ],
@@ -248,7 +251,7 @@ const options = computed<PlotOptions>(() => {
           @click="metric = 'cost'"
         >
           <span class="metric-tab-label">{{ L?.cost ?? 'cost' }}</span>
-          <span class="metric-tab-value">{{ fmtUsd(totals.cost) }}</span>
+          <span class="metric-tab-value">{{ fmtCurrency(totals.cost) }}</span>
         </button>
         <button
           type="button"
@@ -310,7 +313,7 @@ const options = computed<PlotOptions>(() => {
   padding: 5px 14px;
   background: transparent;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--ct-radius-md);
   cursor: pointer;
   text-align: left;
   font-family: inherit;

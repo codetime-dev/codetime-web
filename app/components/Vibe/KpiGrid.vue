@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { VibeOverviewBucket, VibeSummary } from './types'
 import { computed } from 'vue'
-import { compactParts as compact, fmtDurationParts, fmtUsdCompact } from './types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+import { compactParts as compact, fmtDurationParts } from './types'
 
 // Six KPI tiles laid out as a 6-col grid (collapses to 3-col then
 // 2-col on narrower viewports). The shape and sparkline behaviour
@@ -13,6 +14,8 @@ const props = defineProps<{
   overview: VibeOverviewBucket[]
   totalCostUsd?: number
 }>()
+
+const { formatCompactNumber, currencyMeta } = useExchangeRate()
 
 type Kpi = {
   index: string
@@ -108,7 +111,7 @@ const kpis = computed<Kpi[]>(() => {
     {
       index: '04',
       label: l?.cost ?? 'cost',
-      value: cost > 0 ? fmtUsdCompact(cost).replace(/^\$/, '') : '—',
+      value: cost > 0 ? formatCompactNumber(cost) : '—',
       unit: undefined,
       delta: trend(costBucket),
       caption: cost > 0 ? (l?.estimated ?? 'estimated') : '—',
@@ -155,7 +158,7 @@ const kpis = computed<Kpi[]>(() => {
         </span>
       </div>
       <div class="value">
-        <span v-if="kpi.accentValue" class="value-prefix">$</span>
+        <span v-if="kpi.accentValue" class="value-prefix">{{ currencyMeta.symbol }}</span>
         <span class="value-num">{{ kpi.value }}</span>
         <span v-if="kpi.unit" class="value-unit">{{ kpi.unit }}</span>
       </div>

@@ -10,7 +10,10 @@ import type {
   VibeTokenBucket,
   VibeToolRow,
 } from '~/components/Vibe/types'
-import { compact, fmtUsd } from '~/components/Vibe/types'
+import { compact } from '~/components/Vibe/types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+
+const { format: fmtCurrency } = useExchangeRate()
 
 // Public demo of the Vibe (agent telemetry) dashboard. Reuses the same
 // Vibe* components as /dashboard/agent but feeds them deterministic
@@ -529,7 +532,7 @@ const locale = useLocale()
     <VibeSection
       num="05"
       :title="sectionTitles.models"
-      :meta="fmtUsd(totalCostUsd)"
+      :meta="fmtCurrency(totalCostUsd)"
     >
       <VibeModelCosts :rows="dashboard.modelCosts" />
     </VibeSection>

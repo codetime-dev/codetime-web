@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { VibeModelRow } from './types'
 import { computed } from 'vue'
-import { compact, fmtUsd, providerInfoFor } from './types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+import { compact, providerInfoFor } from './types'
 
 // Per-model cost breakdown — column layout mirrors agent-time's
 // ModelCosts.vue so the two dashboards read identical:
@@ -12,6 +13,8 @@ import { compact, fmtUsd, providerInfoFor } from './types'
 // from the live OpenRouter catalogue with a frozen fallback table).
 
 const props = defineProps<{ rows: VibeModelRow[] }>()
+
+const { format: fmtCurrency } = useExchangeRate()
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.table)
 
@@ -110,7 +113,7 @@ function fmtPct(value: number): string {
         class="num cost"
         :class="{ missing: row.pricingSource === 'missing' }"
       >
-        {{ row.pricingSource === 'missing' ? '—' : fmtUsd(row.cost) }}
+        {{ row.pricingSource === 'missing' ? '—' : fmtCurrency(row.cost) }}
       </span>
       <span class="num share">{{ row.share.toFixed(1) }}%</span>
     </li>
@@ -211,7 +214,7 @@ function fmtPct(value: number): string {
 .model-tag.fast {
   color: var(--ct-primary);
   background: color-mix(in srgb, var(--ct-primary) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ct-primary) 35%, transparent);
+  border-radius: 999px;
 }
 
 .num {

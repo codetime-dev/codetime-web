@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { VibeProjectRow, VibeProjectSourceSegment } from './types'
 import { computed } from 'vue'
-import { agentColor, compactParts, fmtDurationShort, fmtUsd } from './types'
+import { useExchangeRate } from '~/composables/useExchangeRate'
+import { agentColor, compactParts, fmtDurationShort } from './types'
 
 // Top-N project leaderboard ranked by estimated cost. Each row gets a
 // horizontal bar whose width is relative to the top project, segmented
@@ -10,6 +11,8 @@ import { agentColor, compactParts, fmtDurationShort, fmtUsd } from './types'
 // agent-time's project leaderboard idiom.
 
 const props = defineProps<{ rows: VibeProjectRow[] }>()
+
+const { format: fmtCurrency } = useExchangeRate()
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.table)
 
@@ -98,13 +101,13 @@ const legend = computed(() => {
               :key="seg.source"
               class="bar-seg"
               :style="{ width: `${seg.segPct}%`, background: seg.color }"
-              :title="`${seg.source} · ${fmtUsd(seg.estimatedCostUsd)}`"
+              :title="`${seg.source} · ${fmtCurrency(seg.estimatedCostUsd)}`"
             />
           </template>
           <span v-else class="bar-seg fallback" :style="{ width: '100%' }" />
         </span>
       </span>
-      <span class="num cost">{{ fmtUsd(row.cost) }}</span>
+      <span class="num cost">{{ fmtCurrency(row.cost) }}</span>
       <span class="num share">{{ row.sharePct.toFixed(1) }}%</span>
       <span class="num tokens">
         {{ compactParts(row.total).value }}{{ compactParts(row.total).unit ?? '' }}
