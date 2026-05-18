@@ -167,6 +167,7 @@ export const ru: Partial<Translation> = {
           export: 'Экспорт данных',
           import: 'Импорт данных',
           more: 'Другие отчеты',
+          agent: 'Телеметрия Agent: стоимость, токены, инструменты и ритм',
         },
       },
       button: 'Бесплатно навсегда',
@@ -190,6 +191,12 @@ export const ru: Partial<Translation> = {
       button: 'Подписаться сейчас',
     },
     needLogin: 'Необходимо войти в систему',
+  },
+  demoBanner: {
+    overviewPrefix: 'Демо-данные — войдите и подключите плагин VS Code или JetBrains через',
+    overviewSuffix: ', чтобы увидеть свои.',
+    agentPrefix: 'Демо-данные — войдите и направьте агента через',
+    agentSuffix: ', чтобы увидеть свои.',
   },
   dashboard: {
     loginRequired:

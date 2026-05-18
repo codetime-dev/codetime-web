@@ -36,6 +36,7 @@ const t = useI18N()
             <FeatureItem>{{ t.plan.basic.features.item.codetimeLanguaeTrend }}</FeatureItem>
             <FeatureItem>{{ t.plan.basic.features.item.codetimeProjectTrend }}</FeatureItem>
             <FeatureItem>{{ t.plan.basic.features.item.badge }}</FeatureItem>
+            <FeatureItem>{{ t.plan.basic.features.item.agent }}</FeatureItem>
             <FeatureItem>{{ t.plan.basic.features.item.export }}</FeatureItem>
             <FeatureItem not-yet>
               {{ t.plan.basic.features.item.import }}

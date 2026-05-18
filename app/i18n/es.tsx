@@ -156,6 +156,7 @@ export const es: Partial<Translation> = {
           export: 'Exportar datos',
           import: 'Importar datos',
           more: 'Más informes',
+          agent: 'Telemetría de Agent: coste, tokens, herramientas y ritmo',
         },
       },
       button: 'Gratis para siempre',
@@ -179,6 +180,12 @@ export const es: Partial<Translation> = {
       button: 'Suscribirse ahora',
     },
     needLogin: 'Necesita iniciar sesión',
+  },
+  demoBanner: {
+    overviewPrefix: 'Datos de ejemplo — inicia sesión y conecta el plugin de VS Code o JetBrains mediante',
+    overviewSuffix: 'para ver los tuyos.',
+    agentPrefix: 'Datos de ejemplo — inicia sesión y envía un agente a través de',
+    agentSuffix: 'para ver los tuyos.',
   },
   dashboard: {
     loginRequired: '¡Bienvenido al panel de CodeTime! Por favor, inicia sesión para ver tus datos de tiempo de programación, o haz clic en el botón de demostración a continuación para experimentar el panel de demostración.',

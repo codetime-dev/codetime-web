@@ -156,6 +156,7 @@ export const zhTW: Partial<Translation> = {
           export: '數據匯出',
           import: '數據匯入',
           more: '更多報告',
+          agent: 'Agent 編程統計：成本、Token、工具與節奏',
         },
       },
       button: '永久免費',
@@ -179,6 +180,12 @@ export const zhTW: Partial<Translation> = {
       button: '立即訂閱',
     },
     needLogin: '需要登入',
+  },
+  demoBanner: {
+    overviewPrefix: '示例數據 — 登入後將 VS Code / JetBrains 外掛連線至',
+    overviewSuffix: '即可查看你自己的數據。',
+    agentPrefix: '示例數據 — 登入後將你的 agent 連線至',
+    agentSuffix: '即可查看你自己的數據。',
   },
   dashboard: {
     loginRequired: '歡迎訪問 CodeTime 儀表板！請登入以查看你的程式設計時間數據，或者點擊下方的演示按鈕體驗演示儀表板。',

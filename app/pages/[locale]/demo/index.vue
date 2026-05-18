@@ -89,6 +89,8 @@ useSeoMeta({
   description: 'A preview of the CodeTime dashboard rendered against synthetic data — no login required.',
   robots: 'noindex',
 })
+
+const locale = useLocale()
 </script>
 
 <template>
@@ -98,6 +100,16 @@ useSeoMeta({
     :description="t.dashboard.pageHeader.description.overview"
   />
   <DashboardPageContent>
+    <div class="demo-banner">
+      <i class="i-tabler-info-circle" />
+      <span>
+        {{ t.demoBanner.overviewPrefix }}
+        <NuxtLink :to="`/${locale}/dashboard`" class="demo-banner-link">
+          /dashboard
+        </NuxtLink>
+        {{ t.demoBanner.overviewSuffix }}
+      </span>
+    </div>
     <UnifiedUserDashboard
       :show-user-info="false"
       :show-controls="true"
@@ -105,3 +117,24 @@ useSeoMeta({
     />
   </DashboardPageContent>
 </template>
+
+<style scoped>
+.demo-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  font-size: var(--ct-text-sm);
+  color: var(--ct-fg-muted);
+  background: var(--ct-surface-1);
+  border-bottom: 1px solid var(--ct-border);
+}
+.demo-banner-link {
+  color: var(--ct-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.demo-banner-link:hover {
+  color: var(--ct-primary-hover);
+}
+</style>

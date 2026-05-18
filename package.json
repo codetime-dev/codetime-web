@@ -11,7 +11,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "deploy": "pnpm gen:api && pnpm build && pm2 start ecosystem.config.cjs",
+    "deploy": "bash scripts/deploy.sh",
     "openapi": "openapi-ts"
   },
   "dependencies": {

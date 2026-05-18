@@ -1,24 +1,51 @@
 <script setup lang="ts">
-defineProps<{
+const props = withDefaults(defineProps<{
   num: string
   title: string
   meta?: string
   flush?: boolean
-}>()
+  // When true, the header acts as a button toggling the body. Useful for
+  // long-form help blocks (install guides) that should stay reachable but
+  // collapsed by default once the user has data.
+  collapsible?: boolean
+  defaultOpen?: boolean
+}>(), {
+  collapsible: false,
+  defaultOpen: false,
+})
+
+const open = ref(props.defaultOpen)
+function toggle() {
+  if (props.collapsible) {
+    open.value = !open.value
+  }
+}
 </script>
 
 <template>
-  <section class="up-section">
+  <section class="up-section" :class="{ 'up-section-collapsible': collapsible, 'is-open': open }">
     <div class="up-section-divider" aria-hidden="true">
       <span class="up-section-divider-fill" />
     </div>
-    <header class="up-section-header">
+    <component
+      :is="collapsible ? 'button' : 'header'"
+      :type="collapsible ? 'button' : undefined"
+      class="up-section-header"
+      :aria-expanded="collapsible ? open : undefined"
+      @click="toggle"
+    >
       <span class="up-section-num tabular-nums">{{ num }}</span>
       <slot name="icon" />
       <span class="up-section-title">{{ title }}</span>
       <span v-if="meta" class="up-section-meta tabular-nums">{{ meta }}</span>
-    </header>
-    <div :class="flush ? '' : 'up-section-body'">
+      <i
+        v-if="collapsible"
+        class="up-section-chevron"
+        :class="open ? 'i-tabler-chevron-up' : 'i-tabler-chevron-down'"
+        aria-hidden="true"
+      />
+    </component>
+    <div v-if="!collapsible || open" :class="flush ? '' : 'up-section-body'">
       <slot />
     </div>
   </section>
@@ -70,6 +97,42 @@ defineProps<{
   padding: 12px 18px;
   background: var(--ct-surface-1);
   border-bottom: 1px solid var(--ct-border);
+}
+
+/* When collapsible, the header is rendered as a <button>. Reset native
+   button styling so it visually matches the static <header> variant, and
+   add a hover affordance so users see it's interactive. */
+button.up-section-header {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border: 0;
+  border-bottom: 1px solid var(--ct-border);
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+button.up-section-header:hover {
+  background: var(--ct-surface-2);
+}
+.up-section-collapsible:not(.is-open) > .up-section-header {
+  border-bottom-color: transparent;
+}
+.up-section-chevron {
+  margin-left: auto;
+  font-size: 16px;
+  color: var(--ct-fg-subtle);
+  transition: color 180ms ease;
+  flex-shrink: 0;
+}
+button.up-section-header:hover .up-section-chevron {
+  color: var(--ct-fg);
+}
+/* When meta is present, chevron should still sit at the far right.
+   The meta uses `margin-left: auto` on wide screens, so chevron needs
+   its own `margin-left: 0` to fall in line behind it. */
+.up-section-meta + .up-section-chevron {
+  margin-left: 0;
 }
 @media (min-width: 640px) {
   .up-section-header { flex-wrap: nowrap; }

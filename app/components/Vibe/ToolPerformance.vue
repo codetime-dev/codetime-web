@@ -3,10 +3,9 @@ import type { VibeToolRow } from './types'
 import { computed } from 'vue'
 import { compactParts, fmtDurationShort } from './types'
 
+const props = defineProps<{ rows: VibeToolRow[] }>()
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.table)
-
-const props = defineProps<{ rows: VibeToolRow[] }>()
 
 const view = computed(() => {
   const max = Math.max(1, ...props.rows.map(r => r.calls))

@@ -103,13 +103,19 @@ async function loadCatalog(): Promise<void> {
       if (!Number.isFinite(input) || !Number.isFinite(output)) {
         continue
       }
-      const cached = Number.parseFloat(String(pricing.input_cache_read ?? '')) || input * 0.1
+      // Read both cache-read and cache-write from OpenRouter. They are
+      // distinct on Claude (cache_write ≈ 1.25× input, cache_read ≈ 0.1× input)
+      // — reusing the cache_read rate for creation would under-charge cache
+      // creation by ~12.5×. Fall back to cache_read when write is absent
+      // (most OpenAI/DeepSeek entries have no input_cache_write).
+      const cacheRead = Number.parseFloat(String(pricing.input_cache_read ?? '')) || input * 0.1
+      const cacheWrite = Number.parseFloat(String(pricing.input_cache_write ?? '')) || cacheRead
       map.set(id.toLowerCase(), {
         displayName: typeof model.name === 'string' ? model.name : undefined,
         inputCostPerToken: input,
-        cacheCreationInputCostPerToken: cached,
-        cacheReadInputCostPerToken: cached,
-        cachedInputCostPerToken: cached,
+        cacheCreationInputCostPerToken: cacheWrite,
+        cacheReadInputCostPerToken: cacheRead,
+        cachedInputCostPerToken: cacheRead,
         outputCostPerToken: output,
         source: 'openrouter',
       })
@@ -146,30 +152,82 @@ export function ensurePricingLoaded(): Promise<void> {
   return inflight
 }
 
-// Verbatim agent-time lookup: exact raw key → exact stripped (vendor-
-// prefix removed) → fallback table. We deliberately do NOT fuzzy-match
-// across versions, because the codetime CLI emits its own naming
-// scheme (`claude-opus-4-7`) whose minor version doesn't correspond
-// 1-to-1 with OpenRouter ids (`anthropic/claude-opus-4.1`). Falling
-// through to the curated FALLBACK table keeps both displayName and
-// per-token prices on the right model.
+// Build lookup candidates from a codetime-emitted model name. The CLI's
+// naming scheme uses dashes between version digits (`claude-opus-4-7`)
+// and sometimes appends a release date (`claude-haiku-4-5-20251001`),
+// while OpenRouter ids use dots and no date (`anthropic/claude-opus-4.7`).
+// We try the literal name first, then progressively normalized variants.
+// Family → OpenRouter vendor prefix lookup. OpenRouter ids carry a
+// mandatory `vendor/` prefix that codetime CLI strips, so we infer it
+// back from the bare model name.
+const VENDOR_PREFIX_BY_FAMILY: Array<{ test: (name: string) => boolean, prefix: string }> = [
+  { test: (n) => n.startsWith('claude-'), prefix: 'anthropic/' },
+  { test: (n) => n.startsWith('gpt-') || n.startsWith('o1-') || n.startsWith('o3-') || n.startsWith('o4-'), prefix: 'openai/' },
+  { test: (n) => n.startsWith('deepseek-'), prefix: 'deepseek/' },
+  { test: (n) => n.startsWith('glm-'), prefix: 'z-ai/' },
+  { test: (n) => n.startsWith('grok-'), prefix: 'x-ai/' },
+  { test: (n) => n.startsWith('gemini-'), prefix: 'google/' },
+  { test: (n) => n.startsWith('llama-'), prefix: 'meta-llama/' },
+  { test: (n) => n.startsWith('qwen'), prefix: 'qwen/' },
+  { test: (n) => n.startsWith('mistral-') || n.startsWith('codestral-'), prefix: 'mistralai/' },
+]
+
+function pricingCandidates(model: string): string[] {
+  const set = new Set<string>()
+  const add = (s: string): void => {
+    if (!s) {
+      return
+    }
+    set.add(s)
+    // Drop any `vendor/` prefix the caller may have supplied so that the
+    // raw model name is still a candidate on its own.
+    const stripped = s.replace(/^[^/]+\//, '')
+    set.add(stripped)
+    // Infer the vendor prefix from the model family.
+    for (const { test, prefix } of VENDOR_PREFIX_BY_FAMILY) {
+      if (test(stripped)) {
+        set.add(`${prefix}${stripped}`)
+      }
+    }
+  }
+  const base = model.toLowerCase()
+  add(base)
+  // `claude-opus-4-7` → `claude-opus-4.7`, `claude-haiku-4-5-20251001` →
+  // `claude-haiku-4.5-20251001`. Lookahead keeps the regex from chewing
+  // through 8-digit date suffixes.
+  const dotted = base.replace(/(\D)(\d+)-(\d+)(?=-|$)/g, '$1$2.$3')
+  if (dotted !== base) {
+    add(dotted)
+  }
+  // Strip a trailing `-YYYYMMDD` release tag so `claude-haiku-4-5-20251001`
+  // can fall back to `claude-haiku-4-5` / `anthropic/claude-haiku-4.5`.
+  const undated = base.replace(/-\d{8}$/, '')
+  if (undated !== base) {
+    add(undated)
+    const undatedDotted = undated.replace(/(\D)(\d+)-(\d+)(?=-|$)/g, '$1$2.$3')
+    if (undatedDotted !== undated) {
+      add(undatedDotted)
+    }
+  }
+  return [...set]
+}
+
 export function getPriceFor(model: string): ModelPrice | null {
   if (!model) {
     return null
   }
-  const key = model.toLowerCase()
-  const fromRaw = state.raw.get(key)
-  if (fromRaw) {
-    return fromRaw
+  const candidates = pricingCandidates(model)
+  for (const candidate of candidates) {
+    const fromRaw = state.raw.get(candidate)
+    if (fromRaw) {
+      return fromRaw
+    }
   }
-  const stripped = key.replace(/^[^/]+\//, '')
-  const fromStripped = state.raw.get(stripped)
-  if (fromStripped) {
-    return fromStripped
-  }
-  const fallback = state.table[key] || state.table[stripped]
-  if (fallback) {
-    return fallback
+  for (const candidate of candidates) {
+    const fallback = state.table[candidate]
+    if (fallback) {
+      return fallback
+    }
   }
   return null
 }

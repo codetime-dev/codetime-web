@@ -156,6 +156,7 @@ export const fr: Partial<Translation> = {
           export: 'Export de données',
           import: 'Importation de données',
           more: 'Plus de rapports',
+          agent: 'Télémétrie Agent : coût, tokens, outils & rythme',
         },
       },
       button: 'Gratuit pour toujours',
@@ -179,6 +180,12 @@ export const fr: Partial<Translation> = {
       button: 'Souscrire maintenant',
     },
     needLogin: 'Besoin de se connecter',
+  },
+  demoBanner: {
+    overviewPrefix: 'Données d’exemple — connecte-toi et branche le plugin VS Code ou JetBrains via',
+    overviewSuffix: 'pour voir les tiennes.',
+    agentPrefix: 'Données d’exemple — connecte-toi et envoie un agent via',
+    agentSuffix: 'pour voir les tiennes.',
   },
   dashboard: {
     loginRequired: 'Bienvenue dans le tableau de bord CodeTime! Veuillez vous connecter pour afficher vos données de temps de codage, ou cliquez sur le bouton de démonstration ci-dessous pour découvrir le tableau de bord de démonstration.',

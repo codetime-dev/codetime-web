@@ -160,6 +160,7 @@ export const zhCN: Partial<Translation> = {
           export: '数据导出',
           import: '数据导入',
           more: '更多报告',
+          agent: 'Agent 编程统计：成本、Token、工具与节奏',
         },
       },
       button: '永久免费',
@@ -183,6 +184,12 @@ export const zhCN: Partial<Translation> = {
       button: '立即订阅',
     },
     needLogin: '需要登录',
+  },
+  demoBanner: {
+    overviewPrefix: '示例数据 — 登录后将 VS Code / JetBrains 插件接入',
+    overviewSuffix: '即可查看你自己的数据。',
+    agentPrefix: '示例数据 — 登录后将你的 agent 接入',
+    agentSuffix: '即可查看你自己的数据。',
   },
   dashboard: {
     loginRequired: '欢迎访问 CodeTime 仪表板！请登录以查看你的编程时间数据，或者点击下方的演示按钮体验演示仪表盘。',
@@ -640,6 +647,20 @@ export const zhCN: Partial<Translation> = {
         title: '其他',
         description: '其他设置。',
         logout: '登出',
+      },
+      connect: {
+        agent: {
+          title: '接入 AI Agent',
+          meta: 'cli · claude · codex · opencode · pi',
+        },
+        vscode: {
+          title: '接入 VSCode',
+          meta: 'vscode · cursor · windsurf',
+        },
+        jetbrains: {
+          title: '接入 JetBrains 系列',
+          meta: 'intellij · pycharm · webstorm · …',
+        },
       },
     },
     workspace: {

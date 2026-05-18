@@ -128,6 +128,7 @@ export type Translation = {
           export: string
           import: string
           more: string
+          agent: string
         }
       }
       button: string
@@ -151,6 +152,12 @@ export type Translation = {
       button: string
     }
     needLogin: string
+  }
+  demoBanner: {
+    overviewPrefix: string
+    overviewSuffix: string
+    agentPrefix: string
+    agentSuffix: string
   }
   dashboard: {
     loginRequired: string
@@ -415,6 +422,22 @@ export type Translation = {
         title: string
         description: string
         logout: string
+      }
+      // Collapsible "connect another client" blocks. Optional so locales
+      // that haven't translated them yet fall back to in-template defaults.
+      connect?: {
+        agent?: {
+          title: string
+          meta: string
+        }
+        vscode?: {
+          title: string
+          meta: string
+        }
+        jetbrains?: {
+          title: string
+          meta: string
+        }
       }
     }
     workspace: {

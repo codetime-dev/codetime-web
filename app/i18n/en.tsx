@@ -159,6 +159,7 @@ export const en: Translation = {
           export: 'Data export',
           import: 'Data import',
           more: 'More reports',
+          agent: 'Agent telemetry: cost, tokens, tools & rhythm',
         },
       },
       button: 'Free forever',
@@ -182,6 +183,12 @@ export const en: Translation = {
       button: 'Subscribe Now',
     },
     needLogin: 'Need to log in',
+  },
+  demoBanner: {
+    overviewPrefix: 'Sample data — sign in and connect the VS Code or JetBrains plugin via',
+    overviewSuffix: 'to see your own.',
+    agentPrefix: 'Sample data — sign in and pipe an agent through',
+    agentSuffix: 'to see your own.',
   },
   dashboard: {
     loginRequired: 'Welcome to the CodeTime dashboard! Please log in to view your coding time data, or click the demo button below to experience the demo dashboard.',
@@ -649,6 +656,20 @@ export const en: Translation = {
         title: 'Other',
         description: 'Other settings.',
         logout: 'Logout',
+      },
+      connect: {
+        agent: {
+          title: 'Connect AI Agents',
+          meta: 'cli · claude · codex · opencode · pi',
+        },
+        vscode: {
+          title: 'Connect VSCode',
+          meta: 'vscode · cursor · windsurf',
+        },
+        jetbrains: {
+          title: 'Connect JetBrains IDEs',
+          meta: 'intellij · pycharm · webstorm · …',
+        },
       },
     },
     workspace: {

@@ -3,9 +3,6 @@ import type { VibeModelRow } from './types'
 import { computed } from 'vue'
 import { compact, fmtUsd, formatModelName } from './types'
 
-const t = useI18N()
-const L = computed(() => t.value.dashboard.agent?.labels?.table)
-
 // Per-model cost breakdown — column layout mirrors agent-time's
 // ModelCosts.vue so the two dashboards read identical:
 //   MODEL · CACHE % · IN % · OUT % · CALLS · TOKENS · COST · SHARE
@@ -15,6 +12,8 @@ const L = computed(() => t.value.dashboard.agent?.labels?.table)
 // from the live OpenRouter catalogue with a frozen fallback table).
 
 const props = defineProps<{ rows: VibeModelRow[] }>()
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.table)
 
 const TOP = 12
 

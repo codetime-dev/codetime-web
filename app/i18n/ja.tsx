@@ -156,6 +156,7 @@ export const ja: Partial<Translation> = {
           export: 'データのエクスポート',
           import: 'データのインポート',
           more: 'その他のレポート',
+          agent: 'Agent テレメトリ：コスト、トークン、ツール、リズム',
         },
       },
       button: '永久に無料',
@@ -179,6 +180,12 @@ export const ja: Partial<Translation> = {
       button: '今すぐ購読',
     },
     needLogin: 'ログインが必要です',
+  },
+  demoBanner: {
+    overviewPrefix: 'サンプルデータ — ログインして VS Code / JetBrains プラグインを',
+    overviewSuffix: 'に接続すると自分のデータが表示されます。',
+    agentPrefix: 'サンプルデータ — ログインしてエージェントを',
+    agentSuffix: 'に接続すると自分のデータが表示されます。',
   },
   dashboard: {
     loginRequired: 'CodeTime ダッシュボードへようこそ！\n コーディング時間のデータを閲覧するには、ログインしていただくか、下のデモボタンをクリックしてデモダッシュボードをお試しいただけます。',

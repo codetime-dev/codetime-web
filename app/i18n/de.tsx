@@ -156,6 +156,7 @@ export const de: Partial<Translation> = {
           export: 'Datenexport',
           import: 'Daten importieren',
           more: 'Weitere Berichte',
+          agent: 'Agent-Telemetrie: Kosten, Tokens, Tools & Rhythmus',
         },
       },
       button: 'Für immer kostenlos',
@@ -179,6 +180,12 @@ export const de: Partial<Translation> = {
       button: 'Jetzt abonnieren',
     },
     needLogin: 'Einloggen',
+  },
+  demoBanner: {
+    overviewPrefix: 'Beispieldaten — Melde dich an und verbinde dein VS-Code- oder JetBrains-Plugin über',
+    overviewSuffix: ', um deine eigenen Daten zu sehen.',
+    agentPrefix: 'Beispieldaten — Melde dich an und leite einen Agent über',
+    agentSuffix: ', um deine eigenen Daten zu sehen.',
   },
   dashboard: {
     projectSelector: {

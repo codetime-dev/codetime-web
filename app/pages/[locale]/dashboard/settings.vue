@@ -48,12 +48,24 @@ async function exportData() {
   }
 }
 
+function triggerDownload() {
+  if (!exportURL.value) {
+    return
+  }
+  const link = document.createElement('a')
+  link.href = exportURL.value
+  link.download = fileName
+  link.click()
+}
+
 async function logout() {
   await postV3AuthLogout({ throwOnError: false })
   globalThis.location.href = '/'
 }
 
 const t = useI18N()
+
+const connect = computed(() => t.value.dashboard.settings.connect)
 </script>
 
 <template>
@@ -112,8 +124,50 @@ const t = useI18N()
       </div>
     </PanelSection>
 
+    <!-- CONNECT · AGENT -->
+    <PanelSection
+      num="03"
+      :title="connect?.agent?.title ?? 'Connect AI Agents'"
+      :meta="connect?.agent?.meta ?? 'cli · claude · codex · opencode · pi'"
+      flush
+      collapsible
+    >
+      <template #icon>
+        <i class="i-tabler-robot text-[15px] text-ct-fg-muted" />
+      </template>
+      <DashboardAgentGuide hide-lead />
+    </PanelSection>
+
+    <!-- CONNECT · VSCODE -->
+    <PanelSection
+      num="04"
+      :title="connect?.vscode?.title ?? 'Connect VSCode'"
+      :meta="connect?.vscode?.meta ?? 'vscode · cursor · windsurf'"
+      flush
+      collapsible
+    >
+      <template #icon>
+        <i class="i-tabler-brand-vscode text-[15px] text-ct-fg-muted" />
+      </template>
+      <DashboardPluginGuide hide-lead family="vscode" />
+    </PanelSection>
+
+    <!-- CONNECT · JETBRAINS -->
+    <PanelSection
+      num="05"
+      :title="connect?.jetbrains?.title ?? 'Connect JetBrains IDEs'"
+      :meta="connect?.jetbrains?.meta ?? 'intellij · pycharm · webstorm · …'"
+      flush
+      collapsible
+    >
+      <template #icon>
+        <i class="i-simple-icons-jetbrains text-[15px] text-ct-fg-muted" />
+      </template>
+      <DashboardPluginGuide hide-lead family="jetbrains" />
+    </PanelSection>
+
     <!-- THEME -->
-    <PanelSection num="03" :title="t.dashboard.settings.theme.title" meta="appearance" flush>
+    <PanelSection num="06" :title="t.dashboard.settings.theme.title" meta="appearance" flush>
       <template #icon>
         <i class="i-tabler-palette text-[15px] text-ct-fg-muted" />
       </template>
@@ -135,7 +189,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- LANGUAGE -->
-    <PanelSection num="04" :title="t.dashboard.settings.language.title" meta="locale" flush>
+    <PanelSection num="07" :title="t.dashboard.settings.language.title" meta="locale" flush>
       <template #icon>
         <i class="i-tabler-language text-[15px] text-ct-fg-muted" />
       </template>
@@ -151,7 +205,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- EXPORT -->
-    <PanelSection num="05" :title="t.dashboard.settings.export.title" meta="csv · download" flush>
+    <PanelSection num="08" :title="t.dashboard.settings.export.title" meta="csv · download" flush>
       <template #icon>
         <i class="i-tabler-file-export text-[15px] text-ct-fg-muted" />
       </template>
@@ -178,16 +232,14 @@ const t = useI18N()
             <span v-else>{{ t.dashboard.settings.export.button }}</span>
           </UButton>
 
-          <a
+          <UButton
             v-if="exportURL"
-            :href="exportURL"
-            :download="fileName"
-            class="export-link"
+            variant="ghost"
+            icon-left="i-tabler-arrow-down"
+            @click="triggerDownload"
           >
-            <UButton variant="ghost" icon-left="i-tabler-arrow-down">
-              {{ t.dashboard.settings.export.download }}
-            </UButton>
-          </a>
+            {{ t.dashboard.settings.export.download }}
+          </UButton>
         </div>
 
         <p class="set-hint">
@@ -197,7 +249,7 @@ const t = useI18N()
     </PanelSection>
 
     <!-- OTHER -->
-    <PanelSection num="06" :title="t.dashboard.settings.other.title" meta="session" flush>
+    <PanelSection num="09" :title="t.dashboard.settings.other.title" meta="session" flush>
       <template #icon>
         <i class="i-tabler-dots-circle-horizontal text-[15px] text-ct-fg-muted" />
       </template>
@@ -355,24 +407,6 @@ const t = useI18N()
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
-}
-
-/* EXPORT */
-.export-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  height: 2.25rem;
-  padding: 0 0.85rem;
-  font-size: var(--ct-text-xs);
-  letter-spacing: 0.2em;
-    color: var(--color-primary-1);
-  text-decoration: none;
-  transition: color 180ms ease, background-color 180ms ease;
-}
-
-.export-link:hover {
-  background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);
 }
 
 /* line-btn */

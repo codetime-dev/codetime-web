@@ -3,9 +3,6 @@ import type { VibeProjectRow, VibeProjectSourceSegment } from './types'
 import { computed } from 'vue'
 import { agentColor, compactParts, fmtDurationShort, fmtUsd } from './types'
 
-const t = useI18N()
-const L = computed(() => t.value.dashboard.agent?.labels?.table)
-
 // Top-N project leaderboard ranked by estimated cost. Each row gets a
 // horizontal bar whose width is relative to the top project, segmented
 // by agent source (codex / claude-code / opencode / pi) so the share
@@ -13,6 +10,8 @@ const L = computed(() => t.value.dashboard.agent?.labels?.table)
 // agent-time's project leaderboard idiom.
 
 const props = defineProps<{ rows: VibeProjectRow[] }>()
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.table)
 
 const TOP = 12
 

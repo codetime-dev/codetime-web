@@ -5,9 +5,6 @@ import * as Plot from '@observablehq/plot'
 import { computed } from 'vue'
 import { agentColor, compactParts, fmtUsd } from './types'
 
-const t = useI18N()
-const L = computed(() => t.value.dashboard.agent?.labels?.timeline)
-
 // Stacked cost-per-bucket bar timeline, coloured by agent source
 // (codex / claude-code / opencode / pi / …). Mirrors agent-time's
 // TokenTimeline.vue: one rectY per (bucket, source) pair, stacked
@@ -27,6 +24,8 @@ const props = defineProps<{
   since?: string | null
   until?: string
 }>()
+const t = useI18N()
+const L = computed(() => t.value.dashboard.agent?.labels?.timeline)
 
 const totals = computed(() => {
   let cost = 0
@@ -126,12 +125,12 @@ function ceilToBucket(date: Date, bucket: 'hour' | 'day' | 'week'): Date {
 
 const xDomain = computed<[Date, Date] | undefined>(() => {
   if (!props.until) {
-    return undefined
+    return
   }
   const until = new Date(props.until)
   const since = props.since ? new Date(props.since) : null
   if (!since || Number.isNaN(since.getTime()) || Number.isNaN(until.getTime())) {
-    return undefined
+    return
   }
   const bucket = props.bucket ?? 'day'
   return [floorToBucket(since, bucket), ceilToBucket(until, bucket)]

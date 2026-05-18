@@ -1,7 +1,23 @@
 <script setup lang="ts">
+const props = withDefaults(defineProps<{
+  // Suppress the big lead heading when embedded under a PanelSection in
+  // Settings — the section header already names the block.
+  hideLead?: boolean
+  // Filter the Plugins grid. `both` (default) keeps the existing dashboard
+  // empty-state behaviour. `vscode` / `jetbrains` narrows it to a single
+  // editor family so each can live in its own collapsible Settings block.
+  family?: 'both' | 'vscode' | 'jetbrains'
+}>(), {
+  hideLead: false,
+  family: 'both',
+})
+
 const user = useUser()
 const token = computed(() => user.value?.uploadToken ?? '')
 const t = useI18N()
+
+const showVscode = computed(() => props.family === 'both' || props.family === 'vscode')
+const showJetbrains = computed(() => props.family === 'both' || props.family === 'jetbrains')
 
 const tokenVisible = ref(false)
 const tokenDisplay = computed(() => {
@@ -18,7 +34,7 @@ const tokenDisplay = computed(() => {
 <template>
   <div class="onb">
     <!-- Lead -->
-    <div class="onb-lead">
+    <div v-if="!hideLead" class="onb-lead">
       <span class="onb-lead-stripe" aria-hidden="true" />
       <div class="onb-lead-body">
         <h2 class="onb-lead-title">
@@ -70,8 +86,9 @@ const tokenDisplay = computed(() => {
       <template #icon>
         <i class="i-tabler-puzzle text-[15px] text-ct-fg-muted" />
       </template>
-      <div class="onb-grid">
+      <div class="onb-grid" :class="{ 'onb-grid-single': family !== 'both' }">
         <a
+          v-if="showVscode"
           href="https://marketplace.visualstudio.com/items?itemName=jannchie.codetime"
           target="_blank"
           rel="noopener"
@@ -92,6 +109,7 @@ const tokenDisplay = computed(() => {
           </span>
         </a>
         <a
+          v-if="showJetbrains"
           href="https://plugins.jetbrains.com/plugin/15507-codetime"
           target="_blank"
           rel="noopener"
@@ -253,7 +271,7 @@ const tokenDisplay = computed(() => {
   border-top: 1px solid var(--ct-border-subtle);
 }
 @media (min-width: 768px) {
-  .onb-grid { grid-template-columns: 1fr 1fr; }
+  .onb-grid:not(.onb-grid-single) { grid-template-columns: 1fr 1fr; }
 }
 .onb-card {
   position: relative;

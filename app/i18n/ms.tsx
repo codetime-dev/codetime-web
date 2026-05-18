@@ -156,6 +156,7 @@ export const ms: Partial<Translation> = {
           export: 'Eksport data',
           import: 'Import data',
           more: 'Lebih banyak laporan',
+          agent: 'Telemetri Agent: kos, token, alat & rentak',
         },
       },
       button: 'Percuma selamanya',
@@ -179,6 +180,12 @@ export const ms: Partial<Translation> = {
       button: 'Langgan Sekarang',
     },
     needLogin: 'Perlu log masuk',
+  },
+  demoBanner: {
+    overviewPrefix: 'Data contoh — log masuk dan sambungkan plugin VS Code atau JetBrains melalui',
+    overviewSuffix: 'untuk melihat data anda sendiri.',
+    agentPrefix: 'Data contoh — log masuk dan salurkan agent melalui',
+    agentSuffix: 'untuk melihat data anda sendiri.',
   },
   dashboard: {
     loginRequired: 'Selamat datang ke papan pemuka CodeTime! Sila log masuk untuk melihat data masa kod anda, atau klik butang demo di bawah untuk mengalami papan pemuka demo.',

@@ -156,6 +156,7 @@ export const ptBR: Partial<Translation> = {
           export: 'Exportar dados',
           import: 'Importar dados',
           more: 'Mais relatórios',
+          agent: 'Telemetria de Agent: custo, tokens, ferramentas e ritmo',
         },
       },
       button: 'Sempre grátis',
@@ -179,6 +180,12 @@ export const ptBR: Partial<Translation> = {
       button: 'Inscreva-se agora',
     },
     needLogin: 'Precisa fazer login',
+  },
+  demoBanner: {
+    overviewPrefix: 'Dados de exemplo — faça login e conecte o plugin do VS Code ou JetBrains via',
+    overviewSuffix: 'para ver os seus.',
+    agentPrefix: 'Dados de exemplo — faça login e direcione um agente por',
+    agentSuffix: 'para ver os seus.',
   },
   dashboard: {
     loginRequired: 'Bem-vindo ao painel CodeTime! Faça login para visualizar seus dados de tempo de codificação ou clique no botão de demonstração abaixo para experimentar o painel de demonstração.',

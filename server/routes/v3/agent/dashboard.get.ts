@@ -255,7 +255,7 @@ export default defineEventHandler(async (event) => {
   // strict IANA-ish character set before being interpolated, so it
   // can safely go inside `AT TIME ZONE`.
   const rawTz = typeof q.tz === 'string' ? q.tz : ''
-  const tz = /^[A-Za-z][\w+\-/]{0,63}$/.test(rawTz) ? rawTz : 'UTC'
+  const tz = /^[A-Z][\w+\-/]{0,63}$/i.test(rawTz) ? rawTz : 'UTC'
   const db = useDb()
 
   // Refresh the OpenRouter price catalogue before doing any cost math.

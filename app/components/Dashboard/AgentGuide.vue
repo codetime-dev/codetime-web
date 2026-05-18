@@ -1,4 +1,14 @@
 <script setup lang="ts">
+withDefaults(defineProps<{
+  // Suppress the big lead heading when the guide is embedded inside another
+  // PanelSection (e.g. as a collapsible block in Settings or under the agent
+  // dashboard once data exists). The PanelSection header already names the
+  // block, so the lead would just duplicate it.
+  hideLead?: boolean
+}>(), {
+  hideLead: false,
+})
+
 const user = useUser()
 const token = computed(() => user.value?.uploadToken ?? '')
 const t = useI18N()
@@ -41,7 +51,7 @@ const supportedAgents: { name: string, icon: string }[] = [
 <template>
   <div class="onb">
     <!-- Lead -->
-    <div class="onb-lead">
+    <div v-if="!hideLead" class="onb-lead">
       <span class="onb-lead-stripe" aria-hidden="true" />
       <div class="onb-lead-body">
         <h2 class="onb-lead-title">

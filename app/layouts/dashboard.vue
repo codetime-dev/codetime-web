@@ -15,15 +15,46 @@ const headerTabs = computed(() => [
   { label: t.value.dashboard.pageHeader.title.settings, id: 'settings', path: `/dashboard/settings` },
 ])
 
-const tabItems = computed(() =>
-  headerTabs.value.map(tab => ({
+// When the visitor is browsing the public demo, every tab must stay
+// inside `/demo/*` so the synthetic-data experience is self-contained;
+// crossing back into `/dashboard/*` would dump anonymous visitors at the
+// auth gate. Only the two demo pages that exist today (overview, agent)
+// are shown — adding more demos here just needs a new entry in this map.
+const route = useRoute()
+const inDemo = computed(() => route.path.startsWith(`/${locale.value}/demo`))
+const DEMO_TAB_PATHS: Record<string, string> = {
+  overview: '/demo',
+  agent: '/demo/agent',
+}
+const tabItems = computed(() => {
+  if (inDemo.value) {
+    return headerTabs.value
+      .filter(tab => DEMO_TAB_PATHS[tab.id])
+      .map(tab => ({
+        id: tab.id,
+        label: tab.label,
+        to: `/${locale.value}${DEMO_TAB_PATHS[tab.id]}`,
+      }))
+  }
+  return headerTabs.value.map(tab => ({
     id: tab.id,
     label: tab.label,
     to: `/${locale.value}${tab.path}`,
-  })),
-)
+  }))
+})
 const currentTab = useCurrentTab(headerTabs)
-const activeTabId = computed(() => currentTab.value?.id)
+// In demo, the visitor's URL is /{locale}/demo/agent but the matching
+// tab still resolves by its dashboard path. Pin the highlight manually
+// so the agent tab reads as active on the synthetic page.
+const activeTabId = computed(() => {
+  if (inDemo.value && route.path === `/${locale.value}/demo/agent`) {
+    return 'agent'
+  }
+  if (inDemo.value && route.path === `/${locale.value}/demo`) {
+    return 'overview'
+  }
+  return currentTab.value?.id
+})
 const user = useUser()
 
 // Drive the skeleton off of the real user-fetch lifecycle instead of a
@@ -39,7 +70,6 @@ const pending = computed(() => userPending.value && !user.value)
 // Pages can opt out of the auth gate (e.g. the public /demo page injects
 // a synthetic user inside its own setup — but that setup only runs when
 // the layout actually renders the slot, so we must let it through here).
-const route = useRoute()
 const skipAuthGate = computed(() => Boolean(route.meta.skipAuthGate))
 
 useHead({

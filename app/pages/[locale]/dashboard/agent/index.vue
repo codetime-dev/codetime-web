@@ -307,7 +307,7 @@ const bucketMeta = computed(() => {
                 <th class="num">
                   {{ Lsess?.outTok ?? 'Out tok' }}
                 </th>
-                <th class="num">
+                <th class="lines">
                   {{ Lsess?.lines ?? 'Lines +/-' }}
                 </th>
               </tr>
@@ -334,9 +334,11 @@ const bucketMeta = computed(() => {
                 <td class="num">
                   {{ fmtTokens(s.outputTokens) }}
                 </td>
-                <td class="num">
-                  <span class="add">+{{ s.linesAdded }}</span>
-                  <span class="rm">-{{ s.linesRemoved }}</span>
+                <td class="lines">
+                  <div class="lines-cell">
+                    <span class="rm">-{{ s.linesRemoved }}</span>
+                    <span class="add">+{{ s.linesAdded }}</span>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -356,6 +358,22 @@ const bucketMeta = computed(() => {
           </div>
         </div>
       </VibeSection>
+
+      <!-- Permanent (but collapsed) install entry so users with existing
+           data can still find the CLI / hook instructions when adding a
+           second machine or a new agent. -->
+      <PanelSection
+        num="08"
+        :title="t.dashboard.settings.connect?.agent?.title ?? 'Connect another agent'"
+        :meta="t.dashboard.settings.connect?.agent?.meta ?? 'cli · claude · codex · opencode · pi'"
+        flush
+        collapsible
+      >
+        <template #icon>
+          <i class="i-tabler-robot text-[15px] text-ct-fg-muted" />
+        </template>
+        <DashboardAgentGuide hide-lead />
+      </PanelSection>
     </template>
 
     <DashboardAgentGuide v-else-if="!dashboardPending && !hasData" />
@@ -468,7 +486,27 @@ const bucketMeta = computed(() => {
 .op55 { opacity: 0.55; }
 .op75 { opacity: 0.75; }
 .add { color: var(--ct-success); }
-.rm  { color: var(--ct-danger); margin-left: 6px; }
+.rm  { color: var(--ct-danger); }
+
+/* Lines column: - sticks to the left gutter, + sticks to the right
+   gutter, so each row reads at-a-glance as a small diff bar. Wrapped
+   in a flex div so the surrounding <td> stays a real table cell (a
+   `display: flex` <td> breaks row-level vertical alignment). */
+.vibe-table th.lines,
+.vibe-table td.lines {
+  font-variant-numeric: tabular-nums;
+}
+.vibe-table td.lines {
+  font-family: var(--ct-font-mono);
+}
+.vibe-table th.lines {
+  text-align: left;
+}
+.lines-cell {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
 
 .vibe-more {
   display: flex;
