@@ -168,8 +168,50 @@ function b64urlToBuffer(s: string): Buffer {
   return Buffer.from(s.replaceAll('-', '+').replaceAll('_', '/'), 'base64')
 }
 
-export async function verifyGoogleIdToken(idToken: string): Promise<GoogleClaims> {
-  const clientId = process.env.GOOGLE_CLIENT_ID || process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID
+// Exchange a Google OAuth authorization code for an ID token using PKCE.
+// Used by the iOS App's native sign-in flow: the App generated the
+// code_verifier locally, kicked off /authorize with the matching challenge,
+// got the code via custom-scheme redirect, and now hands {code,verifier}
+// to us. We're a public-client exchange (no client_secret) because the
+// Google OAuth client is of type "iOS" — PKCE is the security boundary.
+export async function exchangeGoogleCode(
+  code: string,
+  codeVerifier: string,
+  redirectUri: string,
+  clientId: string,
+): Promise<{ idToken: string }> {
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      code,
+      code_verifier: codeVerifier,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri,
+    }),
+  })
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(`Google token exchange failed: ${res.status} ${detail}`)
+  }
+  const body = await res.json() as Record<string, any>
+  if (body.error) {
+    throw new Error(`Google OAuth error: ${body.error_description ?? body.error}`)
+  }
+  if (!body.id_token) {
+    throw new Error('Google id_token missing from token response')
+  }
+  return { idToken: String(body.id_token) }
+}
+
+export async function verifyGoogleIdToken(
+  idToken: string,
+  expectedAudience?: string,
+): Promise<GoogleClaims> {
+  const clientId = expectedAudience
+    || process.env.GOOGLE_CLIENT_ID
+    || process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID
   if (!clientId) {
     throw new Error('Google OAuth client ID not configured')
   }
