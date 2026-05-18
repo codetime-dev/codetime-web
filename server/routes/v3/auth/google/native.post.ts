@@ -101,8 +101,12 @@ export default defineEventHandler(async (event) => {
     if (!claims.sub) {
       throw createError({ statusCode: 401, statusMessage: 'Google user ID not found' })
     }
-    const { id, tokenV1 } = await upsertGoogleUser(claims)
-    return { token: tokenV1, user_id: id }
+    // Return the upload_token rather than the legacy token_v1. The App
+    // sends it back as `Authorization: Bearer …`, which the existing
+    // user_guard already understands. token_v1 is deprecated — it lives
+    // on only because the web cookie pair still uses it.
+    const { id, uploadToken } = await upsertGoogleUser(claims)
+    return { token: uploadToken, user_id: id }
   }
   catch (error: any) {
     if (error?.statusCode) {
