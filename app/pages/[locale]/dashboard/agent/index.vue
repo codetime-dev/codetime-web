@@ -498,22 +498,6 @@ const bucketMeta = computed(() => {
           </div>
         </div>
       </VibeSection>
-
-      <!-- Permanent (but collapsed) install entry so users with existing
-           data can still find the CLI / hook instructions when adding a
-           second machine or a new agent. -->
-      <PanelSection
-        num="08"
-        :title="t.dashboard.settings.connect?.agent?.title ?? 'Connect another agent'"
-        :meta="t.dashboard.settings.connect?.agent?.meta ?? 'cli · claude · codex · opencode · pi'"
-        flush
-        collapsible
-      >
-        <template #icon>
-          <i class="i-tabler-robot text-[15px] text-ct-fg-muted" />
-        </template>
-        <DashboardAgentGuide hide-lead />
-      </PanelSection>
     </template>
 
     <DashboardAgentGuide v-else-if="!dashboardPending && !hasData" />

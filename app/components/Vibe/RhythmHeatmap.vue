@@ -13,10 +13,42 @@ const props = defineProps<{ cells: VibeHeatmapCell[] }>()
 
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.rhythm)
+const locale = useLocale()
 
 const HOURS = 24
 const DAYS = 7
+// Data is indexed Mon=0..Sun=6 (see VibeHeatmapCell.weekday). DAY_LABELS
+// shares that indexing; the visible column order is reordered below per
+// the active locale's first-day-of-week convention.
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+
+// Locales known to start the week on Sunday. Used as a fallback when
+// the runtime lacks Intl.Locale week-info support (older Firefox, etc.).
+const SUN_FIRST_LOCALES = new Set(['en', 'ja', 'pt-BR', 'zh-TW', 'ko', 'he'])
+
+// Returns the weekday index (Mon=0..Sun=6) of the first column.
+function firstDayIdx(loc: string): number {
+  try {
+    const intlLocale = new Intl.Locale(loc) as Intl.Locale & {
+      weekInfo?: { firstDay?: number }
+      getWeekInfo?: () => { firstDay?: number }
+    }
+    const info = intlLocale.getWeekInfo?.() ?? intlLocale.weekInfo
+    const iso = info?.firstDay // 1=Mon..7=Sun
+    if (iso && iso >= 1 && iso <= 7) {
+      return (iso - 1) % 7
+    }
+  }
+  catch {
+    // Intl.Locale unsupported — fall through to the static table.
+  }
+  return SUN_FIRST_LOCALES.has(loc) ? 6 : 0
+}
+
+const displayOrder = computed<number[]>(() => {
+  const start = firstDayIdx(locale.value)
+  return Array.from({ length: DAYS }, (_, i) => (start + i) % DAYS)
+})
 
 type Built = {
   grid: number[][]
@@ -158,14 +190,14 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
       </div>
 
       <template
-        v-for="(row, dayIdx) in built.grid"
+        v-for="dayIdx in displayOrder"
         :key="`d-${dayIdx}`"
       >
         <div class="day-label">
           {{ DAY_LABELS[dayIdx] }}
         </div>
         <div
-          v-for="(value, hour) in row"
+          v-for="(value, hour) in (built.grid[dayIdx] ?? [])"
           :key="`c-${dayIdx}-${hour}`"
           class="cell"
           :style="{ '--i': intensity(value) }"
