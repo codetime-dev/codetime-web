@@ -227,6 +227,13 @@ export const it: Partial<Translation> = {
           return `Ultimi ${days} giorni`
         },
         allTime: 'Sempre',
+        custom: 'Personalizzato…',
+        apply: 'Applica',
+        cancel: 'Annulla',
+        thisMonth: 'Questo mese',
+        lastMonth: 'Mese scorso',
+        yearToDate: 'Anno in corso',
+        pickRange: 'Scegli periodo',
       },
       statistic: {
         timeTotal: 'Tempo/Totali',

@@ -241,6 +241,13 @@ export const ru: Partial<Translation> = {
           return `Прошедшие ${days} дней`
         },
         allTime: 'За все время',
+        custom: 'Произвольно…',
+        apply: 'Применить',
+        cancel: 'Отмена',
+        thisMonth: 'Этот месяц',
+        lastMonth: 'Прошлый месяц',
+        yearToDate: 'С начала года',
+        pickRange: 'Выбрать диапазон',
       },
       statistic: {
         timeTotal: 'Всего',

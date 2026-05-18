@@ -227,6 +227,13 @@ export const zhTW: Partial<Translation> = {
           return `過去 ${days} 天`
         },
         allTime: '所有時間',
+        custom: '自訂…',
+        apply: '套用',
+        cancel: '取消',
+        thisMonth: '本月',
+        lastMonth: '上月',
+        yearToDate: '今年至今',
+        pickRange: '選擇時間範圍',
       },
       statistic: {
         timeTotal: '程式設計時間/總計',

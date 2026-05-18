@@ -233,12 +233,14 @@ export const en: Translation = {
         title(days: number) {
           return `Past ${days} days`
         },
-        allTime: 'All Time',
-        custom: 'Custom',
+        allTime: 'All time',
+        custom: 'Custom…',
         apply: 'Apply',
         cancel: 'Cancel',
         thisMonth: 'This month',
         lastMonth: 'Last month',
+        yearToDate: 'Year to date',
+        pickRange: 'Pick date range',
       },
       statistic: {
         timeTotal: 'Time/Total',

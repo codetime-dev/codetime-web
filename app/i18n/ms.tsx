@@ -227,6 +227,13 @@ export const ms: Partial<Translation> = {
           return `Masa ${days} hari yang lalu`
         },
         allTime: 'Semua Masa',
+        custom: 'Tersuai…',
+        apply: 'Guna',
+        cancel: 'Batal',
+        thisMonth: 'Bulan ini',
+        lastMonth: 'Bulan lepas',
+        yearToDate: 'Tahun setakat ini',
+        pickRange: 'Pilih julat',
       },
       statistic: {
         timeTotal: 'Masa/Jumlah',

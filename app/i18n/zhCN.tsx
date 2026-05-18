@@ -235,11 +235,13 @@ export const zhCN: Partial<Translation> = {
           return `过去 ${days} 天`
         },
         allTime: '全部时间',
-        custom: '自定义',
+        custom: '自定义…',
         apply: '应用',
         cancel: '取消',
         thisMonth: '本月',
         lastMonth: '上月',
+        yearToDate: '今年至今',
+        pickRange: '选择时间范围',
       },
       statistic: {
         timeTotal: '编程时间/总计',

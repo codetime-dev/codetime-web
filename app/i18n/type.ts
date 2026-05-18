@@ -206,6 +206,8 @@ export type Translation = {
         cancel?: string
         thisMonth?: string
         lastMonth?: string
+        yearToDate?: string
+        pickRange?: string
       }
       statistic: {
         timeTotal: string

@@ -240,6 +240,13 @@ export const ua: Partial<Translation> = {
           return `Останні ${days} днів`
         },
         allTime: 'За весь час',
+        custom: 'Власний…',
+        apply: 'Застосувати',
+        cancel: 'Скасувати',
+        thisMonth: 'Цей місяць',
+        lastMonth: 'Минулий місяць',
+        yearToDate: 'З початку року',
+        pickRange: 'Обрати діапазон',
       },
       statistic: {
         timeTotal: 'Всього',

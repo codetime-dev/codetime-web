@@ -227,6 +227,13 @@ export const de: Partial<Translation> = {
           return `Vergangene ${days} Tage`
         },
         allTime: 'Ganze Zeit',
+        custom: 'Benutzerdefiniert…',
+        apply: 'Anwenden',
+        cancel: 'Abbrechen',
+        thisMonth: 'Dieser Monat',
+        lastMonth: 'Letzter Monat',
+        yearToDate: 'Seit Jahresbeginn',
+        pickRange: 'Zeitraum wählen',
       },
       statistic: {
         timeTotal: 'Zeit/Insgesamt',

@@ -1,112 +1,362 @@
 <script setup lang="ts">
+import type { PresetId } from './DateRangePresetMenu.vue'
 import * as d3 from 'd3'
+
+// Internal state model. The component still exposes `days / startTime /
+// endTime` v-models so callers don't have to migrate, but tracks the
+// user's intent (this month, last 7 days, custom, …) so arrow keys can
+// shift the *window* — not the *span* — and the label stays meaningful.
+type RangeState
+  = | { kind: 'rolling', days: number }
+  | { kind: 'month', offset: number }
+  | { kind: 'ytd' }
+  | { kind: 'all' }
+  | { kind: 'custom', start: Date, end: Date }
 
 const days = defineModel<number>('days', { default: 28 })
 const startTime = defineModel<Date | null>('startTime', { default: null })
 const endTime = defineModel<Date | null>('endTime', { default: null })
 
-const { state, index, next, prev } = useCycleList([
-  1,
-  3,
-  7,
-  14,
-  28,
-  90,
-  365,
-  365 * 2,
-  365 * 100,
-], {
-  initialValue: days.value,
-})
-
-const customMode = computed(() => !!startTime.value && !!endTime.value)
-
-watchEffect(() => {
-  if (!customMode.value) {
-    days.value = state.value
-  }
-})
-
 const t = useI18N()
 const user = useUser()
 const priceModal = ref(false)
 const calendarOpen = ref(false)
+const menuOpen = ref(false)
 
-function exitCustom() {
-  startTime.value = null
-  endTime.value = null
-  days.value = state.value
+const ROLLING_CYCLE = [7, 14, 28, 90, 365, 730]
+const ROLLING_FREE_MAX = 90
+
+function startOfDay(d: Date): Date {
+  const x = new Date(d)
+  x.setHours(0, 0, 0, 0)
+  return x
+}
+function endOfDay(d: Date): Date {
+  const x = new Date(d)
+  x.setHours(23, 59, 59, 999)
+  return x
+}
+function addMonths(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1)
+}
+function diffDays(a: Date, b: Date): number {
+  return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / (24 * 60 * 60 * 1000)))
 }
 
+// Reconstruct the preset from the inbound v-models on mount so deep
+// links / SSR-restored URLs still pick the right label.
+function inferInitial(): RangeState {
+  if (startTime.value && endTime.value) {
+    return { kind: 'custom', start: startTime.value, end: endTime.value }
+  }
+  if (days.value === 36_500) {
+    return { kind: 'all' }
+  }
+  return { kind: 'rolling', days: days.value }
+}
+const state = ref<RangeState>(inferInitial())
+
+function isPro(): boolean {
+  return user.value?.plan !== 'free'
+}
+
+function gated(s: RangeState): boolean {
+  if (isPro()) {
+    return false
+  }
+  if (s.kind === 'all' || s.kind === 'ytd' || s.kind === 'custom') {
+    return true
+  }
+  if (s.kind === 'rolling' && s.days > ROLLING_FREE_MAX) {
+    return true
+  }
+  return false
+}
+
+function applyState(s: RangeState) {
+  if (gated(s)) {
+    priceModal.value = true
+    return
+  }
+  state.value = s
+  pushModels(s)
+}
+
+function pushModels(s: RangeState) {
+  const today = startOfDay(new Date())
+  switch (s.kind) {
+    case 'rolling': {
+      startTime.value = null
+      endTime.value = null
+      days.value = s.days
+      break
+    }
+    case 'month': {
+      const anchor = addMonths(today, s.offset)
+      const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
+      const lastDayOfMonth = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)
+      // For the current month, cap to today so the chart doesn't show
+      // a trailing run of empty days.
+      const last = s.offset === 0 && lastDayOfMonth > today ? today : lastDayOfMonth
+      const end = endOfDay(last)
+      startTime.value = first
+      endTime.value = end
+      days.value = diffDays(first, end)
+      break
+    }
+    case 'ytd': {
+      const first = new Date(today.getFullYear(), 0, 1)
+      const end = endOfDay(today)
+      startTime.value = first
+      endTime.value = end
+      days.value = diffDays(first, end)
+      break
+    }
+    case 'all': {
+      startTime.value = null
+      endTime.value = null
+      days.value = 36_500
+      break
+    }
+    case 'custom': {
+      const start = startOfDay(s.start)
+      const end = endOfDay(s.end)
+      startTime.value = start
+      endTime.value = end
+      days.value = diffDays(start, end)
+      break
+    }
+  }
+}
+
+// Arrow keys shift the *window*, not the *span*.
 function onPrev() {
-  if (customMode.value) {
-    exitCustom()
-    return
+  const s = state.value
+  switch (s.kind) {
+    case 'month': {
+      return applyState({ kind: 'month', offset: s.offset - 1 })
+    }
+    case 'rolling': {
+      const i = ROLLING_CYCLE.indexOf(s.days)
+      const prevDays = i <= 0 ? ROLLING_CYCLE[0]! : ROLLING_CYCLE[i - 1]!
+      return applyState({ kind: 'rolling', days: prevDays })
+    }
+    case 'ytd': {
+      // Step into "last year (full)".
+      const year = new Date().getFullYear() - 1
+      return applyState({ kind: 'custom', start: new Date(year, 0, 1), end: new Date(year, 11, 31) })
+    }
+    case 'custom': {
+      const len = s.end.getTime() - s.start.getTime()
+      const newEnd = new Date(s.start.getTime() - 1)
+      const newStart = new Date(newEnd.getTime() - len)
+      return applyState({ kind: 'custom', start: newStart, end: newEnd })
+    }
+    case 'all':
   }
-  if (index.value === 0 && user.value?.plan === 'free') {
-    priceModal.value = true
-    return
-  }
-  prev()
-}
-function onNext() {
-  if (customMode.value) {
-    exitCustom()
-    return
-  }
-  if (index.value === 5 && user.value?.plan === 'free') {
-    priceModal.value = true
-    return
-  }
-  next()
 }
 
-function toggleCalendar() {
+function onNext() {
+  const s = state.value
+  switch (s.kind) {
+    case 'month': {
+      if (s.offset >= 0) {
+        return
+      }
+      return applyState({ kind: 'month', offset: s.offset + 1 })
+    }
+    case 'rolling': {
+      const i = ROLLING_CYCLE.indexOf(s.days)
+      const nextIdx = Math.min(ROLLING_CYCLE.length - 1, i === -1 ? 0 : i + 1)
+      return applyState({ kind: 'rolling', days: ROLLING_CYCLE[nextIdx]! })
+    }
+    case 'custom': {
+      const now = endOfDay(new Date())
+      if (s.end >= now) {
+        return
+      }
+      const len = s.end.getTime() - s.start.getTime()
+      const newStart = new Date(s.end.getTime() + 1)
+      let newEnd = new Date(newStart.getTime() + len)
+      if (newEnd > now) {
+        newEnd = now
+      }
+      return applyState({ kind: 'custom', start: newStart, end: newEnd })
+    }
+    case 'ytd':
+    case 'all':
+  }
+}
+
+const canPrev = computed(() => state.value.kind !== 'all')
+const canNext = computed(() => {
+  const s = state.value
+  if (s.kind === 'all' || s.kind === 'ytd') {
+    return false
+  }
+  if (s.kind === 'month' && s.offset >= 0) {
+    return false
+  }
+  if (s.kind === 'custom' && s.end >= endOfDay(new Date())) {
+    return false
+  }
+  return true
+})
+
+// Display.
+const fmtDay = d3.timeFormat('%Y-%m-%d')
+
+const labelText = computed(() => {
+  const dr = t.value.dashboard.overview.dataRange
+  const s = state.value
+  switch (s.kind) {
+    case 'all': {
+      return dr.allTime
+    }
+    case 'month': {
+      if (s.offset === 0) {
+        return dr.thisMonth ?? 'This month'
+      }
+      if (s.offset === -1) {
+        return dr.lastMonth ?? 'Last month'
+      }
+      const anchor = addMonths(new Date(), s.offset)
+      return `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}`
+    }
+    case 'ytd': {
+      return dr.yearToDate ?? 'Year to date'
+    }
+    case 'rolling': {
+      return dr.title(s.days)
+    }
+    case 'custom': {
+      return `${fmtDay(s.start)} ~ ${fmtDay(s.end)}`
+    }
+    default: {
+      return ''
+    }
+  }
+})
+
+const metaText = computed(() => {
+  const s = state.value
+  if (s.kind === 'all') {
+    return ''
+  }
+  if (s.kind === 'rolling') {
+    const start = new Date(Date.now() - s.days * 24 * 60 * 60 * 1000)
+    return `${fmtDay(start)} → ${fmtDay(new Date())}`
+  }
+  if (startTime.value && endTime.value) {
+    return `${fmtDay(startTime.value)} → ${fmtDay(endTime.value)}`
+  }
+  return ''
+})
+
+const isAnchored = computed(() => {
+  const k = state.value.kind
+  return k === 'month' || k === 'ytd' || k === 'custom'
+})
+
+// Menu items.
+function isActive(id: PresetId): boolean {
+  const s = state.value
+  switch (id) {
+    case 'thisMonth': { return s.kind === 'month' && s.offset === 0
+    }
+    case 'lastMonth': { return s.kind === 'month' && s.offset === -1
+    }
+    case 'last7': { return s.kind === 'rolling' && s.days === 7
+    }
+    case 'last30': { return s.kind === 'rolling' && s.days === 30
+    }
+    case 'last90': { return s.kind === 'rolling' && s.days === 90
+    }
+    case 'ytd': { return s.kind === 'ytd'
+    }
+    case 'all': { return s.kind === 'all'
+    }
+    case 'custom': { return s.kind === 'custom'
+    }
+  }
+}
+
+const menuItems = computed(() => {
+  const dr = t.value.dashboard.overview.dataRange
+  const pro = isPro()
+  const items: Array<{ id: PresetId, label: string, proLocked: boolean, active: boolean }> = [
+    { id: 'thisMonth', label: dr.thisMonth ?? 'This month', proLocked: false, active: isActive('thisMonth') },
+    { id: 'lastMonth', label: dr.lastMonth ?? 'Last month', proLocked: false, active: isActive('lastMonth') },
+    { id: 'last7', label: dr.title(7), proLocked: false, active: isActive('last7') },
+    { id: 'last30', label: dr.title(30), proLocked: false, active: isActive('last30') },
+    { id: 'last90', label: dr.title(90), proLocked: false, active: isActive('last90') },
+    { id: 'ytd', label: dr.yearToDate ?? 'Year to date', proLocked: !pro, active: isActive('ytd') },
+    { id: 'all', label: dr.allTime, proLocked: !pro, active: isActive('all') },
+    { id: 'custom', label: dr.custom ?? 'Custom…', proLocked: !pro, active: isActive('custom') },
+  ]
+  return items
+})
+
+function onPickMenu(id: PresetId) {
+  menuOpen.value = false
+  switch (id) {
+    case 'thisMonth': {
+      return applyState({ kind: 'month', offset: 0 })
+    }
+    case 'lastMonth': {
+      return applyState({ kind: 'month', offset: -1 })
+    }
+    case 'last7': {
+      return applyState({ kind: 'rolling', days: 7 })
+    }
+    case 'last30': {
+      return applyState({ kind: 'rolling', days: 30 })
+    }
+    case 'last90': {
+      return applyState({ kind: 'rolling', days: 90 })
+    }
+    case 'ytd': {
+      return applyState({ kind: 'ytd' })
+    }
+    case 'all': {
+      return applyState({ kind: 'all' })
+    }
+    case 'custom': {
+      if (!isPro()) {
+        priceModal.value = true
+        return
+      }
+      calendarOpen.value = true
+    }
+  }
+}
+
+function toggleMenu() {
   if (calendarOpen.value) {
     calendarOpen.value = false
-    return
   }
-  if (user.value?.plan === 'free') {
-    priceModal.value = true
-    return
-  }
-  calendarOpen.value = true
+  menuOpen.value = !menuOpen.value
 }
 
 function applyCustom(payload: { start: Date, end: Date }) {
-  startTime.value = payload.start
-  endTime.value = payload.end
-  const ms = payload.end.getTime() - payload.start.getTime()
-  days.value = Math.max(1, Math.ceil(ms / (24 * 60 * 60 * 1000)))
   calendarOpen.value = false
+  applyState({ kind: 'custom', start: payload.start, end: payload.end })
 }
 
 function cancelCustom() {
   calendarOpen.value = false
 }
 
-const fmtDay = d3.timeFormat('%Y-%m-%d')
-const labelText = computed(() => {
-  if (customMode.value) {
-    return `${fmtDay(startTime.value!)} ~ ${fmtDay(endTime.value!)}`
-  }
-  if (days.value === 36_500) {
-    return t.value.dashboard.overview.dataRange.allTime
-  }
-  return t.value.dashboard.overview.dataRange.title(days.value)
-})
-
+// Popover anchoring (preserved from the original implementation —
+// narrow viewports need a manual fixed position so the popover can
+// span the viewport instead of being clipped by the trigger box).
 const trigger = ref<HTMLElement | null>(null)
 const popover = ref<HTMLElement | null>(null)
-
-// On narrow viewports we anchor the popover beneath the trigger but let it
-// span the full viewport width. Compute the offsets manually since CSS
-// can't push an absolutely-positioned child past its parent's box edges.
 const narrowPos = ref<{ top: number, left: number, width: number } | null>(null)
 const VIEWPORT_GUTTER = 12
 
 function recomputeNarrowPos() {
-  if (!calendarOpen.value || !trigger.value) {
+  if ((!menuOpen.value && !calendarOpen.value) || !trigger.value) {
     narrowPos.value = null
     return
   }
@@ -122,8 +372,8 @@ function recomputeNarrowPos() {
   }
 }
 
-watch(calendarOpen, async (open) => {
-  if (open) {
+watch([menuOpen, calendarOpen], async ([m, c]) => {
+  if (m || c) {
     await nextTick()
     recomputeNarrowPos()
   }
@@ -133,13 +383,14 @@ watch(calendarOpen, async (open) => {
 })
 
 function onDocClick(event: MouseEvent) {
-  if (!calendarOpen.value) {
+  if (!menuOpen.value && !calendarOpen.value) {
     return
   }
   const target = event.target as Node
   if (popover.value?.contains(target) || trigger.value?.contains(target)) {
     return
   }
+  menuOpen.value = false
   calendarOpen.value = false
 }
 
@@ -157,51 +408,69 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onWinChange)
   window.removeEventListener('scroll', onWinChange, true)
 })
+
+const popoverOpen = computed(() => menuOpen.value || calendarOpen.value)
 </script>
 
 <template>
   <ProUpgradeModal v-model:open="priceModal" />
 
-  <div ref="trigger" class="dr-bar" :class="{ open: calendarOpen, custom: customMode }">
+  <div ref="trigger" class="dr-bar" :class="{ open: popoverOpen, custom: isAnchored }">
     <div class="dr-shell">
-      <button type="button" class="dr-step" @click="onPrev">
+      <button
+        type="button"
+        class="dr-step"
+        :disabled="!canPrev"
+        :aria-label="t.dashboard.overview.dataRange.cancel ?? 'Previous'"
+        @click="onPrev"
+      >
         <i class="i-tabler-chevron-left" />
       </button>
 
       <button
         type="button"
         class="dr-label"
-        :aria-expanded="calendarOpen"
-        :title="t.dashboard.overview.dataRange.custom ?? 'Pick date range'"
-        @click="toggleCalendar"
+        :aria-expanded="popoverOpen"
+        :title="t.dashboard.overview.dataRange.pickRange ?? 'Pick date range'"
+        @click="toggleMenu"
       >
         <i class="dr-icon i-tabler-calendar-event" />
         <span class="dr-text tabular-nums">{{ labelText }}</span>
         <i class="dr-caret i-tabler-chevron-down" />
       </button>
 
-      <button type="button" class="dr-step" @click="onNext">
+      <button
+        type="button"
+        class="dr-step"
+        :disabled="!canNext"
+        :aria-label="t.dashboard.overview.dataRange.apply ?? 'Next'"
+        @click="onNext"
+      >
         <i class="i-tabler-chevron-right" />
       </button>
     </div>
 
-    <div v-if="!customMode && days !== 36500" class="dr-meta tabular-nums">
-      {{ fmtDay(new Date(Date.now() - days * 24 * 60 * 60 * 1000)) }}
-      <span class="dr-meta-sep">→</span>
-      {{ fmtDay(new Date()) }}
+    <div v-if="metaText" class="dr-meta tabular-nums">
+      {{ metaText }}
     </div>
 
     <Transition name="dr-fade">
       <div
-        v-if="calendarOpen"
+        v-if="popoverOpen"
         ref="popover"
         class="dr-popover"
-        :class="{ 'dr-popover-narrow': !!narrowPos }"
+        :class="{ 'dr-popover-narrow': !!narrowPos, 'dr-popover-calendar': calendarOpen }"
         :style="narrowPos
           ? { top: `${narrowPos.top}px`, left: `${narrowPos.left}px`, width: `${narrowPos.width}px` }
           : undefined"
       >
+        <DashboardDateRangePresetMenu
+          v-if="menuOpen"
+          :items="menuItems"
+          @pick="onPickMenu"
+        />
         <DashboardDateRangeCalendar
+          v-else-if="calendarOpen"
           :start="startTime"
           :end="endTime"
           @apply="applyCustom"
@@ -226,7 +495,6 @@ onBeforeUnmount(() => {
   color: var(--ct-fg-subtle);
   letter-spacing: 0.02em;
 }
-.dr-meta-sep { margin: 0 6px; opacity: 0.5; }
 
 .dr-shell {
   display: inline-flex;
@@ -258,7 +526,8 @@ onBeforeUnmount(() => {
   transition: background-color var(--ct-duration-fast) var(--ct-ease),
               color var(--ct-duration-fast) var(--ct-ease);
 }
-.dr-step:hover { background: var(--ct-surface-2); color: var(--ct-fg); }
+.dr-step:hover:not(:disabled) { background: var(--ct-surface-2); color: var(--ct-fg); }
+.dr-step:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .dr-label {
   display: inline-flex;

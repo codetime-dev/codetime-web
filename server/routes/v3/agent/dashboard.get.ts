@@ -297,6 +297,13 @@ export default defineEventHandler(async (event) => {
   // Postgres can't parse — explicitly cast an ISO string to
   // timestamptz so the driver hands over a value Postgres understands.
   const sinceIso = range.since ? range.since.toISOString() : null
+  // Anchored ranges (this month / last month / custom) have an upper
+  // bound strictly earlier than `now`, so both ends need filtering —
+  // otherwise the timeline x-axis (pinned to [since, until] on the
+  // client) cuts off, but rows past `until` still come back and render
+  // outside the axis. Rolling ranges (days=N) pin `until` to the
+  // request time; applying the clause is a no-op there.
+  const untilIso = range.until.toISOString()
   const bucketTrunc = range.bucket // postgres date_trunc accepts 'hour'/'day'/'week'
 
   // Build a reusable WHERE-fragment for buckets/models/tools. We use
@@ -306,8 +313,12 @@ export default defineEventHandler(async (event) => {
   // need a window. To keep queries simple, model/tool/file leaderboards
   // use the parent agent_sessions row's last_event_at via JOIN.
 
-  const sinceClause = sinceIso ? sql`and b.ts >= ${sinceIso}::timestamptz` : sql``
-  const sessSinceClause = sinceIso ? sql`and s.last_event_at >= ${sinceIso}::timestamptz` : sql``
+  const sinceClause = sinceIso
+    ? sql`and b.ts >= ${sinceIso}::timestamptz and b.ts < ${untilIso}::timestamptz`
+    : sql`and b.ts < ${untilIso}::timestamptz`
+  const sessSinceClause = sinceIso
+    ? sql`and s.last_event_at >= ${sinceIso}::timestamptz and s.last_event_at < ${untilIso}::timestamptz`
+    : sql`and s.last_event_at < ${untilIso}::timestamptz`
   // Machine clauses live alongside the time clauses so every query
   // composing both fragments naturally honours the dropdown. b.* lives
   // on agent_time_buckets, s.* on agent_sessions, m.* on

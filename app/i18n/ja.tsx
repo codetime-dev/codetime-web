@@ -227,6 +227,13 @@ export const ja: Partial<Translation> = {
           return `${days} 日間`
         },
         allTime: 'すべての時間',
+        custom: 'カスタム…',
+        apply: '適用',
+        cancel: 'キャンセル',
+        thisMonth: '今月',
+        lastMonth: '先月',
+        yearToDate: '今年',
+        pickRange: '期間を選択',
       },
       statistic: {
         timeTotal: 'コーディング時間/合計',
