@@ -237,6 +237,8 @@ export const en: Translation = {
         custom: 'Custom…',
         apply: 'Apply',
         cancel: 'Cancel',
+        today: 'Today',
+        last24h: 'Last 24 hours',
         thisWeek: 'This week',
         lastWeek: 'Last week',
         thisMonth: 'This month',

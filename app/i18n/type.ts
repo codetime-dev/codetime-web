@@ -204,6 +204,8 @@ export type Translation = {
         custom?: string
         apply?: string
         cancel?: string
+        today?: string
+        last24h?: string
         thisWeek?: string
         lastWeek?: string
         thisMonth?: string

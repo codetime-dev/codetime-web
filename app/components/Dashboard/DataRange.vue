@@ -7,7 +7,8 @@ import * as d3 from 'd3'
 // user's intent (this month, last 7 days, custom, …) so arrow keys can
 // shift the *window* — not the *span* — and the label stays meaningful.
 type RangeState
-  = | { kind: 'rolling', days: number }
+  = | { kind: 'today' }
+  | { kind: 'rolling', days: number }
   | { kind: 'week', offset: number }
   | { kind: 'month', offset: number }
   | { kind: 'ytd' }
@@ -59,6 +60,13 @@ function addDays(d: Date, n: number): Date {
 // links / SSR-restored URLs still pick the right label.
 function inferInitial(): RangeState {
   if (startTime.value && endTime.value) {
+    // Recognise the today preset by its exact bounds so deep links /
+    // SSR-restored URLs keep the right label.
+    const today = startOfDay(new Date())
+    const end = endOfDay(today)
+    if (startTime.value.getTime() === today.getTime() && endTime.value.getTime() === end.getTime()) {
+      return { kind: 'today' }
+    }
     return { kind: 'custom', start: startTime.value, end: endTime.value }
   }
   if (days.value === 36_500) {
@@ -97,6 +105,16 @@ function applyState(s: RangeState) {
 function pushModels(s: RangeState) {
   const today = startOfDay(new Date())
   switch (s.kind) {
+    case 'today': {
+      // Full 24-hour window for today — the x-axis spans the entire
+      // day so empty future hours are visible as part of the canvas.
+      const start = today
+      const end = endOfDay(today)
+      startTime.value = start
+      endTime.value = end
+      days.value = 1
+      break
+    }
     case 'rolling': {
       startTime.value = null
       endTime.value = null
@@ -104,25 +122,23 @@ function pushModels(s: RangeState) {
       break
     }
     case 'week': {
+      // Always render the full Mon→Sun span so the timeline x-axis
+      // matches the "week" label even mid-week.
       const monday = addDays(startOfIsoWeek(today), s.offset * 7)
       const sunday = addDays(monday, 6)
-      // Current week caps to today so trailing empty days don't dilute
-      // the chart.
-      const last = s.offset === 0 && sunday > today ? today : sunday
-      const end = endOfDay(last)
+      const end = endOfDay(sunday)
       startTime.value = monday
       endTime.value = end
       days.value = diffDays(monday, end)
       break
     }
     case 'month': {
+      // Always render the full first→last day of the month so the
+      // x-axis spans the entire month, even when offset === 0.
       const anchor = addMonths(today, s.offset)
       const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
       const lastDayOfMonth = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)
-      // For the current month, cap to today so the chart doesn't show
-      // a trailing run of empty days.
-      const last = s.offset === 0 && lastDayOfMonth > today ? today : lastDayOfMonth
-      const end = endOfDay(last)
+      const end = endOfDay(lastDayOfMonth)
       startTime.value = first
       endTime.value = end
       days.value = diffDays(first, end)
@@ -172,6 +188,12 @@ function shiftRolling(s: { kind: 'rolling', days: number }, dir: -1 | 1): RangeS
 function onPrev() {
   const s = state.value
   switch (s.kind) {
+    case 'today': {
+      // Step back to a one-day custom window covering yesterday.
+      const today = startOfDay(new Date())
+      const yesterday = addDays(today, -1)
+      return applyState({ kind: 'custom', start: yesterday, end: endOfDay(yesterday) })
+    }
     case 'week': {
       return applyState({ kind: 'week', offset: s.offset - 1 })
     }
@@ -229,13 +251,14 @@ function onNext() {
     case 'rolling':
     case 'ytd':
     case 'all':
+    case 'today':
   }
 }
 
 const canPrev = computed(() => state.value.kind !== 'all')
 const canNext = computed(() => {
   const s = state.value
-  if (s.kind === 'all' || s.kind === 'ytd' || s.kind === 'rolling') {
+  if (s.kind === 'all' || s.kind === 'ytd' || s.kind === 'rolling' || s.kind === 'today') {
     return false
   }
   if ((s.kind === 'week' || s.kind === 'month') && s.offset >= 0) {
@@ -254,6 +277,9 @@ const labelText = computed(() => {
   const dr = t.value.dashboard.overview.dataRange
   const s = state.value
   switch (s.kind) {
+    case 'today': {
+      return dr.today ?? 'Today'
+    }
     case 'all': {
       return dr.allTime
     }
@@ -310,13 +336,17 @@ const metaText = computed(() => {
 
 const isAnchored = computed(() => {
   const k = state.value.kind
-  return k === 'week' || k === 'month' || k === 'ytd' || k === 'custom'
+  return k === 'today' || k === 'week' || k === 'month' || k === 'ytd' || k === 'custom'
 })
 
 // Menu items.
 function isActive(id: PresetId): boolean {
   const s = state.value
   switch (id) {
+    case 'today': { return s.kind === 'today'
+    }
+    case 'last24h': { return s.kind === 'rolling' && s.days === 1
+    }
     case 'thisWeek': { return s.kind === 'week' && s.offset === 0
     }
     case 'lastWeek': { return s.kind === 'week' && s.offset === -1
@@ -344,6 +374,8 @@ const menuItems = computed(() => {
   const dr = t.value.dashboard.overview.dataRange
   const pro = isPro()
   const items: Array<{ id: PresetId, label: string, proLocked: boolean, active: boolean }> = [
+    { id: 'today', label: dr.today ?? 'Today', proLocked: false, active: isActive('today') },
+    { id: 'last24h', label: dr.last24h ?? 'Last 24 hours', proLocked: false, active: isActive('last24h') },
     { id: 'thisWeek', label: dr.thisWeek ?? 'This week', proLocked: false, active: isActive('thisWeek') },
     { id: 'lastWeek', label: dr.lastWeek ?? 'Last week', proLocked: false, active: isActive('lastWeek') },
     { id: 'thisMonth', label: dr.thisMonth ?? 'This month', proLocked: false, active: isActive('thisMonth') },
@@ -361,6 +393,12 @@ const menuItems = computed(() => {
 function onPickMenu(id: PresetId) {
   menuOpen.value = false
   switch (id) {
+    case 'today': {
+      return applyState({ kind: 'today' })
+    }
+    case 'last24h': {
+      return applyState({ kind: 'rolling', days: 1 })
+    }
     case 'thisWeek': {
       return applyState({ kind: 'week', offset: 0 })
     }
