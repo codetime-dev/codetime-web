@@ -4,7 +4,9 @@
 // can swap in the calendar instead.
 
 export type PresetId
-  = | 'thisWeek'
+  = | 'today'
+  | 'last24h'
+  | 'thisWeek'
   | 'lastWeek'
   | 'thisMonth'
   | 'lastMonth'

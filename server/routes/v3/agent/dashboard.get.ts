@@ -145,7 +145,10 @@ function bucketForSpan(days: number): BucketGrain {
   if (days <= 1.1) {
     return 'hour'
   }
-  if (days <= 45) {
+  // 90 daily bars still render comfortably with the new insetted bars,
+  // so keep day-grain through a full quarter before falling back to
+  // weekly aggregation.
+  if (days <= 92) {
     return 'day'
   }
   return 'week'
@@ -363,9 +366,17 @@ export default defineEventHandler(async (event) => {
   // One row per bucket (date_trunc). activity = activity_count;
   // sessions = session_starts; tokens = total_tokens; lines = added+removed;
   // estimated cost in USD.
+  // Bucket boundaries are aligned to the user's local timezone so the
+  // timeline's "day"/"hour"/"week" cells match the wall-clock schedule
+  // the user actually experiences (matches `stats-time.ts` and the
+  // rhythm heatmap below). The double `timezone()` round-trip yields a
+  // timestamptz whose instant is the local-bucket boundary:
+  //   timezone(tz, ts::timestamptz) -> naive local timestamp
+  //   date_trunc(..., naive)        -> floored naive local timestamp
+  //   timezone(tz, naive::timestamp)-> timestamptz at local boundary
   const overviewRows = await db.execute(sql`
     select
-      date_trunc(${bucketTrunc}, b.ts) as ts,
+      timezone(${tz}, date_trunc(${bucketTrunc}, timezone(${tz}, b.ts))) as ts,
       coalesce(sum(b.activity_count), 0)::bigint as activity,
       coalesce(sum(b.session_starts), 0)::bigint as sessions,
       coalesce(sum(b.total_tokens), 0)::bigint as tokens,
@@ -393,7 +404,7 @@ export default defineEventHandler(async (event) => {
   // at the per-model granularity.
   const tokenRows = await db.execute(sql`
     select
-      date_trunc(${bucketTrunc}, s.last_event_at) as ts,
+      timezone(${tz}, date_trunc(${bucketTrunc}, timezone(${tz}, s.last_event_at))) as ts,
       coalesce(nullif(s.source, ''), 'unknown') as source,
       coalesce(m.model, 'unknown') as model,
       coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,

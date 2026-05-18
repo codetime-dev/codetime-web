@@ -71,6 +71,10 @@ const sourceOrder = computed(() => {
 
 type Row = {
   ts: Date
+  // Right edge of the bucket — pre-computed so we can pass explicit
+  // x1/x2 channels to rectY and skip Plot's implicit interval-snap,
+  // which can shift bars off the axis grid.
+  ts2: Date
   source: string
   cost: number
   tokens: number
@@ -83,7 +87,10 @@ type Row = {
 const rows = computed<Row[]>(() => {
   const out: Row[] = []
   const isTokens = metric.value === 'tokens'
+  const bucket = props.bucket ?? 'day'
   for (const b of props.buckets) {
+    const ts = new Date(b.ts)
+    const ts2 = ceilToBucket(new Date(ts.getTime() + 1), bucket)
     const entries = b.bySource && Object.keys(b.bySource).length > 0
       ? Object.entries(b.bySource)
       : [['unknown', {
@@ -102,26 +109,30 @@ const rows = computed<Row[]>(() => {
       if (!(value > 0)) {
         continue
       }
-      out.push({ ts: new Date(b.ts), source, cost, tokens, modelCalls: calls, value })
+      out.push({ ts, ts2, source, cost, tokens, modelCalls: calls, value })
     }
   }
   return out
 })
 
+// Bucket boundaries match the backend, which now truncates in the
+// user's local timezone — so we floor/ceil with local-time setters here
+// rather than UTC. The browser's local tz is the same tz the dashboard
+// hands to the server, so the two sides agree.
 function floorToBucket(date: Date, bucket: 'hour' | 'day' | 'week'): Date {
   const d = new Date(date)
-  d.setUTCMinutes(0, 0, 0)
+  d.setMinutes(0, 0, 0)
   if (bucket === 'hour') {
     return d
   }
-  d.setUTCHours(0)
+  d.setHours(0)
   if (bucket === 'day') {
     return d
   }
   // Week: snap to Monday (matches Postgres `date_trunc('week', …)`,
   // which counts ISO weeks starting on Monday).
-  const dow = (d.getUTCDay() + 6) % 7
-  d.setUTCDate(d.getUTCDate() - dow)
+  const dow = (d.getDay() + 6) % 7
+  d.setDate(d.getDate() - dow)
   return d
 }
 
@@ -132,13 +143,13 @@ function ceilToBucket(date: Date, bucket: 'hour' | 'day' | 'week'): Date {
   }
   const next = new Date(floored)
   if (bucket === 'hour') {
-    next.setUTCHours(next.getUTCHours() + 1)
+    next.setHours(next.getHours() + 1)
   }
   else if (bucket === 'day') {
-    next.setUTCDate(next.getUTCDate() + 1)
+    next.setDate(next.getDate() + 1)
   }
   else {
-    next.setUTCDate(next.getUTCDate() + 7)
+    next.setDate(next.getDate() + 7)
   }
   return next
 }
@@ -176,15 +187,6 @@ function formatBucketTs(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
-const intervalFor = computed(() => {
-  switch (props.bucket) {
-    case 'hour': { return 'hour' }
-    case 'week': { return 'week' }
-    case 'day':
-    default: { return 'day' }
-  }
-})
-
 function fmtCompact(n: number): string {
   const { value, unit } = compactParts(n)
   return `${value}${unit ?? ''}`
@@ -202,7 +204,9 @@ const options = computed<PlotOptions>(() => {
     marginTop: 12,
     marginRight: 12,
     x: {
-      type: 'utc',
+      // Local-time axis so ticks and bar boundaries match the
+      // backend's local-tz buckets and the local-time tooltip.
+      type: 'time',
       label: null,
       ticks: 6,
       ...(xDomain.value ? { domain: xDomain.value } : {}),
@@ -221,12 +225,16 @@ const options = computed<PlotOptions>(() => {
     },
     marks: [
       Plot.rectY(rows.value, {
-        x: 'ts',
+        x1: 'ts',
+        x2: 'ts2',
         y: 'value',
         fill: 'source',
-        interval: intervalFor.value,
         // Stack order matches sourceOrder (biggest at the bottom).
         order: sourceOrder.value,
+        // Inset each side by a pixel or two so adjacent buckets read
+        // as discrete bars rather than a continuous stacked area.
+        insetLeft: 1,
+        insetRight: 1,
         fillOpacity: 0.9,
         tip: true,
         title: (d: Row) =>

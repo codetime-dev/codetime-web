@@ -238,6 +238,8 @@ export const zhCN: Partial<Translation> = {
         custom: '自定义…',
         apply: '应用',
         cancel: '取消',
+        today: '今日',
+        last24h: '最近 24 小时',
         thisWeek: '本周',
         lastWeek: '上周',
         thisMonth: '本月',
