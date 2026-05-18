@@ -108,6 +108,32 @@ export type VibeToolRow = {
   avgDurationMs: number
 }
 
+export type VibeAgentModelSegment = {
+  model: string
+  estimatedCostUsd: number
+}
+
+// Per-agent-source leaderboard row. Mirrors VibeProjectRow but the
+// stacked bar slices by model instead of by source — picks up the
+// "which model dominates this agent" angle that the projects table
+// can't show because it already uses source as its segment axis.
+export type VibeAgentRow = {
+  source: string
+  sessions: number
+  modelCalls: number
+  inputTokens: number
+  cachedInputTokens: number
+  outputTokens: number
+  reasoningOutputTokens: number
+  totalTokens: number
+  agentDurationMs: number
+  estimatedCostUsd: number
+  // Sorted descending by cost. Frontend renders this as a stacked
+  // horizontal bar so users can see at a glance which model is doing
+  // the heavy lifting under each agent.
+  modelSegments: VibeAgentModelSegment[]
+}
+
 export type VibeDashboard = {
   range: { key: '24h' | '7d' | '30d' | 'all' | 'custom', since: string | null, until: string }
   bucket: 'hour' | 'day' | 'week'
@@ -117,6 +143,7 @@ export type VibeDashboard = {
   heatmap: VibeHeatmapCell[]
   projectTokens: VibeProjectRow[]
   modelCosts: VibeModelRow[]
+  agentCosts: VibeAgentRow[]
   tools: VibeToolRow[]
   // Distinct agent sources the user has ingested, scoped to the
   // current machine + time window. Powers the source dropdown so the
@@ -408,6 +435,32 @@ export function modelColor(model: string): string {
     }
   }
   return VIBE_PALETTE[hashSource(key)]!
+}
+
+// Display metadata for an agent source id (claude-code / codex / …).
+// Shared between the source dropdown and the AgentCosts leaderboard so
+// new agents only need to be added in one place.
+export function agentSourceMeta(id: string): { label: string, icon: string } {
+  const key = id.toLowerCase()
+  switch (key) {
+    case 'claude':
+    case 'claude-code': {
+      return { label: 'Claude Code', icon: 'i-simple-icons-anthropic' }
+    }
+    case 'codex': {
+      return { label: 'Codex', icon: 'i-simple-icons-openai' }
+    }
+    case 'opencode': {
+      return { label: 'OpenCode', icon: 'i-brand-opencode' }
+    }
+    case 'pi': {
+      return { label: 'Pi', icon: 'i-brand-pi' }
+    }
+    default: {
+      const label = id.length > 0 ? id.charAt(0).toUpperCase() + id.slice(1) : id
+      return { label, icon: 'i-tabler-terminal-2' }
+    }
+  }
 }
 
 export function fmtDurationShort(ms: number): string {

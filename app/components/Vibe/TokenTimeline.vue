@@ -2,16 +2,14 @@
 import type { PlotOptions } from '@observablehq/plot'
 import type { VibeTokenBucket } from './types'
 import * as Plot from '@observablehq/plot'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { agentColor, compactParts, fmtUsd } from './types'
 
-// Stacked cost-per-bucket bar timeline, coloured by agent source
-// (codex / claude-code / opencode / pi / …). Mirrors agent-time's
-// TokenTimeline.vue: one rectY per (bucket, source) pair, stacked
-// upward so total bucket cost reads as bar height and per-agent
-// share reads as stack thickness. The header strip below the chart
-// holds the three numbers a Vibe user actually cares about: total
-// cost, model calls, cache hit rate.
+// Stacked per-bucket bar timeline, coloured by agent source (codex /
+// claude-code / opencode / pi / …). The user picks the metric the bars
+// encode — cost (USD) or tokens (input + output) — but the tooltip
+// always carries both numbers plus model-call count so hovering reveals
+// the full per-bucket picture regardless of the active mode.
 
 const props = defineProps<{
   buckets: VibeTokenBucket[]
@@ -26,6 +24,9 @@ const props = defineProps<{
 }>()
 const t = useI18N()
 const L = computed(() => t.value.dashboard.agent?.labels?.timeline)
+
+type Metric = 'cost' | 'tokens'
+const metric = ref<Metric>('cost')
 
 const totals = computed(() => {
   let cost = 0
@@ -49,9 +50,10 @@ const totals = computed(() => {
   }
 })
 
-// Flatten buckets × sources into one row per stack segment. Sources
-// are sorted by total spend (descending) so the biggest spender
-// renders at the bottom of each stack — agent-time's convention.
+// Stable across the toggle: sort sources by total spend (descending) so
+// the biggest spender is always at the bottom of the stack and colours
+// don't shuffle when the user flips the metric. The tokens view re-uses
+// the same ordering for visual continuity.
 const sourceOrder = computed(() => {
   const totals = new Map<string, number>()
   for (const b of props.buckets) {
@@ -64,30 +66,45 @@ const sourceOrder = computed(() => {
     .map(([source]) => source)
 })
 
-const rows = computed(() => {
-  const out: { ts: Date, source: string, cost: number }[] = []
+type Row = {
+  ts: Date
+  source: string
+  cost: number
+  tokens: number
+  modelCalls: number
+  // Pre-rendered metric value the y channel reads from — picked at
+  // build time so we don't pay for a getter in Plot's inner loop.
+  value: number
+}
+
+const rows = computed<Row[]>(() => {
+  const out: Row[] = []
+  const isTokens = metric.value === 'tokens'
   for (const b of props.buckets) {
     const entries = b.bySource && Object.keys(b.bySource).length > 0
       ? Object.entries(b.bySource)
-      : [['unknown', { estimatedCostUsd: b.estimatedCostUsd }] as const]
+      : [['unknown', {
+          estimatedCostUsd: b.estimatedCostUsd,
+          inputTokens: b.inputTokens,
+          outputTokens: b.outputTokens,
+          modelCalls: b.modelCalls,
+        }] as const]
     for (const [source, cell] of entries) {
-      // Keep zero-cost rows out — they collapse to a 0-height stack
-      // and contribute nothing to the chart but a hover target.
-      if (!(cell.estimatedCostUsd > 0)) {
+      const cost = cell.estimatedCostUsd
+      const tokens = (cell.inputTokens ?? 0) + (cell.outputTokens ?? 0)
+      const calls = cell.modelCalls ?? 0
+      const value = isTokens ? tokens : cost
+      // Skip empty stacks — they contribute nothing to the chart but
+      // a hover target.
+      if (!(value > 0)) {
         continue
       }
-      out.push({ ts: new Date(b.ts), source, cost: cell.estimatedCostUsd })
+      out.push({ ts: new Date(b.ts), source, cost, tokens, modelCalls: calls, value })
     }
   }
   return out
 })
 
-// Align [since, until] onto bucket boundaries — done in UTC because
-// Plot's x scale is `type: 'utc'` and the server uses Postgres
-// `date_trunc(..., ts)` which already lands on UTC boundaries. Doing
-// the snap in local time would offset by the user's TZ and bleed the
-// first/last bar past the axis (the symptom users see as "柱子超出
-// 坐标轴").
 function floorToBucket(date: Date, bucket: 'hour' | 'day' | 'week'): Date {
   const d = new Date(date)
   d.setUTCMinutes(0, 0, 0)
@@ -141,14 +158,6 @@ const legend = computed(() => sourceOrder.value.map(source => ({
   color: agentColor(source),
 })))
 
-// rectY draws closed rectangles; on a continuous time axis it needs an
-// `interval` so each bar gets a width (otherwise Plot falls back to a
-// band scale and throws "utc !== band"). The interval also lets Plot
-// fill gaps with zero-height bars so the timeline reads as a series.
-// Tooltip date formatter — emits a human-readable label in the user's
-// local timezone at the bucket grain. The bucket Date arrives as a UTC
-// instant (server-side date_trunc + ISO serialisation); Intl renders
-// it in whatever zone the browser is set to.
 function pad2(n: number): string {
   return n.toString().padStart(2, '0')
 }
@@ -166,73 +175,94 @@ function formatBucketTs(date: Date): string {
 
 const intervalFor = computed(() => {
   switch (props.bucket) {
-    case 'hour': { return 'hour'
-    }
-    case 'week': { return 'week'
-    }
+    case 'hour': { return 'hour' }
+    case 'week': { return 'week' }
     case 'day':
-    default: { return 'day'
-    }
+    default: { return 'day' }
   }
 })
 
-const options = computed<PlotOptions>(() => ({
-  height: 320,
-  marginLeft: 56,
-  marginBottom: 28,
-  marginTop: 12,
-  marginRight: 12,
-  x: {
-    type: 'utc',
-    label: null,
-    ticks: 6,
-    ...(xDomain.value ? { domain: xDomain.value } : {}),
-  },
-  y: {
-    label: 'USD',
-    grid: true,
-    tickFormat: (d: number) => (d >= 1 ? `$${d.toFixed(0)}` : `$${d.toFixed(2)}`),
-  },
-  color: {
-    type: 'categorical',
-    domain: sourceOrder.value,
-    range: sourceOrder.value.map(s => agentColor(s)),
-  },
-  marks: [
-    Plot.rectY(rows.value, {
-      x: 'ts',
-      y: 'cost',
-      fill: 'source',
-      interval: intervalFor.value,
-      // Stack order matches sourceOrder (biggest at the bottom).
-      order: sourceOrder.value,
-      fillOpacity: 0.9,
-      tip: true,
-      title: (d: { ts: Date, source: string, cost: number }) =>
-        `${d.source}\n${formatBucketTs(d.ts)}\n${fmtUsd(d.cost)}`,
-    }),
-    Plot.ruleY([0], { stroke: 'var(--ct-border-strong)' }),
-  ],
-}))
+function fmtCompact(n: number): string {
+  const { value, unit } = compactParts(n)
+  return `${value}${unit ?? ''}`
+}
+
+const tokensLabel = computed(() => L.value?.tokens ?? 'tokens')
+const callsLabel = computed(() => L.value?.modelCalls ?? 'model calls')
+
+const options = computed<PlotOptions>(() => {
+  const isTokens = metric.value === 'tokens'
+  return {
+    height: 320,
+    marginLeft: 56,
+    marginBottom: 28,
+    marginTop: 12,
+    marginRight: 12,
+    x: {
+      type: 'utc',
+      label: null,
+      ticks: 6,
+      ...(xDomain.value ? { domain: xDomain.value } : {}),
+    },
+    y: {
+      label: isTokens ? tokensLabel.value : 'USD',
+      grid: true,
+      tickFormat: isTokens
+        ? (d: number) => fmtCompact(d)
+        : (d: number) => (d >= 1 ? `$${d.toFixed(0)}` : `$${d.toFixed(2)}`),
+    },
+    color: {
+      type: 'categorical',
+      domain: sourceOrder.value,
+      range: sourceOrder.value.map(s => agentColor(s)),
+    },
+    marks: [
+      Plot.rectY(rows.value, {
+        x: 'ts',
+        y: 'value',
+        fill: 'source',
+        interval: intervalFor.value,
+        // Stack order matches sourceOrder (biggest at the bottom).
+        order: sourceOrder.value,
+        fillOpacity: 0.9,
+        tip: true,
+        title: (d: Row) =>
+          `${d.source}\n${formatBucketTs(d.ts)}\n${fmtUsd(d.cost)} · ${fmtCompact(d.tokens)} ${tokensLabel.value}\n${fmtCompact(d.modelCalls)} ${callsLabel.value}`,
+      }),
+      Plot.ruleY([0], { stroke: 'var(--ct-border-strong)' }),
+    ],
+  }
+})
 </script>
 
 <template>
   <div class="timeline">
     <div class="timeline-meta">
-      <div class="meta-cell">
-        <span class="meta-label">{{ L?.cost ?? 'cost' }}</span>
-        <span class="meta-value">{{ fmtUsd(totals.cost) }}</span>
+      <div class="metric-tabs" role="tablist" :aria-label="L?.metricCost ?? 'Cost'">
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="metric === 'cost'"
+          class="metric-tab"
+          :class="{ active: metric === 'cost' }"
+          @click="metric = 'cost'"
+        >
+          <span class="metric-tab-label">{{ L?.cost ?? 'cost' }}</span>
+          <span class="metric-tab-value">{{ fmtUsd(totals.cost) }}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="metric === 'tokens'"
+          class="metric-tab"
+          :class="{ active: metric === 'tokens' }"
+          @click="metric = 'tokens'"
+        >
+          <span class="metric-tab-label">{{ L?.tokens ?? 'tokens' }}</span>
+          <span class="metric-tab-value">{{ fmtCompact(totals.tokens) }}</span>
+        </button>
       </div>
-      <div class="meta-cell">
-        <span class="meta-label">{{ L?.modelCalls ?? 'model calls' }}</span>
-        <span class="meta-value">
-          {{ compactParts(totals.modelCalls).value }}{{ compactParts(totals.modelCalls).unit ?? '' }}
-        </span>
-      </div>
-      <div class="meta-cell">
-        <span class="meta-label">{{ L?.cacheHit ?? 'cache hit' }}</span>
-        <span class="meta-value">{{ (totals.cacheHitRate * 100).toFixed(0) }}%</span>
-      </div>
+
       <ul v-if="legend.length > 1" class="meta-legend">
         <li
           v-for="item in legend"
@@ -252,8 +282,8 @@ const options = computed<PlotOptions>(() => ({
     </div>
     <div v-if="rows.length > 0" class="timeline-foot">
       {{ L?.tokensFoot
-        ? L.tokensFoot(props.buckets.length, `${compactParts(totals.tokens).value}${compactParts(totals.tokens).unit ?? ''}`)
-        : `${props.buckets.length} buckets · ${compactParts(totals.tokens).value}${compactParts(totals.tokens).unit ?? ''} tokens` }}
+        ? L.tokensFoot(props.buckets.length, fmtCompact(totals.tokens))
+        : `${props.buckets.length} buckets · ${fmtCompact(totals.tokens)} tokens` }}
     </div>
   </div>
 </template>
@@ -262,23 +292,58 @@ const options = computed<PlotOptions>(() => ({
 .timeline { display: flex; flex-direction: column; gap: 8px; }
 .timeline-meta {
   display: flex;
-  gap: 32px;
+  gap: 24px;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
+  justify-content: space-between;
 }
-.meta-cell { display: flex; flex-direction: column; gap: 2px; }
-.meta-label {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+
+.metric-tabs {
+  display: inline-flex;
+  gap: 4px;
+  align-items: stretch;
+}
+.metric-tab {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
   color: var(--ct-fg-muted);
+  transition: background-color 120ms var(--ct-ease),
+              color 120ms var(--ct-ease);
 }
-.meta-value {
-  font-size: 18px;
+.metric-tab:hover:not(.active) {
   color: var(--ct-fg);
+  background: color-mix(in srgb, var(--ct-fg) 5%, transparent);
+}
+.metric-tab.active {
+  color: var(--ct-fg);
+  background: color-mix(in srgb, var(--ct-fg) 7%, transparent);
+}
+.metric-tab-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ct-fg-subtle);
+  transition: color 120ms var(--ct-ease);
+}
+.metric-tab.active .metric-tab-label { color: var(--ct-fg-muted); }
+.metric-tab-value {
+  font-size: 16px;
+  color: var(--ct-fg-muted);
   font-family: var(--ct-font-mono);
   font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  transition: color 120ms var(--ct-ease);
 }
+.metric-tab.active .metric-tab-value { color: var(--ct-fg); }
+
 .meta-legend {
   list-style: none;
   margin: 0;
@@ -286,8 +351,7 @@ const options = computed<PlotOptions>(() => ({
   display: inline-flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-left: auto;
-  align-self: flex-end;
+  align-self: center;
 }
 .legend-item {
   display: inline-flex;

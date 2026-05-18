@@ -8,6 +8,7 @@ import * as d3 from 'd3'
 // shift the *window* — not the *span* — and the label stays meaningful.
 type RangeState
   = | { kind: 'rolling', days: number }
+  | { kind: 'week', offset: number }
   | { kind: 'month', offset: number }
   | { kind: 'ytd' }
   | { kind: 'all' }
@@ -23,7 +24,6 @@ const priceModal = ref(false)
 const calendarOpen = ref(false)
 const menuOpen = ref(false)
 
-const ROLLING_CYCLE = [7, 14, 28, 90, 365, 730]
 const ROLLING_FREE_MAX = 90
 
 function startOfDay(d: Date): Date {
@@ -41,6 +41,18 @@ function addMonths(d: Date, n: number): Date {
 }
 function diffDays(a: Date, b: Date): number {
   return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / (24 * 60 * 60 * 1000)))
+}
+// ISO-week Monday — matches `date_trunc('week', …)` on the server side.
+function startOfIsoWeek(d: Date): Date {
+  const x = startOfDay(d)
+  const dow = (x.getDay() + 6) % 7
+  x.setDate(x.getDate() - dow)
+  return x
+}
+function addDays(d: Date, n: number): Date {
+  const x = new Date(d)
+  x.setDate(x.getDate() + n)
+  return x
 }
 
 // Reconstruct the preset from the inbound v-models on mount so deep
@@ -91,6 +103,18 @@ function pushModels(s: RangeState) {
       days.value = s.days
       break
     }
+    case 'week': {
+      const monday = addDays(startOfIsoWeek(today), s.offset * 7)
+      const sunday = addDays(monday, 6)
+      // Current week caps to today so trailing empty days don't dilute
+      // the chart.
+      const last = s.offset === 0 && sunday > today ? today : sunday
+      const end = endOfDay(last)
+      startTime.value = monday
+      endTime.value = end
+      days.value = diffDays(monday, end)
+      break
+    }
     case 'month': {
       const anchor = addMonths(today, s.offset)
       const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
@@ -129,22 +153,40 @@ function pushModels(s: RangeState) {
   }
 }
 
-// Arrow keys shift the *window*, not the *span*.
+// Arrow keys uniformly shift to the previous / next window of the same
+// width. They never change span — span is set by the preset menu.
+function shiftRolling(s: { kind: 'rolling', days: number }, dir: -1 | 1): RangeState {
+  const now = endOfDay(new Date())
+  if (dir < 0) {
+    // Window of `days` length ending one day before today's window
+    // started — i.e. the previous `days`-day stretch.
+    const end = endOfDay(addDays(startOfDay(now), -s.days))
+    const start = startOfDay(addDays(end, -(s.days - 1)))
+    return { kind: 'custom', start, end }
+  }
+  // Forward from a fresh rolling window has nothing to shift into —
+  // callers gate this via canNext.
+  return s
+}
+
 function onPrev() {
   const s = state.value
   switch (s.kind) {
+    case 'week': {
+      return applyState({ kind: 'week', offset: s.offset - 1 })
+    }
     case 'month': {
       return applyState({ kind: 'month', offset: s.offset - 1 })
     }
-    case 'rolling': {
-      const i = ROLLING_CYCLE.indexOf(s.days)
-      const prevDays = i <= 0 ? ROLLING_CYCLE[0]! : ROLLING_CYCLE[i - 1]!
-      return applyState({ kind: 'rolling', days: prevDays })
-    }
     case 'ytd': {
-      // Step into "last year (full)".
+      // Previous year, same period (Jan 1 → today's date last year).
       const year = new Date().getFullYear() - 1
-      return applyState({ kind: 'custom', start: new Date(year, 0, 1), end: new Date(year, 11, 31) })
+      const start = new Date(year, 0, 1)
+      const lastYearToday = new Date(year, new Date().getMonth(), new Date().getDate())
+      return applyState({ kind: 'custom', start, end: endOfDay(lastYearToday) })
+    }
+    case 'rolling': {
+      return applyState(shiftRolling(s, -1))
     }
     case 'custom': {
       const len = s.end.getTime() - s.start.getTime()
@@ -159,16 +201,17 @@ function onPrev() {
 function onNext() {
   const s = state.value
   switch (s.kind) {
+    case 'week': {
+      if (s.offset >= 0) {
+        return
+      }
+      return applyState({ kind: 'week', offset: s.offset + 1 })
+    }
     case 'month': {
       if (s.offset >= 0) {
         return
       }
       return applyState({ kind: 'month', offset: s.offset + 1 })
-    }
-    case 'rolling': {
-      const i = ROLLING_CYCLE.indexOf(s.days)
-      const nextIdx = Math.min(ROLLING_CYCLE.length - 1, i === -1 ? 0 : i + 1)
-      return applyState({ kind: 'rolling', days: ROLLING_CYCLE[nextIdx]! })
     }
     case 'custom': {
       const now = endOfDay(new Date())
@@ -183,6 +226,7 @@ function onNext() {
       }
       return applyState({ kind: 'custom', start: newStart, end: newEnd })
     }
+    case 'rolling':
     case 'ytd':
     case 'all':
   }
@@ -191,10 +235,10 @@ function onNext() {
 const canPrev = computed(() => state.value.kind !== 'all')
 const canNext = computed(() => {
   const s = state.value
-  if (s.kind === 'all' || s.kind === 'ytd') {
+  if (s.kind === 'all' || s.kind === 'ytd' || s.kind === 'rolling') {
     return false
   }
-  if (s.kind === 'month' && s.offset >= 0) {
+  if ((s.kind === 'week' || s.kind === 'month') && s.offset >= 0) {
     return false
   }
   if (s.kind === 'custom' && s.end >= endOfDay(new Date())) {
@@ -212,6 +256,17 @@ const labelText = computed(() => {
   switch (s.kind) {
     case 'all': {
       return dr.allTime
+    }
+    case 'week': {
+      if (s.offset === 0) {
+        return dr.thisWeek ?? 'This week'
+      }
+      if (s.offset === -1) {
+        return dr.lastWeek ?? 'Last week'
+      }
+      const monday = addDays(startOfIsoWeek(new Date()), s.offset * 7)
+      const sunday = addDays(monday, 6)
+      return `${fmtDay(monday)} ~ ${fmtDay(sunday)}`
     }
     case 'month': {
       if (s.offset === 0) {
@@ -255,13 +310,17 @@ const metaText = computed(() => {
 
 const isAnchored = computed(() => {
   const k = state.value.kind
-  return k === 'month' || k === 'ytd' || k === 'custom'
+  return k === 'week' || k === 'month' || k === 'ytd' || k === 'custom'
 })
 
 // Menu items.
 function isActive(id: PresetId): boolean {
   const s = state.value
   switch (id) {
+    case 'thisWeek': { return s.kind === 'week' && s.offset === 0
+    }
+    case 'lastWeek': { return s.kind === 'week' && s.offset === -1
+    }
     case 'thisMonth': { return s.kind === 'month' && s.offset === 0
     }
     case 'lastMonth': { return s.kind === 'month' && s.offset === -1
@@ -285,6 +344,8 @@ const menuItems = computed(() => {
   const dr = t.value.dashboard.overview.dataRange
   const pro = isPro()
   const items: Array<{ id: PresetId, label: string, proLocked: boolean, active: boolean }> = [
+    { id: 'thisWeek', label: dr.thisWeek ?? 'This week', proLocked: false, active: isActive('thisWeek') },
+    { id: 'lastWeek', label: dr.lastWeek ?? 'Last week', proLocked: false, active: isActive('lastWeek') },
     { id: 'thisMonth', label: dr.thisMonth ?? 'This month', proLocked: false, active: isActive('thisMonth') },
     { id: 'lastMonth', label: dr.lastMonth ?? 'Last month', proLocked: false, active: isActive('lastMonth') },
     { id: 'last7', label: dr.title(7), proLocked: false, active: isActive('last7') },
@@ -300,6 +361,12 @@ const menuItems = computed(() => {
 function onPickMenu(id: PresetId) {
   menuOpen.value = false
   switch (id) {
+    case 'thisWeek': {
+      return applyState({ kind: 'week', offset: 0 })
+    }
+    case 'lastWeek': {
+      return applyState({ kind: 'week', offset: -1 })
+    }
     case 'thisMonth': {
       return applyState({ kind: 'month', offset: 0 })
     }

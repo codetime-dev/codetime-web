@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { UserSelfPublic } from '~/api/v3/types.gen'
 import type {
+  VibeAgentRow,
   VibeDashboard,
   VibeHeatmapCell,
   VibeModelRow,
@@ -335,6 +336,70 @@ cachedInputPerMillion: 0.3,
   },
 ]
 
+const agentCosts: VibeAgentRow[] = [
+  {
+    source: 'claude-code',
+    sessions: 48,
+    modelCalls: 412,
+    inputTokens: 540_000,
+    cachedInputTokens: 120_000,
+    outputTokens: 180_000,
+    reasoningOutputTokens: 38_000,
+    totalTokens: 878_000,
+    agentDurationMs: 18 * 60 * 60 * 1000,
+    estimatedCostUsd: 9.2,
+    modelSegments: [
+      { model: 'anthropic/claude-opus-4-7', estimatedCostUsd: 7.6 },
+      { model: 'anthropic/claude-sonnet-4-6', estimatedCostUsd: 1.6 },
+    ],
+  },
+  {
+    source: 'codex',
+    sessions: 32,
+    modelCalls: 268,
+    inputTokens: 320_000,
+    cachedInputTokens: 68_000,
+    outputTokens: 96_000,
+    reasoningOutputTokens: 12_000,
+    totalTokens: 496_000,
+    agentDurationMs: 7 * 60 * 60 * 1000,
+    estimatedCostUsd: 4.2,
+    modelSegments: [
+      { model: 'openai/gpt-5-codex', estimatedCostUsd: 4.2 },
+    ],
+  },
+  {
+    source: 'opencode',
+    sessions: 11,
+    modelCalls: 36,
+    inputTokens: 60_000,
+    cachedInputTokens: 16_000,
+    outputTokens: 24_000,
+    reasoningOutputTokens: 1000,
+    totalTokens: 101_000,
+    agentDurationMs: 90 * 60 * 1000,
+    estimatedCostUsd: 1.4,
+    modelSegments: [
+      { model: 'anthropic/claude-sonnet-4-6', estimatedCostUsd: 1.4 },
+    ],
+  },
+  {
+    source: 'pi',
+    sessions: 4,
+    modelCalls: 14,
+    inputTokens: 8000,
+    cachedInputTokens: 1000,
+    outputTokens: 3000,
+    reasoningOutputTokens: 0,
+    totalTokens: 12_000,
+    agentDurationMs: 12 * 60 * 1000,
+    estimatedCostUsd: 0.18,
+    modelSegments: [
+      { model: 'openai/gpt-5-codex', estimatedCostUsd: 0.18 },
+    ],
+  },
+]
+
 const tools: VibeToolRow[] = [
   { tool: 'Read', calls: 1840, failures: 12, totalDurationMs: 92_000, avgDurationMs: 50 },
   { tool: 'Edit', calls: 920, failures: 38, totalDurationMs: 86_000, avgDurationMs: 93 },
@@ -366,6 +431,7 @@ const dashboard: VibeDashboard = {
   heatmap,
   projectTokens,
   modelCosts,
+  agentCosts,
   tools,
   availableSources: ['claude-code', 'codex', 'opencode', 'pi'],
 }
@@ -381,6 +447,7 @@ const sectionTitles = computed(() => {
     rhythm: s?.rhythm ?? 'Rhythm · When',
     projects: s?.projects ?? 'Projects · Costs',
     models: s?.models ?? 'Models · Costs',
+    agents: s?.agents ?? 'Agents · Costs',
     tools: s?.tools ?? 'Tools',
   }
 })
@@ -469,6 +536,14 @@ const locale = useLocale()
 
     <VibeSection
       num="06"
+      :title="sectionTitles.agents"
+      :meta="Lmeta?.agents ? Lmeta.agents(dashboard.agentCosts.length) : `${dashboard.agentCosts.length} agents`"
+    >
+      <VibeAgentCosts :rows="dashboard.agentCosts" />
+    </VibeSection>
+
+    <VibeSection
+      num="07"
       :title="sectionTitles.tools"
       :meta="Lmeta?.calls ? Lmeta.calls(compact(totalToolCalls)) : `${compact(totalToolCalls)} calls`"
     >

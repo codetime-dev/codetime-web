@@ -204,6 +204,8 @@ export type Translation = {
         custom?: string
         apply?: string
         cancel?: string
+        thisWeek?: string
+        lastWeek?: string
         thisMonth?: string
         lastMonth?: string
         yearToDate?: string
@@ -644,6 +646,7 @@ export type Translation = {
         rhythm: string
         projects: string
         models: string
+        agents?: string
         tools: string
         sessions: string
       }
@@ -671,6 +674,9 @@ export type Translation = {
           cacheHit: string
           tokensFoot: (buckets: number, tokens: string) => string
           empty: string
+          tokens?: string
+          metricCost?: string
+          metricTokens?: string
         }
         rhythm: {
           peakHour: string
@@ -688,6 +694,7 @@ export type Translation = {
           project: string
           model: string
           tool: string
+          agent?: string
           cost: string
           share: string
           tokens: string
@@ -701,6 +708,7 @@ export type Translation = {
           noProject: string
           noModel: string
           noTool: string
+          noAgent?: string
         }
         sessions: {
           source: string
@@ -719,6 +727,7 @@ export type Translation = {
         }
         meta: {
           projects: (n: number) => string
+          agents?: (n: number) => string
           calls: (n: string) => string
           estimatedBuckets: (bucket: string, range: string) => string
           rhythmMeta: (range: string) => string

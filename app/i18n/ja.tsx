@@ -230,6 +230,8 @@ export const ja: Partial<Translation> = {
         custom: 'カスタム…',
         apply: '適用',
         cancel: 'キャンセル',
+        thisWeek: '今週',
+        lastWeek: '先週',
         thisMonth: '今月',
         lastMonth: '先月',
         yearToDate: '今年',

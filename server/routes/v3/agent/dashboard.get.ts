@@ -60,6 +60,7 @@ defineRouteMeta({
                 'heatmap',
 'projectTokens',
 'modelCosts',
+'agentCosts',
 'tools',
 'availableSources',
               ],
@@ -112,6 +113,7 @@ defineRouteMeta({
                 heatmap: { type: 'array', items: { type: 'object' } },
                 projectTokens: { type: 'array', items: { type: 'object' } },
                 modelCosts: { type: 'array', items: { type: 'object' } },
+                agentCosts: { type: 'array', items: { type: 'object' } },
                 tools: { type: 'array', items: { type: 'object' } },
                 availableSources: { type: 'array', items: { type: 'string' } },
               },
@@ -481,6 +483,28 @@ export default defineEventHandler(async (event) => {
     durationByProject.set(String(r.project ?? 'unknown'), toN(r.duration_ms))
   }
 
+  // Per-source agent wall-clock duration, mirroring durationByProject.
+  // Same caveat about joining session_models vs sessions for duration.
+  const sourceDurationRows = await db.execute(sql`
+    select
+      coalesce(nullif(s.source, ''), 'unknown') as source,
+      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms,
+      count(*)::bigint as sessions
+    from agent_sessions s
+    where s.user_id = ${userId}
+    ${sessSinceClause}
+    ${sessMachineClause}
+    ${sessSourceClause}
+    group by 1
+  `) as unknown as Record<string, unknown>[]
+  const durationBySource = new Map<string, number>()
+  const sessionsBySource = new Map<string, number>()
+  for (const r of sourceDurationRows) {
+    const key = String(r.source ?? 'unknown')
+    durationBySource.set(key, toN(r.duration_ms))
+    sessionsBySource.set(key, toN(r.sessions))
+  }
+
   // --- fold breakdown → model leaderboard -----------------------------
   type ModelAgg = {
     model: string
@@ -619,6 +643,73 @@ export default defineEventHandler(async (event) => {
   const projectAggList = [...projectAggs.values()]
     .sort((a, b) => b.cost - a.cost || b.totalTokens - a.totalTokens)
     .slice(0, 50)
+
+  // --- fold breakdown → agent-source leaderboard ----------------------
+  // Sibling to the project leaderboard. Re-aggregates breakdownRows by
+  // source (claude-code / codex / opencode / pi / …) and tracks the
+  // model mix inside each source so the stacked bar reads as "Opus
+  // dominates claude-code, GPT-5 dominates codex" at a glance.
+  type AgentAgg = {
+    source: string
+    inputTokens: number
+    cachedInputTokens: number
+    cacheCreationInputTokens: number
+    cacheReadInputTokens: number
+    outputTokens: number
+    reasoningOutputTokens: number
+    totalTokens: number
+    modelCalls: number
+    cost: number
+    byModel: Map<string, number>
+  }
+  const agentAggs = new Map<string, AgentAgg>()
+  for (const r of breakdownRows) {
+    const sourceKey = String(r.source ?? 'unknown')
+    const model = String(r.model ?? 'unknown')
+    const inputTokens = toN(r.input_tokens)
+    const cachedInputTokens = toN(r.cached_input_tokens)
+    const cacheCreationInputTokens = toN(r.cache_creation_input_tokens)
+    const cacheReadInputTokens = toN(r.cache_read_input_tokens)
+    const outputTokens = toN(r.output_tokens)
+    const reasoningOutputTokens = toN(r.reasoning_output_tokens)
+    const totalTokens = toN(r.total_tokens)
+    const modelCalls = toN(r.model_calls)
+    const { cost } = estimateCostUsd({
+      model,
+      inputTokens,
+      cachedInputTokens,
+      cacheCreationInputTokens,
+      cacheReadInputTokens,
+      outputTokens,
+      reasoningOutputTokens,
+    })
+    const existing = agentAggs.get(sourceKey) ?? {
+      source: sourceKey,
+      inputTokens: 0,
+      cachedInputTokens: 0,
+      cacheCreationInputTokens: 0,
+      cacheReadInputTokens: 0,
+      outputTokens: 0,
+      reasoningOutputTokens: 0,
+      totalTokens: 0,
+      modelCalls: 0,
+      cost: 0,
+      byModel: new Map<string, number>(),
+    }
+    existing.inputTokens += inputTokens
+    existing.cachedInputTokens += cachedInputTokens
+    existing.cacheCreationInputTokens += cacheCreationInputTokens
+    existing.cacheReadInputTokens += cacheReadInputTokens
+    existing.outputTokens += outputTokens
+    existing.reasoningOutputTokens += reasoningOutputTokens
+    existing.totalTokens += totalTokens
+    existing.modelCalls += modelCalls
+    existing.cost += cost
+    existing.byModel.set(model, (existing.byModel.get(model) ?? 0) + cost)
+    agentAggs.set(sourceKey, existing)
+  }
+  const agentAggList = [...agentAggs.values()]
+    .sort((a, b) => b.cost - a.cost || b.totalTokens - a.totalTokens)
 
   // --- tools (normalized into categories) -----------------------------
   // Buckets raw tool names into the same eight categories agent-time
@@ -886,6 +977,22 @@ export default defineEventHandler(async (event) => {
             cachedInputPerMillion: 0,
             outputPerMillion: 0,
           },
+    })),
+    agentCosts: agentAggList.map(a => ({
+      source: a.source,
+      sessions: sessionsBySource.get(a.source) ?? 0,
+      modelCalls: a.modelCalls,
+      inputTokens: a.inputTokens,
+      cachedInputTokens: a.cachedInputTokens,
+      outputTokens: a.outputTokens,
+      reasoningOutputTokens: a.reasoningOutputTokens,
+      totalTokens: a.totalTokens,
+      agentDurationMs: durationBySource.get(a.source) ?? 0,
+      estimatedCostUsd: a.cost,
+      modelSegments: [...a.byModel.entries()]
+        .filter(([, cost]) => cost > 0)
+        .sort((x, y) => y[1] - x[1])
+        .map(([model, cost]) => ({ model, estimatedCostUsd: cost })),
     })),
     tools: toolRows.map(r => ({
       tool: String(r.tool ?? 'Other'),

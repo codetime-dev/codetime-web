@@ -230,6 +230,8 @@ export const zhTW: Partial<Translation> = {
         custom: '自訂…',
         apply: '套用',
         cancel: '取消',
+        thisWeek: '本週',
+        lastWeek: '上週',
         thisMonth: '本月',
         lastMonth: '上月',
         yearToDate: '今年至今',

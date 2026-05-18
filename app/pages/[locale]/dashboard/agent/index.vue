@@ -209,6 +209,7 @@ const sectionTitles = computed(() => {
     rhythm: s?.rhythm ?? 'Rhythm · When',
     projects: s?.projects ?? 'Projects · Costs',
     models: s?.models ?? 'Models · Costs',
+    agents: s?.agents ?? 'Agents · Costs',
     tools: s?.tools ?? 'Tools',
     sessions: s?.sessions ?? 'Sessions · List',
   }
@@ -410,6 +411,14 @@ const bucketMeta = computed(() => {
 
       <VibeSection
         num="06"
+        :title="sectionTitles.agents"
+        :meta="Lmeta?.agents ? Lmeta.agents(dashboard.agentCosts.length) : `${dashboard.agentCosts.length} agents`"
+      >
+        <VibeAgentCosts :rows="dashboard.agentCosts" />
+      </VibeSection>
+
+      <VibeSection
+        num="07"
         :title="sectionTitles.tools"
         :meta="Lmeta?.calls ? Lmeta.calls(compact(totalToolCalls)) : `${compact(totalToolCalls)} calls`"
       >
@@ -417,7 +426,7 @@ const bucketMeta = computed(() => {
       </VibeSection>
 
       <VibeSection
-        num="07"
+        num="08"
         :title="sectionTitles.sessions"
         :meta="Lsess?.loaded ? Lsess.loaded(sessions.length) : `${sessions.length} loaded`"
         flush
