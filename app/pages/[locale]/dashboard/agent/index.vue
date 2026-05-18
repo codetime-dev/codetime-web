@@ -527,6 +527,11 @@ const bucketMeta = computed(() => {
   background: var(--ct-surface-1);
   flex-wrap: wrap;
 }
+/* Push the machine/agent pills + refresh button to the right edge,
+   keeping the date-range picker anchored on the left. */
+.vibe-rangebar > :nth-child(2) {
+  margin-left: auto;
+}
 .range-refresh {
   display: inline-flex;
   align-items: center;

@@ -52,6 +52,48 @@ const FALLBACK: Record<string, ModelPrice> = {
   'deepseek-v4-pro': fbPrice('DeepSeek V4 Pro', 4.35e-7, 3.625e-9, 8.7e-7),
 }
 
+// Fast / priority inference variants. Mirrors agent-time/apps/api/src/
+// pricing.ts so the fallback table can still price fast tiers when
+// OpenRouter is unreachable or has not yet catalogued a variant.
+//
+// - Anthropic: Opus only; observed multiplier ×6 across input/output/
+//   cache (matches OpenRouter's `anthropic/claude-opus-4-7-fast`).
+//   Sonnet and Haiku have no fast variant — do not synthesize one.
+// - OpenAI Codex: `service_tier = fast | priority` maps to ×2 across
+//   the board (matches ccusage's CODEX_FAST_FALLBACK_MULTIPLIER).
+addFastVariants(FALLBACK, ['claude-opus-4-6', 'claude-opus-4-7'], 6)
+addFastVariants(FALLBACK, [
+  'gpt-5',
+  'gpt-5-codex',
+  'gpt-5.1',
+  'gpt-5.1-codex',
+  'gpt-5.1-codex-max',
+  'gpt-5.1-codex-mini',
+  'gpt-5.2-codex',
+  'gpt-5.3-codex',
+  'gpt-5.4',
+  'gpt-5.4-mini',
+  'gpt-5.5',
+], 2)
+
+function addFastVariants(table: Record<string, ModelPrice>, baseIds: string[], multiplier: number): void {
+  for (const id of baseIds) {
+    const base = table[id]
+    if (!base) {
+      continue
+    }
+    table[`${id}-fast`] = {
+      displayName: base.displayName ? `${base.displayName} Fast` : undefined,
+      inputCostPerToken: base.inputCostPerToken * multiplier,
+      cacheCreationInputCostPerToken: base.cacheCreationInputCostPerToken * multiplier,
+      cacheReadInputCostPerToken: base.cacheReadInputCostPerToken * multiplier,
+      cachedInputCostPerToken: base.cachedInputCostPerToken * multiplier,
+      outputCostPerToken: base.outputCostPerToken * multiplier,
+      source: 'fallback',
+    }
+  }
+}
+
 function fbPrice(
   displayName: string,
   input: number,

@@ -333,36 +333,76 @@ const FAMILY_TO_PROVIDER: Array<{ test: (n: string) => boolean, provider: string
   { test: n => n.startsWith('glm-'), provider: 'z-ai' },
 ]
 
+// Strip trailing "Fast" / "(Fast)" / "[Fast]" markers from a display
+// name and return whether one was present. The marker comes from
+// OpenRouter (parenthesised) or our fallback pricing table (bare
+// suffix, see agent-time/apps/api/src/pricing.ts), so callers can
+// render it as a tag instead of inline noise.
+function extractFastTag(name: string): { name: string, fast: boolean } {
+  // Match trailing " Fast", "-Fast", "_Fast" or "(Fast)" markers without
+  // a backtracking-prone regex — strip the suffix manually.
+  let stripped = name.trimEnd()
+  if (stripped.endsWith(')') || stripped.endsWith(']')) {
+    stripped = stripped.slice(0, -1).trimEnd()
+  }
+  const lower = stripped.toLowerCase()
+  if (!lower.endsWith('fast')) {
+    return { name, fast: false }
+  }
+  let head = stripped.slice(0, -4).trimEnd()
+  // Drop the opening bracket and the connector character so we don't
+  // leave behind a dangling "(", "-", or "_".
+  if (head.endsWith('(') || head.endsWith('[')) {
+    head = head.slice(0, -1).trimEnd()
+  }
+  if (head.endsWith('-') || head.endsWith('_')) {
+    head = head.slice(0, -1).trimEnd()
+  }
+  if (head.length === 0) {
+    return { name, fast: false }
+  }
+  return { name: head, fast: true }
+}
+
 export function providerInfoFor(
   rawModel: string,
   displayName: string | undefined,
-): { icon: string | undefined, name: string, provider: string | undefined } {
+): { icon: string | undefined, name: string, provider: string | undefined, fast: boolean } {
+  // Fast tag may live in either the bare model id (`claude-opus-4-7-fast`)
+  // or the OpenRouter display name ("Claude Opus 4.7 (Fast)"); detect on
+  // the id first so the flag is set even when displayName is absent.
+  const bareModel = rawModel.includes('/') ? rawModel.split('/').pop()! : rawModel
+  const idFast = /(?:^|-)fast$/i.test(bareModel)
+
   // OpenRouter formats `name` as "Provider: Pretty Model Name" (with
   // optional trailing tags like "(Fast)"). Split on the first colon and
   // hand back both halves so the caller can render them independently.
   if (displayName && displayName.includes(':')) {
     const [providerRaw, ...rest] = displayName.split(':')
     const provider = providerRaw!.trim()
-    const cleanName = rest.join(':').trim()
+    const cleanRaw = rest.join(':').trim() || displayName
+    const { name: cleanName, fast: nameFast } = extractFastTag(cleanRaw)
     const icon = PROVIDER_ICON[provider.toLowerCase()]
-    return { icon, name: cleanName || displayName, provider }
+    return { icon, name: cleanName, provider, fast: idFast || nameFast }
   }
 
   // No OpenRouter `name` — fall back to inferring the provider from the
   // bare codetime model id's family prefix.
-  const bareModel = rawModel.includes('/') ? rawModel.split('/').pop()! : rawModel
   const lower = bareModel.toLowerCase()
+  const rawName = displayName ?? formatModelName(rawModel)
+  const { name: cleanName, fast: nameFast } = extractFastTag(rawName)
   for (const { test, provider } of FAMILY_TO_PROVIDER) {
     if (test(lower)) {
       return {
         icon: PROVIDER_ICON[provider],
-        name: displayName ?? formatModelName(rawModel),
+        name: cleanName,
         provider,
+        fast: idFast || nameFast,
       }
     }
   }
 
-  return { icon: undefined, name: displayName ?? formatModelName(rawModel), provider: undefined }
+  return { icon: undefined, name: cleanName, provider: undefined, fast: idFast || nameFast }
 }
 
 // Canonical categorical palette — same colours agent-time uses for

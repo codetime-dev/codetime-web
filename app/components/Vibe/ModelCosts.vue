@@ -34,7 +34,7 @@ const view = computed(() => {
     const inputPct = (freshInput / denom) * 100
     const outputPct = (outputTotal / denom) * 100
     const share = totalCost.value > 0 ? (row.estimatedCostUsd / totalCost.value) * 100 : 0
-    const { icon, name, provider } = providerInfoFor(row.model, row.pricing?.displayName)
+    const { icon, name, provider, fast } = providerInfoFor(row.model, row.pricing?.displayName)
     const pricingSource = row.pricing?.source ?? 'missing'
     return {
       index: String(index + 1).padStart(2, '0'),
@@ -42,6 +42,7 @@ const view = computed(() => {
       name,
       icon,
       provider,
+      fast,
       cachePct,
       inputPct,
       outputPct,
@@ -95,6 +96,7 @@ function fmtPct(value: number): string {
         <span v-if="row.icon" class="provider-icon" :class="[row.icon]" :aria-label="row.provider" />
         <span v-else class="provider-icon i-mdi-cube-outline" :aria-label="row.provider ?? 'unknown'" />
         <span class="model-name">{{ row.name }}</span>
+        <span v-if="row.fast" class="model-tag fast" title="Fast / priority inference tier">FAST</span>
       </span>
       <span class="bar-wrap">
         <span class="bar" :style="{ width: `${row.widthPct}%` }" />
@@ -194,6 +196,22 @@ function fmtPct(value: number): string {
 .model-name {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.model-tag {
+  flex: 0 0 auto;
+  font-family: var(--ct-font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.model-tag.fast {
+  color: var(--ct-primary);
+  background: color-mix(in srgb, var(--ct-primary) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ct-primary) 35%, transparent);
 }
 
 .num {
