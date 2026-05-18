@@ -19,6 +19,7 @@ defineRouteMeta({
       { name: 'cursor', in: 'query', schema: { type: 'string' } },
       { name: 'source', in: 'query', schema: { type: 'string' } },
       { name: 'project_id', in: 'query', schema: { type: 'string' } },
+      { name: 'machine_id', in: 'query', schema: { type: 'string', format: 'uuid' } },
     ],
     responses: {
       200: {
@@ -131,6 +132,9 @@ export default defineEventHandler(async (event) => {
   }
   if (typeof q.project_id === 'string' && q.project_id) {
     filters.push(eq(agentSessions.projectId, q.project_id))
+  }
+  if (typeof q.machine_id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q.machine_id)) {
+    filters.push(eq(agentSessions.machineId, q.machine_id))
   }
   const cursor = parseCursor(q.cursor)
   if (cursor) {

@@ -118,6 +118,12 @@ export type VibeDashboard = {
   projectTokens: VibeProjectRow[]
   modelCosts: VibeModelRow[]
   tools: VibeToolRow[]
+  // Distinct agent sources the user has ingested, scoped to the
+  // current machine + time window. Powers the source dropdown so the
+  // user can scope the dashboard to one agent (claude-code / codex /
+  // opencode / pi / …) without the picker shrinking to just the
+  // currently selected value.
+  availableSources: string[]
 }
 
 // Common compact formatter used across KPI/table components. Returns
@@ -260,6 +266,76 @@ export function formatModelName(model: string): string {
     }
     return part.charAt(0).toUpperCase() + part.slice(1)
   }).join(' ')
+}
+
+// Map an OpenRouter `name` field ("Anthropic: Claude Opus 4.7") or a
+// bare codetime model id ("claude-opus-4-7") into a provider icon class
+// plus a clean display name with the provider stripped. The provider
+// icon lets the table render `<icon> Claude Opus 4.7` instead of the
+// noisier `Anthropic: Claude Opus 4.7`.
+const PROVIDER_ICON: Record<string, string> = {
+  'anthropic': 'i-simple-icons-anthropic',
+  'openai': 'i-simple-icons-openai',
+  'google': 'i-simple-icons-google',
+  'deepseek': 'i-simple-icons-deepseek',
+  'meta': 'i-simple-icons-meta',
+  'meta-llama': 'i-simple-icons-meta',
+  'mistral': 'i-simple-icons-mistralai',
+  'mistralai': 'i-simple-icons-mistralai',
+  'xai': 'i-simple-icons-x',
+  'x-ai': 'i-simple-icons-x',
+  'qwen': 'i-simple-icons-alibabacloud',
+  'alibaba': 'i-simple-icons-alibabacloud',
+  // Z.ai has no entry in simple-icons (zai / z both 404), so providers
+  // matching `z-ai` / `glm-*` fall through to the generic cube glyph
+  // ModelCosts uses for unknown providers.
+}
+
+// Family-prefix → provider for codetime's bare ids. Matches the vendor
+// inference table in `server/utils/agent-pricing.ts` so the icon picks
+// up even when OpenRouter pricing didn't match (no `displayName`).
+const FAMILY_TO_PROVIDER: Array<{ test: (n: string) => boolean, provider: string }> = [
+  { test: n => n.startsWith('claude-'), provider: 'anthropic' },
+  { test: n => n.startsWith('gpt-') || /^o[134]-/.test(n), provider: 'openai' },
+  { test: n => n.startsWith('deepseek-'), provider: 'deepseek' },
+  { test: n => n.startsWith('gemini-'), provider: 'google' },
+  { test: n => n.startsWith('llama-'), provider: 'meta-llama' },
+  { test: n => n.startsWith('qwen'), provider: 'qwen' },
+  { test: n => n.startsWith('mistral-') || n.startsWith('codestral-'), provider: 'mistral' },
+  { test: n => n.startsWith('grok-'), provider: 'x-ai' },
+  { test: n => n.startsWith('glm-'), provider: 'z-ai' },
+]
+
+export function providerInfoFor(
+  rawModel: string,
+  displayName: string | undefined,
+): { icon: string | undefined, name: string, provider: string | undefined } {
+  // OpenRouter formats `name` as "Provider: Pretty Model Name" (with
+  // optional trailing tags like "(Fast)"). Split on the first colon and
+  // hand back both halves so the caller can render them independently.
+  if (displayName && displayName.includes(':')) {
+    const [providerRaw, ...rest] = displayName.split(':')
+    const provider = providerRaw!.trim()
+    const cleanName = rest.join(':').trim()
+    const icon = PROVIDER_ICON[provider.toLowerCase()]
+    return { icon, name: cleanName || displayName, provider }
+  }
+
+  // No OpenRouter `name` — fall back to inferring the provider from the
+  // bare codetime model id's family prefix.
+  const bareModel = rawModel.includes('/') ? rawModel.split('/').pop()! : rawModel
+  const lower = bareModel.toLowerCase()
+  for (const { test, provider } of FAMILY_TO_PROVIDER) {
+    if (test(lower)) {
+      return {
+        icon: PROVIDER_ICON[provider],
+        name: displayName ?? formatModelName(rawModel),
+        provider,
+      }
+    }
+  }
+
+  return { icon: undefined, name: displayName ?? formatModelName(rawModel), provider: undefined }
 }
 
 // Canonical categorical palette — same colours agent-time uses for

@@ -31,6 +31,18 @@ defineRouteMeta({
         in: 'query',
         schema: { type: 'string', enum: ['24h', '7d', '30d', 'all'], default: '30d' },
       },
+      {
+        name: 'machine_id',
+        in: 'query',
+        schema: { type: 'string', format: 'uuid' },
+        description: 'Restrict every aggregate to a single machine UUID.',
+      },
+      {
+        name: 'source',
+        in: 'query',
+        schema: { type: 'string' },
+        description: 'Restrict every aggregate to a single agent source (e.g. claude-code, codex, opencode, pi).',
+      },
     ],
     responses: {
       200: {
@@ -49,6 +61,7 @@ defineRouteMeta({
 'projectTokens',
 'modelCosts',
 'tools',
+'availableSources',
               ],
               properties: {
                 range: {
@@ -100,6 +113,7 @@ defineRouteMeta({
                 projectTokens: { type: 'array', items: { type: 'object' } },
                 modelCosts: { type: 'array', items: { type: 'object' } },
                 tools: { type: 'array', items: { type: 'object' } },
+                availableSources: { type: 'array', items: { type: 'string' } },
               },
             },
           },
@@ -256,6 +270,20 @@ export default defineEventHandler(async (event) => {
   // can safely go inside `AT TIME ZONE`.
   const rawTz = typeof q.tz === 'string' ? q.tz : ''
   const tz = /^[A-Z][\w+\-/]{0,63}$/i.test(rawTz) ? rawTz : 'UTC'
+  // Optional machine filter. Validated as a strict UUID before being
+  // interpolated into SQL via ::uuid so a bad value is dropped early
+  // rather than producing a Postgres parse error mid-query.
+  const rawMachineId = typeof q.machine_id === 'string' ? q.machine_id : ''
+  const machineId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawMachineId)
+    ? rawMachineId
+    : null
+  // Optional agent-source filter — pins the dashboard to a single CLI
+  // / agent (claude-code, codex, opencode, pi, …). Kept permissive on
+  // the allowed character set so new agents work without a server
+  // redeploy, but capped to a sane shape to keep the parameterised
+  // value harmless if anything slipped past Postgres' type binding.
+  const rawSource = typeof q.source === 'string' ? q.source.trim() : ''
+  const source = /^[\w.-]{1,64}$/.test(rawSource) ? rawSource : null
   const db = useDb()
 
   // Refresh the OpenRouter price catalogue before doing any cost math.
@@ -280,6 +308,19 @@ export default defineEventHandler(async (event) => {
 
   const sinceClause = sinceIso ? sql`and b.ts >= ${sinceIso}::timestamptz` : sql``
   const sessSinceClause = sinceIso ? sql`and s.last_event_at >= ${sinceIso}::timestamptz` : sql``
+  // Machine clauses live alongside the time clauses so every query
+  // composing both fragments naturally honours the dropdown. b.* lives
+  // on agent_time_buckets, s.* on agent_sessions, m.* on
+  // agent_session_models — pick the alias each query already uses.
+  const bMachineClause = machineId ? sql`and b.machine_id = ${machineId}::uuid` : sql``
+  const sessMachineClause = machineId ? sql`and s.machine_id = ${machineId}::uuid` : sql``
+  const mMachineClause = machineId ? sql`and m.machine_id = ${machineId}::uuid` : sql``
+  // Source clauses mirror the machine ones: every query already has a
+  // `source` column on the relevant table, so we filter wherever the
+  // join naturally exposes it.
+  const bSourceClause = source ? sql`and b.source = ${source}` : sql``
+  const sessSourceClause = source ? sql`and s.source = ${source}` : sql``
+  const mSourceClause = source ? sql`and m.source = ${source}` : sql``
 
   // --- summary --------------------------------------------------------
   const summaryRows = await db.execute(sql`
@@ -300,6 +341,8 @@ export default defineEventHandler(async (event) => {
     from agent_sessions s
     where s.user_id = ${userId}
     ${sessSinceClause}
+    ${sessMachineClause}
+    ${sessSourceClause}
   `)
   const summaryRow = (summaryRows as unknown as Record<string, unknown>[])[0] ?? {}
 
@@ -318,6 +361,8 @@ export default defineEventHandler(async (event) => {
     from agent_time_buckets b
     where b.user_id = ${userId}
     ${sinceClause}
+    ${bMachineClause}
+    ${bSourceClause}
     group by 1
     order by 1
   `) as unknown as Record<string, unknown>[]
@@ -349,6 +394,8 @@ export default defineEventHandler(async (event) => {
     join agent_sessions s on s.rollup_key = m.rollup_key
     where m.user_id = ${userId}
     ${sessSinceClause}
+    ${mMachineClause}
+    ${mSourceClause}
     group by 1, 2, 3
     order by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
@@ -368,6 +415,8 @@ export default defineEventHandler(async (event) => {
     from agent_time_buckets b
     where b.user_id = ${userId}
     ${sinceClause}
+    ${bMachineClause}
+    ${bSourceClause}
     group by 1, 2
     order by 1, 2
   `) as unknown as Record<string, unknown>[]
@@ -396,6 +445,8 @@ export default defineEventHandler(async (event) => {
     join agent_sessions s on s.rollup_key = m.rollup_key
     where m.user_id = ${userId}
     ${sessSinceClause}
+    ${mMachineClause}
+    ${mSourceClause}
     group by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
 
@@ -410,6 +461,8 @@ export default defineEventHandler(async (event) => {
     from agent_sessions s
     where s.user_id = ${userId}
     ${sessSinceClause}
+    ${sessMachineClause}
+    ${sessSourceClause}
     group by 1
   `) as unknown as Record<string, unknown>[]
   const durationByProject = new Map<string, number>()
@@ -643,6 +696,8 @@ export default defineEventHandler(async (event) => {
       join agent_sessions s on s.rollup_key = t.rollup_key
       where t.user_id = ${userId}
       ${sessSinceClause}
+      ${sessMachineClause}
+      ${sessSourceClause}
     )
     select
       tool,
@@ -655,7 +710,22 @@ export default defineEventHandler(async (event) => {
     limit 30
   `) as unknown as Record<string, unknown>[]
 
+  // --- available sources (for the agent picker) ----------------------
+  // List every source the user has ever ingested, ignoring the current
+  // source filter (otherwise the dropdown would shrink to just the
+  // already-selected value). Machine + time scope are kept so the list
+  // reflects what's actually reachable from the picker's perspective.
+  const sourceRows = await db.execute(sql`
+    select distinct coalesce(nullif(s.source, ''), 'unknown') as source
+    from agent_sessions s
+    where s.user_id = ${userId}
+    ${sessSinceClause}
+    ${sessMachineClause}
+    order by 1
+  `) as unknown as Record<string, unknown>[]
+
   return {
+    availableSources: sourceRows.map(r => String(r.source ?? 'unknown')),
     range: {
       key: range.key,
       since: range.since ? range.since.toISOString() : null,

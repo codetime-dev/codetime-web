@@ -66,6 +66,15 @@ async function logout() {
 const t = useI18N()
 
 const connect = computed(() => t.value.dashboard.settings.connect)
+
+type ConnectTab = 'agent' | 'vscode' | 'jetbrains'
+const connectOpen = ref(false)
+const connectTab = ref<ConnectTab>('agent')
+
+function openConnect(tab: ConnectTab) {
+  connectTab.value = tab
+  connectOpen.value = true
+}
 </script>
 
 <template>
@@ -124,50 +133,54 @@ const connect = computed(() => t.value.dashboard.settings.connect)
       </div>
     </PanelSection>
 
-    <!-- CONNECT · AGENT -->
+    <!-- CONNECT — opens a near-fullscreen modal so the guides aren't
+         crammed into the Settings flow. Three cards stand in for the
+         old collapsibles; clicking one launches the modal pre-selected
+         on that tab. -->
     <PanelSection
       num="03"
-      :title="connect?.agent?.title ?? 'Connect AI Agents'"
-      :meta="connect?.agent?.meta ?? 'cli · claude · codex · opencode · pi'"
+      title="Connect"
+      meta="cli · editors · agents"
       flush
-      collapsible
     >
       <template #icon>
-        <i class="i-tabler-robot text-[15px] text-ct-fg-muted" />
+        <i class="i-tabler-plug-connected text-[15px] text-ct-fg-muted" />
       </template>
-      <DashboardAgentGuide hide-lead />
+
+      <div class="connect-grid">
+        <button type="button" class="connect-card" @click="openConnect('agent')">
+          <i class="i-tabler-robot connect-card-icon" />
+          <span class="connect-card-body">
+            <span class="connect-card-title">{{ connect?.agent?.title ?? 'Connect AI Agents' }}</span>
+            <span class="connect-card-meta">{{ connect?.agent?.meta ?? 'cli · claude · codex · opencode · pi' }}</span>
+          </span>
+          <i class="i-tabler-arrow-up-right connect-card-cta" />
+        </button>
+
+        <button type="button" class="connect-card" @click="openConnect('vscode')">
+          <i class="i-tabler-brand-vscode connect-card-icon" />
+          <span class="connect-card-body">
+            <span class="connect-card-title">{{ connect?.vscode?.title ?? 'Connect VSCode' }}</span>
+            <span class="connect-card-meta">{{ connect?.vscode?.meta ?? 'vscode · cursor · windsurf' }}</span>
+          </span>
+          <i class="i-tabler-arrow-up-right connect-card-cta" />
+        </button>
+
+        <button type="button" class="connect-card" @click="openConnect('jetbrains')">
+          <i class="i-simple-icons-jetbrains connect-card-icon" />
+          <span class="connect-card-body">
+            <span class="connect-card-title">{{ connect?.jetbrains?.title ?? 'Connect JetBrains IDEs' }}</span>
+            <span class="connect-card-meta">{{ connect?.jetbrains?.meta ?? 'intellij · pycharm · webstorm · …' }}</span>
+          </span>
+          <i class="i-tabler-arrow-up-right connect-card-cta" />
+        </button>
+      </div>
     </PanelSection>
 
-    <!-- CONNECT · VSCODE -->
-    <PanelSection
-      num="04"
-      :title="connect?.vscode?.title ?? 'Connect VSCode'"
-      :meta="connect?.vscode?.meta ?? 'vscode · cursor · windsurf'"
-      flush
-      collapsible
-    >
-      <template #icon>
-        <i class="i-tabler-brand-vscode text-[15px] text-ct-fg-muted" />
-      </template>
-      <DashboardPluginGuide hide-lead family="vscode" />
-    </PanelSection>
-
-    <!-- CONNECT · JETBRAINS -->
-    <PanelSection
-      num="05"
-      :title="connect?.jetbrains?.title ?? 'Connect JetBrains IDEs'"
-      :meta="connect?.jetbrains?.meta ?? 'intellij · pycharm · webstorm · …'"
-      flush
-      collapsible
-    >
-      <template #icon>
-        <i class="i-simple-icons-jetbrains text-[15px] text-ct-fg-muted" />
-      </template>
-      <DashboardPluginGuide hide-lead family="jetbrains" />
-    </PanelSection>
+    <DashboardConnectModal v-model:open="connectOpen" :initial-tab="connectTab" />
 
     <!-- THEME -->
-    <PanelSection num="06" :title="t.dashboard.settings.theme.title" meta="appearance" flush>
+    <PanelSection num="04" :title="t.dashboard.settings.theme.title" meta="appearance" flush>
       <template #icon>
         <i class="i-tabler-palette text-[15px] text-ct-fg-muted" />
       </template>
@@ -189,7 +202,7 @@ const connect = computed(() => t.value.dashboard.settings.connect)
     </PanelSection>
 
     <!-- LANGUAGE -->
-    <PanelSection num="07" :title="t.dashboard.settings.language.title" meta="locale" flush>
+    <PanelSection num="05" :title="t.dashboard.settings.language.title" meta="locale" flush>
       <template #icon>
         <i class="i-tabler-language text-[15px] text-ct-fg-muted" />
       </template>
@@ -205,7 +218,7 @@ const connect = computed(() => t.value.dashboard.settings.connect)
     </PanelSection>
 
     <!-- EXPORT -->
-    <PanelSection num="08" :title="t.dashboard.settings.export.title" meta="csv · download" flush>
+    <PanelSection num="06" :title="t.dashboard.settings.export.title" meta="csv · download" flush>
       <template #icon>
         <i class="i-tabler-file-export text-[15px] text-ct-fg-muted" />
       </template>
@@ -249,7 +262,7 @@ const connect = computed(() => t.value.dashboard.settings.connect)
     </PanelSection>
 
     <!-- OTHER -->
-    <PanelSection num="09" :title="t.dashboard.settings.other.title" meta="session" flush>
+    <PanelSection num="07" :title="t.dashboard.settings.other.title" meta="session" flush>
       <template #icon>
         <i class="i-tabler-dots-circle-horizontal text-[15px] text-ct-fg-muted" />
       </template>
@@ -453,5 +466,59 @@ const connect = computed(() => t.value.dashboard.settings.connect)
 .line-btn-danger {
   color: #ef4444 !important;
   background-color: rgb(239 68 68 / 0.16) !important;
+}
+
+/* Connect cards (trigger row for the near-fullscreen ConnectModal) */
+.connect-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 1px solid var(--ct-border-subtle);
+}
+@media (min-width: 720px) {
+  .connect-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.connect-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--ct-surface);
+  border: 0;
+  border-bottom: 1px solid var(--ct-border-subtle);
+  color: var(--ct-fg);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--ct-duration-fast) var(--ct-ease);
+}
+@media (min-width: 720px) {
+  .connect-card { border-bottom: 0; }
+  .connect-card:not(:last-child) { border-right: 1px solid var(--ct-border-subtle); }
+}
+.connect-card:hover { background: var(--ct-surface-1); }
+.connect-card:hover .connect-card-cta { color: var(--ct-primary); }
+.connect-card-icon {
+  font-size: 24px;
+  color: var(--ct-fg-muted);
+  flex-shrink: 0;
+}
+.connect-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.connect-card-title {
+  font-size: var(--ct-text-md);
+  font-weight: var(--ct-weight-semibold);
+  color: var(--ct-fg);
+}
+.connect-card-meta {
+  font-family: var(--ct-font-mono);
+  font-size: var(--ct-text-xs);
+  color: var(--ct-fg-subtle);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.connect-card-cta {
+  flex-shrink: 0;
+  color: var(--ct-fg-subtle);
+  transition: color var(--ct-duration-fast) var(--ct-ease);
 }
 </style>

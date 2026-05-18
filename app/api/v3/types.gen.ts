@@ -356,6 +356,8 @@ export type GetV3AgentDashboardData = {
     path?: never;
     query?: {
         range?: '24h' | '7d' | '30d' | 'all';
+        machine_id?: string;
+        source?: string;
     };
     url: '/v3/agent/dashboard';
 };
@@ -568,6 +570,7 @@ export type GetV3AgentSessionsData = {
         cursor?: string;
         source?: string;
         project_id?: string;
+        machine_id?: string;
     };
     url: '/v3/agent/sessions';
 };

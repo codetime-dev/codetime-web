@@ -161,15 +161,15 @@ export function ensurePricingLoaded(): Promise<void> {
 // mandatory `vendor/` prefix that codetime CLI strips, so we infer it
 // back from the bare model name.
 const VENDOR_PREFIX_BY_FAMILY: Array<{ test: (name: string) => boolean, prefix: string }> = [
-  { test: (n) => n.startsWith('claude-'), prefix: 'anthropic/' },
-  { test: (n) => n.startsWith('gpt-') || n.startsWith('o1-') || n.startsWith('o3-') || n.startsWith('o4-'), prefix: 'openai/' },
-  { test: (n) => n.startsWith('deepseek-'), prefix: 'deepseek/' },
-  { test: (n) => n.startsWith('glm-'), prefix: 'z-ai/' },
-  { test: (n) => n.startsWith('grok-'), prefix: 'x-ai/' },
-  { test: (n) => n.startsWith('gemini-'), prefix: 'google/' },
-  { test: (n) => n.startsWith('llama-'), prefix: 'meta-llama/' },
-  { test: (n) => n.startsWith('qwen'), prefix: 'qwen/' },
-  { test: (n) => n.startsWith('mistral-') || n.startsWith('codestral-'), prefix: 'mistralai/' },
+  { test: n => n.startsWith('claude-'), prefix: 'anthropic/' },
+  { test: n => n.startsWith('gpt-') || n.startsWith('o1-') || n.startsWith('o3-') || n.startsWith('o4-'), prefix: 'openai/' },
+  { test: n => n.startsWith('deepseek-'), prefix: 'deepseek/' },
+  { test: n => n.startsWith('glm-'), prefix: 'z-ai/' },
+  { test: n => n.startsWith('grok-'), prefix: 'x-ai/' },
+  { test: n => n.startsWith('gemini-'), prefix: 'google/' },
+  { test: n => n.startsWith('llama-'), prefix: 'meta-llama/' },
+  { test: n => n.startsWith('qwen'), prefix: 'qwen/' },
+  { test: n => n.startsWith('mistral-') || n.startsWith('codestral-'), prefix: 'mistralai/' },
 ]
 
 function pricingCandidates(model: string): string[] {
@@ -195,7 +195,7 @@ function pricingCandidates(model: string): string[] {
   // `claude-opus-4-7` → `claude-opus-4.7`, `claude-haiku-4-5-20251001` →
   // `claude-haiku-4.5-20251001`. Lookahead keeps the regex from chewing
   // through 8-digit date suffixes.
-  const dotted = base.replace(/(\D)(\d+)-(\d+)(?=-|$)/g, '$1$2.$3')
+  const dotted = base.replaceAll(/(\D)(\d+)-(\d+)(?=-|$)/g, '$1$2.$3')
   if (dotted !== base) {
     add(dotted)
   }
@@ -204,7 +204,7 @@ function pricingCandidates(model: string): string[] {
   const undated = base.replace(/-\d{8}$/, '')
   if (undated !== base) {
     add(undated)
-    const undatedDotted = undated.replace(/(\D)(\d+)-(\d+)(?=-|$)/g, '$1$2.$3')
+    const undatedDotted = undated.replaceAll(/(\D)(\d+)-(\d+)(?=-|$)/g, '$1$2.$3')
     if (undatedDotted !== undated) {
       add(undatedDotted)
     }
@@ -246,7 +246,17 @@ export function estimateCostUsd(args: {
     return { cost: 0, pricing: null }
   }
   const cacheCreation = Math.max(0, args.cacheCreationInputTokens ?? 0)
-  const cacheRead = Math.max(0, args.cacheReadInputTokens ?? Math.max(0, args.cachedInputTokens - cacheCreation))
+  // Codex / OpenAI emit only `cachedInputTokens` (a subset of input) and
+  // never split it into cache_read vs cache_creation. The CLI therefore
+  // writes 0 (not NULL) into the cache_read_input_tokens column, so a
+  // plain `??` fallback never fires. Treat an explicit 0 the same as
+  // "absent" and derive cache read from cachedInputTokens — otherwise
+  // 90%+ of Codex input would silently get charged at the full prompt
+  // rate instead of the much cheaper cache_read rate.
+  const explicitCacheRead = Math.max(0, args.cacheReadInputTokens ?? 0)
+  const cacheRead = explicitCacheRead > 0
+    ? explicitCacheRead
+    : Math.max(0, args.cachedInputTokens - cacheCreation)
   const fresh = Math.max(0, args.inputTokens - cacheCreation - cacheRead)
   const cost
     = fresh * pricing.inputCostPerToken

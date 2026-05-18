@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { VibeModelRow } from './types'
 import { computed } from 'vue'
-import { compact, fmtUsd, formatModelName } from './types'
+import { compact, fmtUsd, providerInfoFor } from './types'
 
 // Per-model cost breakdown — column layout mirrors agent-time's
 // ModelCosts.vue so the two dashboards read identical:
@@ -34,12 +34,14 @@ const view = computed(() => {
     const inputPct = (freshInput / denom) * 100
     const outputPct = (outputTotal / denom) * 100
     const share = totalCost.value > 0 ? (row.estimatedCostUsd / totalCost.value) * 100 : 0
-    const name = row.pricing?.displayName ?? formatModelName(row.model)
+    const { icon, name, provider } = providerInfoFor(row.model, row.pricing?.displayName)
     const pricingSource = row.pricing?.source ?? 'missing'
     return {
       index: String(index + 1).padStart(2, '0'),
       model: row.model,
       name,
+      icon,
+      provider,
       cachePct,
       inputPct,
       outputPct,
@@ -89,7 +91,11 @@ function fmtPct(value: number): string {
       class="row"
     >
       <span class="idx">{{ row.index }}</span>
-      <span class="name" :title="row.model">{{ row.name }}</span>
+      <span class="name" :title="row.provider ? `${row.provider} · ${row.model}` : row.model">
+        <span v-if="row.icon" class="provider-icon" :class="[row.icon]" :aria-label="row.provider" />
+        <span v-else class="provider-icon i-mdi-cube-outline" :aria-label="row.provider ?? 'unknown'" />
+        <span class="model-name">{{ row.name }}</span>
+      </span>
       <span class="bar-wrap">
         <span class="bar" :style="{ width: `${row.widthPct}%` }" />
       </span>
@@ -109,6 +115,14 @@ function fmtPct(value: number): string {
     <li v-if="view.length === 0" class="empty">
       {{ L?.noModel ?? '— no model usage in window —' }}
     </li>
+    <!-- UnoCSS class discovery anchor — provider icons are picked
+         from PROVIDER_ICON at runtime, so the scanner can't see them.
+         Listing the classes once in markup is more reliable than the
+         safelist (which needs a uno.config reload). -->
+    <span
+      aria-hidden="true"
+      class="icon-discovery i-simple-icons-anthropic i-simple-icons-openai i-simple-icons-google i-simple-icons-deepseek i-simple-icons-meta i-simple-icons-mistralai i-simple-icons-x i-simple-icons-alibabacloud i-mdi-cube-outline"
+    />
   </ul>
 </template>
 
@@ -167,6 +181,19 @@ function fmtPct(value: number): string {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.provider-icon {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  color: var(--ct-fg-muted);
+}
+.model-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .num {
@@ -186,6 +213,14 @@ function fmtPct(value: number): string {
   text-align: center;
   color: var(--ct-fg-muted);
   padding: 24px 0;
+}
+
+.icon-discovery {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 @media (max-width: 980px) {

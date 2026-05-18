@@ -1,12 +1,23 @@
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import { defineConfig, presetIcons, presetWind4 } from 'unocss'
 
-// In-house brand icons that no iconify collection ships. Add new files
-// to `app/assets/icons/<name>.svg`, then reference as `i-brand-<name>`.
-const brandIconsDir = fileURLToPath(new URL('app/assets/icons/', import.meta.url))
-function loadBrand(name: string): string {
-  return readFileSync(`${brandIconsDir}${name}.svg`, 'utf8')
+// In-house brand icons that no iconify collection ships. Inlined as
+// raw SVG strings (presetIcons / @iconify/utils' custom loader expects
+// a string here — returning IconifyIcon objects crashes with
+// "result.indexOf is not a function"). Inlining also avoids a
+// readFileSync round-trip that was finicky under vite-node HMR.
+// New icons: add a `<svg>` string below and reference as
+// `i-brand-<name>` from a template (or add it to `safelist` if the
+// class is only ever interpolated at runtime).
+const BRAND_ICONS: Record<string, string> = {
+  // opencode.ai favicon — frame (rectangle outline with the "screen"
+  // hole) plus the inner detail block. The original favicon also
+  // ships a full-canvas background rect; we drop it so the icon
+  // renders as a clean monochrome mask rather than a solid square.
+  opencode: '<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z"/><path fill="currentColor" d="M320 224V352H192V224Z"/></svg>',
+  // Pi (inflection.ai) mark — stylised lowercase π plus its detached
+  // terminal block. Both paths use currentColor so the icon tints to
+  // the surrounding text colour.
+  pi: '<svg viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fill-rule="evenodd" d="M165.29 165.29H517.36V400H400V517.36H282.65V634.72H165.29ZM282.65 282.65V400H400V282.65Z"/><path fill="currentColor" d="M517.36 400H634.72V634.72H517.36Z"/></svg>',
 }
 
 // Codetime design tokens are declared in app/assets/tokens.css.
@@ -23,10 +34,9 @@ export default defineConfig({
         'vertical-align': 'middle',
       },
       collections: {
-        brand: {
-          opencode: () => loadBrand('opencode'),
-          pi: () => loadBrand('pi'),
-        },
+        brand: Object.fromEntries(
+          Object.entries(BRAND_ICONS).map(([name, svg]) => [name, () => svg]),
+        ),
       },
     }),
   ],
@@ -85,5 +95,15 @@ export default defineConfig({
     'i-simple-icons-openai',
     'i-brand-opencode',
     'i-brand-pi',
+    // Provider icons rendered next to model names in Vibe ModelCosts.
+    // Same dynamic-class issue — explicit listing keeps them in the
+    // production CSS even when no template references them statically.
+    'i-simple-icons-google',
+    'i-simple-icons-deepseek',
+    'i-simple-icons-meta',
+    'i-simple-icons-mistralai',
+    'i-simple-icons-x',
+    'i-simple-icons-alibabacloud',
+    'i-mdi-cube-outline',
   ],
 })

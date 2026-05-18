@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import type { VibeDashboard } from '~/components/Vibe/types'
-import { getV3AgentSessions } from '~/api/v3'
+import { getV3AgentSessions, getV3Machines } from '~/api/v3'
 import { compact, fmtUsd } from '~/components/Vibe/types'
+
+type Machine = {
+  id: string
+  hostname?: string | null
+  displayName?: string | null
+  platform?: string | null
+  source?: string | null
+  lastSeenAt?: string | null
+  createdAt?: string | null
+}
 
 // Vibe page. Top half is an agent-time-style telemetry dashboard
 // (KPIs + cost timeline + rhythm heatmap + project/model/tool
@@ -30,6 +40,35 @@ const days = ref<number>(28)
 const startTime = ref<Date | null>(null)
 const endTime = ref<Date | null>(null)
 
+// Machine scope. `null` means "All machines"; a value pins every
+// aggregate and the sessions list to a single machine UUID.
+const machineId = ref<string | null>(null)
+const machines = ref<Machine[]>([])
+const machinesLoading = ref(false)
+
+// Agent-source scope (claude-code / codex / opencode / pi / …). The
+// list of options comes back inside the dashboard response so the
+// dropdown stays in sync with what the user has actually ingested.
+const sourceId = ref<string | null>(null)
+
+async function loadMachines() {
+  if (machinesLoading.value) {
+    return
+  }
+  machinesLoading.value = true
+  try {
+    const resp = await getV3Machines()
+    const list = (resp.data?.machines ?? []) as Machine[]
+    machines.value = list.filter(m => typeof m.id === 'string' && m.id.length > 0)
+  }
+  catch {
+    machines.value = []
+  }
+  finally {
+    machinesLoading.value = false
+  }
+}
+
 // Browser IANA timezone (e.g. "Asia/Shanghai"). Server uses this to
 // bucket weekday/hour for the rhythm heatmap so the grid reflects the
 // user's local schedule, not UTC. Falls back to UTC during SSR where
@@ -51,9 +90,16 @@ const dashboardParams = computed<Record<string, string>>(() => {
   if (startTime.value && endTime.value) {
     base.since = startTime.value.toISOString()
     base.until = endTime.value.toISOString()
-    return base
   }
-  base.days = String(days.value)
+  else {
+    base.days = String(days.value)
+  }
+  if (machineId.value) {
+    base.machine_id = machineId.value
+  }
+  if (sourceId.value) {
+    base.source = sourceId.value
+  }
   return base
 })
 
@@ -66,7 +112,7 @@ const { data: dashboard, pending: dashboardPending, error: dashboardError, refre
     key: 'vibe-dashboard',
     query: dashboardParams,
     credentials: 'include',
-    watch: [days, startTime, endTime],
+    watch: [days, startTime, endTime, machineId, sourceId],
   })
 
 const cursor = ref<string | null>(null)
@@ -85,6 +131,8 @@ async function loadPage(reset = false) {
       query: {
         limit: 50,
         ...((!reset && cursor.value) ? { cursor: cursor.value } : {}),
+        ...(machineId.value ? { machine_id: machineId.value } : {}),
+        ...(sourceId.value ? { source: sourceId.value } : {}),
       },
     })
     const body = resp.data
@@ -102,7 +150,18 @@ async function loadPage(reset = false) {
   }
 }
 
-onMounted(() => loadPage(true))
+onMounted(() => {
+  loadMachines()
+  loadPage(true)
+})
+
+// Reset the sessions list whenever a scope filter changes so the list
+// reflects the current filter instead of appending to the old one.
+watch([machineId, sourceId], () => {
+  cursor.value = null
+  sessions.value = []
+  loadPage(true)
+})
 
 const hasData = computed(() => {
   const d = dashboard.value
@@ -158,6 +217,77 @@ const sectionTitles = computed(() => {
 const Lsess = computed(() => t.value.dashboard.agent?.labels?.sessions)
 const Lmeta = computed(() => t.value.dashboard.agent?.labels?.meta)
 
+function machineLabel(m: Machine): string {
+  return m.displayName?.trim() || m.hostname?.trim() || m.id.slice(0, 8)
+}
+
+// Pick a tabler icon from a platform string. The CLI ingests platform
+// values like "darwin" / "linux" / "win32", so we match on substrings
+// rather than hand-listing every variant.
+function platformIcon(p?: string | null): string {
+  const norm = (p ?? '').toLowerCase()
+  if (norm.includes('darwin') || norm.includes('mac')) {
+    return 'i-tabler-brand-apple'
+  }
+  if (norm.includes('win')) {
+    return 'i-tabler-brand-windows'
+  }
+  if (norm.includes('linux')) {
+    return 'i-tabler-brand-debian'
+  }
+  return 'i-tabler-device-desktop'
+}
+
+// Map an agent-source id → display label + icon. The icon set
+// mirrors the chips on the empty-state guide (DashboardAgentGuide) so
+// the picker reads consistent with the install page.
+function sourceMeta(id: string): { label: string, icon: string } {
+  const key = id.toLowerCase()
+  switch (key) {
+    case 'claude':
+    case 'claude-code': {
+      return { label: 'Claude Code', icon: 'i-simple-icons-anthropic' }
+    }
+    case 'codex': {
+      return { label: 'Codex', icon: 'i-simple-icons-openai' }
+    }
+    case 'opencode': {
+      return { label: 'OpenCode', icon: 'i-brand-opencode' }
+    }
+    case 'pi': {
+      return { label: 'Pi', icon: 'i-brand-pi' }
+    }
+    default: {
+      // Title-case any unknown source so newly-added agents still
+      // render with a readable label.
+      const label = id.length > 0 ? id.charAt(0).toUpperCase() + id.slice(1) : id
+      return { label, icon: 'i-tabler-terminal-2' }
+    }
+  }
+}
+
+type PillItem<T extends string> = { id: T | null, label: string, icon?: string }
+
+const machineItems = computed<PillItem<string>[]>(() => [
+  { id: null, label: 'All machines', icon: 'i-tabler-stack-2' },
+  ...machines.value.map(m => ({
+    id: m.id,
+    label: machineLabel(m),
+    icon: platformIcon(m.platform),
+  })),
+])
+
+const sourceItems = computed<PillItem<string>[]>(() => {
+  const sources = dashboard.value?.availableSources ?? []
+  return [
+    { id: null, label: 'All agents', icon: 'i-tabler-robot' },
+    ...sources.map((id) => {
+      const meta = sourceMeta(id)
+      return { id, label: meta.label, icon: meta.icon }
+    }),
+  ]
+})
+
 const rangeMeta = computed(() => {
   const d = dashboard.value
   if (!d) {
@@ -201,6 +331,16 @@ const bucketMeta = computed(() => {
         v-model:days="days"
         v-model:start-time="startTime"
         v-model:end-time="endTime"
+      />
+      <DashboardPillSelect
+        v-model="machineId"
+        :items="machineItems"
+        empty-title="No machines yet"
+      />
+      <DashboardPillSelect
+        v-model="sourceId"
+        :items="sourceItems"
+        empty-title="No agents yet"
       />
       <button
         class="range-refresh"
@@ -414,6 +554,7 @@ const bucketMeta = computed(() => {
 .range-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
 .range-refresh .i-tabler-refresh,
 .range-refresh .i-tabler-loader-2 { width: 16px; height: 16px; font-size: 16px; }
+
 .spinning { animation: vibe-spin 0.9s linear infinite; }
 @keyframes vibe-spin {
   from { transform: rotate(0); }

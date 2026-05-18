@@ -367,6 +367,7 @@ const dashboard: VibeDashboard = {
   projectTokens,
   modelCosts,
   tools,
+  availableSources: ['claude-code', 'codex', 'opencode', 'pi'],
 }
 
 const totalCostUsd = modelCosts.reduce((sum, m) => sum + m.estimatedCostUsd, 0)
