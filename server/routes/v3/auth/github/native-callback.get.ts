@@ -64,10 +64,15 @@ export default defineEventHandler(async (event) => {
     if (!ghUser.id) {
       return sendRedirect(event, appErrorRedirect('github_user_missing', state), 302)
     }
-    const { id, tokenV1 } = await upsertGithubUser(ghUser)
+    const { id, uploadToken } = await upsertGithubUser(ghUser)
 
+    // The App authenticates subsequent calls as
+    // `Authorization: Bearer <uploadToken>` — the same scheme the CLI
+    // ingest path already uses, so no `user_guard` change is needed.
+    // `token_v1` stays cookie-only on the web flow and isn't shipped
+    // to the device.
     const out = new URLSearchParams({
-      token: tokenV1,
+      token: uploadToken,
       user_id: String(id),
     })
     if (state) {

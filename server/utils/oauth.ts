@@ -77,7 +77,7 @@ export async function fetchGithubUser(accessToken: string): Promise<GithubUser> 
   }
 }
 
-export async function upsertGithubUser(gh: GithubUser): Promise<{ id: number, tokenV1: string }> {
+export async function upsertGithubUser(gh: GithubUser): Promise<{ id: number, tokenV1: string, uploadToken: string }> {
   const db = useDb()
   const [existing] = await db.select().from(users).where(eq(users.githubId, gh.id)).limit(1)
   if (existing) {
@@ -89,19 +89,25 @@ export async function upsertGithubUser(gh: GithubUser): Promise<{ id: number, to
       patch.avatar = gh.avatar_url
     }
     // Some legacy rows (carried over from the Vue/Next-era backends) have
-    // `token_v1 = ''` even though the column is NOT NULL. The cookie pair
-    // we mint then carries an empty `auth_token` which `tryUser` rejects
-    // — the user appears unauthenticated immediately after a successful
-    // GitHub callback. Re-mint a fresh token on the fly so login works.
+    // `token_v1 = ''` / `upload_token = ''` even though the columns are
+    // NOT NULL. The cookie pair / Bearer header we mint then carries an
+    // empty value and `tryUser` rejects it — the user appears
+    // unauthenticated immediately after a successful GitHub callback.
+    // Re-mint on the fly so login works.
     let tokenV1 = existing.tokenV1
     if (!tokenV1) {
       tokenV1 = randomBytes(24).toString('hex')
       patch.tokenV1 = tokenV1
     }
+    let uploadToken = existing.uploadToken
+    if (!uploadToken) {
+      uploadToken = randomBytes(24).toString('hex')
+      patch.uploadToken = uploadToken
+    }
     if (Object.keys(patch).length > 0) {
       await db.update(users).set(patch).where(eq(users.id, existing.id))
     }
-    return { id: existing.id, tokenV1 }
+    return { id: existing.id, tokenV1, uploadToken }
   }
   const tokenV1 = randomBytes(24).toString('hex')
   const uploadToken = randomBytes(24).toString('hex')
@@ -117,11 +123,11 @@ export async function upsertGithubUser(gh: GithubUser): Promise<{ id: number, to
     tokenV1,
     createdAt: now,
     updatedAt: now,
-  } as any).returning({ id: users.id, tokenV1: users.tokenV1 })
+  } as any).returning({ id: users.id, tokenV1: users.tokenV1, uploadToken: users.uploadToken })
   if (!created) {
  throw new Error('Failed to create user')
 }
-  return { id: Number(created.id), tokenV1: created.tokenV1 }
+  return { id: Number(created.id), tokenV1: created.tokenV1, uploadToken: created.uploadToken }
 }
 
 // Verify a Google ID token by validating its RS256 signature against
@@ -266,7 +272,7 @@ export async function verifyGoogleIdToken(
   return claims
 }
 
-export async function upsertGoogleUser(claims: GoogleClaims): Promise<{ id: number, tokenV1: string }> {
+export async function upsertGoogleUser(claims: GoogleClaims): Promise<{ id: number, tokenV1: string, uploadToken: string }> {
   const db = useDb()
   const [existing] = await db.select().from(users).where(eq(users.googleId, claims.sub)).limit(1)
   if (existing) {
@@ -277,16 +283,21 @@ export async function upsertGoogleUser(claims: GoogleClaims): Promise<{ id: numb
     if (claims.picture) {
       patch.avatar = claims.picture
     }
-    // Same legacy-empty-token_v1 mitigation as in upsertGithubUser.
+    // Same legacy-empty-token mitigation as in upsertGithubUser.
     let tokenV1 = existing.tokenV1
     if (!tokenV1) {
       tokenV1 = randomBytes(24).toString('hex')
       patch.tokenV1 = tokenV1
     }
+    let uploadToken = existing.uploadToken
+    if (!uploadToken) {
+      uploadToken = randomBytes(24).toString('hex')
+      patch.uploadToken = uploadToken
+    }
     if (Object.keys(patch).length > 0) {
       await db.update(users).set(patch).where(eq(users.id, existing.id))
     }
-    return { id: existing.id, tokenV1 }
+    return { id: existing.id, tokenV1, uploadToken }
   }
   const tokenV1 = randomBytes(24).toString('hex')
   const uploadToken = randomBytes(24).toString('hex')
@@ -302,9 +313,9 @@ export async function upsertGoogleUser(claims: GoogleClaims): Promise<{ id: numb
     tokenV1,
     createdAt: now,
     updatedAt: now,
-  } as any).returning({ id: users.id, tokenV1: users.tokenV1 })
+  } as any).returning({ id: users.id, tokenV1: users.tokenV1, uploadToken: users.uploadToken })
   if (!created) {
  throw new Error('Failed to create user')
 }
-  return { id: Number(created.id), tokenV1: created.tokenV1 }
+  return { id: Number(created.id), tokenV1: created.tokenV1, uploadToken: created.uploadToken }
 }
