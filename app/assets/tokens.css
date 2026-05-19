@@ -159,6 +159,13 @@ html[data-scheme="light"] {
   /* Calendar heatmap */
   --ct-cal-empty:  #e0e2e8;
   --ct-cal-stroke: #f1f2f5;
+  /* Cells inside the 365-day grid but outside the dashboard's active
+     date window. Visibly fainter than empty so the in-range window
+     still "pops" without losing the grid silhouette. */
+  --ct-cal-out:    #eef0f3;
+  /* Cells in the future portion of the grid (date > today). Lightest of
+     the three so the user reads them as "not yet". */
+  --ct-cal-future: #f6f7f9;
 
   color-scheme: light;
 }
@@ -245,6 +252,8 @@ html[data-scheme="dark"] {
 
     --ct-cal-empty:  #1c1d20;
     --ct-cal-stroke: #0a0a0b;
+    --ct-cal-out:    #141518;
+    --ct-cal-future: #0f1012;
 
     color-scheme: dark;
   }
@@ -362,11 +371,12 @@ html, body {
    `.plot` className; we override axis/grid styling so charts inherit the
    design-token palette instead of the library defaults. */
 .plot {
-  font-family: var(--ct-font-sans);
+  font-family: var(--ct-font-mono);
   font-size: var(--ct-text-xs);
   color: var(--ct-fg-subtle);
   background: transparent;
   overflow: visible;
+  font-variant-numeric: tabular-nums;
 }
 .plot [aria-label$="-axis tick"] line,
 .plot [aria-label$="-axis"] path.domain {
@@ -374,7 +384,8 @@ html, body {
 }
 .plot [aria-label$="-grid"] line {
   stroke: var(--ct-border-subtle);
-  stroke-opacity: 0.8;
+  stroke-opacity: 1;
+  stroke-dasharray: 2 4;
 }
 .plot [aria-label$="-axis tick label"],
 .plot [aria-label$="-axis label"] {

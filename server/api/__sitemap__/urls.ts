@@ -3,43 +3,42 @@ import { locales } from '~/i18n'
 
 export default defineSitemapEventHandler(async () => {
   const urls: SitemapUrlInput[] = []
-
-  // Add homepage for all locales
-  for (const locale of locales) {
-    urls.push({
-      loc: `/${locale}`,
-      changefreq: 'daily',
-      priority: 1,
-      lastmod: new Date().toISOString(),
-    })
-  }
-
-  // Add only leaderboard page from dashboard
-  for (const locale of locales) {
-    urls.push({
-      loc: `/${locale}/dashboard/leaderboard`,
-      changefreq: 'daily',
-      priority: 0.9,
-      lastmod: new Date().toISOString(),
-    })
-  }
-
-  // Add user profile pages
-  // Note: In production, you might want to fetch this from your API
-  // For now, adding some example user IDs
-  // You can replace this with actual API calls to get user list
-  const exampleUserIds = [1, 2, 3, 4, 5] // Replace with real user IDs from API
+  const now = new Date().toISOString()
 
   for (const locale of locales) {
-    for (const userId of exampleUserIds) {
-      urls.push({
-        loc: `/${locale}/user/${userId}`,
-        changefreq: 'weekly',
-        priority: 0.7,
-        lastmod: new Date().toISOString(),
-      })
-    }
+    urls.push(
+      {
+        loc: `/${locale}`,
+        changefreq: 'daily',
+        priority: 1,
+        lastmod: now,
+      },
+      {
+        loc: `/${locale}/dashboard/leaderboard`,
+        changefreq: 'daily',
+        priority: 0.9,
+        lastmod: now,
+      },
+      {
+        loc: `/${locale}/privacy`,
+        changefreq: 'monthly',
+        priority: 0.3,
+        lastmod: now,
+      },
+      {
+        loc: `/${locale}/terms`,
+        changefreq: 'monthly',
+        priority: 0.3,
+        lastmod: now,
+      },
+    )
   }
+
+  // User profile pages are publicly accessible but we do not actively
+  // submit them to search engines via the sitemap — search engines can
+  // still discover them by following links from the leaderboard. Avoid
+  // listing specific user IDs here so we are not "publishing" a curated
+  // list of identifiable users to crawlers.
 
   return urls
 })

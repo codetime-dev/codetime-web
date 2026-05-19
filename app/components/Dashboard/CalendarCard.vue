@@ -6,6 +6,11 @@ const props = defineProps<{
     by?: string
   }[]
   loading?: boolean
+  // Optional active window. The calendar grid still spans the
+  // trailing 365 days; cells outside [rangeStart, rangeEnd] render
+  // in a fainter colour. Forwarded as-is to YearCalendarChart.
+  rangeStart?: Date
+  rangeEnd?: Date
 }>()
 const data = computed(() => props.data)
 
@@ -54,7 +59,12 @@ const t = useI18N()
           :style="{ animationDelay: `${(i % 53) * 18}ms` }"
         />
       </div>
-      <YearCalendarChart v-else :data="pAllData" />
+      <YearCalendarChart
+        v-else
+        :data="pAllData"
+        :range-start="rangeStart"
+        :range-end="rangeEnd"
+      />
     </div>
   </div>
 </template>

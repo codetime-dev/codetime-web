@@ -42,6 +42,11 @@ export const LLMS_TXT = `# Code Time
 - [Schema map (NLWeb)](https://codetime.dev/schema-map.xml)
 - [robots.txt](https://codetime.dev/robots.txt)
 
+## Legal
+
+- [Privacy Policy](https://codetime.dev/en/privacy)
+- [Terms of Service](https://codetime.dev/en/terms)
+
 ## Optional
 
 - [VS Code extension](https://marketplace.visualstudio.com/items?itemName=jannchie.codetime)

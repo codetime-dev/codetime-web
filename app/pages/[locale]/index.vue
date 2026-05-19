@@ -318,10 +318,13 @@ useHead({
     </div>
   </section>
 
+  <!-- AGENT TELEMETRY -->
+  <LandingAgentShowcase />
+
   <!-- FEATURE PAIRS -->
   <section class="section-band">
     <div class="mx-auto px-6 py-24 max-w-6xl space-y-28 sm:py-32 sm:space-y-32">
-      <!-- 02 SAVE — wide hero card with calendar visual -->
+      <!-- 03 SAVE — wide hero card with calendar visual -->
       <div class="feature-card feature-card--wide">
         <span class="feature-card-corner feature-card-corner--tl" aria-hidden="true" />
         <span class="feature-card-corner feature-card-corner--tr" aria-hidden="true" />
@@ -330,7 +333,7 @@ useHead({
         <div class="feature-card-body">
           <div class="eyebrow feature-eyebrow">
             <span class="eyebrow-bracket">[</span>
-            <span class="eyebrow-num">02</span>
+            <span class="eyebrow-num">03</span>
             <span class="eyebrow-sep">/</span>
             <span>{{ t.landing.sections.alwaysSynced }}</span>
             <span class="eyebrow-bracket">]</span>
@@ -362,12 +365,12 @@ useHead({
         </div>
       </div>
 
-      <!-- 03 EXPORT — split with API/JSON snippet -->
+      <!-- 04 EXPORT — split with API/JSON snippet -->
       <div class="gap-12 grid items-stretch md:gap-14 md:grid-cols-[1fr_1.25fr]">
         <div class="feature-text-block">
           <div class="eyebrow feature-eyebrow">
             <span class="eyebrow-bracket">[</span>
-            <span class="eyebrow-num">03</span>
+            <span class="eyebrow-num">04</span>
             <span class="eyebrow-sep">/</span>
             <span>{{ t.landing.sections.openData }}</span>
             <span class="eyebrow-bracket">]</span>
@@ -394,12 +397,12 @@ useHead({
         </div>
       </div>
 
-      <!-- 04 EDITOR — title above, editor grid below -->
+      <!-- 05 EDITOR — title above, editor grid below -->
       <div class="space-y-12">
         <div class="feature-text-block max-w-3xl">
           <div class="eyebrow feature-eyebrow">
             <span class="eyebrow-bracket">[</span>
-            <span class="eyebrow-num">04</span>
+            <span class="eyebrow-num">05</span>
             <span class="eyebrow-sep">/</span>
             <span>{{ t.landing.sections.editors }}</span>
             <span class="eyebrow-bracket">]</span>
@@ -450,7 +453,7 @@ useHead({
       <div class="mb-12 text-center flex flex-col gap-3 items-center">
         <div class="eyebrow">
           <span class="eyebrow-bracket">[</span>
-          <span class="eyebrow-num">06</span>
+          <span class="eyebrow-num">07</span>
           <span class="eyebrow-sep">/</span>
           <span>{{ t.landing.sections.pricing }}</span>
           <span class="eyebrow-bracket">]</span>

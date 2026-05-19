@@ -1,14 +1,23 @@
 <script setup lang="ts">
 const year = new Date().getFullYear()
+const locale = useLocale()
 </script>
 
 <template>
   <footer class="layout-foot relative">
     <div class="dash-foot">
-      <span>Datreks · {{ year }}</span>
+      <span>Code Time · {{ year }}</span>
+      <span class="dash-foot-sep">·</span>
+      <NuxtLink :to="`/${locale}/privacy`" class="dash-foot-link">
+        Privacy
+      </NuxtLink>
+      <span class="dash-foot-sep">·</span>
+      <NuxtLink :to="`/${locale}/terms`" class="dash-foot-link">
+        Terms
+      </NuxtLink>
       <span class="dash-foot-sep">·</span>
       <NuxtLink
-        to="https://github.com/Jannchie/codetime-web-v3"
+        to="https://github.com/codetime-dev/codetime-web"
         target="_blank"
         class="dash-foot-link"
       >

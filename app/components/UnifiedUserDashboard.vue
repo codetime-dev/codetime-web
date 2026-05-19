@@ -7,12 +7,19 @@ type UnifiedUserDashboardProps = {
   showUserInfo?: boolean
   showControls?: boolean
   layout?: 'dashboard' | 'user'
+  // Demo flag. When true the dashboard uses in-memory state for the
+  // date-range trio (`days` / `range-start` / `range-end`) instead of
+  // `useLocalStorage`, and pre-seeds it to year-to-date. Keeps demo
+  // selections from leaking into the real free-user dashboard via the
+  // shared localStorage keys and bypassing the Pro upgrade gate.
+  demoMode?: boolean
 }
 
 const props = withDefaults(defineProps<UnifiedUserDashboardProps>(), {
   showUserInfo: false,
   showControls: true,
   layout: 'dashboard',
+  demoMode: false,
 })
 
 const route = useRoute()
@@ -34,20 +41,30 @@ const isOwnProfile = computed(() => {
   return targetUserId.value === currentUser.value?.id
 })
 
-// 日期范围控制
-const days = useLocalStorage('days', ref(currentUser.value?.plan === 'pro' ? 365 : 28))
-const customStartTime = useLocalStorage<Date | null>('range-start', null, {
-  serializer: {
-    read: (v: string) => v ? new Date(v) : null,
-    write: (v: Date | null) => v ? v.toISOString() : '',
-  },
-})
-const customEndTime = useLocalStorage<Date | null>('range-end', null, {
-  serializer: {
-    read: (v: string) => v ? new Date(v) : null,
-    write: (v: Date | null) => v ? v.toISOString() : '',
-  },
-})
+// Date-range trio. Persisted to localStorage for real users so picks
+// survive reloads; held in plain refs for the demo so YTD pre-seeding
+// can't leak into a real free user's session and bypass the Pro gate.
+const ytdStart = new Date(new Date().getFullYear(), 0, 1)
+const ytdNow = new Date()
+const days = props.demoMode
+  ? ref(Math.max(1, Math.round((ytdNow.getTime() - ytdStart.getTime()) / 86_400_000)))
+  : useLocalStorage('days', ref(currentUser.value?.plan === 'pro' ? 365 : 28))
+const customStartTime = props.demoMode
+  ? ref<Date | null>(ytdStart)
+  : useLocalStorage<Date | null>('range-start', null, {
+      serializer: {
+        read: (v: string) => v ? new Date(v) : null,
+        write: (v: Date | null) => v ? v.toISOString() : '',
+      },
+    })
+const customEndTime = props.demoMode
+  ? ref<Date | null>(ytdNow)
+  : useLocalStorage<Date | null>('range-end', null, {
+      serializer: {
+        read: (v: string) => v ? new Date(v) : null,
+        write: (v: Date | null) => v ? v.toISOString() : '',
+      },
+    })
 const segments = ref(5)
 
 const isCustomRange = computed(() => !!customStartTime.value && !!customEndTime.value)
@@ -499,6 +516,8 @@ watchEffect(() => {
           <DashboardCalendarCard
             :loading="allDataResp.status.value !== 'success'"
             :data="allData"
+            :range-start="isCustomRange ? customStartTime ?? undefined : undefined"
+            :range-end="isCustomRange ? customEndTime ?? undefined : undefined"
           />
         </PanelSection>
 

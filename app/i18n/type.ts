@@ -54,6 +54,9 @@ export type Translation = {
       alwaysSynced: string
       openData: string
       editors: string
+      // Optional during rollout — the landing falls back to "agent telemetry"
+      // for locales that haven't translated this yet.
+      agentTelemetry?: string
       widgets: string
       pricing: string
       startTracking: string
@@ -85,6 +88,18 @@ export type Translation = {
         badge: string
         donut: string
         status: string
+        cta: string
+      }
+      // Optional during rollout — the agent landing block falls back to
+      // English copy for locales that haven't translated this yet.
+      agent?: {
+        title: string
+        description: string
+        supports: string
+        kpiSessions: string
+        kpiCost: string
+        kpiCalls: string
+        chartLegend: string
         cta: string
       }
     }

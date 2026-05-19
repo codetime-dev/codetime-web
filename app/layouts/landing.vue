@@ -53,23 +53,31 @@ watchEffect(() => {
             Live demo
           </NuxtLink>
           <span class="lp-foot-sep">·</span>
-          <NuxtLink :to="`/${locale}/dashboard/badge`" class="lp-foot-link">
+          <NuxtLink :to="`/${locale}/dashboard/widgets?tab=badge`" class="lp-foot-link">
             Badges
           </NuxtLink>
           <span class="lp-foot-sep">·</span>
-          <NuxtLink :to="`/${locale}/dashboard/widget`" class="lp-foot-link">
+          <NuxtLink :to="`/${locale}/dashboard/widgets`" class="lp-foot-link">
             Widgets
           </NuxtLink>
           <span class="lp-foot-sep">·</span>
           <NuxtLink :to="`/${locale}/dashboard/leaderboard`" class="lp-foot-link">
             Leaderboard
           </NuxtLink>
+          <span class="lp-foot-sep">·</span>
+          <NuxtLink :to="`/${locale}/privacy`" class="lp-foot-link">
+            Privacy
+          </NuxtLink>
+          <span class="lp-foot-sep">·</span>
+          <NuxtLink :to="`/${locale}/terms`" class="lp-foot-link">
+            Terms
+          </NuxtLink>
         </nav>
         <div class="lp-foot">
-          <span>Datreks · {{ new Date().getFullYear() }}</span>
+          <span>Code Time · {{ new Date().getFullYear() }}</span>
           <span class="lp-foot-sep">·</span>
           <NuxtLink
-            to="https://github.com/Jannchie/codetime-web-v3"
+            to="https://github.com/codetime-dev/codetime-web"
             target="_blank"
             rel="noopener"
             class="lp-foot-link"
