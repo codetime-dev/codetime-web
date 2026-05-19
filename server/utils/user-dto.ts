@@ -4,6 +4,9 @@ import type { users } from '../db/schema'
 // format must stay byte-equivalent to codetime-server-v3/src/dto.py so
 // existing UI / SDK code reads either backend unchanged. Python emits
 // camelCase keys via pydantic's `alias_generator=to_camel`.
+//
+// `appleId` is Nuxt-only — the Python service never shipped Sign in with
+// Apple — so old clients reading this DTO simply ignore the extra field.
 
 export type UserSelfPublic = {
   id: number
@@ -13,6 +16,7 @@ export type UserSelfPublic = {
   githubId: number | null
   bio: string | null
   googleId: string | null
+  appleId: string | null
   plan: string
   timezone: string | null
   uploadToken: string
@@ -31,6 +35,7 @@ export function toUserSelfPublic(row: typeof users.$inferSelect): UserSelfPublic
     githubId: row.githubId,
     bio: row.bio,
     googleId: row.googleId,
+    appleId: row.appleId,
     plan: row.plan,
     timezone: row.timezone,
     uploadToken: row.uploadToken,

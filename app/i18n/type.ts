@@ -406,6 +406,20 @@ export type Translation = {
         light: string
         system: string
       }
+      connections?: {
+        title: string
+        description: string
+        connected: string
+        notConnected: string
+        connect: string
+        disconnect: string
+        lastProviderHint: string
+        feedback?: {
+          ok: string
+          conflict: string
+          replace: string
+        }
+      }
       dangerZone: {
         title: string
         description: string
@@ -416,6 +430,12 @@ export type Translation = {
         button: {
           removeAllData: string
           removeAllDataModal: {
+            p1: string
+            p2: string
+            p3: string
+          }
+          deleteAccount?: string
+          deleteAccountModal?: {
             p1: string
             p2: string
             p3: string

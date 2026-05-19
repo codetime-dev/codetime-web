@@ -4,6 +4,7 @@ import { eq, sql } from 'drizzle-orm'
 import { defineEventHandler, getHeader, readRawBody } from 'h3'
 import { lemonsqueezyRawWebhooks, users } from '../../../../db/schema'
 import { useDb } from '../../../../utils/db'
+import { isProduction } from '../../../../utils/env'
 import {
   calcExpirationFromVariant,
   endsExpiry,
@@ -51,10 +52,18 @@ defineRouteMeta({
 
 function verifySignature(raw: string | Buffer, signature: string | undefined): boolean {
   const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET
-  // Matches Python: when no secret is configured, skip verification.
   if (!secret) {
- return true
-}
+    // In production, refuse to process the webhook rather than accepting
+    // it unauthenticated: a missing secret would otherwise let anyone
+    // forge `subscription_created` events and grant Pro plans by sending
+    // `meta.custom_data.uid` for a victim. In dev we keep the old
+    // accept-all behaviour so local test fixtures keep working.
+    if (isProduction()) {
+      console.error('[ls-webhook] LEMONSQUEEZY_WEBHOOK_SECRET is not configured; rejecting webhook in production')
+      return false
+    }
+    return true
+  }
   if (!signature) {
  return false
 }

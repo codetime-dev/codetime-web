@@ -356,7 +356,13 @@ export type GetV3AgentDashboardData = {
     path?: never;
     query?: {
         range?: '24h' | '7d' | '30d' | 'all';
+        /**
+         * Restrict every aggregate to a single machine UUID.
+         */
         machine_id?: string;
+        /**
+         * Restrict every aggregate to a single agent source (e.g. claude-code, codex, opencode, pi).
+         */
         source?: string;
     };
     url: '/v3/agent/dashboard';
@@ -412,9 +418,13 @@ export type GetV3AgentDashboardResponses = {
         modelCosts: Array<{
             [key: string]: unknown;
         }>;
+        agentCosts: Array<{
+            [key: string]: unknown;
+        }>;
         tools: Array<{
             [key: string]: unknown;
         }>;
+        availableSources: Array<string>;
     };
 };
 
@@ -615,6 +625,77 @@ export type GetV3AgentSessionsResponses = {
 
 export type GetV3AgentSessionsResponse = GetV3AgentSessionsResponses[keyof GetV3AgentSessionsResponses];
 
+export type PostV3AuthAppleData = {
+    body: {
+        identity_token: string;
+        nonce: string;
+        email?: string;
+        full_name?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/auth/apple';
+};
+
+export type PostV3AuthAppleErrors = {
+    /**
+     * Invalid request
+     */
+    400: unknown;
+    /**
+     * Apple identity token verification failed
+     */
+    401: unknown;
+};
+
+export type PostV3AuthAppleResponses = {
+    /**
+     * Signed in; auth cookies set
+     */
+    200: {
+        success: boolean;
+        user_id: number;
+    };
+};
+
+export type PostV3AuthAppleResponse = PostV3AuthAppleResponses[keyof PostV3AuthAppleResponses];
+
+export type PostV3AuthAppleNativeData = {
+    body: {
+        identity_token: string;
+        authorization_code?: string;
+        nonce: string;
+        email?: string;
+        full_name?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/auth/apple/native';
+};
+
+export type PostV3AuthAppleNativeErrors = {
+    /**
+     * Invalid request
+     */
+    400: unknown;
+    /**
+     * Apple identity token verification failed
+     */
+    401: unknown;
+};
+
+export type PostV3AuthAppleNativeResponses = {
+    /**
+     * Session token issued
+     */
+    200: {
+        token: string;
+        user_id: number;
+    };
+};
+
+export type PostV3AuthAppleNativeResponse = PostV3AuthAppleNativeResponses[keyof PostV3AuthAppleNativeResponses];
+
 export type GetV3AuthGithubData = {
     body?: never;
     path?: never;
@@ -622,6 +703,23 @@ export type GetV3AuthGithubData = {
         code: string;
     };
     url: '/v3/auth/github';
+};
+
+export type GetV3AuthGithubNativeCallbackData = {
+    body?: never;
+    path?: never;
+    query: {
+        code: string;
+        state?: string;
+    };
+    url: '/v3/auth/github/native-callback';
+};
+
+export type GetV3AuthGithubStartData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v3/auth/github/start';
 };
 
 export type PostV3AuthGoogleData = {
@@ -632,6 +730,41 @@ export type PostV3AuthGoogleData = {
     query?: never;
     url: '/v3/auth/google';
 };
+
+export type PostV3AuthGoogleNativeData = {
+    body: {
+        code: string;
+        code_verifier: string;
+        redirect_uri: string;
+        client_id?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/auth/google/native';
+};
+
+export type PostV3AuthGoogleNativeErrors = {
+    /**
+     * Invalid request
+     */
+    400: unknown;
+    /**
+     * Google token verification failed
+     */
+    401: unknown;
+};
+
+export type PostV3AuthGoogleNativeResponses = {
+    /**
+     * Session token issued
+     */
+    200: {
+        token: string;
+        user_id: number;
+    };
+};
+
+export type PostV3AuthGoogleNativeResponse = PostV3AuthGoogleNativeResponses[keyof PostV3AuthGoogleNativeResponses];
 
 export type PostV3AuthLogoutData = {
     body?: never;
@@ -1603,13 +1736,26 @@ export type PostV3UsersEventLogResponses = {
 };
 
 export type DeleteV3UsersSelfData = {
-    body?: never;
+    body: {
+        /**
+         * Token issued by POST /v3/users/self/delete-challenge
+         */
+        challenge: string;
+        /**
+         * Must match the caller's current username
+         */
+        confirmUsername: string;
+    };
     path?: never;
     query?: never;
     url: '/v3/users/self';
 };
 
 export type DeleteV3UsersSelfErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
     /**
      * Not authenticated
      */
@@ -1688,13 +1834,26 @@ export type PostV3UsersSelfBioResponses = {
 export type PostV3UsersSelfBioResponse = PostV3UsersSelfBioResponses[keyof PostV3UsersSelfBioResponses];
 
 export type DeleteV3UsersSelfDataData = {
-    body?: never;
+    body: {
+        /**
+         * Token issued by POST /v3/users/self/delete-challenge?purpose=data
+         */
+        challenge: string;
+        /**
+         * Must match the caller's current username
+         */
+        confirmUsername: string;
+    };
     path?: never;
     query?: never;
     url: '/v3/users/self/data';
 };
 
 export type DeleteV3UsersSelfDataErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
     /**
      * Not authenticated
      */
@@ -1711,6 +1870,44 @@ export type DeleteV3UsersSelfDataResponses = {
 };
 
 export type DeleteV3UsersSelfDataResponse = DeleteV3UsersSelfDataResponses[keyof DeleteV3UsersSelfDataResponses];
+
+export type PostV3UsersSelfDeleteChallengeData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Which DELETE route the token authorises.
+         */
+        purpose: 'account' | 'data';
+    };
+    url: '/v3/users/self/delete-challenge';
+};
+
+export type PostV3UsersSelfDeleteChallengeErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+};
+
+export type PostV3UsersSelfDeleteChallengeError = PostV3UsersSelfDeleteChallengeErrors[keyof PostV3UsersSelfDeleteChallengeErrors];
+
+export type PostV3UsersSelfDeleteChallengeResponses = {
+    /**
+     * Challenge token issued
+     */
+    201: {
+        challenge: string;
+        expiresAt: Date;
+        purpose: 'account' | 'data';
+    };
+};
+
+export type PostV3UsersSelfDeleteChallengeResponse = PostV3UsersSelfDeleteChallengeResponses[keyof PostV3UsersSelfDeleteChallengeResponses];
 
 export type GetV3UsersSelfExportData = {
     body?: never;
