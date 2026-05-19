@@ -1,4 +1,4 @@
-import { createPublicKey, createVerify, randomBytes } from 'node:crypto'
+import { createHash, createPublicKey, createVerify, randomBytes } from 'node:crypto'
 import process from 'node:process'
 import { eq } from 'drizzle-orm'
 import { users } from '../db/schema'
@@ -270,6 +270,204 @@ export async function verifyGoogleIdToken(
     throw new Error('Invalid Google ID token issuer')
   }
   return claims
+}
+
+// Apple Sign in with Apple support.
+// JWKS at https://appleid.apple.com/auth/keys; identity tokens are RS256
+// JWTs whose `aud` is the requesting bundle/Service ID and whose `nonce`
+// is the SHA-256 hex digest of the raw nonce the client generated. The
+// `sub` claim is the stable per-team user identifier — same value for
+// the same Apple ID across iOS bundle + web Service ID as long as both
+// are in the same App ID group / configured as primary App ID.
+type AppleClaims = {
+  sub: string
+  email?: string
+  email_verified?: string | boolean
+  is_private_email?: string | boolean
+  nonce?: string
+  iss: string
+  aud: string
+  exp: number
+  iat: number
+}
+
+let appleJwksCache: { keys: Map<string, ReturnType<typeof createPublicKey>>, fetchedAt: number } | null = null
+
+async function loadAppleJwks(): Promise<Map<string, ReturnType<typeof createPublicKey>>> {
+  const TTL_MS = 60 * 60 * 1000
+  if (appleJwksCache && Date.now() - appleJwksCache.fetchedAt < TTL_MS) {
+    return appleJwksCache.keys
+  }
+  const res = await fetch('https://appleid.apple.com/auth/keys')
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Apple JWKS: ${res.status}`)
+  }
+  const body = await res.json() as { keys: Jwk[] }
+  const keys = new Map<string, ReturnType<typeof createPublicKey>>()
+  for (const jwk of body.keys) {
+    keys.set(jwk.kid, createPublicKey({ key: jwk as any, format: 'jwk' }))
+  }
+  appleJwksCache = { keys, fetchedAt: Date.now() }
+  return keys
+}
+
+// Verifies an Apple `identity_token`. `expectedAudience` is the Bundle ID
+// (iOS) or Services ID (web).
+//
+// `expectedNonceClaim` is the exact string we expect to find in the JWT's
+// `nonce` claim. The two client SDKs hash the user-provided nonce
+// differently — Sign in with Apple on iOS expects the *SHA-256 hex
+// digest* in `request.nonce` and that's what lands in the JWT; the web
+// `AppleID.auth.init({ nonce })` SDK ships the raw value verbatim. So
+// callers compute the appropriate form before calling this:
+//   * iOS native: `sha256Hex(rawNonce)`
+//   * Web popup:  `rawNonce`
+// Pass `null` to skip the nonce check (e.g. when using `state` instead
+// for a form-post flow).
+export async function verifyAppleIdentityToken(
+  identityToken: string,
+  expectedAudience: string,
+  expectedNonceClaim: string | null,
+): Promise<AppleClaims> {
+  const parts = identityToken.split('.')
+  if (parts.length !== 3) {
+    throw new Error('Invalid Apple identity token: malformed JWT')
+  }
+  const [headerB64, payloadB64, signatureB64] = parts
+  let header: { alg: string, kid: string, typ?: string }
+  let claims: AppleClaims
+  try {
+    header = JSON.parse(b64urlToBuffer(headerB64!).toString('utf8'))
+    claims = JSON.parse(b64urlToBuffer(payloadB64!).toString('utf8'))
+  }
+  catch {
+    throw new Error('Invalid Apple identity token: undecodable')
+  }
+  if (header.alg !== 'RS256') {
+    throw new Error(`Invalid Apple identity token: alg ${header.alg}`)
+  }
+  const keys = await loadAppleJwks()
+  let key = keys.get(header.kid)
+  if (!key) {
+    // Apple rotates keys; force-refresh once before giving up.
+    appleJwksCache = null
+    const refreshed = await loadAppleJwks()
+    key = refreshed.get(header.kid)
+    if (!key) {
+      throw new Error(`Invalid Apple identity token: unknown kid ${header.kid}`)
+    }
+  }
+  const signed = Buffer.from(`${headerB64}.${payloadB64}`, 'utf8')
+  const verifier = createVerify('RSA-SHA256')
+  verifier.update(signed)
+  verifier.end()
+  if (!verifier.verify(key, b64urlToBuffer(signatureB64!))) {
+    throw new Error('Invalid Apple identity token: signature mismatch')
+  }
+  const now = Math.floor(Date.now() / 1000)
+  if (typeof claims.exp === 'number' && claims.exp < now - 30) {
+    throw new Error('Invalid Apple identity token: expired')
+  }
+  if (typeof claims.iat === 'number' && claims.iat > now + 300) {
+    throw new Error('Invalid Apple identity token: issued in the future')
+  }
+  if (claims.iss !== 'https://appleid.apple.com') {
+    throw new Error('Invalid Apple identity token issuer')
+  }
+  if (claims.aud !== expectedAudience) {
+    throw new Error('Invalid Apple identity token audience')
+  }
+  if (expectedNonceClaim !== null) {
+    if (!claims.nonce || claims.nonce !== expectedNonceClaim) {
+      throw new Error('Invalid Apple identity token: nonce mismatch')
+    }
+  }
+  if (!claims.sub) {
+    throw new Error('Invalid Apple identity token: missing sub')
+  }
+  return claims
+}
+
+// SHA-256 hex digest of the raw nonce, matching what Apple Sign In
+// clients (Swift `SignInWithAppleButton`, JS AppleID auth) place in the
+// `nonce` field of the identity token.
+export function sha256Hex(input: string): string {
+  return createHash('sha256').update(input, 'utf8').digest('hex')
+}
+
+export async function upsertAppleUser(
+  appleSub: string,
+  emailFromClient: string | null,
+  fullNameFromClient: string | null,
+  emailFromClaims: string | null,
+): Promise<{ id: number, tokenV1: string, uploadToken: string }> {
+  const db = useDb()
+  const [existing] = await db.select().from(users).where(eq(users.appleId, appleSub)).limit(1)
+
+  // Apple only returns email/fullName on the *first* successful sign-in
+  // for a given (Apple ID, App ID) pair. Persist whichever we got — the
+  // body fields take precedence over the JWT (the JWT only ships the
+  // email, never the name), and we never overwrite a value the user has
+  // since edited.
+  const preferredEmail = emailFromClient ?? emailFromClaims ?? null
+
+  if (existing) {
+    const patch: Partial<typeof users.$inferInsert> = {}
+    if (!existing.email && preferredEmail) {
+      patch.email = preferredEmail
+    }
+    // Same legacy-empty-token mitigation as in upsertGithubUser /
+    // upsertGoogleUser. Some pre-Drizzle rows shipped with empty
+    // upload_token / token_v1 columns.
+    let tokenV1 = existing.tokenV1
+    if (!tokenV1) {
+      tokenV1 = randomBytes(24).toString('hex')
+      patch.tokenV1 = tokenV1
+    }
+    let uploadToken = existing.uploadToken
+    if (!uploadToken) {
+      uploadToken = randomBytes(24).toString('hex')
+      patch.uploadToken = uploadToken
+    }
+    if (Object.keys(patch).length > 0) {
+      await db.update(users).set(patch).where(eq(users.id, existing.id))
+    }
+    return { id: existing.id, tokenV1, uploadToken }
+  }
+
+  const tokenV1 = randomBytes(24).toString('hex')
+  const uploadToken = randomBytes(24).toString('hex')
+  const username = deriveAppleUsername(fullNameFromClient, preferredEmail, appleSub)
+  const now = new Date()
+  const [created] = await db.insert(users).values({
+    appleId: appleSub,
+    email: preferredEmail,
+    username,
+    plan: 'free',
+    uploadToken,
+    tokenV1,
+    createdAt: now,
+    updatedAt: now,
+  } as any).returning({ id: users.id, tokenV1: users.tokenV1, uploadToken: users.uploadToken })
+  if (!created) {
+    throw new Error('Failed to create user')
+  }
+  return { id: Number(created.id), tokenV1: created.tokenV1, uploadToken: created.uploadToken }
+}
+
+function deriveAppleUsername(fullName: string | null, email: string | null, sub: string): string {
+  const cleanedName = fullName?.trim()
+  if (cleanedName) {
+    return cleanedName
+  }
+  if (email) {
+    const local = email.split('@')[0]
+    if (local) {
+      return local
+    }
+  }
+  // Apple sub is opaque and quite long; truncate for a usable handle.
+  return `apple_${sub.slice(0, 8)}`
 }
 
 export async function upsertGoogleUser(claims: GoogleClaims): Promise<{ id: number, tokenV1: string, uploadToken: string }> {
