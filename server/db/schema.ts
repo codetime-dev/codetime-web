@@ -29,6 +29,9 @@ export const users = pgTable('users', {
   hideCurrentWorkspace: boolean('hide_current_workspace').notNull().default(false),
   hideCurrentLanguage: boolean('hide_current_language').notNull().default(false),
   githubId: bigint('github_id', { mode: 'number' }),
+  // Apple's stable per-team user identifier (`sub` claim from the Apple
+  // identity token). Opaque string, distinct from githubId/googleId.
+  appleId: text('apple_id'),
   showEmail: boolean('show_email').notNull().default(false),
   showGithub: boolean('show_github').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),

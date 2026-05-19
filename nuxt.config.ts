@@ -15,6 +15,10 @@ export default defineNuxtConfig({
       // settings were removed along with `shared/migrated-routes.ts`.
       githubClientId: process.env.NUXT_PUBLIC_GITHUB_CLIENT_ID || '978fe1a6f0c5d12f5beb',
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '1020029657488-f66ubcmj6qqg4h4ptjk505ljmkv55jkv.apps.googleusercontent.com',
+      // Apple Services ID for Sign in with Apple JS SDK.
+      // Distinct from the iOS Bundle ID — created under the same
+      // primary App ID in the Apple Developer Portal.
+      appleServiceId: process.env.NUXT_PUBLIC_APPLE_SERVICE_ID || '',
       sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN || '',
     },
   },
