@@ -65,6 +65,12 @@ function isDashboardCacheKey(key: string): boolean {
     || key.startsWith('time-distribution-')
 }
 
+// The demo's YTD pre-seed lives in `UnifiedUserDashboard`'s `demoMode`
+// branch (passed via the template prop below). Keeping it there means
+// we never touch the real `range-start` / `range-end` localStorage keys,
+// so a hard refresh / tab close / crash on /demo can't leak Pro-gated
+// state into a real free user's dashboard.
+
 if (import.meta.client) {
   const originalBaseUrl = client.getConfig().baseUrl
   clearNuxtData(isDashboardCacheKey)
@@ -110,9 +116,13 @@ const locale = useLocale()
         {{ t.demoBanner.overviewSuffix }}
       </span>
     </div>
+    <div class="ct-stripes-band" aria-hidden="true">
+      <div class="ct-stripes" />
+    </div>
     <UnifiedUserDashboard
       :show-user-info="false"
       :show-controls="true"
+      :demo-mode="true"
       layout="dashboard"
     />
   </DashboardPageContent>

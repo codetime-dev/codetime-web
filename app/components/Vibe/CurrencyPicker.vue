@@ -215,25 +215,31 @@ function fmtRate(rate: number): string {
   display: inline-block;
 }
 
+/* Trigger mirrors DashboardPillSelect's .ps-trigger so the rangebar
+   reads as one cohesive row. Only the inner symbol/code spans keep
+   currency-specific accents. */
 .trigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   height: 32px;
-  padding: 0 12px;
+  padding: 0 10px;
   font-family: inherit;
-  font-size: 13px;
-  background: var(--ct-surface);
+  font-size: var(--ct-text-sm);
+  font-weight: var(--ct-weight-medium);
+  background: var(--ct-surface-1);
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-radius-md);
-  color: var(--ct-fg-muted);
+  color: var(--ct-fg);
   cursor: pointer;
-  transition: border-color 140ms ease, color 140ms ease;
+  transition: border-color var(--ct-duration-fast) var(--ct-ease),
+              background-color var(--ct-duration-fast) var(--ct-ease),
+              box-shadow var(--ct-duration-fast) var(--ct-ease);
 }
-.trigger:hover,
+.trigger:hover { background: var(--ct-surface-2); }
 .trigger.open {
   border-color: var(--ct-primary);
-  color: var(--ct-fg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-primary) 14%, transparent);
 }
 
 .trigger-symbol {
@@ -255,10 +261,16 @@ function fmtRate(rate: number): string {
   letter-spacing: 0.04em;
 }
 .trigger-arrow {
-  width: 12px;
-  height: 12px;
+  display: block;
+  width: 13px;
+  height: 13px;
+  font-size: 13px;
+  line-height: 1;
   color: var(--ct-fg-subtle);
+  transition: transform var(--ct-duration-fast) var(--ct-ease),
+              color var(--ct-duration-fast) var(--ct-ease);
 }
+.trigger.open .trigger-arrow { transform: rotate(180deg); color: var(--ct-fg); }
 
 .dropdown {
   position: absolute;

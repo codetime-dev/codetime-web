@@ -411,7 +411,7 @@ const tools: VibeToolRow[] = [
   { tool: 'Write', calls: 184, failures: 4, totalDurationMs: 14_000, avgDurationMs: 76 },
 ]
 
-const dashboard: VibeDashboard = {
+const baseDashboard: VibeDashboard = {
   range: { key: '30d', since: since.toISOString(), until: now.toISOString() },
   bucket: 'day',
   summary: {
@@ -439,8 +439,299 @@ const dashboard: VibeDashboard = {
   availableSources: ['claude-code', 'codex', 'opencode', 'pi'],
 }
 
-const totalCostUsd = modelCosts.reduce((sum, m) => sum + m.estimatedCostUsd, 0)
-const totalToolCalls = tools.reduce((sum, x) => sum + x.calls, 0)
+// -----------------------------------------------------------------------
+// Rangebar state — mirrors the real /dashboard/agent so the demo's
+// controls feel identical. Filters mutate a derived `dashboard` view
+// rather than re-running the synthetic generator, which keeps the
+// numbers stable across switches.
+// -----------------------------------------------------------------------
+const days = ref<number>(28)
+const startTime = ref<Date | null>(null)
+const endTime = ref<Date | null>(null)
+const machineId = ref<string | null>(null)
+const sourceId = ref<string | null>(null)
+const refreshing = ref(false)
+
+// Two synthetic machines that partition the data: each owns a fixed
+// subset of agent sources. Switching the picker filters every
+// source-aware aggregate to that machine's sources and scales the
+// source-agnostic ones (heatmap / overview / tools) by the machine's
+// share of total cost, so the whole dashboard noticeably changes.
+type DemoMachine = {
+  id: string
+  label: string
+  icon: string
+  sources: string[]
+}
+const demoMachines: DemoMachine[] = [
+  // MacBook owns the heavy hitters — claude-code + codex — so picking
+  // it keeps the dashboard "busy".
+  { id: 'demo-mbp', label: 'MacBook Pro', icon: 'i-tabler-brand-apple', sources: ['claude-code', 'codex'] },
+  // Linux gets the experimental agents — opencode + pi — so the
+  // timeline visibly thins out when picked.
+  { id: 'demo-linux', label: 'Linux Dev Box', icon: 'i-tabler-brand-debian', sources: ['opencode', 'pi'] },
+]
+const machineById = new Map(demoMachines.map(m => [m.id, m]))
+
+type PillItem<T extends string> = { id: T | null, label: string, icon?: string }
+
+const machineItems = computed<PillItem<string>[]>(() => [
+  { id: null, label: 'All machines', icon: 'i-tabler-stack-2' },
+  ...demoMachines.map(m => ({ id: m.id, label: m.label, icon: m.icon })),
+])
+
+function sourceMeta(id: string): { label: string, icon: string } {
+  const key = id.toLowerCase()
+  switch (key) {
+    case 'claude':
+    case 'claude-code': {
+      return { label: 'Claude Code', icon: 'i-simple-icons-anthropic' }
+    }
+    case 'codex': {
+      return { label: 'Codex', icon: 'i-simple-icons-openai' }
+    }
+    case 'opencode': {
+      return { label: 'OpenCode', icon: 'i-brand-opencode' }
+    }
+    case 'pi': {
+      return { label: 'Pi', icon: 'i-brand-pi' }
+    }
+    default: {
+      const label = id.length > 0 ? id.charAt(0).toUpperCase() + id.slice(1) : id
+      return { label, icon: 'i-tabler-terminal-2' }
+    }
+  }
+}
+
+const sourceItems = computed<PillItem<string>[]>(() => [
+  { id: null, label: 'All agents', icon: 'i-tabler-robot' },
+  ...baseDashboard.availableSources.map((id) => {
+    const meta = sourceMeta(id)
+    return { id, label: meta.label, icon: meta.icon }
+  }),
+])
+
+// Effective window:
+//  • custom start/end → use those literal bounds
+//  • days preset      → slice the last N buckets (clamped to the 28
+//                       buckets the generator emits; presets larger
+//                       than that still show all 28 days)
+const windowBounds = computed<{ since: Date, until: Date }>(() => {
+  if (startTime.value && endTime.value) {
+    return { since: startTime.value, until: endTime.value }
+  }
+  const until = now
+  const span = Math.max(1, days.value)
+  const sinceClamped = new Date(until.getTime() - (span - 1) * DAY_MS)
+  return { since: sinceClamped, until }
+})
+
+function inWindow(tsIso: string): boolean {
+  const t = new Date(tsIso).getTime()
+  return t >= windowBounds.value.since.getTime() && t <= windowBounds.value.until.getTime()
+}
+
+function sumBy<T, K extends keyof T>(rows: T[], key: K): number {
+  return rows.reduce((s, r) => s + (Number(r[key]) || 0), 0)
+}
+
+function fmtDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Effective set of agent sources after machine + source filters.
+// machineId narrows to the machine's owned sources; sourceId then
+// further narrows to a single source (when both are set and the
+// picked source isn't owned by the machine, the result is empty —
+// matches the real backend behaviour).
+const activeSources = computed<Set<string>>(() => {
+  const machineSources = machineId.value
+    ? (machineById.get(machineId.value)?.sources ?? [])
+    : baseDashboard.availableSources
+  const allowed = new Set<string>(machineSources)
+  if (sourceId.value) {
+    if (allowed.has(sourceId.value)) {
+      allowed.clear()
+      allowed.add(sourceId.value)
+    }
+    else {
+      allowed.clear()
+    }
+  }
+  return allowed
+})
+
+// Pre-computed total cost across all agents, used to derive each
+// machine/source filter's "share" of the source-agnostic data
+// (heatmap counts, overview activity, tool calls).
+const baseAgentCostTotal = agentCosts.reduce((s, a) => s + a.estimatedCostUsd, 0)
+
+// Share of base data that survives the current machine + source
+// filters, used to scale source-agnostic aggregates.
+const activeShare = computed<number>(() => {
+  if (!machineId.value && !sourceId.value) {
+    return 1
+  }
+  const active = agentCosts
+    .filter(a => activeSources.value.has(a.source))
+    .reduce((s, a) => s + a.estimatedCostUsd, 0)
+  return baseAgentCostTotal > 0 ? active / baseAgentCostTotal : 0
+})
+
+// Derived dashboard view — date-window slice + source / machine
+// filtering. Source-aware arrays (tokenBuckets.bySource, agentCosts,
+// projectTokens.sourceSegments, modelCosts) drop rows outside the
+// active source set; source-agnostic ones (overview activity, heatmap,
+// tools) get scaled by `activeShare` so the KPI numbers also drop.
+const dashboard = computed<VibeDashboard>(() => {
+  const active = activeSources.value
+  const share = activeShare.value
+  const overview = baseDashboard.overviewBuckets
+    .filter(b => inWindow(b.ts))
+    .map(b => ({
+      ...b,
+      activity: Math.round(b.activity * share),
+      sessions: Math.round(b.sessions * share),
+      tokens: Math.round(b.tokens * share),
+      linesChanged: Math.round(b.linesChanged * share),
+      estimatedCostUsd: Number((b.estimatedCostUsd * share).toFixed(2)),
+    }))
+  const tokens = baseDashboard.tokenBuckets
+    .filter(b => inWindow(b.ts))
+    .map((b) => {
+      const filteredEntries = Object.entries(b.bySource ?? {})
+        .filter(([src]) => active.has(src))
+      const reduced = {
+        inputTokens: 0,
+        cachedInputTokens: 0,
+        outputTokens: 0,
+        reasoningOutputTokens: 0,
+        modelCalls: 0,
+        estimatedCostUsd: 0,
+      }
+      for (const [, cell] of filteredEntries) {
+        reduced.inputTokens += cell.inputTokens
+        reduced.cachedInputTokens += cell.cachedInputTokens
+        reduced.outputTokens += cell.outputTokens
+        reduced.reasoningOutputTokens += cell.reasoningOutputTokens
+        reduced.modelCalls += cell.modelCalls
+        reduced.estimatedCostUsd += cell.estimatedCostUsd
+      }
+      return {
+        ts: b.ts,
+        ...reduced,
+        estimatedCostUsd: Number(reduced.estimatedCostUsd.toFixed(3)),
+        bySource: Object.fromEntries(filteredEntries),
+      }
+    })
+  const agents = baseDashboard.agentCosts.filter(a => active.has(a.source))
+  // Project rows: scale aggregates by the share of their cost that
+  // falls inside the active source set, drop the row if zero.
+  const projects = baseDashboard.projectTokens
+    .map((p) => {
+      const segs = (p.sourceSegments ?? []).filter(s => active.has(s.source))
+      const segCost = segs.reduce((s, x) => s + x.estimatedCostUsd, 0)
+      const fullCost = (p.sourceSegments ?? []).reduce((s, x) => s + x.estimatedCostUsd, 0)
+      const ratio = fullCost > 0 ? segCost / fullCost : 0
+      return {
+        ...p,
+        inputTokens: Math.round(p.inputTokens * ratio),
+        cachedInputTokens: Math.round(p.cachedInputTokens * ratio),
+        outputTokens: Math.round(p.outputTokens * ratio),
+        reasoningOutputTokens: Math.round(p.reasoningOutputTokens * ratio),
+        totalTokens: Math.round(p.totalTokens * ratio),
+        modelCalls: Math.round(p.modelCalls * ratio),
+        sessions: Math.round(p.sessions * ratio),
+        agentDurationMs: Math.round(p.agentDurationMs * ratio),
+        estimatedCostUsd: Number(segCost.toFixed(2)),
+        sourceSegments: segs,
+      }
+    })
+    .filter(p => p.estimatedCostUsd > 0)
+  // Models: scale each row by the share of the active agent set that
+  // routes through it. Drop rows whose cost falls to zero.
+  const modelToCost = new Map<string, number>()
+  for (const a of agents) {
+    for (const seg of a.modelSegments ?? []) {
+      modelToCost.set(seg.model, (modelToCost.get(seg.model) ?? 0) + seg.estimatedCostUsd)
+    }
+  }
+  const models = baseDashboard.modelCosts
+    .map((m) => {
+      const newCost = modelToCost.get(m.model) ?? 0
+      const ratio = m.estimatedCostUsd > 0 ? newCost / m.estimatedCostUsd : 0
+      return {
+        ...m,
+        inputTokens: Math.round(m.inputTokens * ratio),
+        cachedInputTokens: Math.round(m.cachedInputTokens * ratio),
+        outputTokens: Math.round(m.outputTokens * ratio),
+        reasoningOutputTokens: Math.round(m.reasoningOutputTokens * ratio),
+        modelCalls: Math.round(m.modelCalls * ratio),
+        durationMs: Math.round(m.durationMs * ratio),
+        estimatedCostUsd: Number(newCost.toFixed(2)),
+      }
+    })
+    .filter(m => m.estimatedCostUsd > 0)
+  // Heatmap: scale counts/costs by share, drop cells that fall under 1.
+  const heat = baseDashboard.heatmap
+    .map(c => ({
+      ...c,
+      count: Math.round(c.count * share),
+      estimatedCostUsd: Number((c.estimatedCostUsd * share).toFixed(3)),
+    }))
+    .filter(c => c.count > 0)
+  const toolRows = baseDashboard.tools.map(tool => ({
+    ...tool,
+    calls: Math.round(tool.calls * share),
+    failures: Math.round(tool.failures * share),
+    totalDurationMs: Math.round(tool.totalDurationMs * share),
+  }))
+  return {
+    range: {
+      key: baseDashboard.range.key,
+      since: windowBounds.value.since.toISOString(),
+      until: windowBounds.value.until.toISOString(),
+    },
+    bucket: baseDashboard.bucket,
+    summary: {
+      totalSessions: sumBy(overview, 'sessions'),
+      totalEvents: overview.reduce((s, r) => s + r.activity, 0),
+      totalProjects: projects.length,
+      totalToolCalls: toolRows.reduce((s, x) => s + x.calls, 0),
+      totalCommandCalls: Math.round(baseDashboard.summary.totalCommandCalls * share),
+      totalInputTokens: sumBy(tokens, 'inputTokens'),
+      totalCachedInputTokens: sumBy(tokens, 'cachedInputTokens'),
+      totalOutputTokens: sumBy(tokens, 'outputTokens'),
+      totalReasoningOutputTokens: sumBy(tokens, 'reasoningOutputTokens'),
+      totalTokens: sumBy(tokens, 'inputTokens') + sumBy(tokens, 'outputTokens'),
+      totalDurationMs: agents.reduce((s, a) => s + a.agentDurationMs, 0),
+      totalLinesAdded: Math.round(baseDashboard.summary.totalLinesAdded * share),
+      totalLinesRemoved: Math.round(baseDashboard.summary.totalLinesRemoved * share),
+    },
+    overviewBuckets: overview,
+    tokenBuckets: tokens,
+    heatmap: heat,
+    projectTokens: projects,
+    modelCosts: models,
+    agentCosts: agents,
+    tools: toolRows,
+    availableSources: baseDashboard.availableSources,
+  }
+})
+
+const totalCostUsd = computed(() =>
+  dashboard.value.modelCosts.reduce((sum, m) => sum + m.estimatedCostUsd, 0),
+)
+const totalToolCalls = computed(() =>
+  dashboard.value.tools.reduce((sum, x) => sum + x.calls, 0),
+)
+
+function refreshDashboard(): void {
+  refreshing.value = true
+  setTimeout(() => {
+    refreshing.value = false
+  }, 420)
+}
 
 const sectionTitles = computed(() => {
   const s = t.value.dashboard?.agent?.sections
@@ -457,7 +748,9 @@ const sectionTitles = computed(() => {
 
 const Lmeta = computed(() => t.value.dashboard.agent?.labels?.meta)
 
-const rangeMeta = `${since.toISOString().slice(0, 10)} → ${now.toISOString().slice(0, 10)}`
+const rangeMeta = computed(() =>
+  `${fmtDate(windowBounds.value.since)} → ${fmtDate(windowBounds.value.until)}`,
+)
 const bucketMeta = '1d buckets'
 
 useSeoMeta({
@@ -485,6 +778,37 @@ const locale = useLocale()
         </NuxtLink>
         {{ t.demoBanner.agentSuffix }}
       </span>
+    </div>
+    <div class="ct-stripes-band" aria-hidden="true">
+      <div class="ct-stripes" />
+    </div>
+
+    <div class="vibe-rangebar">
+      <DashboardDataRange
+        v-model:days="days"
+        v-model:start-time="startTime"
+        v-model:end-time="endTime"
+      />
+      <DashboardPillSelect
+        v-model="machineId"
+        :items="machineItems"
+        empty-title="No machines yet"
+      />
+      <DashboardPillSelect
+        v-model="sourceId"
+        :items="sourceItems"
+        empty-title="No agents yet"
+      />
+      <VibeCurrencyPicker />
+      <button
+        class="range-refresh"
+        :disabled="refreshing"
+        title="Refresh"
+        @click="refreshDashboard()"
+      >
+        <i v-if="refreshing" class="i-tabler-loader-2 spinning" />
+        <i v-else class="i-tabler-refresh" />
+      </button>
     </div>
 
     <VibeSection
@@ -573,5 +897,45 @@ const locale = useLocale()
 }
 .demo-banner-link:hover {
   color: var(--ct-primary-hover);
+}
+
+/* Rangebar — mirrors /dashboard/agent's .vibe-rangebar exactly so the
+   demo reads as the same UI surface. */
+.vibe-rangebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--ct-border);
+  background: var(--ct-surface-1);
+  flex-wrap: wrap;
+}
+.vibe-rangebar > :nth-child(2) {
+  margin-left: auto;
+}
+.range-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-surface-1);
+  color: var(--ct-fg-muted);
+  border-radius: var(--ct-radius-md);
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+.range-refresh:hover:not(:disabled) {
+  border-color: var(--ct-primary);
+  color: var(--ct-primary);
+}
+.range-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+.range-refresh .i-tabler-refresh,
+.range-refresh .i-tabler-loader-2 { width: 16px; height: 16px; font-size: 16px; }
+.spinning { animation: vibe-spin 0.9s linear infinite; }
+@keyframes vibe-spin {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
 }
 </style>

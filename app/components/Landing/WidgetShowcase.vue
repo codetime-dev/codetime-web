@@ -99,7 +99,7 @@ const tiles = computed(() => [
       <div class="mb-12 flex flex-col gap-3">
         <div class="eyebrow">
           <span class="eyebrow-bracket">[</span>
-          <span class="eyebrow-num">05</span>
+          <span class="eyebrow-num">06</span>
           <span class="eyebrow-sep">/</span>
           <span>{{ t.landing.sections.widgets }}</span>
           <span class="eyebrow-bracket">]</span>

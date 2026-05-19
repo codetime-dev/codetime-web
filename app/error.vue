@@ -1,28 +1,15 @@
 <script setup lang="ts">
-// Catchall for paths that do not resolve to a real page.
-// Without this, soft-404s ship as HTTP 200 — agents trust status codes,
-// so a 200 error page gets cited as real content. Fail loudly with 404
-// (and serve a markdown alternate on Accept: text/markdown).
-definePageMeta({
-  middleware: ['i18n'],
-})
+import type { NuxtError } from '#app'
+
+const props = defineProps<{
+  error: NuxtError
+}>()
 
 const route = useRoute()
-const url = `https://codetime.dev${route.fullPath}`
 
-// Set HTTP 404 on the server so agents trust the negative signal. The
-// agent-friendly server middleware (see server/middleware/agent-friendly.ts)
-// short-circuits with a markdown body when Accept: text/markdown is sent.
-if (import.meta.server) {
-  const event = useRequestEvent()
-  if (event) {
-    setResponseStatus(event, 404)
-  }
-}
-
-// Locale sniffing: the i18n middleware sets the document `<html lang>` but
-// doesn't populate `route.params.locale` for unmatched paths. Read the first
-// path segment so quick-link CTAs land on a real, translated route.
+// `useLocale()` reads from route params, which won't exist when an unmatched
+// path triggers this page (no `[locale]` was captured). Sniff the first path
+// segment and fall back to `en` so all CTAs land on a real, translated route.
 const supportedLocales = new Set([
   'en',
   'zh-CN',
@@ -42,14 +29,20 @@ const locale = computed(() => {
   return supportedLocales.has(seg) ? seg : 'en'
 })
 
-useSeoMeta({
-  title: '404 — Page not found · Code Time',
-  description: 'The page you requested does not exist on codetime.dev.',
-  robots: 'noindex',
-})
+const statusCode = computed(() => Number(props.error?.statusCode) || 404)
+const isNotFound = computed(() => statusCode.value === 404)
 
-useHead({
-  link: [{ rel: 'canonical', href: url }],
+const heading = computed(() => (isNotFound.value ? 'Page not found' : 'Something went wrong'))
+const description = computed(() =>
+  isNotFound.value
+    ? 'The route you followed does not exist, was moved, or has been retired. Check the URL, or jump back to a known surface.'
+    : 'An unexpected error occurred while rendering this page. You can try again or head back home.',
+)
+
+useSeoMeta({
+  title: `${statusCode.value} · Code Time`,
+  description: description.value,
+  robots: 'noindex',
 })
 
 function goBack() {
@@ -57,60 +50,65 @@ function goBack() {
     globalThis.history.back()
     return
   }
-  navigateTo(`/${locale.value}`)
+  clearError({ redirect: `/${locale.value}` })
+}
+
+function goHome() {
+  clearError({ redirect: `/${locale.value}` })
 }
 </script>
 
 <template>
-  <NuxtLayout>
-    <main class="nf-root">
-      <div class="nf-bg" aria-hidden="true">
-        <div class="nf-grid" />
-        <div class="nf-glow" />
+  <NuxtLayout name="default">
+    <main class="err-root">
+      <div class="err-bg" aria-hidden="true">
+        <div class="err-grid" />
+        <div class="err-glow" />
       </div>
 
-      <section class="nf-panel">
-        <div class="nf-eyebrow">
-          <span class="nf-eyebrow-bracket">[</span>
-          <span class="nf-eyebrow-key">STATUS</span>
-          <span class="nf-eyebrow-sep">·</span>
-          <span class="nf-eyebrow-val">404</span>
-          <span class="nf-eyebrow-bracket">]</span>
+      <section class="err-panel">
+        <div class="err-eyebrow">
+          <span class="err-eyebrow-bracket">[</span>
+          <span class="err-eyebrow-key">STATUS</span>
+          <span class="err-eyebrow-sep">·</span>
+          <span class="err-eyebrow-val">{{ statusCode }}</span>
+          <span class="err-eyebrow-bracket">]</span>
         </div>
 
-        <h1 class="nf-code" aria-label="Error 404">
-          <span class="nf-digit nf-digit-1">4</span>
-          <span class="nf-digit nf-digit-2">0</span>
-          <span class="nf-digit nf-digit-3">4</span>
+        <h1 class="err-code" aria-label="Error 404">
+          <span class="err-digit err-digit-1">4</span>
+          <span class="err-digit err-digit-2">0</span>
+          <span class="err-digit err-digit-3">4</span>
         </h1>
 
-        <h2 class="nf-heading">
-          Page not found
+        <h2 class="err-heading">
+          {{ heading }}
         </h2>
-        <p class="nf-desc">
-          The route you followed does not exist, was moved, or has been retired. Check the URL, or jump back to a known surface.
+        <p class="err-desc">
+          {{ description }}
         </p>
 
-        <div class="nf-trace" role="status">
-          <span class="nf-trace-prompt">$</span>
-          <span class="nf-trace-cmd">codetime route resolve</span>
-          <span class="nf-trace-flag">--path</span>
-          <span class="nf-trace-path">{{ route.path }}</span>
-          <span class="nf-trace-arrow">→</span>
-          <span class="nf-trace-err">no match</span>
+        <div class="err-trace" role="status">
+          <span class="err-trace-prompt">$</span>
+          <span class="err-trace-cmd">codetime route resolve</span>
+          <span class="err-trace-flag">--path</span>
+          <span class="err-trace-path">{{ route.path }}</span>
+          <span class="err-trace-arrow">→</span>
+          <span class="err-trace-err">no match</span>
         </div>
 
-        <div class="nf-actions">
-          <NuxtLink
-            :to="`/${locale}`"
-            class="nf-btn nf-btn-primary"
+        <div class="err-actions">
+          <button
+            type="button"
+            class="err-btn err-btn-primary"
+            @click="goHome"
           >
             <i class="i-tabler-home" />
             <span>Back to home</span>
-          </NuxtLink>
+          </button>
           <button
             type="button"
-            class="nf-btn nf-btn-ghost"
+            class="err-btn err-btn-ghost"
             @click="goBack"
           >
             <i class="i-tabler-arrow-back-up" />
@@ -118,23 +116,23 @@ function goBack() {
           </button>
         </div>
 
-        <nav class="nf-quick" aria-label="Quick links">
-          <NuxtLink :to="`/${locale}/dashboard`" class="nf-quick-link">
+        <nav class="err-quick" aria-label="Quick links">
+          <NuxtLink :to="`/${locale}/dashboard`" class="err-quick-link">
             <i class="i-tabler-layout-dashboard" />
             Dashboard
           </NuxtLink>
-          <span class="nf-quick-sep">·</span>
-          <NuxtLink :to="`/${locale}/demo`" class="nf-quick-link">
+          <span class="err-quick-sep">·</span>
+          <NuxtLink :to="`/${locale}/demo`" class="err-quick-link">
             <i class="i-tabler-flask" />
             Live demo
           </NuxtLink>
-          <span class="nf-quick-sep">·</span>
-          <NuxtLink :to="`/${locale}/dashboard/widgets`" class="nf-quick-link">
+          <span class="err-quick-sep">·</span>
+          <NuxtLink :to="`/${locale}/dashboard/widgets`" class="err-quick-link">
             <i class="i-tabler-components" />
             Widgets
           </NuxtLink>
-          <span class="nf-quick-sep">·</span>
-          <NuxtLink :to="`/${locale}/dashboard/leaderboard`" class="nf-quick-link">
+          <span class="err-quick-sep">·</span>
+          <NuxtLink :to="`/${locale}/dashboard/leaderboard`" class="err-quick-link">
             <i class="i-tabler-trophy" />
             Leaderboard
           </NuxtLink>
@@ -145,9 +143,9 @@ function goBack() {
 </template>
 
 <style scoped>
-.nf-root {
+.err-root {
   position: relative;
-  min-height: calc(100vh - 120px);
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,13 +156,13 @@ function goBack() {
 
 /* Layered ambient background — a faint dot grid behind a soft brand-tinted
    glow. Both sit under `z: 0` so the panel above stays crisp. */
-.nf-bg {
+.err-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
 }
-.nf-grid {
+.err-grid {
   position: absolute;
   inset: 0;
   background-image: radial-gradient(
@@ -177,7 +175,7 @@ function goBack() {
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
           mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
 }
-.nf-glow {
+.err-glow {
   position: absolute;
   left: 50%;
   top: 38%;
@@ -191,7 +189,7 @@ function goBack() {
   opacity: 0.7;
 }
 
-.nf-panel {
+.err-panel {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -203,7 +201,7 @@ function goBack() {
   text-align: center;
 }
 
-.nf-eyebrow {
+.err-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -218,16 +216,16 @@ function goBack() {
   background: color-mix(in srgb, var(--ct-surface) 70%, transparent);
   backdrop-filter: blur(8px);
 }
-.nf-eyebrow-bracket { color: color-mix(in srgb, var(--ct-primary) 60%, transparent); }
-.nf-eyebrow-key { color: var(--ct-fg-subtle); }
-.nf-eyebrow-sep { color: var(--ct-fg-disabled); }
-.nf-eyebrow-val {
+.err-eyebrow-bracket { color: color-mix(in srgb, var(--ct-primary) 60%, transparent); }
+.err-eyebrow-key { color: var(--ct-fg-subtle); }
+.err-eyebrow-sep { color: var(--ct-fg-disabled); }
+.err-eyebrow-val {
   color: var(--ct-primary);
   font-weight: var(--ct-weight-bold);
   font-variant-numeric: tabular-nums;
 }
 
-.nf-code {
+.err-code {
   display: inline-flex;
   align-items: baseline;
   gap: clamp(0.05em, 1vw, 0.18em);
@@ -238,7 +236,7 @@ function goBack() {
   line-height: 0.85;
   letter-spacing: -0.04em;
 }
-.nf-digit {
+.err-digit {
   display: inline-block;
   background: linear-gradient(
     180deg,
@@ -248,19 +246,19 @@ function goBack() {
   -webkit-background-clip: text;
           background-clip: text;
   color: transparent;
-  animation: nf-digit-in 700ms var(--ct-ease) both;
+  animation: err-digit-in 700ms var(--ct-ease) both;
 }
-.nf-digit-2 {
+.err-digit-2 {
   color: var(--ct-fg);
   -webkit-text-fill-color: var(--ct-fg);
   animation-delay: 80ms;
 }
-.nf-digit-1 { animation-delay: 0ms; }
-.nf-digit-3 { animation-delay: 160ms; }
+.err-digit-1 { animation-delay: 0ms; }
+.err-digit-3 { animation-delay: 160ms; }
 
 /* Light scheme: same darker→brand ramp used on the landing title so the
    gradient reads on the soft-gray bg without going washed out. */
-html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
+html[data-scheme="light"] .err-digit:not(.err-digit-2) {
   background: linear-gradient(
     180deg,
     var(--ct-brand-700) 0%,
@@ -272,12 +270,12 @@ html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
   -webkit-text-fill-color: transparent;
 }
 
-@keyframes nf-digit-in {
+@keyframes err-digit-in {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.nf-heading {
+.err-heading {
   margin: 4px 0 0;
   font-family: var(--ct-font-sans);
   font-size: clamp(1.5rem, 3vw, 2rem);
@@ -285,7 +283,7 @@ html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
   letter-spacing: -0.01em;
   color: var(--ct-fg);
 }
-.nf-desc {
+.err-desc {
   margin: 0;
   max-width: 38rem;
   font-size: var(--ct-text-md);
@@ -293,7 +291,7 @@ html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
   color: var(--ct-fg-muted);
 }
 
-.nf-trace {
+.err-trace {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -311,10 +309,10 @@ html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
   max-width: 100%;
   overflow-x: auto;
 }
-.nf-trace-prompt { color: var(--ct-primary); font-weight: var(--ct-weight-bold); }
-.nf-trace-cmd { color: var(--ct-fg); }
-.nf-trace-flag { color: var(--ct-fg-subtle); }
-.nf-trace-path {
+.err-trace-prompt { color: var(--ct-primary); font-weight: var(--ct-weight-bold); }
+.err-trace-cmd { color: var(--ct-fg); }
+.err-trace-flag { color: var(--ct-fg-subtle); }
+.err-trace-path {
   color: var(--ct-fg-muted);
   background: var(--ct-surface-1);
   padding: 2px 6px;
@@ -325,20 +323,20 @@ html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.nf-trace-arrow { color: var(--ct-fg-disabled); }
-.nf-trace-err {
+.err-trace-arrow { color: var(--ct-fg-disabled); }
+.err-trace-err {
   color: var(--ct-danger);
   font-weight: var(--ct-weight-medium);
 }
 
-.nf-actions {
+.err-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   margin-top: 18px;
 }
-.nf-btn {
+.err-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -355,25 +353,25 @@ html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
     transform var(--ct-duration-fast) var(--ct-ease),
     box-shadow var(--ct-duration-fast) var(--ct-ease);
 }
-.nf-btn:active { transform: translateY(1px); }
-.nf-btn-primary {
+.err-btn:active { transform: translateY(1px); }
+.err-btn-primary {
   background: var(--ct-primary);
   color: var(--ct-on-primary);
   box-shadow: var(--ct-shadow-sm);
 }
-.nf-btn-primary:hover { background: var(--ct-primary-hover); }
-.nf-btn-ghost {
+.err-btn-primary:hover { background: var(--ct-primary-hover); }
+.err-btn-ghost {
   background: var(--ct-surface);
   color: var(--ct-fg);
   border-color: var(--ct-border);
 }
-.nf-btn-ghost:hover {
+.err-btn-ghost:hover {
   background: var(--ct-surface-1);
   border-color: var(--ct-border-strong);
 }
-.nf-btn i { font-size: 16px; }
+.err-btn i { font-size: 16px; }
 
-.nf-quick {
+.err-quick {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -386,17 +384,17 @@ html[data-scheme="light"] .nf-digit:not(.nf-digit-2) {
   max-width: 30rem;
   font-size: var(--ct-text-xs);
 }
-.nf-quick-link {
+.err-quick-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   color: var(--ct-fg-subtle);
   transition: color var(--ct-duration-fast) var(--ct-ease);
 }
-.nf-quick-link:hover { color: var(--ct-primary); }
-.nf-quick-sep { color: var(--ct-fg-disabled); }
+.err-quick-link:hover { color: var(--ct-primary); }
+.err-quick-sep { color: var(--ct-fg-disabled); }
 
 @media (prefers-reduced-motion: reduce) {
-  .nf-digit { animation: none; }
+  .err-digit { animation: none; }
 }
 </style>

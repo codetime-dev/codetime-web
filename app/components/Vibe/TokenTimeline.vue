@@ -195,6 +195,23 @@ function fmtCompact(n: number): string {
 const tokensLabel = computed(() => L.value?.tokens ?? 'tokens')
 const callsLabel = computed(() => L.value?.modelCalls ?? 'model calls')
 
+// Bar inset scales with bucket count: keep dense windows readable (small
+// inset so bars don't disappear) while letting sparse windows breathe
+// with the wider landing-style gaps the design language now uses.
+const barInset = computed(() => {
+  const n = Math.max(1, props.buckets.length)
+  if (n <= 14) {
+    return 6
+  }
+  if (n <= 28) {
+    return 4
+  }
+  if (n <= 60) {
+    return 2
+  }
+  return 1
+})
+
 const options = computed<PlotOptions>(() => {
   const isTokens = metric.value === 'tokens'
   return {
@@ -204,8 +221,6 @@ const options = computed<PlotOptions>(() => {
     marginTop: 12,
     marginRight: 12,
     x: {
-      // Local-time axis so ticks and bar boundaries match the
-      // backend's local-tz buckets and the local-time tooltip.
       type: 'time',
       label: null,
       ticks: 6,
@@ -229,18 +244,20 @@ const options = computed<PlotOptions>(() => {
         x2: 'ts2',
         y: 'value',
         fill: 'source',
-        // Stack order matches sourceOrder (biggest at the bottom).
         order: sourceOrder.value,
-        // Inset each side by a pixel or two so adjacent buckets read
-        // as discrete bars rather than a continuous stacked area.
-        insetLeft: 1,
-        insetRight: 1,
-        fillOpacity: 0.9,
+        insetLeft: barInset.value,
+        insetRight: barInset.value,
+        // Rounded top corners on the top-most segment in each stack —
+        // matches the landing showcase. Plot rounds every rect, but the
+        // narrow inset hides the bottom curve under neighbours so the
+        // visible effect is only on the top of the stack.
+        rx: 1.5,
+        fillOpacity: 0.92,
         tip: true,
         title: (d: Row) =>
           `${d.source}\n${formatBucketTs(d.ts)}\n${fmtCurrency(d.cost)} · ${fmtCompact(d.tokens)} ${tokensLabel.value}\n${fmtCompact(d.modelCalls)} ${callsLabel.value}`,
       }),
-      Plot.ruleY([0], { stroke: 'var(--ct-border-strong)' }),
+      Plot.ruleY([0], { stroke: 'var(--ct-border)' }),
     ],
   }
 })
