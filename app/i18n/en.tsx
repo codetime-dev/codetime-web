@@ -643,6 +643,20 @@ export const en: Translation = {
         light: 'Light',
         system: 'System',
       },
+      connections: {
+        title: 'Sign-in Providers',
+        description: 'Link multiple identities so you can sign in with any of them. At least one must remain connected.',
+        connected: 'Connected',
+        notConnected: 'Not connected',
+        connect: 'Connect',
+        disconnect: 'Disconnect',
+        lastProviderHint: 'Disconnecting this would leave the account with no way to sign in.',
+        feedback: {
+          ok: 'Account linked.',
+          conflict: 'That identity is already linked to a different Code Time account.',
+          replace: 'Another identity is already linked for this provider. Disconnect it first.',
+        },
+      },
       dangerZone: {
         title: 'Danger Zone',
         description: 'These settings will permanently affect your data and cannot be undone. Please proceed with caution.',
@@ -652,6 +666,12 @@ export const en: Translation = {
             p1: 'Are you sure you want to delete all your data? This operation cannot be undone.',
             p2: 'Your data is very important, you can export the data first, and then delete the data.',
             p3: 'If you want to delete all data, please enter DELETE below, and then click Confirm.',
+          },
+          deleteAccount: 'Delete Account',
+          deleteAccountModal: {
+            p1: 'This will permanently delete your account and erase every record we hold for you — coding activity, agent sessions, machines, projects, tags, and the link to your Google / GitHub / Apple identities.',
+            p2: 'This action cannot be undone. If you sign in again with the same provider afterward, you will start over as a new user.',
+            p3: 'To confirm, type DELETE below and click Confirm.',
           },
         },
         subTitle: {

@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { getCookie, getHeader } from 'h3'
 import { users } from '../db/schema'
 import { useDb } from './db'
@@ -7,15 +7,27 @@ import { useDb } from './db'
 export type AuthUser = typeof users.$inferSelect
 
 // Port of codetime-server-v3/src/services/users.py::user_guard.
-// Resolution order (matches Python for parity during migration):
+// Resolution order:
 //   1. Authorization: Bearer <upload_token>
-//   2. token: <upload_token> header
-//   3. user_id + auth_token cookies — auth_token must equal users.token_v1
+//   2. user_id + auth_token cookies — auth_token must equal users.token_v1
 //      (the legacy Python guard skips this check; we tighten it here).
+//
+// The legacy bare `token: <upload_token>` header that Python accepted is
+// NOT honoured here. That header bypasses the access-log scrubbers most
+// proxies / APM products apply to `Authorization`, so a captured request
+// could leak the credential into logs. Clients still using the bare
+// header against Nuxt-served endpoints must migrate to `Authorization:
+// Bearer …`. The legacy Python service (event-log uploads only) keeps
+// accepting it for backwards compatibility.
 //
 // Returns null when not authenticated. Callers must convert null into the
 // Python-shaped { status_code, detail } body via sendPyError — DO NOT throw
 // h3 errors here, they pollute the response with stack/url/statusMessage.
+//
+// Every lookup is gated on `deleted_at IS NULL`: DELETE /v3/users/self
+// tombstones the row (and rotates tokenV1/uploadToken to random values),
+// but a leaked old token or cookie must still be refused — the deletedAt
+// gate is the defence-in-depth for that.
 
 async function resolveUser(event: H3Event): Promise<AuthUser | null> {
   const db = useDb()
@@ -24,18 +36,14 @@ async function resolveUser(event: H3Event): Promise<AuthUser | null> {
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7).trim()
     if (token) {
-      const rows = await db.select().from(users).where(eq(users.uploadToken, token)).limit(1)
+      const rows = await db
+        .select()
+        .from(users)
+        .where(and(eq(users.uploadToken, token), isNull(users.deletedAt)))
+        .limit(1)
       if (rows[0]) {
         return rows[0]
       }
-    }
-  }
-
-  const tokenHeader = getHeader(event, 'token')
-  if (tokenHeader) {
-    const rows = await db.select().from(users).where(eq(users.uploadToken, tokenHeader)).limit(1)
-    if (rows[0]) {
-      return rows[0]
     }
   }
 
@@ -47,7 +55,11 @@ async function resolveUser(event: H3Event): Promise<AuthUser | null> {
       const rows = await db
         .select()
         .from(users)
-        .where(and(eq(users.id, uid), eq(users.tokenV1, authTokenCookie)))
+        .where(and(
+          eq(users.id, uid),
+          eq(users.tokenV1, authTokenCookie),
+          isNull(users.deletedAt),
+        ))
         .limit(1)
       if (rows[0]) {
         return rows[0]

@@ -1,6 +1,6 @@
 import { createHash, createPublicKey, createVerify, randomBytes } from 'node:crypto'
 import process from 'node:process'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { users } from '../db/schema'
 import { useDb } from './db'
 import { isProduction } from './env'
@@ -20,6 +20,14 @@ export function frontendUrl(): string {
 }
   return isProduction() ? 'https://codetime.dev' : 'http://localhost:3001'
 }
+
+// HttpOnly cookies that bridge /v3/auth/github/start → GitHub /authorize
+// → /v3/auth/github callback. STATE pins the OAuth `state` param;
+// LINK_INTENT marks the round-trip as link-mode (attach identity to
+// signed-in user instead of upsert). See server/routes/v3/auth/github/start.get.ts.
+export const GITHUB_STATE_COOKIE = 'gh_oauth_state'
+export const GITHUB_LINK_COOKIE = 'gh_link_intent'
+export const GITHUB_STATE_TTL_SECONDS = 10 * 60
 
 export async function exchangeGithubCode(code: string, redirectUri?: string): Promise<{ accessToken: string }> {
   const clientId = process.env.GITHUB_CLIENT_ID
@@ -79,7 +87,14 @@ export async function fetchGithubUser(accessToken: string): Promise<GithubUser> 
 
 export async function upsertGithubUser(gh: GithubUser): Promise<{ id: number, tokenV1: string, uploadToken: string }> {
   const db = useDb()
-  const [existing] = await db.select().from(users).where(eq(users.githubId, gh.id)).limit(1)
+  // `deleted_at IS NULL` so a soft-deleted account is never resurrected
+  // — DELETE /v3/users/self also nulls github_id, but defence in depth
+  // in case a future code path forgets to clear it.
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.githubId, gh.id), isNull(users.deletedAt)))
+    .limit(1)
   if (existing) {
     const patch: Partial<typeof users.$inferInsert> = {}
     if (!existing.email && gh.email) {
@@ -377,11 +392,9 @@ export async function verifyAppleIdentityToken(
   if (claims.aud !== expectedAudience) {
     throw new Error('Invalid Apple identity token audience')
   }
-  if (expectedNonceClaim !== null) {
-    if (!claims.nonce || claims.nonce !== expectedNonceClaim) {
+  if (expectedNonceClaim !== null && (!claims.nonce || claims.nonce !== expectedNonceClaim)) {
       throw new Error('Invalid Apple identity token: nonce mismatch')
     }
-  }
   if (!claims.sub) {
     throw new Error('Invalid Apple identity token: missing sub')
   }
@@ -402,14 +415,21 @@ export async function upsertAppleUser(
   emailFromClaims: string | null,
 ): Promise<{ id: number, tokenV1: string, uploadToken: string }> {
   const db = useDb()
-  const [existing] = await db.select().from(users).where(eq(users.appleId, appleSub)).limit(1)
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.appleId, appleSub), isNull(users.deletedAt)))
+    .limit(1)
 
   // Apple only returns email/fullName on the *first* successful sign-in
-  // for a given (Apple ID, App ID) pair. Persist whichever we got — the
-  // body fields take precedence over the JWT (the JWT only ships the
-  // email, never the name), and we never overwrite a value the user has
-  // since edited.
-  const preferredEmail = emailFromClient ?? emailFromClaims ?? null
+  // for a given (Apple ID, App ID) pair. For email, prefer the JWT
+  // claim because it's signed by Apple — the client-supplied body field
+  // is unauthenticated and a malicious client could otherwise persist
+  // any address (including a third party's) as the new account's email.
+  // We fall back to the body value only when Apple itself did not ship
+  // an `email` claim. Names are not in the JWT, so we have no choice but
+  // to trust the body for `full_name`.
+  const preferredEmail = emailFromClaims ?? emailFromClient ?? null
 
   if (existing) {
     const patch: Partial<typeof users.$inferInsert> = {}
@@ -472,7 +492,11 @@ function deriveAppleUsername(fullName: string | null, email: string | null, sub:
 
 export async function upsertGoogleUser(claims: GoogleClaims): Promise<{ id: number, tokenV1: string, uploadToken: string }> {
   const db = useDb()
-  const [existing] = await db.select().from(users).where(eq(users.googleId, claims.sub)).limit(1)
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.googleId, claims.sub), isNull(users.deletedAt)))
+    .limit(1)
   if (existing) {
     const patch: Partial<typeof users.$inferInsert> = {}
     if (!existing.email && claims.email) {
@@ -516,4 +540,82 @@ export async function upsertGoogleUser(claims: GoogleClaims): Promise<{ id: numb
  throw new Error('Failed to create user')
 }
   return { id: Number(created.id), tokenV1: created.tokenV1, uploadToken: created.uploadToken }
+}
+
+// =============================================================================
+// Account linking — attach an additional provider identity to an existing
+// signed-in user without spawning a new row, and detach it later.
+//
+// Called from POST/DELETE /v3/auth/{provider}/link after the route has
+// verified the provider credential the same way the signin path does.
+// =============================================================================
+
+export type LinkOutcome = 'linked' | 'already-yours' | 'taken-by-self' | 'conflict'
+
+type ProviderIdField = 'githubId' | 'googleId' | 'appleId'
+
+// Outcomes:
+//   * 'linked'        — patched the field on the current user row.
+//   * 'already-yours' — the user is already linked to this exact sub
+//                       (idempotent; safe for the UI to retry).
+//   * 'taken-by-self' — the user already has a *different* identity on
+//                       this provider — refuse to silently overwrite.
+//   * 'conflict'      — some other non-deleted user already owns this
+//                       sub.
+//
+// Soft-deleted users do not count as conflicts; DELETE /v3/users/self
+// nulls the OAuth IDs already, but defence in depth.
+export async function linkProviderIdentity(
+  userId: number,
+  field: ProviderIdField,
+  value: number | string,
+): Promise<LinkOutcome> {
+  const db = useDb()
+  const column = users[field]
+  const [existing] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(column as any, value as any), isNull(users.deletedAt)))
+    .limit(1)
+  if (existing) {
+    return existing.id === userId ? 'already-yours' : 'conflict'
+  }
+  const [self] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+  if (!self) {
+    return 'conflict'
+  }
+  const current = self[field]
+  if (current != null && current !== value) {
+    return 'taken-by-self'
+  }
+  await db
+    .update(users)
+    .set({ [field]: value as any, updatedAt: new Date() })
+    .where(eq(users.id, userId))
+  return 'linked'
+}
+
+export type UnlinkOutcome = 'unlinked' | 'not-linked' | 'last-one'
+
+// Refuses to remove the LAST connected provider — once all three OAuth
+// IDs are null the row becomes unreachable through any login flow.
+export async function unlinkProviderIdentity(
+  userId: number,
+  field: ProviderIdField,
+): Promise<UnlinkOutcome> {
+  const db = useDb()
+  const [self] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+  if (!self || self[field] == null) {
+    return 'not-linked'
+  }
+  const others: ProviderIdField[] = (['githubId', 'googleId', 'appleId'] as const).filter(f => f !== field)
+  const hasAnother = others.some(f => self[f] != null)
+  if (!hasAnother) {
+    return 'last-one'
+  }
+  await db
+    .update(users)
+    .set({ [field]: null as any, updatedAt: new Date() })
+    .where(eq(users.id, userId))
+  return 'unlinked'
 }

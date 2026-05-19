@@ -1,6 +1,7 @@
-import { defineEventHandler, getHeader, getQuery, getRequestURL, sendRedirect } from 'h3'
+import { defineEventHandler, deleteCookie, getCookie, getHeader, getQuery, getRequestURL, sendRedirect } from 'h3'
+import { tryUser } from '../../../utils/auth'
 import { setAuthCookies } from '../../../utils/auth-cookie'
-import { exchangeGithubCode, fetchGithubUser, frontendUrl, upsertGithubUser } from '../../../utils/oauth'
+import { exchangeGithubCode, fetchGithubUser, frontendUrl, GITHUB_LINK_COOKIE, GITHUB_STATE_COOKIE, linkProviderIdentity, upsertGithubUser } from '../../../utils/oauth'
 
 // Mirrors GET /v3/auth/github. Receives ?code= from the OAuth provider,
 // exchanges it for an access token, fetches the GitHub profile,
@@ -48,10 +49,22 @@ function safeCode(code: unknown): code is string {
 }
 
 export default defineEventHandler(async (event) => {
-  const code = getQuery(event).code
+  const q = getQuery(event)
+  const code = q.code
   const fe = frontendUrl()
   if (!safeCode(code)) {
     return sendRedirect(event, `${fe}/auth/error?message=${encodeURIComponent('Invalid authorization code')}`, 302)
+  }
+
+  // OAuth Login-CSRF defence: every legitimate flow originated at
+  // /v3/auth/github/start, which set an HttpOnly `gh_oauth_state`
+  // cookie. The `state` parameter we got back from GitHub must match.
+  // Delete the cookie either way so a single state can't be reused.
+  const stateFromQuery = typeof q.state === 'string' ? q.state : ''
+  const stateFromCookie = getCookie(event, GITHUB_STATE_COOKIE) || ''
+  deleteCookie(event, GITHUB_STATE_COOKIE, { path: '/' })
+  if (!stateFromQuery || !stateFromCookie || stateFromQuery !== stateFromCookie) {
+    return sendRedirect(event, `${fe}/auth/error?message=${encodeURIComponent('Invalid OAuth state')}`, 302)
   }
   // Defensive guards against duplicate hits that would burn the code:
   //   1. Sec-Purpose / Purpose: prefetch — speculation/prefetch agents.
@@ -73,6 +86,15 @@ export default defineEventHandler(async (event) => {
     return sendRedirect(event, fe, 302)
   }
   rememberCode(code)
+
+  // Link-intent cookie, planted by /v3/auth/github/start?link=1 when the
+  // user clicked "Connect GitHub" from a signed-in settings page. We
+  // always delete it (single-use), then branch on whether (a) it was
+  // present and (b) the session still resolves.
+  const linkIntent = getCookie(event, GITHUB_LINK_COOKIE) === '1'
+  deleteCookie(event, GITHUB_LINK_COOKIE, { path: '/' })
+  const linkSession = linkIntent ? await tryUser(event) : null
+
   try {
     // Mirror the redirect_uri the browser used at /authorize. The OAuth
     // app has multiple callbacks registered (codetime.dev + api.codetime.dev),
@@ -92,6 +114,27 @@ export default defineEventHandler(async (event) => {
     if (!ghUser.id) {
       return sendRedirect(event, `${fe}/auth/error?message=${encodeURIComponent('GitHub user ID not found')}`, 302)
     }
+
+    if (linkSession) {
+      // Link mode — attach the GitHub identity to the current user
+      // instead of provisioning a new row. Settings page reloads and
+      // refetches /v3/users/self to surface the new connection state.
+      const outcome = await linkProviderIdentity(linkSession.id, 'githubId', ghUser.id)
+      const settingsUrl = `${fe}/dashboard/settings`
+      switch (outcome) {
+        case 'linked':
+        case 'already-yours': {
+          return sendRedirect(event, `${settingsUrl}?link=github&result=ok`, 302)
+        }
+        case 'taken-by-self': {
+          return sendRedirect(event, `${settingsUrl}?link=github&result=replace`, 302)
+        }
+        case 'conflict': {
+          return sendRedirect(event, `${settingsUrl}?link=github&result=conflict`, 302)
+        }
+      }
+    }
+
     const { id, tokenV1 } = await upsertGithubUser(ghUser)
     setAuthCookies(event, id, tokenV1)
     return sendRedirect(event, fe, 302)

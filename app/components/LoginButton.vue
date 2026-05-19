@@ -92,7 +92,7 @@ function loadAppleSdk(): Promise<void> {
     return appleSdkPromise
   }
   appleSdkPromise = new Promise<void>((resolve, reject) => {
-    if (window.AppleID?.auth) {
+    if (globalThis.AppleID?.auth) {
       resolve()
       return
     }
@@ -134,7 +134,7 @@ async function handleAppleLogin() {
   try {
     await loadAppleSdk()
     const nonce = randomNonce()
-    window.AppleID!.auth.init({
+    globalThis.AppleID!.auth.init({
       clientId,
       scope: 'name email',
       redirectURI: `${globalThis.location.origin}/v3/auth/apple/callback`,
@@ -142,7 +142,7 @@ async function handleAppleLogin() {
       nonce,
       usePopup: true,
     })
-    const credential = await window.AppleID!.auth.signIn()
+    const credential = await globalThis.AppleID!.auth.signIn()
     const id_token = credential.authorization?.id_token
     if (!id_token) {
       throw new Error('Apple did not return an identity token')
@@ -185,41 +185,14 @@ async function handleAppleLogin() {
   }
 }
 
-// Handle GitHub OAuth
-async function handleGitHubLogin() {
+// Handle GitHub OAuth — delegate to the server so it can mint an HttpOnly
+// `state` cookie before redirecting to GitHub. The callback at
+// /v3/auth/github verifies that cookie, which closes the OAuth Login-CSRF
+// hole where an attacker pre-fetches a code and tricks a victim into
+// hitting the callback to silently bind to the attacker's account.
+function handleGitHubLogin() {
   isGitHubLoading.value = true
-
-  try {
-    const config = useRuntimeConfig()
-    const clientId = config.public.githubClientId
-    const scope = 'user:email'
-    const state = Math.random().toString(36).slice(2, 15)
-
-    // Store state for verification
-    sessionStorage.setItem('github_oauth_state', state)
-    sessionStorage.setItem('github_oauth_redirect', globalThis.location.href)
-
-    // GitHub app has more than one callback URL registered (codetime.dev
-    // for the Nuxt handler and api.codetime.dev for the legacy Python
-    // handler). When multiple URLs are registered, GitHub no longer
-    // infers a default and the token exchange returns bad_verification_code
-    // unless redirect_uri is sent explicitly at BOTH /authorize and
-    // /access_token. Pin both ends to this page's origin so the code
-    // stays bound to the Nuxt callback.
-    const redirectUri = `${globalThis.location.origin}/v3/auth/github`
-
-    const authUrl = `https://github.com/login/oauth/authorize?`
-      + `client_id=${clientId}&`
-      + `scope=${encodeURIComponent(scope)}&`
-      + `state=${state}&`
-      + `redirect_uri=${encodeURIComponent(redirectUri)}`
-
-    globalThis.location.href = authUrl
-  }
-  catch (error) {
-    console.error('GitHub OAuth initiation failed:', error)
-    isGitHubLoading.value = false
-  }
+  globalThis.location.href = '/v3/auth/github/start'
 }
 </script>
 

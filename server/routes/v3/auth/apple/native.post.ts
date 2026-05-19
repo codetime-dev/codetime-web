@@ -108,8 +108,8 @@ export default defineEventHandler(async (event) => {
   try {
     claims = await verifyAppleIdentityToken(identityToken, iosBundleId, expectedNonceClaim)
   }
-  catch (err) {
-    console.error('[auth.apple.native]', (err as Error).message)
+  catch (error) {
+    console.error('[auth.apple.native]', (error as Error).message)
   }
   if (!claims) {
     throw createError({ statusCode: 401, statusMessage: 'Apple authentication failed' })
@@ -124,11 +124,11 @@ export default defineEventHandler(async (event) => {
     )
     return { token: uploadToken, user_id: id }
   }
-  catch (err: any) {
-    if (err?.statusCode) {
-      throw err
+  catch (error: any) {
+    if (error?.statusCode) {
+      throw error
     }
-    console.error('[auth.apple.native]', err)
+    console.error('[auth.apple.native]', error)
     throw createError({ statusCode: 500, statusMessage: 'Failed to provision Apple user' })
   }
 })

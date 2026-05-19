@@ -634,6 +634,20 @@ export const zhCN: Partial<Translation> = {
         light: '亮色',
         system: '跟随系统',
       },
+      connections: {
+        title: '登录方式',
+        description: '可以同时绑定多个身份，登录时任选其一。至少需要保留一个绑定。',
+        connected: '已绑定',
+        notConnected: '未绑定',
+        connect: '连接',
+        disconnect: '解绑',
+        lastProviderHint: '解绑后将无法登录账号。',
+        feedback: {
+          ok: '账号已绑定。',
+          conflict: '该身份已绑定到另一个 Code Time 账号。',
+          replace: '此 provider 已绑定另一个身份，请先解绑现有的。',
+        },
+      },
       dangerZone: {
         title: '危险区域',
         description: '这些设置会永久影响你的数据，不可恢复。请谨慎操作。',
@@ -643,6 +657,12 @@ export const zhCN: Partial<Translation> = {
             p1: '您确定要删除所有数据吗？此操作不可撤销。',
             p2: '您的数据非常重要，您可以先导出数据，再删除数据。',
             p3: '如果您要删除所有数据，请在下方输入 DELETE，然后点击确定。',
+          },
+          deleteAccount: '删除账号',
+          deleteAccountModal: {
+            p1: '此操作将永久删除您的账号，并清除我们为您保存的所有数据 —— 包括编码活动、Agent 会话、机器、项目、标签，以及您与 Google / GitHub / Apple 身份的关联。',
+            p2: '此操作不可撤销。即使之后使用同一身份再次登录，也将作为新用户重新开始。',
+            p3: '如要确认，请在下方输入 DELETE，然后点击确定。',
           },
         },
         subTitle: {

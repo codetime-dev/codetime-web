@@ -50,6 +50,7 @@ defineRouteMeta({
               githubId: { type: 'integer', nullable: true },
               bio: { type: 'string', nullable: true },
               googleId: { type: 'string', nullable: true },
+              appleId: { type: 'string', nullable: true },
               plan: { type: 'string' },
               timezone: { type: 'string', nullable: true },
               uploadToken: { type: 'string' },

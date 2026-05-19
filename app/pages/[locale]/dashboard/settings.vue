@@ -279,6 +279,8 @@ function openConnect(tab: ConnectTab) {
       </div>
     </PanelSection>
 
+    <DashboardSettingsConnections />
+
     <DashboardSettingsDangerZone />
   </DashboardPageContent>
 </template>

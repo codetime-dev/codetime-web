@@ -95,8 +95,8 @@ export default defineEventHandler(async (event) => {
   try {
     claims = await verifyAppleIdentityToken(identityToken, webServiceId, rawNonce)
   }
-  catch (err) {
-    console.error('[auth.apple]', (err as Error).message)
+  catch (error) {
+    console.error('[auth.apple]', (error as Error).message)
     throw createError({ statusCode: 401, statusMessage: 'Apple authentication failed' })
   }
 
@@ -110,11 +110,11 @@ export default defineEventHandler(async (event) => {
     setAuthCookies(event, id, tokenV1)
     return { success: true, user_id: id }
   }
-  catch (err: any) {
-    if (err?.statusCode) {
-      throw err
+  catch (error: any) {
+    if (error?.statusCode) {
+      throw error
     }
-    console.error('[auth.apple]', err)
+    console.error('[auth.apple]', error)
     throw createError({ statusCode: 500, statusMessage: 'Failed to provision Apple user' })
   }
 })
