@@ -1,46 +1,32 @@
-// Helpers for widget endpoints: fetch from the local Nuxt backend & set
-// SVG response headers consistently.
+// Helpers for widget endpoints: fetch JSON from the local Nuxt backend
+// and set SVG response headers consistently.
 //
-// Historically these proxied to `api.codetime.dev` because the Python
-// service owned `/v3/*`. The Nuxt backend now serves every widget
-// dependency in-process (see server/routes/v3/users/...), so we resolve
-// the API host from the inbound request's own origin and let Nitro
-// route the fetch internally. `NUXT_PUBLIC_API_HOST` is still honoured
-// as an escape hatch for staging environments that want to test against
-// a remote backend without touching this file.
+// `$fetch` is Nitro's internal dispatcher — when the path is local it
+// short-circuits straight to the matching handler, skipping the
+// TCP/TLS/HTTP roundtrip that a `fetch()` of the same origin would
+// incur. `NUXT_PUBLIC_API_HOST` is still honoured as an escape hatch
+// for staging environments that want to proxy widget JSON through a
+// remote backend.
 
 import type { H3Event } from 'h3'
 import process from 'node:process'
-import { createError, getRequestURL, setHeader, setResponseStatus } from 'h3'
+import { createError, setHeader, setResponseStatus } from 'h3'
 
-function getApiHost(event: H3Event): string {
-  const env = process.env.NUXT_PUBLIC_API_HOST
-  if (env) {
-    return env.replace(/\/$/, '')
-  }
-  const headerOverride = event.node.req.headers['x-codetime-api']
-  if (typeof headerOverride === 'string' && headerOverride.length > 0) {
-    return headerOverride.replace(/\/$/, '')
-  }
-  // Same-origin loopback. `getRequestURL(event)` reflects whatever host
-  // Nginx / Cloudflare forwarded as, so prod hits codetime.dev and dev
-  // hits localhost:3001 without any per-environment branching.
-  const url = getRequestURL(event)
-  return `${url.protocol}//${url.host}`
-}
+type FetchError = { statusCode?: number, response?: { status?: number }, data?: unknown }
 
-export async function fetchWidgetJson<T>(event: H3Event, path: string): Promise<T> {
-  const host = getApiHost(event)
-  const url = `${host}${path.startsWith('/') ? path : `/${path}`}`
-  const resp = await fetch(url, { headers: { accept: 'application/json' } })
-  if (!resp.ok) {
-    const text = await resp.text().catch(() => '')
-    throw createError({
-      statusCode: resp.status,
-      statusMessage: text || resp.statusText || 'upstream error',
-    })
+export async function fetchWidgetJson<T>(_event: H3Event, path: string): Promise<T> {
+  const remoteHost = (process.env.NUXT_PUBLIC_API_HOST || '').replace(/\/$/, '')
+  const url = remoteHost
+    ? `${remoteHost}${path.startsWith('/') ? path : `/${path}`}`
+    : (path.startsWith('/') ? path : `/${path}`)
+  try {
+    return await $fetch<T>(url, { headers: { accept: 'application/json' } })
   }
-  return resp.json() as Promise<T>
+  catch (error) {
+    const err = error as FetchError
+    const status = err.statusCode ?? err.response?.status ?? 500
+    throw createError({ statusCode: status, statusMessage: typeof err.data === 'string' ? err.data : 'upstream error' })
+  }
 }
 
 export function sendSvg(event: H3Event, svg: string, opts?: { cacheSeconds?: number }): string {

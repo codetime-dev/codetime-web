@@ -3,6 +3,7 @@ import { defineEventHandler, getQuery, getRouterParam } from 'h3'
 import { eventLogs, users, workspaceMinutesV2 } from '../../../../../db/schema'
 import { useDb } from '../../../../../utils/db'
 import { sendPyError } from '../../../../../utils/py-error'
+import { todayStartUtc } from '../../../../../utils/tz'
 
 // Mirrors GET /v3/users/{user_id}/public/status. Returns a snapshot for
 // the embeddable status widget: latest event log + today's coding
@@ -50,46 +51,6 @@ defineRouteMeta({
     },
   },
 })
-
-// Compute the UTC instant at the start of today in the given IANA tz.
-// Mirrors Python `datetime.now(tz).replace(hour=0...).astimezone(UTC)`.
-function todayStartUtc(tzName: string): Date {
-  const tz = isValidTimezone(tzName) ? tzName : 'Etc/UTC'
-  const now = new Date()
-  // Read the local Y/M/D in the target tz, then reconstruct midnight UTC
-  // for that calendar date and shift by the tz offset at that moment.
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: tz,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  }).formatToParts(now)
-  const get = (t: string) => parts.find(p => p.type === t)?.value ?? '0'
-  const y = Number(get('year'))
-  const m = Number(get('month'))
-  const d = Number(get('day'))
-  // Approximate offset from "local clock minus UTC clock" at this instant.
-  const localMidnightUTC = Date.UTC(y, m - 1, d, 0, 0, 0)
-  // What instant does that wall-clock midnight in tz correspond to in UTC?
-  // Calculate offset minutes by formatting `now` and diffing wall-clock to UTC.
-  const wallNowUtc = Date.UTC(y, m - 1, d, Number(get('hour')), Number(get('minute')), Number(get('second')))
-  const offsetMs = wallNowUtc - now.getTime()
-  return new Date(localMidnightUTC - offsetMs)
-}
-
-function isValidTimezone(tz: string): boolean {
-  try {
-    Intl.DateTimeFormat('en-US', { timeZone: tz })
-    return true
-  }
-  catch {
-    return false
-  }
-}
 
 const ALLOWED_FIELDS = new Set(['project', 'language', 'editor'])
 

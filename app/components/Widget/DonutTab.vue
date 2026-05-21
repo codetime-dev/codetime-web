@@ -35,9 +35,7 @@ const qs = computed(() => {
     theme: p.theme,
   }).toString()
 })
-// Preview hits the current origin so dev / preview deploys also work.
 const previewLink = computed(() => qs.value ? `/api/widgets/donut.svg?${qs.value}` : '')
-// Embed link is always the canonical production URL.
 const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/donut.svg?${qs.value}` : '')
 </script>
 
@@ -60,61 +58,16 @@ const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/do
     <template #icon>
       <i class="i-tabler-adjustments-horizontal text-[15px] text-ct-fg-muted" />
     </template>
-
-    <div class="form-grid">
-      <div class="form-cell">
-        <div class="form-label">
-          {{ w?.donut.days ?? 'Days' }}
-        </div>
-        <input v-model.number="days" class="line-input" type="number" min="1" max="365">
-      </div>
-      <div class="form-cell">
-        <div class="form-label">
-          {{ w?.donut.limit ?? 'Languages' }}
-        </div>
-        <input v-model.number="limit" class="line-input" type="number" min="2" max="12">
-      </div>
-      <div class="form-cell">
-        <div class="form-label">
-          {{ w?.theme.label ?? 'Theme' }}
-        </div>
-        <div class="seg">
-          <button
-            v-for="opt in themeOptions"
-            :key="opt.id"
-            type="button"
-            class="seg-btn"
-            :class="theme === opt.id ? 'seg-btn-active' : ''"
-            @click="theme = opt.id"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <WidgetFormRow :label="w?.donut.days ?? 'Days'">
+      <WidgetFormNumberInput v-model="days" :min="1" :max="365" />
+    </WidgetFormRow>
+    <WidgetFormRow :label="w?.donut.limit ?? 'Languages'">
+      <WidgetFormNumberInput v-model="limit" :min="2" :max="12" />
+    </WidgetFormRow>
+    <WidgetFormRow :label="w?.theme.label ?? 'Theme'">
+      <WidgetFormSeg v-model="theme" :options="themeOptions" />
+    </WidgetFormRow>
   </PanelSection>
 
   <WidgetCopyCard :link="embedLink" alt="CodeTime Languages" class="z-1" />
 </template>
-
-<style scoped>
-.form-grid { display: grid; grid-template-columns: 1fr; }
-@media (min-width: 768px) {
-  .form-grid { grid-template-columns: 1fr 1fr 1fr; }
-  .form-grid > .form-cell + .form-cell { border-left: 1px solid var(--ct-border-subtle); }
-}
-@media (max-width: 767px) {
-  .form-grid > .form-cell + .form-cell { border-top: 1px solid var(--ct-border-subtle); }
-}
-.form-cell { padding: 0.85rem 1rem 0.95rem; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
-.form-label { font-size: var(--ct-text-xs); color: var(--ct-fg-subtle); }
-
-.seg { display: inline-flex; border: 1px solid var(--ct-border); border-radius: var(--ct-radius-lg); overflow: hidden; }
-.seg-btn { flex: 1; padding: 7px 12px; font-size: var(--ct-text-sm); color: var(--ct-fg-muted); background: transparent; border: 0; border-left: 1px solid var(--ct-border-subtle); cursor: pointer; transition: color 160ms ease, background-color 160ms ease; }
-.seg-btn:first-child { border-left: 0; }
-.seg-btn:hover { color: var(--ct-fg); background-color: var(--ct-surface-2); }
-.seg-btn-active { color: var(--color-primary-1); background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent); }
-
-.line-input { display: block; width: 100%; height: 36px; padding: 0 12px; font-family: var(--ct-font-sans); font-size: var(--ct-text-base); color: var(--ct-fg); background: var(--ct-surface); border: 1px solid var(--ct-border); border-radius: var(--ct-radius-lg); outline: 0; transition: border-color var(--ct-duration-fast) var(--ct-ease), box-shadow var(--ct-duration-fast) var(--ct-ease); }
-.line-input:focus { border-color: var(--ct-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-primary) 18%, transparent); }
-</style>
