@@ -7,7 +7,7 @@ const t = useI18N()
 const route = useRoute()
 const router = useRouter()
 
-type TabId = 'badge' | 'donut' | 'status' | 'calendar' | 'trend'
+type TabId = 'badge' | 'donut' | 'status' | 'calendar' | 'trend' | 'usage'
 
 const tabs = computed<{ id: TabId, label: string, icon: string }[]>(() => {
   const w = t.value.dashboard.widget
@@ -17,10 +17,11 @@ const tabs = computed<{ id: TabId, label: string, icon: string }[]>(() => {
     { id: 'status', label: w?.tab.status ?? 'Status', icon: 'i-tabler-activity-heartbeat' },
     { id: 'calendar', label: w?.tab.calendar ?? 'Calendar', icon: 'i-tabler-calendar-stats' },
     { id: 'trend', label: w?.tab.trend ?? 'Trend', icon: 'i-tabler-chart-line' },
+    { id: 'usage', label: w?.tab.usage ?? 'Usage', icon: 'i-tabler-coin' },
   ]
 })
 
-const VALID_TABS = new Set<TabId>(['badge', 'donut', 'status', 'calendar', 'trend'])
+const VALID_TABS = new Set<TabId>(['badge', 'donut', 'status', 'calendar', 'trend', 'usage'])
 
 const active = computed<TabId>({
   get() {
@@ -50,5 +51,6 @@ const active = computed<TabId>({
     <WidgetStatusTab v-else-if="active === 'status'" />
     <WidgetCalendarTab v-else-if="active === 'calendar'" />
     <WidgetTrendTab v-else-if="active === 'trend'" />
+    <WidgetUsageTab v-else-if="active === 'usage'" />
   </DashboardPageContent>
 </template>

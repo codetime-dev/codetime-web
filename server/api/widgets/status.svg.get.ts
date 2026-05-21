@@ -1,7 +1,7 @@
 // "Currently coding" status card. Public — uid required.
 
 import { createError, defineEventHandler, getQuery } from 'h3'
-import { escapeXml, FONT_MONO, FONT_SANS, formatMinutes, getTheme } from '../../utils/svg-theme'
+import { escapeXml, FONT_MONO, FONT_SANS, formatMinutes, getTheme, sanitizeColor } from '../../utils/svg-theme'
 import { fetchWidgetJson, sendSvg } from '../../utils/widget-fetch'
 
 // Upstream historically used camelCase (lastActiveAt/todayMinutes); newer
@@ -26,18 +26,6 @@ const H = 116
 const MIN_W = 200
 const MIN_H = 36
 const ACTIVE_WINDOW_SECONDS = 5 * 60
-
-// Hex color guard: accepts #rgb / #rrggbb / #rrggbbaa (with or without leading #).
-function sanitizeColor(raw: unknown): string | null {
-  if (typeof raw !== 'string') {
-    return null
-  }
-  const v = raw.trim().replace(/^#/, '')
-  if (!/^(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v)) {
-    return null
-  }
-  return `#${v.toLowerCase()}`
-}
 
 function parseStyle(raw: unknown): WidgetStyle {
   return String(raw ?? '').toLowerCase() === 'minimal' ? 'minimal' : 'detailed'

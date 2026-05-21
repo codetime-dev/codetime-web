@@ -47,8 +47,27 @@ module.exports = {
       name: 'CodetimeWebV3',
       cwd: __dirname,
       script: './.output/server/index.mjs',
-      exec_mode: 'fork',
-      instances: 1,
+      // Cluster mode + 2 instances + wait_ready gives us true zero-downtime
+      // reload: `pm2 reload` spawns a fresh worker, waits for it to send
+      // `process.send('ready')` (see server/plugins/pm2-ready.ts) BEFORE
+      // routing traffic to it, then shuts the old worker down with
+      // SIGINT — Nitro's setupGracefulShutdown drains in-flight requests
+      // for up to 30s before exiting.
+      exec_mode: 'cluster',
+      instances: 2,
+      wait_ready: true,
+      // How long PM2 will wait for the new worker's `ready` signal before
+      // declaring the reload failed and killing it. The pm2-ready probe
+      // gives up at 30s; we cap PM2 a bit higher so its own timeout never
+      // races ahead of the in-app deadline.
+      listen_timeout: 30_000,
+      // SIGINT first, then SIGKILL after this long. Must be >= Nitro's
+      // own shutdown timeout (NITRO_SHUTDOWN_TIMEOUT, default 30s) or PM2
+      // will hard-kill mid-drain.
+      kill_timeout: 35_000,
+      // Workers are independent — no shared in-memory state. The pricing
+      // catalogue (server/utils/agent-pricing.ts) refreshes per-process;
+      // each worker pulls its own copy on first hit, which is fine.
       max_memory_restart: '500M',
       env: {
         PORT: 3001,

@@ -327,6 +327,7 @@ export type Translation = {
         status: string
         calendar?: string
         trend?: string
+        usage?: string
       }
       theme: {
         label: string
@@ -364,6 +365,24 @@ export type Translation = {
         title: string
         days: string
       }
+      usage?: {
+        title: string
+        style?: string
+        color?: string
+        background?: string
+        range?: string
+        styles?: {
+          minimal: string
+          detailed: string
+        }
+        ranges?: {
+          today: string
+          week: string
+          month: string
+          year: string
+          all: string
+        }
+      }
       limit: {
         upgrade: string
         donutFree: string
@@ -373,6 +392,7 @@ export type Translation = {
         calendarFree?: string
         trendFree?: string
         trendExceeds?: string
+        usageFree?: string
       }
     }
     settings: {

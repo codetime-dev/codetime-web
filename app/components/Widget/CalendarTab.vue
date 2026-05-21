@@ -45,39 +45,10 @@ const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/ca
     <template #icon>
       <i class="i-tabler-adjustments-horizontal text-[15px] text-ct-fg-muted" />
     </template>
-
-    <div class="form-grid">
-      <div class="form-cell">
-        <div class="form-label">
-          {{ w?.theme.label ?? 'Theme' }}
-        </div>
-        <div class="seg">
-          <button
-            v-for="opt in themeOptions"
-            :key="opt.id"
-            type="button"
-            class="seg-btn"
-            :class="theme === opt.id ? 'seg-btn-active' : ''"
-            @click="theme = opt.id"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <WidgetFormRow :label="w?.theme.label ?? 'Theme'">
+      <WidgetFormSeg v-model="theme" :options="themeOptions" />
+    </WidgetFormRow>
   </PanelSection>
 
   <WidgetCopyCard :link="embedLink" alt="CodeTime Activity Calendar" class="z-1" />
 </template>
-
-<style scoped>
-.form-grid { display: grid; grid-template-columns: 1fr; }
-.form-cell { padding: 0.85rem 1rem 0.95rem; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
-.form-label { font-size: var(--ct-text-xs); color: var(--ct-fg-subtle); }
-
-.seg { display: inline-flex; border: 1px solid var(--ct-border); border-radius: var(--ct-radius-lg); overflow: hidden; }
-.seg-btn { flex: 1; padding: 7px 12px; font-size: var(--ct-text-sm); color: var(--ct-fg-muted); background: transparent; border: 0; border-left: 1px solid var(--ct-border-subtle); cursor: pointer; transition: color 160ms ease, background-color 160ms ease; }
-.seg-btn:first-child { border-left: 0; }
-.seg-btn:hover { color: var(--ct-fg); background-color: var(--ct-surface-2); }
-.seg-btn-active { color: var(--color-primary-1); background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent); }
-</style>

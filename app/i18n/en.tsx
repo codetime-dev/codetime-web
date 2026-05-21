@@ -527,6 +527,7 @@ export const en: Translation = {
         status: 'Status',
         calendar: 'Calendar',
         trend: 'Trend',
+        usage: 'Usage',
       },
       theme: {
         label: 'Theme',
@@ -544,6 +545,24 @@ export const en: Translation = {
       trend: {
         title: 'Daily trend',
         days: 'Days',
+      },
+      usage: {
+        title: 'Token & cost usage',
+        style: 'Style',
+        color: 'Accent color',
+        background: 'Background',
+        range: 'Range',
+        styles: {
+          minimal: 'Minimal',
+          detailed: 'Detailed',
+        },
+        ranges: {
+          today: 'Today',
+          week: 'This week',
+          month: 'This month',
+          year: 'This year',
+          all: 'All time',
+        },
       },
       status: {
         title: 'Currently coding',
@@ -573,6 +592,7 @@ export const en: Translation = {
         calendarFree: 'Free plan shows the last 90 days. Pro unlocks the full 365-day calendar.',
         trendFree: 'Free plan: up to 90 days of trend. Pro extends the window to 365 days.',
         trendExceeds: 'Free plan caps the trend at 90 days — values will be clamped.',
+        usageFree: 'Free plan: minimal style, last 30 days only. Pro unlocks the detailed card, all-time totals, and custom colors.',
       },
     },
     settings: {

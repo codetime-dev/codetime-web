@@ -82,6 +82,55 @@ export function pickColor(index: number, override?: string | null): string {
 export const FONT_SANS = `ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`
 export const FONT_MONO = `ui-monospace, SFMono-Regular, Menlo, 'JetBrains Mono', Consolas, monospace`
 
+// Hex color guard: accepts #rgb / #rrggbb / #rrggbbaa (with or without
+// the leading "#"). Returns the normalised lowercased form ("#rrggbb")
+// or null on bad input.
+export function sanitizeColor(raw: unknown): string | null {
+  if (typeof raw !== 'string') {
+    return null
+  }
+  const v = raw.trim().replace(/^#/, '')
+  if (!/^(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v)) {
+    return null
+  }
+  return `#${v.toLowerCase()}`
+}
+
+export function formatTokens(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) {
+    return '0'
+  }
+  if (n < 1000) {
+    return String(Math.round(n))
+  }
+  if (n < 1_000_000) {
+    return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}K`
+  }
+  if (n < 1_000_000_000) {
+    return `${(n / 1_000_000).toFixed(n < 10_000_000 ? 2 : 1)}M`
+  }
+  return `${(n / 1_000_000_000).toFixed(2)}B`
+}
+
+export function formatUsd(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) {
+    return '$0'
+  }
+  if (n < 0.01) {
+    return `$${n.toFixed(4)}`
+  }
+  if (n < 1) {
+    return `$${n.toFixed(3)}`
+  }
+  if (n < 1000) {
+    return `$${n.toFixed(2)}`
+  }
+  if (n < 1_000_000) {
+    return `$${(n / 1000).toFixed(n < 10_000 ? 2 : 1)}K`
+  }
+  return `$${(n / 1_000_000).toFixed(2)}M`
+}
+
 export function formatMinutes(min: number): string {
   if (!min) {
     return '0m'
