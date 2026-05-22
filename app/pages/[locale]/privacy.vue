@@ -9,7 +9,7 @@ const locale = useLocale()
 const isEnglish = computed(() => (locale.value || 'en') === 'en')
 const canonicalUrl = computed(() => `https://codetime.dev/${locale.value || 'en'}/privacy`)
 
-const lastUpdated = '2026-05-19'
+const lastUpdated = '2026-05-22'
 
 useSeoMeta({
   title: 'Privacy Policy · Code Time',
@@ -87,10 +87,14 @@ useHead({
       <h2>1. What we collect</h2>
 
       <p>
-        <strong>Account.</strong> When you sign in with GitHub or Google
-        OAuth, we receive a provider account ID, your public username,
-        display name, avatar URL, and the email address linked to that
-        provider. We never receive your password.
+        <strong>Account.</strong> When you sign in with GitHub, Google,
+        or Apple OAuth, we receive a provider account ID, your public
+        username (where the provider supplies one), display name, avatar
+        URL, and the email address linked to that provider. If you use
+        Sign in with Apple and choose <em>Hide My Email</em>, we receive
+        Apple's anonymised relay address instead of your real one and
+        treat it the same as any other email on file. We never receive
+        your password.
       </p>
 
       <p>
@@ -113,6 +117,25 @@ useHead({
         duration / turn count, project path, and the list of file paths
         touched. <strong>Prompt text, tool inputs/outputs, and file
           contents are not sent.</strong>
+      </p>
+
+      <p>
+        <strong>iOS app.</strong> The iOS app is a thin client over the
+        same dashboards described above. When you open it, it sends the
+        same kind of request metadata any HTTP client would (app
+        version, iOS version, device model family, preferred language,
+        and your sign-in token if you're signed in). The auth token is
+        stored in the iOS Keychain on your device. The app does
+        <strong>not</strong> request the App Tracking Transparency
+        (ATT) prompt because we do not track you across other apps or
+        websites and do not collect the IDFA. The app does
+        <strong>not</strong> use push notifications, and so does not
+        register a push token. The app does not access your contacts,
+        photos, microphone, camera, calendar, health data, or precise
+        location. Apple may share anonymous, aggregated App Analytics
+        and crash reports with us if (and only if) you have opted in
+        under iOS Settings → Privacy &amp; Security → Analytics &amp;
+        Improvements; that data is not linked to your account.
       </p>
 
       <p>
@@ -188,18 +211,23 @@ useHead({
       <p>The data passes through these third parties as needed:</p>
       <ul>
         <li>
-          <strong>GitHub</strong> and <strong>Google</strong> — OAuth
-          sign-in.
+          <strong>GitHub</strong>, <strong>Google</strong>, and
+          <strong>Apple</strong> — OAuth sign-in. Apple is also the
+          distribution channel for the iOS app (App Store and
+          TestFlight) and may collect its own diagnostics under your iOS
+          privacy settings (see §1 iOS app).
         </li>
         <li>
           <strong>LemonSqueezy</strong> — payment processing for Pro
-          subscriptions. Card details go to LemonSqueezy directly; we
-          receive only subscription status, customer ID, and transaction
-          metadata.
+          subscriptions, sold on the website only (the iOS app does not
+          offer in-app purchases). Card details go to LemonSqueezy
+          directly; we receive only subscription status, customer ID,
+          and transaction metadata.
         </li>
         <li>
           <strong>Google Analytics 4</strong> — aggregate traffic
-          measurement (see §1 Cookies).
+          measurement on the website only; not loaded inside the iOS
+          app (see §1 Cookies).
         </li>
         <li>
           Our <strong>hosting provider</strong> — runs the servers and
@@ -226,11 +254,17 @@ useHead({
           telemetry), email us.
         </li>
         <li>
-          <strong>Delete data or close your account.</strong> Dashboard →
-          Settings → Danger Zone. Account closure cascades the deletion
-          to your coding minutes, event logs, and workspace metadata, and
-          removes you from the leaderboard. Encrypted backups may still
-          contain the data for up to 30 days before rotation.
+          <strong>Delete data or close your account.</strong> Available
+          from Dashboard → Settings → Danger Zone on the web, and from
+          Settings → Account → Delete Account inside the iOS app (per
+          Apple's account-deletion requirement). Account closure
+          cascades the deletion to your coding minutes, event logs, and
+          workspace metadata, and removes you from the leaderboard.
+          Encrypted backups may still contain the data for up to 30
+          days before rotation. <strong>Uninstalling the iOS app does
+            not delete your account or your data on our
+            servers</strong> — use the in-app or in-dashboard delete
+          flow for that.
         </li>
         <li>
           <strong>Access, correction, restriction, objection.</strong>

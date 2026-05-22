@@ -9,7 +9,7 @@ const locale = useLocale()
 const isEnglish = computed(() => (locale.value || 'en') === 'en')
 const canonicalUrl = computed(() => `https://codetime.dev/${locale.value || 'en'}/terms`)
 
-const lastUpdated = '2026-05-19'
+const lastUpdated = '2026-05-22'
 
 useSeoMeta({
   title: 'Terms of Service · Code Time',
@@ -70,8 +70,8 @@ useHead({
       <p>
         Code Time (<a href="https://codetime.dev">codetime.dev</a>) is an
         independent personal project. These Terms govern your access to
-        and use of the website, editor plugins, agent CLI, and API
-        (together, the "<strong>Service</strong>"). By using the Service
+        and use of the website, editor plugins, agent CLI, iOS app, and
+        API (together, the "<strong>Service</strong>"). By using the Service
         you agree to these Terms. If you do not agree, don't use it. How
         we handle data is described in our
         <NuxtLink :to="`/${locale || 'en'}/privacy`" class="legal-inline-link">
@@ -83,10 +83,11 @@ useHead({
     <section class="legal-section">
       <h2>1. Your account and acceptable use</h2>
       <p>
-        You sign in via GitHub or Google OAuth. You're responsible for
-        what happens under your account and for keeping your API token
-        secret. You must be at least 13 years old (or 16 if you live in
-        an EU country that applies that as the digital-consent age).
+        You sign in via GitHub, Google, or Apple OAuth. You're
+        responsible for what happens under your account and for keeping
+        your API token secret. You must be at least 13 years old (or 16
+        if you live in an EU country that applies that as the
+        digital-consent age).
       </p>
       <p>You agree not to:</p>
       <ul>
@@ -121,6 +122,12 @@ useHead({
         time, taking effect at the end of the current billing period.
       </p>
       <p>
+        <strong>Pro is sold on the website only.</strong> The iOS app
+        does not offer in-app purchases or subscriptions; any Pro
+        entitlement purchased on <a href="https://codetime.dev">codetime.dev</a>
+        applies automatically inside the iOS app once you sign in.
+      </p>
+      <p>
         Refunds are handled case-by-case at our reasonable discretion.
         Email <a href="mailto:support@codetime.dev">support@codetime.dev</a>
         within 14 days of a charge to ask. Statutory consumer rights
@@ -148,7 +155,63 @@ useHead({
     </section>
 
     <section class="legal-section">
-      <h2>4. Service availability and termination</h2>
+      <h2>4. Apple App Store (iOS app only)</h2>
+      <p>
+        The iOS app is distributed through Apple's App Store and
+        TestFlight. The following terms apply <em>in addition to</em>
+        the rest of these Terms whenever you use the iOS app:
+      </p>
+      <ul>
+        <li>
+          These Terms are entered into between you and us, not with
+          Apple. Apple is not responsible for the iOS app or its
+          content, and has no obligation to provide any maintenance or
+          support for it.
+        </li>
+        <li>
+          Your licence to use the iOS app is limited to use on any
+          Apple-branded device that you own or control, as permitted by
+          the App Store
+          <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener">
+            Licensed Application End User Licence Agreement
+          </a>
+          (the "Standard EULA"). Where the Standard EULA imposes
+          stricter restrictions than these Terms, the stricter terms
+          apply to the iOS app.
+        </li>
+        <li>
+          We — not Apple — are responsible for addressing any product
+          warranty claims, product-liability claims, and intellectual
+          property infringement claims relating to the iOS app, to the
+          extent provided by applicable law.
+        </li>
+        <li>
+          You represent that you are not located in a country subject to
+          a U.S. government embargo or designated by the U.S. government
+          as a "terrorist supporting" country, and that you are not
+          listed on any U.S. government list of prohibited or restricted
+          parties.
+        </li>
+        <li>
+          Apple and Apple's subsidiaries are third-party beneficiaries
+          of these Terms with respect to the iOS app and, upon your
+          acceptance of these Terms, will have the right (and will be
+          deemed to have accepted the right) to enforce these Terms
+          against you as a third-party beneficiary.
+        </li>
+      </ul>
+      <p>
+        If anything in these Terms conflicts with Apple's
+        <a href="https://www.apple.com/legal/internet-services/itunes/" target="_blank" rel="noopener">
+          Media Services Terms and Conditions
+        </a>
+        as they apply to App Store purchases or distribution, Apple's
+        terms control for those matters only.
+      </p>
+    </section>
+
+    <section class="legal-section">
+      <h2>5. Service availability and termination</h2>
       <p>
         We aim for high availability but don't guarantee that the Service
         is uninterrupted or error-free. We may modify, suspend, or
@@ -156,17 +219,21 @@ useHead({
       </p>
       <p>
         You can close your account at any time from Dashboard → Settings
-        → Danger Zone. Closing your account permanently deletes your data
-        (subject to short backup retention as described in the Privacy
-        Policy). We may suspend or terminate accounts that materially
-        violate these Terms, that are used to abuse the Service, or that
-        we are required to remove by law, giving you reasonable notice
-        where possible.
+        → Danger Zone on the web, or from Settings → Account → Delete
+        Account inside the iOS app. Closing your account permanently
+        deletes your data (subject to short backup retention as
+        described in the Privacy Policy).
+        <strong>Uninstalling the iOS app does not close your account or
+          delete your data</strong> — use the in-app or in-dashboard
+        delete flow for that. We may suspend or terminate accounts that
+        materially violate these Terms, that are used to abuse the
+        Service, or that we are required to remove by law, giving you
+        reasonable notice where possible.
       </p>
     </section>
 
     <section class="legal-section">
-      <h2>5. Disclaimer and limitation of liability</h2>
+      <h2>6. Disclaimer and limitation of liability</h2>
       <p>
         The Service is provided <strong>"as is" and "as available"</strong>
         without warranties of any kind, whether express or implied,
@@ -191,7 +258,7 @@ useHead({
     </section>
 
     <section class="legal-section">
-      <h2>6. General</h2>
+      <h2>7. General</h2>
       <p>
         We may update these Terms as the Service evolves. Material
         changes will be flagged on the site; continued use after a change
