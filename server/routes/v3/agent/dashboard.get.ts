@@ -1,6 +1,7 @@
+import type { estimateCostUsd } from '../../../utils/agent-pricing'
 import { sql } from 'drizzle-orm'
 import { defineEventHandler, getQuery } from 'h3'
-import { ensurePricingLoaded, estimateCostUsd, pricingState } from '../../../utils/agent-pricing'
+import { ensurePricingLoaded, estimateCostFromRow, pricingState } from '../../../utils/agent-pricing'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { agentVisibilityCutoff } from '../../../utils/plan-limits'
@@ -230,11 +231,6 @@ function toN(value: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
-// Convert micro-USD (integer) to USD float.
-function microsToUsd(value: unknown): number {
-  return toN(value) / 1_000_000
-}
-
 // Postgres serialises timestamptz as "2026-05-05 00:00:00+00" when
 // returned through `db.execute(sql\`...\`)` raw queries — not the ISO
 // form `new Date()` accepts everywhere. Normalise to ISO so the
@@ -380,8 +376,7 @@ export default defineEventHandler(async (event) => {
       coalesce(sum(b.activity_count), 0)::bigint as activity,
       coalesce(sum(b.session_starts), 0)::bigint as sessions,
       coalesce(sum(b.total_tokens), 0)::bigint as tokens,
-      coalesce(sum(b.lines_added + b.lines_removed), 0)::bigint as lines_changed,
-      coalesce(sum(b.estimated_cost_micros), 0)::bigint as cost_micros
+      coalesce(sum(b.lines_added + b.lines_removed), 0)::bigint as lines_changed
     from agent_time_buckets b
     where b.user_id = ${userId}
     ${sinceClause}
@@ -434,8 +429,7 @@ export default defineEventHandler(async (event) => {
     select
       ((extract(dow from (b.ts at time zone ${tz}))::int + 6) % 7) as weekday,
       extract(hour from (b.ts at time zone ${tz}))::int as hour,
-      coalesce(sum(b.model_calls), 0)::bigint as count,
-      coalesce(sum(b.estimated_cost_micros), 0)::bigint as cost_micros
+      coalesce(sum(b.model_calls), 0)::bigint as count
     from agent_time_buckets b
     where b.user_id = ${userId}
     ${sinceClause}
@@ -444,6 +438,35 @@ export default defineEventHandler(async (event) => {
     group by 1, 2
     order by 1, 2
   `) as unknown as Record<string, unknown>[]
+
+  // Heatmap cost overlay. Same agent_session_models source as tokenRows
+  // above (see that comment) but grouped on (weekday, hour) so the
+  // rhythm tiles can read per-cell cost from the live pricing catalogue.
+  const heatmapCostRows = await db.execute(sql`
+    select
+      ((extract(dow from (s.last_event_at at time zone ${tz}))::int + 6) % 7) as weekday,
+      extract(hour from (s.last_event_at at time zone ${tz}))::int as hour,
+      coalesce(m.model, 'unknown') as model,
+      coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
+      coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
+      coalesce(sum(m.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(m.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
+      coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
+      coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens
+    from agent_session_models m
+    join agent_sessions s on s.rollup_key = m.rollup_key
+    where m.user_id = ${userId}
+    ${sessSinceClause}
+    ${mMachineClause}
+    ${mSourceClause}
+    group by 1, 2, 3
+  `) as unknown as Record<string, unknown>[]
+  const heatmapCostByCell = new Map<number, number>()
+  for (const r of heatmapCostRows) {
+    const key = toN(r.weekday) * 24 + toN(r.hour)
+    const { cost } = estimateCostFromRow(r)
+    heatmapCostByCell.set(key, (heatmapCostByCell.get(key) ?? 0) + cost)
+  }
 
   // --- per-(project, model) breakdown ---------------------------------
   // Pulled once at the (project, model) grain so we can recompute cost
@@ -541,15 +564,7 @@ export default defineEventHandler(async (event) => {
     const reasoningOutputTokens = toN(r.reasoning_output_tokens)
     const totalTokens = toN(r.total_tokens)
     const modelCalls = toN(r.model_calls)
-    const { cost, pricing } = estimateCostUsd({
-      model,
-      inputTokens,
-      cachedInputTokens,
-      cacheCreationInputTokens,
-      cacheReadInputTokens,
-      outputTokens,
-      reasoningOutputTokens,
-    })
+    const { cost, pricing } = estimateCostFromRow(r)
     const existing = modelAggs.get(model) ?? {
       model,
       inputTokens: 0,
@@ -605,7 +620,6 @@ export default defineEventHandler(async (event) => {
   for (const r of breakdownRows) {
     const project = String(r.project ?? 'unknown')
     const source = String(r.source ?? 'unknown')
-    const model = String(r.model ?? 'unknown')
     const inputTokens = toN(r.input_tokens)
     const cachedInputTokens = toN(r.cached_input_tokens)
     const cacheCreationInputTokens = toN(r.cache_creation_input_tokens)
@@ -615,15 +629,7 @@ export default defineEventHandler(async (event) => {
     const totalTokens = toN(r.total_tokens)
     const modelCalls = toN(r.model_calls)
     const sessions = toN(r.sessions)
-    const { cost } = estimateCostUsd({
-      model,
-      inputTokens,
-      cachedInputTokens,
-      cacheCreationInputTokens,
-      cacheReadInputTokens,
-      outputTokens,
-      reasoningOutputTokens,
-    })
+    const { cost } = estimateCostFromRow(r)
     const existing = projectAggs.get(project) ?? {
       project,
       inputTokens: 0,
@@ -685,15 +691,7 @@ export default defineEventHandler(async (event) => {
     const reasoningOutputTokens = toN(r.reasoning_output_tokens)
     const totalTokens = toN(r.total_tokens)
     const modelCalls = toN(r.model_calls)
-    const { cost } = estimateCostUsd({
-      model,
-      inputTokens,
-      cachedInputTokens,
-      cacheCreationInputTokens,
-      cacheReadInputTokens,
-      outputTokens,
-      reasoningOutputTokens,
-    })
+    const { cost } = estimateCostFromRow(r)
     const existing = agentAggs.get(sourceKey) ?? {
       source: sourceKey,
       inputTokens: 0,
@@ -837,6 +835,95 @@ export default defineEventHandler(async (event) => {
     order by 1
   `) as unknown as Record<string, unknown>[]
 
+  // Fold tokenRows into one entry per bucket with a bySource breakdown.
+  // The resulting per-bucket cost also feeds overviewBuckets below — its
+  // own estimated_cost_micros source is unreliable (see tokenRows above).
+  type SourceTotals = { inputTokens: number, cachedInputTokens: number, outputTokens: number, reasoningOutputTokens: number, modelCalls: number, estimatedCostUsd: number }
+  type Bucket = { ts: string, bySource: Record<string, SourceTotals> } & SourceTotals
+  const emptyCell = (): SourceTotals => ({
+    inputTokens: 0,
+    cachedInputTokens: 0,
+    outputTokens: 0,
+    reasoningOutputTokens: 0,
+    modelCalls: 0,
+    estimatedCostUsd: 0,
+  })
+  const bucketMap = new Map<string, Bucket>()
+  for (const r of tokenRows) {
+    const ts = tsToIso(r.ts)
+    const source = String(r.source ?? 'unknown')
+    const inputTokens = toN(r.input_tokens)
+    const cachedInputTokens = toN(r.cached_input_tokens)
+    const outputTokens = toN(r.output_tokens)
+    const reasoningOutputTokens = toN(r.reasoning_output_tokens)
+    const modelCalls = toN(r.model_calls)
+    const { cost } = estimateCostFromRow(r)
+    const existing = bucketMap.get(ts) ?? {
+      ts,
+      inputTokens: 0,
+      cachedInputTokens: 0,
+      outputTokens: 0,
+      reasoningOutputTokens: 0,
+      modelCalls: 0,
+      estimatedCostUsd: 0,
+      bySource: {},
+    }
+    const cell = existing.bySource[source] ?? emptyCell()
+    cell.inputTokens += inputTokens
+    cell.cachedInputTokens += cachedInputTokens
+    cell.outputTokens += outputTokens
+    cell.reasoningOutputTokens += reasoningOutputTokens
+    cell.modelCalls += modelCalls
+    cell.estimatedCostUsd += cost
+    existing.bySource[source] = cell
+    existing.inputTokens += inputTokens
+    existing.cachedInputTokens += cachedInputTokens
+    existing.outputTokens += outputTokens
+    existing.reasoningOutputTokens += reasoningOutputTokens
+    existing.modelCalls += modelCalls
+    existing.estimatedCostUsd += cost
+    bucketMap.set(ts, existing)
+  }
+  const tokenBucketList = [...bucketMap.values()].sort((a, b) => a.ts.localeCompare(b.ts))
+  const overviewCostByTs = new Map(tokenBucketList.map(b => [b.ts, b.estimatedCostUsd]))
+
+  // Dense bucket spine for [since, until]. Without it, KPI sparklines &
+  // the cost timeline collapse to a single bar when the user only has
+  // activity in one bucket — Postgres only returns rows where data
+  // exists. The spine forces the full window's width regardless.
+  // For the open-ended 'all' range we fall back to the earliest ts we
+  // saw across overview / token rows; if nothing's there we skip.
+  const spineStartIso = sinceIso ?? (() => {
+    const candidates: string[] = []
+    if (overviewRows[0]) {
+      candidates.push(tsToIso((overviewRows[0] as Record<string, unknown>).ts))
+    }
+    if (tokenBucketList[0]) {
+      candidates.push(tokenBucketList[0].ts)
+    }
+    return candidates.length > 0 ? candidates.sort()[0]! : null
+  })()
+  let spine: string[] = []
+  if (spineStartIso) {
+    const spineRows = await db.execute(sql`
+      select timezone(${tz}, gs)::timestamptz as ts
+      from generate_series(
+        date_trunc(${bucketTrunc}, timezone(${tz}, ${spineStartIso}::timestamptz)),
+        date_trunc(${bucketTrunc}, timezone(${tz}, ${untilIso}::timestamptz)),
+        ('1 ' || ${bucketTrunc})::interval
+      ) as gs
+    `) as unknown as Record<string, unknown>[]
+    spine = spineRows.map(r => tsToIso(r.ts))
+  }
+
+  function fillSpine<T extends { ts: string }>(rows: T[], blank: (ts: string) => T): T[] {
+    if (spine.length === 0) {
+      return rows
+    }
+    const byTs = new Map(rows.map(r => [r.ts, r] as const))
+    return spine.map(ts => byTs.get(ts) ?? blank(ts))
+  }
+
   return {
     availableSources: sourceRows.map(r => String(r.source ?? 'unknown')),
     range: {
@@ -860,84 +947,43 @@ export default defineEventHandler(async (event) => {
       totalLinesAdded: toN(summaryRow.total_lines_added),
       totalLinesRemoved: toN(summaryRow.total_lines_removed),
     },
-    overviewBuckets: overviewRows.map(r => ({
-      ts: tsToIso(r.ts),
-      activity: toN(r.activity),
-      sessions: toN(r.sessions),
-      tokens: toN(r.tokens),
-      linesChanged: toN(r.lines_changed),
-      estimatedCostUsd: microsToUsd(r.cost_micros),
-    })),
-    tokenBuckets: (() => {
-      // Fold the (bucket, source, model) rows into one entry per bucket
-      // with a bySource breakdown. Cost is recomputed per row via the
-      // live pricing catalogue so the stacked timeline reads from the
-      // same numbers as the MODELS leaderboard.
-      type SourceTotals = { inputTokens: number, cachedInputTokens: number, outputTokens: number, reasoningOutputTokens: number, modelCalls: number, estimatedCostUsd: number }
-      type Bucket = { ts: string, bySource: Record<string, SourceTotals> } & SourceTotals
-      const emptyCell = (): SourceTotals => ({
+    overviewBuckets: fillSpine(
+      overviewRows.map((r) => {
+        const ts = tsToIso(r.ts)
+        return {
+          ts,
+          activity: toN(r.activity),
+          sessions: toN(r.sessions),
+          tokens: toN(r.tokens),
+          linesChanged: toN(r.lines_changed),
+          estimatedCostUsd: overviewCostByTs.get(ts) ?? 0,
+        }
+      }),
+      ts => ({ ts, activity: 0, sessions: 0, tokens: 0, linesChanged: 0, estimatedCostUsd: 0 }),
+    ),
+    tokenBuckets: fillSpine(
+      tokenBucketList,
+      ts => ({
+        ts,
         inputTokens: 0,
         cachedInputTokens: 0,
         outputTokens: 0,
         reasoningOutputTokens: 0,
         modelCalls: 0,
         estimatedCostUsd: 0,
-      })
-      const out = new Map<string, Bucket>()
-      for (const r of tokenRows) {
-        const ts = tsToIso(r.ts)
-        const source = String(r.source ?? 'unknown')
-        const model = String(r.model ?? 'unknown')
-        const inputTokens = toN(r.input_tokens)
-        const cachedInputTokens = toN(r.cached_input_tokens)
-        const cacheCreationInputTokens = toN(r.cache_creation_input_tokens)
-        const cacheReadInputTokens = toN(r.cache_read_input_tokens)
-        const outputTokens = toN(r.output_tokens)
-        const reasoningOutputTokens = toN(r.reasoning_output_tokens)
-        const modelCalls = toN(r.model_calls)
-        const { cost } = estimateCostUsd({
-          model,
-          inputTokens,
-          cachedInputTokens,
-          cacheCreationInputTokens,
-          cacheReadInputTokens,
-          outputTokens,
-          reasoningOutputTokens,
-        })
-        const existing = out.get(ts) ?? {
-          ts,
-          inputTokens: 0,
-          cachedInputTokens: 0,
-          outputTokens: 0,
-          reasoningOutputTokens: 0,
-          modelCalls: 0,
-          estimatedCostUsd: 0,
-          bySource: {},
-        }
-        const cell = existing.bySource[source] ?? emptyCell()
-        cell.inputTokens += inputTokens
-        cell.cachedInputTokens += cachedInputTokens
-        cell.outputTokens += outputTokens
-        cell.reasoningOutputTokens += reasoningOutputTokens
-        cell.modelCalls += modelCalls
-        cell.estimatedCostUsd += cost
-        existing.bySource[source] = cell
-        existing.inputTokens += inputTokens
-        existing.cachedInputTokens += cachedInputTokens
-        existing.outputTokens += outputTokens
-        existing.reasoningOutputTokens += reasoningOutputTokens
-        existing.modelCalls += modelCalls
-        existing.estimatedCostUsd += cost
-        out.set(ts, existing)
+        bySource: {},
+      }),
+    ),
+    heatmap: heatmapRows.map((r) => {
+      const weekday = toN(r.weekday)
+      const hour = toN(r.hour)
+      return {
+        weekday,
+        hour,
+        count: toN(r.count),
+        estimatedCostUsd: heatmapCostByCell.get(weekday * 24 + hour) ?? 0,
       }
-      return [...out.values()].sort((a, b) => a.ts.localeCompare(b.ts))
-    })(),
-    heatmap: heatmapRows.map(r => ({
-      weekday: toN(r.weekday),
-      hour: toN(r.hour),
-      count: toN(r.count),
-      estimatedCostUsd: microsToUsd(r.cost_micros),
-    })),
+    }),
     projectTokens: projectAggList.map(p => ({
       project: p.project,
       inputTokens: p.inputTokens,
