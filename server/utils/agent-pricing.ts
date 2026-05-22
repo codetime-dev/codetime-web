@@ -308,6 +308,30 @@ export function estimateCostUsd(args: {
   return { cost, pricing }
 }
 
+function rowNum(v: unknown): number {
+  if (v === null || v === undefined) {
+    return 0
+  }
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+// Convenience: build estimateCostUsd args from a raw SQL row that uses
+// the standard `*_tokens` snake_case column names — every cost-folding
+// loop in the agent dashboard / public-usage handlers writes the same
+// six toN(...) reads, so the column-name contract lives here instead.
+export function estimateCostFromRow(r: Record<string, unknown>): { cost: number, pricing: ModelPrice | null } {
+  return estimateCostUsd({
+    model: String(r.model ?? 'unknown'),
+    inputTokens: rowNum(r.input_tokens),
+    cachedInputTokens: rowNum(r.cached_input_tokens),
+    cacheCreationInputTokens: rowNum(r.cache_creation_input_tokens),
+    cacheReadInputTokens: rowNum(r.cache_read_input_tokens),
+    outputTokens: rowNum(r.output_tokens),
+    reasoningOutputTokens: rowNum(r.reasoning_output_tokens),
+  })
+}
+
 export function pricingState(): { status: CatalogState['status'], loadedAt: number, source: CatalogState['source'], size: number } {
   return { status: state.status, loadedAt: state.loadedAt, source: state.source, size: state.raw.size }
 }

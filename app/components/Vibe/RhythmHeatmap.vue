@@ -67,11 +67,12 @@ function makeRow(length: number): number[] {
   return Array.from({ length }).fill(0)
 }
 
-// Cell intensity is driven by `count` (model call volume) instead of
-// `estimatedCostUsd` because `agent_time_buckets.estimated_cost_micros`
-// is CLI-stamped and frequently zero — using it produced a heatmap
-// with all-or-nothing cells. Cost still rides along for the tooltip
-// and the peak-hour/peak-day summary tiles.
+// Cell intensity is driven by `count` (model call volume) rather than
+// `estimatedCostUsd` so a single high-spend model call doesn't drown
+// out cheaper but more frequent activity. Cost still rides along for
+// the tooltip and the peak-hour/peak-day summary tiles (computed by
+// the backend via the live pricing catalogue, not the CLI-stamped
+// `agent_time_buckets.estimated_cost_micros`).
 function build(cells: VibeHeatmapCell[]): Built {
   const grid: number[][] = Array.from({ length: DAYS }, () => makeRow(HOURS))
   const costs: number[][] = Array.from({ length: DAYS }, () => makeRow(HOURS))
