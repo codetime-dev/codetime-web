@@ -44,6 +44,30 @@ defineRouteMeta({
         schema: { type: 'string' },
         description: 'Restrict every aggregate to a single agent source (e.g. claude-code, codex, opencode, pi).',
       },
+      {
+        name: 'since',
+        in: 'query',
+        schema: { type: 'string', format: 'date-time' },
+        description: 'Custom window start (ISO 8601). Takes precedence over `days` and `range`; pair with `until` to scope aggregates to an exact span (e.g. start-of-today for a calendar-day view).',
+      },
+      {
+        name: 'until',
+        in: 'query',
+        schema: { type: 'string', format: 'date-time' },
+        description: 'Custom window end (ISO 8601). Defaults to the request time. Only meaningful alongside `since`.',
+      },
+      {
+        name: 'days',
+        in: 'query',
+        schema: { type: 'integer', minimum: 1 },
+        description: 'Rolling window of the last N days. Overrides `range`; ignored when `since` is given.',
+      },
+      {
+        name: 'tz',
+        in: 'query',
+        schema: { type: 'string' },
+        description: 'IANA timezone (e.g. Asia/Shanghai) used to align day/hour/week buckets to the user\'s local schedule. Defaults to UTC.',
+      },
     ],
     responses: {
       200: {
