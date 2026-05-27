@@ -97,7 +97,7 @@ export default defineEventHandler(async (event) => {
 }
   }
 
-  const { queryStart, queryEnd, limit: finalLimit } = computeWindow({
+  const { queryStart, queryEnd } = computeWindow({
     startTime,
 endTime,
 unit,
@@ -131,11 +131,15 @@ isPro: session.plan === 'pro',
         ),
       )
     : base
+  // Python's list_self_stats_time does NOT apply a SQL LIMIT — `limit`
+  // only sizes the time window (limit * minutes_per_unit) inside
+  // computeWindow. Applying a row LIMIT here truncates user-supplied
+  // windows (e.g. YTD) to the SDK-omitted default of 30 buckets.
+  // Mirror the sibling /stats handler and rely on the window for sizing.
   const rows = await stmt
     .where(and(...where))
     .groupBy(time)
     .orderBy(desc(time))
-    .limit(finalLimit)
 
   // Postgres returns the truncated value as a timestamp-without-tz. If we
   // wrap it in `new Date(...)` here, Node parses it in the *process* time
