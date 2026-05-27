@@ -2,14 +2,16 @@
 import { ACCENT_PRESETS, BG_PRESETS, isValidHex } from './Form/presets'
 
 type WidgetStyle = 'minimal' | 'detailed'
-type RangeId = 'today' | 'week' | 'month' | 'year' | 'all'
+type RangeId = 'today' | 'week' | 'month' | 'year' | '24h' | '7d' | '30d' | '365d' | 'all'
 
 const t = useI18N()
 const user = useUser()
 
 const theme = ref<'light' | 'dark'>('light')
 const styleMode = ref<WidgetStyle>('detailed')
-const range = ref<RangeId>('month')
+// Default to the rolling 30-day window so the widget matches the agent
+// dashboard's default span out of the box.
+const range = ref<RangeId>('30d')
 const accentColor = ref<string>('')
 const bgColor = ref<string>('')
 
@@ -26,14 +28,33 @@ const styleOptions = computed(() => [
   { id: 'detailed' as const, label: w.value?.usage?.styles?.detailed ?? w.value?.status?.styles?.detailed ?? 'Detailed', proOnly: true },
 ])
 
-const rangeOptions = computed(() => {
+const rangeGroups = computed(() => {
   const r = w.value?.usage?.ranges
+  const g = w.value?.usage?.rangeGroups
   return [
-    { id: 'today' as const, label: r?.today ?? 'Today' },
-    { id: 'week' as const, label: r?.week ?? 'This week' },
-    { id: 'month' as const, label: r?.month ?? 'This month' },
-    { id: 'year' as const, label: r?.year ?? 'This year' },
-    { id: 'all' as const, label: r?.all ?? 'All time' },
+    {
+      label: g?.rolling ?? 'Rolling',
+      options: [
+        { id: '24h' as const, label: r?.['24h'] ?? 'Last 24 hours' },
+        { id: '7d' as const, label: r?.['7d'] ?? 'Last 7 days' },
+        { id: '30d' as const, label: r?.['30d'] ?? 'Last 30 days' },
+        { id: '365d' as const, label: r?.['365d'] ?? 'Last 365 days' },
+      ],
+    },
+    {
+      label: g?.calendar ?? 'Calendar',
+      options: [
+        { id: 'today' as const, label: r?.today ?? 'Today' },
+        { id: 'week' as const, label: r?.week ?? 'This week' },
+        { id: 'month' as const, label: r?.month ?? 'This month' },
+        { id: 'year' as const, label: r?.year ?? 'This year' },
+      ],
+    },
+    {
+      options: [
+        { id: 'all' as const, label: r?.all ?? 'All time' },
+      ],
+    },
   ]
 })
 
@@ -86,7 +107,7 @@ const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/us
       <i class="i-tabler-adjustments-horizontal text-[15px] text-ct-fg-muted" />
     </template>
     <WidgetFormRow :label="w?.usage?.range ?? 'Range'">
-      <WidgetFormSeg v-model="range" :options="rangeOptions" />
+      <WidgetFormSelect v-model="range" :groups="rangeGroups" />
     </WidgetFormRow>
     <WidgetFormRow :label="w?.usage?.style ?? w?.status?.style ?? 'Style'">
       <WidgetFormSeg v-model="styleMode" :options="styleOptions" :is-pro="isPro" />

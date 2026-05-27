@@ -2,12 +2,15 @@ import { sql } from 'drizzle-orm'
 import { defineEventHandler, getQuery, getRouterParam } from 'h3'
 import { ensurePricingLoaded, estimateCostUsd } from '../../../../../utils/agent-pricing'
 import { useDb } from '../../../../../utils/db'
+import { agentVisibilityCutoff } from '../../../../../utils/plan-limits'
 import { sendPyError } from '../../../../../utils/py-error'
 import { parseUsageRange, USAGE_RANGES, usageRangeStart } from '../../../../../utils/usage-range'
 
 // Public token / cost summary backing the embeddable usage widget.
-// Caller picks the window via `?range=today|week|month|year|all`; all
-// calendar-aligned ranges anchor to the user's stored IANA timezone.
+// Caller picks the window via `?range=`: calendar-aligned today|week|
+// month|year (anchored to the user's stored IANA timezone) or rolling
+// 24h|7d|30d|365d (now − N days, matching the Vibe dashboard's rolling
+// presets), or `all`. Free plan is clamped to the last 30 days.
 // Cost is recomputed via the live OpenRouter catalogue so the figure
 // matches the Vibe dashboard, not the CLI-stamped estimated_cost_micros
 // (which is 0 for codex / claude-code sessions).
@@ -21,8 +24,8 @@ defineRouteMeta({
       {
         name: 'range',
         in: 'query',
-        schema: { type: 'string', enum: [...USAGE_RANGES], default: 'month' },
-        description: 'Calendar-aligned window in the user\'s timezone; `all` covers full history.',
+        schema: { type: 'string', enum: [...USAGE_RANGES], default: '30d' },
+        description: 'Window: calendar-aligned `today`/`week`/`month`/`year` (anchored to the user\'s timezone), rolling `24h`/`7d`/`30d`/`365d` (now − N days), or `all` for full history. Free plan is capped to the last 30 days regardless.',
       },
     ],
     responses: {
@@ -140,7 +143,17 @@ export default defineEventHandler(async (event) => {
   const tz = user.timezone || 'Etc/UTC'
 
   const now = new Date()
-  const since = usageRangeStart(tz, range, now)
+  const requestedSince = usageRangeStart(tz, range, now)
+  // Free plan only sees the last N days of agent data. The agent
+  // dashboard enforces this via agentVisibilityCutoff; mirror it here so
+  // the public widget can't price (or expose) history the owner's own
+  // dashboard hides — and so the figure matches the dashboard. Pro users
+  // get null (no cutoff). When the calendar range start predates the
+  // cutoff (e.g. free user picks `year`/`all`), clamp up to the cutoff.
+  const cutoff = agentVisibilityCutoff(plan)
+  const since = cutoff && (!requestedSince || requestedSince < cutoff)
+    ? cutoff
+    : requestedSince
   const sinceClause = since
     ? sql`and s.last_event_at >= ${since.toISOString()}::timestamptz`
     : sql``

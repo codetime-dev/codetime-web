@@ -22,18 +22,26 @@ type UsagePayload = {
 type WidgetStyle = 'minimal' | 'detailed'
 
 const RANGE_LABELS: Record<UsageRange, string> = {
-  today: 'TODAY',
-  week: 'THIS WEEK',
-  month: 'THIS MONTH',
-  year: 'THIS YEAR',
-  all: 'ALL TIME',
+  'today': 'TODAY',
+  'week': 'THIS WEEK',
+  'month': 'THIS MONTH',
+  'year': 'THIS YEAR',
+  '24h': 'LAST 24H',
+  '7d': 'LAST 7 DAYS',
+  '30d': 'LAST 30 DAYS',
+  '365d': 'LAST 365 DAYS',
+  'all': 'ALL TIME',
 }
 const RANGE_LABELS_LOWER: Record<UsageRange, string> = {
-  today: 'today',
-  week: 'this week',
-  month: 'this month',
-  year: 'this year',
-  all: 'all time',
+  'today': 'today',
+  'week': 'this week',
+  'month': 'this month',
+  'year': 'this year',
+  '24h': 'last 24h',
+  '7d': 'last 7 days',
+  '30d': 'last 30 days',
+  '365d': 'last 365 days',
+  'all': 'all time',
 }
 
 const MIN_H = 36
@@ -105,7 +113,7 @@ type RenderArgs = {
 
 function renderMinimal({ theme, bg, accent, payload }: RenderArgs): string {
   const W = 340
-  const rangeLabel = RANGE_LABELS_LOWER[payload.range] ?? 'this month'
+  const rangeLabel = RANGE_LABELS_LOWER[payload.range] ?? 'last 30 days'
   const text = `${formatTokens(payload.tokens)} tok  •  ${formatUsd(payload.estimatedCostUsd)}`
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${MIN_H}" viewBox="0 0 ${W} ${MIN_H}" role="img" aria-label="Token usage, ${escapeXml(rangeLabel)}">
   <rect width="${W}" height="${MIN_H}" rx="8" fill="${bg}" stroke="${theme.border}"/>
@@ -118,7 +126,7 @@ function renderMinimal({ theme, bg, accent, payload }: RenderArgs): string {
 function renderDetailed({ theme, bg, accent, payload }: RenderArgs): string {
   const W = 380
   const H = 132
-  const rangeLabel = RANGE_LABELS[payload.range] ?? 'THIS MONTH'
+  const rangeLabel = RANGE_LABELS[payload.range] ?? 'LAST 30 DAYS'
   const span = formatSpan(payload.since, payload.until, payload.range)
   // Cache-read tokens are charged at a fraction of the prompt rate;
   // subtract them so the displayed "in" matches the cost calculation.

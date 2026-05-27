@@ -376,11 +376,19 @@ export type Translation = {
           detailed: string
         }
         ranges?: {
-          today: string
-          week: string
-          month: string
-          year: string
-          all: string
+          'today': string
+          'week': string
+          'month': string
+          'year': string
+          '24h': string
+          '7d': string
+          '30d': string
+          '365d': string
+          'all': string
+        }
+        rangeGroups?: {
+          calendar: string
+          rolling: string
         }
       }
       limit: {
