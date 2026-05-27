@@ -34,6 +34,15 @@ export const users = pgTable('users', {
   appleId: text('apple_id'),
   showEmail: boolean('show_email').notNull().default(false),
   showGithub: boolean('show_github').notNull().default(false),
+  // Fine-grained privacy (see server/utils/privacy.ts). `leaderboardListed`
+  // is a real column because the leaderboard/ranking queries filter MANY
+  // users by it before LIMIT; everything else lives in the `privacy` JSONB
+  // blob (read per-user alongside the row, so a column buys nothing).
+  // `privacy` is null for users created before the privacy migration
+  // backfilled them, and for brand-new signups — resolveUserPrivacy()
+  // treats null as the privacy-first new-user default.
+  leaderboardListed: boolean('leaderboard_listed').notNull().default(true),
+  privacy: jsonb('privacy'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),

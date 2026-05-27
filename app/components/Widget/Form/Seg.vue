@@ -6,6 +6,11 @@ type Option = {
   proOnly?: boolean
   // Plain disabled — no PRO tag (e.g. an option already taken by a sibling slot).
   disabled?: boolean
+  // Privacy-locked: stays clickable and shows a lock; clicking emits
+  // `lockedClick` (for an in-context "make public?" consent) instead of
+  // selecting. Ignored when `disabled` is also set — a hard plan/sibling
+  // block wins, since making the facet public wouldn't unblock it.
+  locked?: boolean
 }
 
 const props = defineProps<{
@@ -16,9 +21,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: T): void
+  (e: 'lockedClick', value: T): void
 }>()
 
-function isLocked(opt: Option): boolean {
+function isDisabled(opt: Option): boolean {
   if (opt.disabled) {
     return true
   }
@@ -26,7 +32,11 @@ function isLocked(opt: Option): boolean {
 }
 
 function pick(opt: Option) {
-  if (isLocked(opt)) {
+  if (isDisabled(opt)) {
+    return
+  }
+  if (opt.locked) {
+    emit('lockedClick', opt.id)
     return
   }
   emit('update:modelValue', opt.id)
@@ -40,10 +50,11 @@ function pick(opt: Option) {
       :key="String(opt.id)"
       type="button"
       class="seg-btn"
-      :class="modelValue === opt.id ? 'seg-btn-active' : ''"
-      :disabled="isLocked(opt)"
+      :class="[modelValue === opt.id ? 'seg-btn-active' : '', opt.locked && !isDisabled(opt) ? 'seg-btn-locked' : '']"
+      :disabled="isDisabled(opt)"
       @click="pick(opt)"
     >
+      <i v-if="opt.locked && !isDisabled(opt)" class="i-tabler-lock seg-lock" />
       {{ opt.label }}
       <span v-if="opt.proOnly && isPro === false" class="seg-pro">PRO</span>
     </button>
@@ -82,6 +93,9 @@ function pick(opt: Option) {
 .seg-btn:first-child { border-left: 0; }
 .seg-btn:hover:not(:disabled) { color: var(--ct-fg); background-color: var(--ct-surface-2); }
 .seg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.seg-btn-locked { color: var(--ct-fg-subtle); }
+.seg-btn-locked:hover { color: var(--ct-fg); background-color: var(--ct-surface-2); }
+.seg-lock { font-size: 11px; opacity: 0.8; }
 .seg-btn-active {
   color: var(--color-primary-1);
   background-color: color-mix(in srgb, var(--color-primary-1) 14%, transparent);

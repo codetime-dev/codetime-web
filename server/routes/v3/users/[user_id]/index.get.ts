@@ -3,6 +3,7 @@ import { defineEventHandler, getRouterParam } from 'h3'
 import { users } from '../../../../db/schema'
 import { tryUser } from '../../../../utils/auth'
 import { useDb } from '../../../../utils/db'
+import { canShowProfileIdentity, resolveUserPrivacy } from '../../../../utils/privacy'
 import { sendPyError } from '../../../../utils/py-error'
 
 // Mirrors GET /v3/users/{user_id}. Returns a UserPublic projection with
@@ -68,12 +69,19 @@ export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
   const isSelf = !!session && session.id === userId
 
+  // Privacy ceiling. A private profile is invisible to everyone but its
+  // owner — return 404 so we don't even confirm the account exists.
+  const privacy = resolveUserPrivacy(row.privacy)
+  if (!isSelf && !privacy.profilePublic) {
+    return sendPyError(event, 404, 'User not found')
+  }
+
   return {
     id: row.id,
-    email: isSelf ? row.email : null,
+    email: isSelf ? row.email : (canShowProfileIdentity(privacy, 'email') ? row.email : null),
     username: row.username,
     avatar: row.avatar,
-    githubId: isSelf ? row.githubId : (row.showGithub ? row.githubId : null),
+    githubId: isSelf ? row.githubId : (canShowProfileIdentity(privacy, 'github') ? row.githubId : null),
     bio: row.bio,
     googleId: isSelf ? row.googleId : null,
     plan: row.plan,

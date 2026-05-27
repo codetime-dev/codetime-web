@@ -2,6 +2,7 @@ import { and, count, desc, eq, gte, max } from 'drizzle-orm'
 import { defineEventHandler, getQuery, getRouterParam } from 'h3'
 import { eventLogs, users, workspaceMinutesV2 } from '../../../../../db/schema'
 import { useDb } from '../../../../../utils/db'
+import { canShowStatusField, isLiveStatusEnabled, resolveUserPrivacy } from '../../../../../utils/privacy'
 import { sendPyError } from '../../../../../utils/py-error'
 import { todayStartUtc } from '../../../../../utils/tz'
 
@@ -67,6 +68,7 @@ export default defineEventHandler(async (event) => {
       username: users.username,
       plan: users.plan,
       timezone: users.timezone,
+      privacy: users.privacy,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -74,6 +76,15 @@ export default defineEventHandler(async (event) => {
   if (!user) {
  return sendPyError(event, 404, 'User not found')
 }
+
+  // Privacy ceiling. The live-status master (widgets enabled + "coding"
+  // facet public) gates the whole widget; project/language/editor are each
+  // nulled below when their facet is private — the embedder's `show` param
+  // and the plan gating can only narrow further, never widen.
+  const privacy = resolveUserPrivacy(user.privacy)
+  if (!isLiveStatusEnabled(privacy)) {
+    return sendPyError(event, 403, 'Widget disabled')
+  }
 
   // Python's expiration check is a no-op in practice (see top-languages.get.ts).
   const plan = (user.plan || 'free').toLowerCase()
@@ -107,6 +118,13 @@ export default defineEventHandler(async (event) => {
   const requested = new Set(
     showRaw.split(',').map(s => s.trim().toLowerCase()).filter(s => ALLOWED_FIELDS.has(s)),
   )
+  // Apply the privacy ceiling before any plan gating: drop fields the user
+  // has marked private no matter what the embedder asked for.
+  for (const field of ['project', 'language', 'editor'] as const) {
+    if (!canShowStatusField(privacy, field)) {
+      requested.delete(field)
+    }
+  }
   if (!isPro && requested.has('project') && requested.has('language')) {
     // Match Python: drop project, keep language.
     requested.delete('project')

@@ -49,10 +49,12 @@ export async function fetchLanguageRanking(
   const db = useDb()
   const rows = await db.execute(sql`
     with user_minutes as (
-      select uid, count(meta_xxh3_64)::int as total_minutes
-      from workspace_minutes_v2
-      where language = ${language} and recorded_at >= ${from.toISOString()} and recorded_at <= ${to.toISOString()}
-      group by uid
+      select m.uid, count(m.meta_xxh3_64)::int as total_minutes
+      from workspace_minutes_v2 m
+      join users u on u.id = m.uid
+      where m.language = ${language} and m.recorded_at >= ${from.toISOString()} and m.recorded_at <= ${to.toISOString()}
+        and u.leaderboard_listed
+      group by m.uid
     ),
     ranked as (
       select uid, total_minutes,
@@ -242,10 +244,11 @@ export async function fetchLeaderboard(from: Date, _to: Date, limit: number): Pr
   const db = useDb()
   const result = await db.execute(sql`
     with top_uids as (
-      select uid, count(*)::int as total_minutes
-      from workspace_minutes_v2
-      where recorded_at >= ${from.toISOString()}
-      group by uid
+      select m.uid, count(*)::int as total_minutes
+      from workspace_minutes_v2 m
+      join users u on u.id = m.uid
+      where m.recorded_at >= ${from.toISOString()} and u.leaderboard_listed
+      group by m.uid
       order by total_minutes desc
       limit ${limit}
     )

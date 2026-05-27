@@ -1,13 +1,16 @@
 import { eq } from 'drizzle-orm'
-import { defineEventHandler, readBody, setResponseStatus } from 'h3'
+import { defineEventHandler, readBody } from 'h3'
 import { users } from '../../../../db/schema'
 import { tryUser } from '../../../../utils/auth'
 import { useDb } from '../../../../utils/db'
+import { mergePrivacy, resolveUserPrivacy } from '../../../../utils/privacy'
 import { sendPyError } from '../../../../utils/py-error'
 
-// Mirrors POST /v3/users/self/privacy. Only `show_github` is writable —
-// `show_email` is always false on the wire (Python enforces this; we do
-// too).
+// POST /v3/users/self/privacy — update privacy settings. Accepts either the
+// full object (settings page) or a partial patch (in-context consent, e.g.
+// { status: { project: 'public' } }); both deep-merge onto the current
+// settings and re-validate. `leaderboardListed` is the one field stored as a
+// column, not in the JSONB blob.
 
 defineRouteMeta({
   openAPI: {
@@ -18,11 +21,7 @@ defineRouteMeta({
       required: true,
       content: {
         'application/json': {
-          schema: {
-            type: 'object',
-            properties: { showGithub: { type: 'boolean' } },
-            required: ['showGithub'],
-          },
+          schema: { $ref: '#/components/schemas/PrivacySettings' },
         },
       },
     },
@@ -39,23 +38,35 @@ defineRouteMeta({
 export default defineEventHandler(async (event) => {
   const session = await tryUser(event)
   if (!session) {
- return sendPyError(event, 401, 'Not authenticated')
-}
+    return sendPyError(event, 401, 'Not authenticated')
+  }
 
-  // Accept both camel and snake case so older clients keep working.
-  const body = await readBody<{ showGithub?: unknown, show_github?: unknown }>(event).catch(() => null)
-  const showGithub = Boolean(body?.showGithub ?? body?.show_github)
+  const body = await readBody<Record<string, unknown>>(event).catch(() => null)
+  const current = resolveUserPrivacy(session.privacy)
+  const next = mergePrivacy(current, body)
+  const leaderboardListed = typeof body?.leaderboardListed === 'boolean'
+    ? body.leaderboardListed
+    : session.leaderboardListed
 
+  // Mirror the identity facets into the legacy show_github / show_email
+  // columns so the leaderboard + language-ranking queries (which still read
+  // the columns) stay consistent with the JSONB source of truth. The
+  // columns are now derived caches; drop them once those queries move to the
+  // JSON facet directly.
   const db = useDb()
   const [row] = await db
     .update(users)
-    .set({ showGithub })
+    .set({
+      privacy: next,
+      leaderboardListed,
+      showGithub: next.identity.github === 'public',
+      showEmail: next.identity.email === 'public',
+      updatedAt: new Date(),
+    })
     .where(eq(users.id, session.id))
-    .returning({ showGithub: users.showGithub })
+    .returning({ privacy: users.privacy, leaderboardListed: users.leaderboardListed })
   if (!row) {
- return sendPyError(event, 401, 'Not authenticated')
-}
-  // Litestar's @post default status is 201 — keep parity.
-  setResponseStatus(event, 201)
-  return { showEmail: false, showGithub: row.showGithub }
+    return sendPyError(event, 401, 'Not authenticated')
+  }
+  return { ...resolveUserPrivacy(row.privacy), leaderboardListed: row.leaderboardListed }
 })

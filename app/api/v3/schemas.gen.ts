@@ -744,6 +744,58 @@ export const WidgetTopLanguagesResponseSchema = {
     }
 } as const;
 
+export const WidgetUsageResponseSchema = {
+    type: 'object',
+    required: [
+        'plan',
+        'range',
+        'until',
+        'tokens',
+        'inputTokens',
+        'cachedInputTokens',
+        'outputTokens',
+        'reasoningOutputTokens',
+        'estimatedCostUsd'
+    ],
+    properties: {
+        plan: {
+            type: 'string'
+        },
+        range: {
+            type: 'string',
+            enum: []
+        },
+        since: {
+            type: 'string',
+            format: 'date-time',
+            nullable: true,
+            description: 'Inclusive lower bound; null when `range=all`.'
+        },
+        until: {
+            type: 'string',
+            format: 'date-time'
+        },
+        tokens: {
+            type: 'integer'
+        },
+        inputTokens: {
+            type: 'integer'
+        },
+        cachedInputTokens: {
+            type: 'integer'
+        },
+        outputTokens: {
+            type: 'integer'
+        },
+        reasoningOutputTokens: {
+            type: 'integer'
+        },
+        estimatedCostUsd: {
+            type: 'number'
+        }
+    }
+} as const;
+
 export const EventLogRequestSchema = {
     type: 'object',
     required: [
@@ -838,6 +890,10 @@ export const UserSelfPublicSchema = {
             nullable: true
         },
         googleId: {
+            type: 'string',
+            nullable: true
+        },
+        appleId: {
             type: 'string',
             nullable: true
         },
@@ -976,18 +1032,98 @@ export const UserOverallRankResponseSchema = {
     }
 } as const;
 
+export const FacetSchema = {
+    type: 'string',
+    enum: [
+        'public',
+        'private'
+    ]
+} as const;
+
 export const PrivacySettingsSchema = {
     type: 'object',
     required: [
-        'showEmail',
-        'showGithub'
+        'v',
+        'profilePublic',
+        'widgetsEnabled',
+        'leaderboardListed',
+        'identity',
+        'status',
+        'history'
     ],
     properties: {
-        showEmail: {
+        v: {
+            type: 'integer'
+        },
+        profilePublic: {
             type: 'boolean'
         },
-        showGithub: {
+        widgetsEnabled: {
             type: 'boolean'
+        },
+        leaderboardListed: {
+            type: 'boolean'
+        },
+        identity: {
+            type: 'object',
+            required: [
+                'email',
+                'github'
+            ],
+            properties: {
+                email: {
+                    $ref: '#/components/schemas/Facet'
+                },
+                github: {
+                    $ref: '#/components/schemas/Facet'
+                }
+            }
+        },
+        status: {
+            type: 'object',
+            required: [
+                'coding',
+                'project',
+                'language',
+                'editor'
+            ],
+            properties: {
+                coding: {
+                    $ref: '#/components/schemas/Facet'
+                },
+                project: {
+                    $ref: '#/components/schemas/Facet'
+                },
+                language: {
+                    $ref: '#/components/schemas/Facet'
+                },
+                editor: {
+                    $ref: '#/components/schemas/Facet'
+                }
+            }
+        },
+        history: {
+            type: 'object',
+            required: [
+                'totalTime',
+                'languages',
+                'projects',
+                'calendar'
+            ],
+            properties: {
+                totalTime: {
+                    $ref: '#/components/schemas/Facet'
+                },
+                languages: {
+                    $ref: '#/components/schemas/Facet'
+                },
+                projects: {
+                    $ref: '#/components/schemas/Facet'
+                },
+                calendar: {
+                    $ref: '#/components/schemas/Facet'
+                }
+            }
         }
     }
 } as const;

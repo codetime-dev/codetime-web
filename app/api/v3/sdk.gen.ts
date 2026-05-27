@@ -2,8 +2,8 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import { getV3AgentDashboardResponseTransformer, getV3AgentSessionsResponseTransformer, getV3DiscountsActiveResponseTransformer, getV3PublicLanguageRankingResponseTransformer, getV3PublicLeaderboardResponseTransformer, getV3PublicUsersByUserIdCodingHistoryResponseTransformer, getV3PublicUsersByUserIdLanguageRankResponseTransformer, getV3PublicUsersByUserIdOverallRankResponseTransformer, getV3PublicUsersByUserIdTopLanguagesRankResponseTransformer, getV3TagsByTagIdHistoryResponseTransformer, getV3TagsByTagIdResponseTransformer, getV3TagsResponseTransformer, getV3TagsStatsResponseTransformer, getV3TotalMinutesResponseTransformer, getV3UsersByUserIdResponseTransformer, getV3UsersSelfOverallRankResponseTransformer, getV3UsersSelfResponseTransformer, getV3UsersSelfTopLanguagesRankResponseTransformer, postV3PaymentsCheckoutResponseTransformer, postV3TagsEvaluateResponseTransformer, postV3TagsResponseTransformer, postV3UsersSelfBioResponseTransformer, postV3UsersSelfDeleteChallengeResponseTransformer, postV3UsersSelfUsernameResponseTransformer, putV3TagsByTagIdResponseTransformer } from './transformers.gen';
-import type { DeleteV3AgentSessionsData, DeleteV3AgentSessionsErrors, DeleteV3AgentSessionsResponses, DeleteV3MachinesByMachineIdData, DeleteV3MachinesByMachineIdErrors, DeleteV3MachinesByMachineIdResponses, DeleteV3TagsByTagIdData, DeleteV3TagsByTagIdErrors, DeleteV3TagsByTagIdResponses, DeleteV3UsersSelfData, DeleteV3UsersSelfDataData, DeleteV3UsersSelfDataErrors, DeleteV3UsersSelfDataResponses, DeleteV3UsersSelfErrors, DeleteV3UsersSelfResponses, GetV3AgentDashboardData, GetV3AgentDashboardErrors, GetV3AgentDashboardResponses, GetV3AgentSessionsByRollupKeyData, GetV3AgentSessionsByRollupKeyErrors, GetV3AgentSessionsByRollupKeyResponses, GetV3AgentSessionsByRollupKeyTurnsData, GetV3AgentSessionsByRollupKeyTurnsErrors, GetV3AgentSessionsByRollupKeyTurnsResponses, GetV3AgentSessionsData, GetV3AgentSessionsErrors, GetV3AgentSessionsResponses, GetV3AuthGithubData, GetV3AuthGithubNativeCallbackData, GetV3AuthGithubStartData, GetV3DiscountsActiveData, GetV3DiscountsActiveErrors, GetV3DiscountsActiveResponses, GetV3IcalendarFeedIcsData, GetV3IcalendarFeedIcsErrors, GetV3IcalendarFeedIcsResponses, GetV3IcalendarInfoData, GetV3IcalendarInfoErrors, GetV3IcalendarInfoResponses, GetV3LogsYearlyReportDataData, GetV3LogsYearlyReportDataErrors, GetV3LogsYearlyReportDataResponses, GetV3MachinesData, GetV3MachinesErrors, GetV3MachinesResponses, GetV3MetricsData, GetV3MetricsResponses, GetV3PaymentsProductsData, GetV3PaymentsProductsResponses, GetV3PublicLanguageRankingData, GetV3PublicLanguageRankingErrors, GetV3PublicLanguageRankingResponses, GetV3PublicLeaderboardData, GetV3PublicLeaderboardResponses, GetV3PublicUsersByUserIdCodingHistoryData, GetV3PublicUsersByUserIdCodingHistoryErrors, GetV3PublicUsersByUserIdCodingHistoryResponses, GetV3PublicUsersByUserIdLanguageRankData, GetV3PublicUsersByUserIdLanguageRankErrors, GetV3PublicUsersByUserIdLanguageRankResponses, GetV3PublicUsersByUserIdOverallRankData, GetV3PublicUsersByUserIdOverallRankErrors, GetV3PublicUsersByUserIdOverallRankResponses, GetV3PublicUsersByUserIdTopLanguagesRankData, GetV3PublicUsersByUserIdTopLanguagesRankErrors, GetV3PublicUsersByUserIdTopLanguagesRankResponses, GetV3TagsByTagIdData, GetV3TagsByTagIdErrors, GetV3TagsByTagIdHistoryData, GetV3TagsByTagIdHistoryErrors, GetV3TagsByTagIdHistoryResponses, GetV3TagsByTagIdResponses, GetV3TagsData, GetV3TagsErrors, GetV3TagsResponses, GetV3TagsStatsData, GetV3TagsStatsErrors, GetV3TagsStatsResponses, GetV3TotalMinutesData, GetV3TotalMinutesResponses, GetV3UsersByUserIdData, GetV3UsersByUserIdErrors, GetV3UsersByUserIdPublicStatusData, GetV3UsersByUserIdPublicStatusErrors, GetV3UsersByUserIdPublicStatusResponses, GetV3UsersByUserIdPublicTopLanguagesData, GetV3UsersByUserIdPublicTopLanguagesErrors, GetV3UsersByUserIdPublicTopLanguagesResponses, GetV3UsersByUserIdResponses, GetV3UsersSelfData, GetV3UsersSelfErrors, GetV3UsersSelfExportData, GetV3UsersSelfExportErrors, GetV3UsersSelfExportResponses, GetV3UsersSelfLanguagesRecentData, GetV3UsersSelfLanguagesRecentErrors, GetV3UsersSelfLanguagesRecentResponses, GetV3UsersSelfLatestLogsData, GetV3UsersSelfLatestLogsErrors, GetV3UsersSelfLatestLogsResponses, GetV3UsersSelfMinutesData, GetV3UsersSelfMinutesErrors, GetV3UsersSelfMinutesResponses, GetV3UsersSelfOverallRankData, GetV3UsersSelfOverallRankErrors, GetV3UsersSelfOverallRankResponses, GetV3UsersSelfPrivacyData, GetV3UsersSelfPrivacyErrors, GetV3UsersSelfPrivacyResponses, GetV3UsersSelfResponses, GetV3UsersSelfStatsData, GetV3UsersSelfStatsErrors, GetV3UsersSelfStatsResponses, GetV3UsersSelfStatsTimeData, GetV3UsersSelfStatsTimeErrors, GetV3UsersSelfStatsTimeResponses, GetV3UsersSelfTimeDistributionData, GetV3UsersSelfTimeDistributionErrors, GetV3UsersSelfTimeDistributionResponses, GetV3UsersSelfTopData, GetV3UsersSelfTopErrors, GetV3UsersSelfTopLanguagesRankData, GetV3UsersSelfTopLanguagesRankErrors, GetV3UsersSelfTopLanguagesRankResponses, GetV3UsersSelfTopResponses, GetV3UsersSelfWorkspaceData, GetV3UsersSelfWorkspaceErrors, GetV3UsersSelfWorkspaceResponses, GetV3UsersSelfWorkspacesRecentData, GetV3UsersSelfWorkspacesRecentErrors, GetV3UsersSelfWorkspacesRecentResponses, GetV3UsersSelfWorkspacesSearchData, GetV3UsersSelfWorkspacesSearchErrors, GetV3UsersSelfWorkspacesSearchResponses, GetV3UsersShieldData, GetV3UsersShieldErrors, GetV3UsersShieldResponses, PatchV3MachinesByMachineIdData, PatchV3MachinesByMachineIdErrors, PatchV3MachinesByMachineIdResponses, PostV3AgentIngestData, PostV3AgentIngestErrors, PostV3AgentIngestResponses, PostV3AuthAppleData, PostV3AuthAppleErrors, PostV3AuthAppleNativeData, PostV3AuthAppleNativeErrors, PostV3AuthAppleNativeResponses, PostV3AuthAppleResponses, PostV3AuthGoogleData, PostV3AuthGoogleNativeData, PostV3AuthGoogleNativeErrors, PostV3AuthGoogleNativeResponses, PostV3AuthLogoutData, PostV3AuthLogoutResponses, PostV3AuthRefreshTokenData, PostV3AuthRefreshTokenErrors, PostV3AuthRefreshTokenResponses, PostV3DevBeData, PostV3DevBeErrors, PostV3DevBeResponses, PostV3PaymentsCheckoutData, PostV3PaymentsCheckoutErrors, PostV3PaymentsCheckoutResponses, PostV3PaymentsWebhooksLemonsqueezyData, PostV3PaymentsWebhooksLemonsqueezyErrors, PostV3PaymentsWebhooksLemonsqueezyResponses, PostV3TagsData, PostV3TagsErrors, PostV3TagsEvaluateData, PostV3TagsEvaluateErrors, PostV3TagsEvaluateResponses, PostV3TagsResponses, PostV3UsersEventLogData, PostV3UsersEventLogErrors, PostV3UsersEventLogResponses, PostV3UsersSelfBioData, PostV3UsersSelfBioErrors, PostV3UsersSelfBioResponses, PostV3UsersSelfDeleteChallengeData, PostV3UsersSelfDeleteChallengeErrors, PostV3UsersSelfDeleteChallengeResponses, PostV3UsersSelfPrivacyData, PostV3UsersSelfPrivacyErrors, PostV3UsersSelfPrivacyResponses, PostV3UsersSelfUsernameData, PostV3UsersSelfUsernameErrors, PostV3UsersSelfUsernameResponses, PutV3TagsByTagIdData, PutV3TagsByTagIdErrors, PutV3TagsByTagIdResponses } from './types.gen';
+import { getV3AgentDashboardResponseTransformer, getV3AgentSessionsResponseTransformer, getV3DiscountsActiveResponseTransformer, getV3PublicLanguageRankingResponseTransformer, getV3PublicLeaderboardResponseTransformer, getV3PublicUsersByUserIdCodingHistoryResponseTransformer, getV3PublicUsersByUserIdLanguageRankResponseTransformer, getV3PublicUsersByUserIdOverallRankResponseTransformer, getV3PublicUsersByUserIdTopLanguagesRankResponseTransformer, getV3TagsByTagIdHistoryResponseTransformer, getV3TagsByTagIdResponseTransformer, getV3TagsResponseTransformer, getV3TagsStatsResponseTransformer, getV3TotalMinutesResponseTransformer, getV3UsersByUserIdPublicUsageResponseTransformer, getV3UsersByUserIdResponseTransformer, getV3UsersSelfOverallRankResponseTransformer, getV3UsersSelfResponseTransformer, getV3UsersSelfTopLanguagesRankResponseTransformer, postV3PaymentsCheckoutResponseTransformer, postV3TagsEvaluateResponseTransformer, postV3TagsResponseTransformer, postV3UsersSelfBioResponseTransformer, postV3UsersSelfDeleteChallengeResponseTransformer, postV3UsersSelfUsernameResponseTransformer, putV3TagsByTagIdResponseTransformer } from './transformers.gen';
+import type { DeleteV3AgentSessionsData, DeleteV3AgentSessionsErrors, DeleteV3AgentSessionsResponses, DeleteV3AuthAppleLinkData, DeleteV3AuthAppleLinkErrors, DeleteV3AuthAppleLinkResponses, DeleteV3AuthGithubLinkData, DeleteV3AuthGithubLinkErrors, DeleteV3AuthGithubLinkResponses, DeleteV3AuthGoogleLinkData, DeleteV3AuthGoogleLinkErrors, DeleteV3AuthGoogleLinkResponses, DeleteV3MachinesByMachineIdData, DeleteV3MachinesByMachineIdErrors, DeleteV3MachinesByMachineIdResponses, DeleteV3TagsByTagIdData, DeleteV3TagsByTagIdErrors, DeleteV3TagsByTagIdResponses, DeleteV3UsersSelfData, DeleteV3UsersSelfDataData, DeleteV3UsersSelfDataErrors, DeleteV3UsersSelfDataResponses, DeleteV3UsersSelfErrors, DeleteV3UsersSelfResponses, GetV3AgentDashboardData, GetV3AgentDashboardErrors, GetV3AgentDashboardResponses, GetV3AgentSessionsByRollupKeyData, GetV3AgentSessionsByRollupKeyErrors, GetV3AgentSessionsByRollupKeyResponses, GetV3AgentSessionsByRollupKeyTurnsData, GetV3AgentSessionsByRollupKeyTurnsErrors, GetV3AgentSessionsByRollupKeyTurnsResponses, GetV3AgentSessionsData, GetV3AgentSessionsErrors, GetV3AgentSessionsResponses, GetV3AuthGithubData, GetV3AuthGithubNativeCallbackData, GetV3AuthGithubStartData, GetV3DiscountsActiveData, GetV3DiscountsActiveErrors, GetV3DiscountsActiveResponses, GetV3IcalendarFeedIcsData, GetV3IcalendarFeedIcsErrors, GetV3IcalendarFeedIcsResponses, GetV3IcalendarInfoData, GetV3IcalendarInfoErrors, GetV3IcalendarInfoResponses, GetV3LogsYearlyReportDataData, GetV3LogsYearlyReportDataErrors, GetV3LogsYearlyReportDataResponses, GetV3MachinesData, GetV3MachinesErrors, GetV3MachinesResponses, GetV3MetricsData, GetV3MetricsResponses, GetV3PaymentsProductsData, GetV3PaymentsProductsResponses, GetV3PublicLanguageRankingData, GetV3PublicLanguageRankingErrors, GetV3PublicLanguageRankingResponses, GetV3PublicLeaderboardData, GetV3PublicLeaderboardResponses, GetV3PublicUsersByUserIdCodingHistoryData, GetV3PublicUsersByUserIdCodingHistoryErrors, GetV3PublicUsersByUserIdCodingHistoryResponses, GetV3PublicUsersByUserIdLanguageRankData, GetV3PublicUsersByUserIdLanguageRankErrors, GetV3PublicUsersByUserIdLanguageRankResponses, GetV3PublicUsersByUserIdOverallRankData, GetV3PublicUsersByUserIdOverallRankErrors, GetV3PublicUsersByUserIdOverallRankResponses, GetV3PublicUsersByUserIdTopLanguagesRankData, GetV3PublicUsersByUserIdTopLanguagesRankErrors, GetV3PublicUsersByUserIdTopLanguagesRankResponses, GetV3TagsByTagIdData, GetV3TagsByTagIdErrors, GetV3TagsByTagIdHistoryData, GetV3TagsByTagIdHistoryErrors, GetV3TagsByTagIdHistoryResponses, GetV3TagsByTagIdResponses, GetV3TagsData, GetV3TagsErrors, GetV3TagsResponses, GetV3TagsStatsData, GetV3TagsStatsErrors, GetV3TagsStatsResponses, GetV3TotalMinutesData, GetV3TotalMinutesResponses, GetV3UsersByUserIdData, GetV3UsersByUserIdErrors, GetV3UsersByUserIdPublicStatusData, GetV3UsersByUserIdPublicStatusErrors, GetV3UsersByUserIdPublicStatusResponses, GetV3UsersByUserIdPublicTopLanguagesData, GetV3UsersByUserIdPublicTopLanguagesErrors, GetV3UsersByUserIdPublicTopLanguagesResponses, GetV3UsersByUserIdPublicUsageData, GetV3UsersByUserIdPublicUsageErrors, GetV3UsersByUserIdPublicUsageResponses, GetV3UsersByUserIdResponses, GetV3UsersSelfData, GetV3UsersSelfErrors, GetV3UsersSelfExportData, GetV3UsersSelfExportErrors, GetV3UsersSelfExportResponses, GetV3UsersSelfLanguagesRecentData, GetV3UsersSelfLanguagesRecentErrors, GetV3UsersSelfLanguagesRecentResponses, GetV3UsersSelfLatestLogsData, GetV3UsersSelfLatestLogsErrors, GetV3UsersSelfLatestLogsResponses, GetV3UsersSelfMinutesData, GetV3UsersSelfMinutesErrors, GetV3UsersSelfMinutesResponses, GetV3UsersSelfOverallRankData, GetV3UsersSelfOverallRankErrors, GetV3UsersSelfOverallRankResponses, GetV3UsersSelfPrivacyData, GetV3UsersSelfPrivacyErrors, GetV3UsersSelfPrivacyResponses, GetV3UsersSelfResponses, GetV3UsersSelfStatsData, GetV3UsersSelfStatsErrors, GetV3UsersSelfStatsResponses, GetV3UsersSelfStatsTimeData, GetV3UsersSelfStatsTimeErrors, GetV3UsersSelfStatsTimeResponses, GetV3UsersSelfTimeDistributionData, GetV3UsersSelfTimeDistributionErrors, GetV3UsersSelfTimeDistributionResponses, GetV3UsersSelfTopData, GetV3UsersSelfTopErrors, GetV3UsersSelfTopLanguagesRankData, GetV3UsersSelfTopLanguagesRankErrors, GetV3UsersSelfTopLanguagesRankResponses, GetV3UsersSelfTopResponses, GetV3UsersSelfWorkspaceData, GetV3UsersSelfWorkspaceErrors, GetV3UsersSelfWorkspaceResponses, GetV3UsersSelfWorkspacesRecentData, GetV3UsersSelfWorkspacesRecentErrors, GetV3UsersSelfWorkspacesRecentResponses, GetV3UsersSelfWorkspacesSearchData, GetV3UsersSelfWorkspacesSearchErrors, GetV3UsersSelfWorkspacesSearchResponses, GetV3UsersShieldData, GetV3UsersShieldErrors, GetV3UsersShieldResponses, PatchV3MachinesByMachineIdData, PatchV3MachinesByMachineIdErrors, PatchV3MachinesByMachineIdResponses, PostV3AgentIngestData, PostV3AgentIngestErrors, PostV3AgentIngestResponses, PostV3AuthAppleData, PostV3AuthAppleErrors, PostV3AuthAppleLinkData, PostV3AuthAppleLinkErrors, PostV3AuthAppleLinkResponses, PostV3AuthAppleNativeData, PostV3AuthAppleNativeErrors, PostV3AuthAppleNativeResponses, PostV3AuthAppleResponses, PostV3AuthGoogleData, PostV3AuthGoogleLinkData, PostV3AuthGoogleLinkErrors, PostV3AuthGoogleLinkResponses, PostV3AuthGoogleNativeData, PostV3AuthGoogleNativeErrors, PostV3AuthGoogleNativeResponses, PostV3AuthLoginData, PostV3AuthLoginErrors, PostV3AuthLoginResponses, PostV3AuthLogoutData, PostV3AuthLogoutResponses, PostV3AuthRefreshTokenData, PostV3AuthRefreshTokenErrors, PostV3AuthRefreshTokenResponses, PostV3DevBeData, PostV3DevBeErrors, PostV3DevBeResponses, PostV3PaymentsCheckoutData, PostV3PaymentsCheckoutErrors, PostV3PaymentsCheckoutResponses, PostV3PaymentsWebhooksLemonsqueezyData, PostV3PaymentsWebhooksLemonsqueezyErrors, PostV3PaymentsWebhooksLemonsqueezyResponses, PostV3TagsData, PostV3TagsErrors, PostV3TagsEvaluateData, PostV3TagsEvaluateErrors, PostV3TagsEvaluateResponses, PostV3TagsResponses, PostV3UsersEventLogData, PostV3UsersEventLogErrors, PostV3UsersEventLogResponses, PostV3UsersSelfBioData, PostV3UsersSelfBioErrors, PostV3UsersSelfBioResponses, PostV3UsersSelfDeleteChallengeData, PostV3UsersSelfDeleteChallengeErrors, PostV3UsersSelfDeleteChallengeResponses, PostV3UsersSelfPrivacyData, PostV3UsersSelfPrivacyErrors, PostV3UsersSelfPrivacyResponses, PostV3UsersSelfUsernameData, PostV3UsersSelfUsernameErrors, PostV3UsersSelfUsernameResponses, PutV3TagsByTagIdData, PutV3TagsByTagIdErrors, PutV3TagsByTagIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -77,6 +77,36 @@ export const postV3AuthApple = <ThrowOnError extends boolean = false>(options: O
 });
 
 /**
+ * Disconnect Sign in with Apple from the signed-in user
+ */
+export const deleteV3AuthAppleLink = <ThrowOnError extends boolean = false>(options?: Options<DeleteV3AuthAppleLinkData, ThrowOnError>) => (options?.client ?? client).delete<DeleteV3AuthAppleLinkResponses, DeleteV3AuthAppleLinkErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/auth/apple/link',
+    ...options
+});
+
+/**
+ * Link a Sign in with Apple identity to the signed-in user
+ */
+export const postV3AuthAppleLink = <ThrowOnError extends boolean = false>(options: Options<PostV3AuthAppleLinkData, ThrowOnError>) => (options.client ?? client).post<PostV3AuthAppleLinkResponses, PostV3AuthAppleLinkErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/auth/apple/link',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Native Sign in with Apple (identity token verification)
  */
 export const postV3AuthAppleNative = <ThrowOnError extends boolean = false>(options: Options<PostV3AuthAppleNativeData, ThrowOnError>) => (options.client ?? client).post<PostV3AuthAppleNativeResponses, PostV3AuthAppleNativeErrors, ThrowOnError>({
@@ -92,6 +122,19 @@ export const postV3AuthAppleNative = <ThrowOnError extends boolean = false>(opti
  * GitHub OAuth callback
  */
 export const getV3AuthGithub = <ThrowOnError extends boolean = false>(options: Options<GetV3AuthGithubData, ThrowOnError>) => (options.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/v3/auth/github', ...options });
+
+/**
+ * Disconnect GitHub from the signed-in user
+ */
+export const deleteV3AuthGithubLink = <ThrowOnError extends boolean = false>(options?: Options<DeleteV3AuthGithubLinkData, ThrowOnError>) => (options?.client ?? client).delete<DeleteV3AuthGithubLinkResponses, DeleteV3AuthGithubLinkErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/auth/github/link',
+    ...options
+});
 
 /**
  * GitHub OAuth callback for the native iOS app
@@ -119,10 +162,52 @@ export const postV3AuthGoogle = <ThrowOnError extends boolean = false>(options: 
 });
 
 /**
+ * Disconnect Google from the signed-in user
+ */
+export const deleteV3AuthGoogleLink = <ThrowOnError extends boolean = false>(options?: Options<DeleteV3AuthGoogleLinkData, ThrowOnError>) => (options?.client ?? client).delete<DeleteV3AuthGoogleLinkResponses, DeleteV3AuthGoogleLinkErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/auth/google/link',
+    ...options
+});
+
+/**
+ * Link a Google account to the signed-in user
+ */
+export const postV3AuthGoogleLink = <ThrowOnError extends boolean = false>(options: Options<PostV3AuthGoogleLinkData, ThrowOnError>) => (options.client ?? client).post<PostV3AuthGoogleLinkResponses, PostV3AuthGoogleLinkErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'auth_token',
+            type: 'apiKey'
+        }],
+    url: '/v3/auth/google/link',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Native Google sign-in (PKCE code exchange)
  */
 export const postV3AuthGoogleNative = <ThrowOnError extends boolean = false>(options: Options<PostV3AuthGoogleNativeData, ThrowOnError>) => (options.client ?? client).post<PostV3AuthGoogleNativeResponses, PostV3AuthGoogleNativeErrors, ThrowOnError>({
     url: '/v3/auth/google/native',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Email/password sign-in (App Store review account only)
+ */
+export const postV3AuthLogin = <ThrowOnError extends boolean = false>(options: Options<PostV3AuthLoginData, ThrowOnError>) => (options.client ?? client).post<PostV3AuthLoginResponses, PostV3AuthLoginErrors, ThrowOnError>({
+    url: '/v3/auth/login',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -456,6 +541,15 @@ export const getV3UsersByUserIdPublicStatus = <ThrowOnError extends boolean = fa
  * Public top languages for embeddable widgets
  */
 export const getV3UsersByUserIdPublicTopLanguages = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersByUserIdPublicTopLanguagesData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersByUserIdPublicTopLanguagesResponses, GetV3UsersByUserIdPublicTopLanguagesErrors, ThrowOnError>({ url: '/v3/users/{user_id}/public/top-languages', ...options });
+
+/**
+ * Public token / cost usage snapshot for embeddable widgets
+ */
+export const getV3UsersByUserIdPublicUsage = <ThrowOnError extends boolean = false>(options: Options<GetV3UsersByUserIdPublicUsageData, ThrowOnError>) => (options.client ?? client).get<GetV3UsersByUserIdPublicUsageResponses, GetV3UsersByUserIdPublicUsageErrors, ThrowOnError>({
+    responseTransformer: getV3UsersByUserIdPublicUsageResponseTransformer,
+    url: '/v3/users/{user_id}/public/usage',
+    ...options
+});
 
 /**
  * Submit a single editor event

@@ -220,6 +220,22 @@ export type WidgetTopLanguagesResponse = {
     items: Array<TopPublic>;
 };
 
+export type WidgetUsageResponse = {
+    plan: string;
+    range: never;
+    /**
+     * Inclusive lower bound; null when `range=all`.
+     */
+    since?: Date;
+    until: Date;
+    tokens: number;
+    inputTokens: number;
+    cachedInputTokens: number;
+    outputTokens: number;
+    reasoningOutputTokens: number;
+    estimatedCostUsd: number;
+};
+
 export type EventLogRequest = {
     eventTime: number;
     language: string;
@@ -245,6 +261,7 @@ export type UserSelfPublic = {
     githubId?: number;
     bio?: string;
     googleId?: string;
+    appleId?: string;
     plan: string;
     timezone?: string;
     uploadToken: string;
@@ -284,9 +301,29 @@ export type UserOverallRankResponse = {
     updatedAt: Date;
 };
 
+export type Facet = 'public' | 'private';
+
 export type PrivacySettings = {
-    showEmail: boolean;
-    showGithub: boolean;
+    v: number;
+    profilePublic: boolean;
+    widgetsEnabled: boolean;
+    leaderboardListed: boolean;
+    identity: {
+        email: Facet;
+        github: Facet;
+    };
+    status: {
+        coding: Facet;
+        project: Facet;
+        language: Facet;
+        editor: Facet;
+    };
+    history: {
+        totalTime: Facet;
+        languages: Facet;
+        projects: Facet;
+        calendar: Facet;
+    };
 };
 
 export type StatsTimeResponse = {
@@ -364,6 +401,22 @@ export type GetV3AgentDashboardData = {
          * Restrict every aggregate to a single agent source (e.g. claude-code, codex, opencode, pi).
          */
         source?: string;
+        /**
+         * Custom window start (ISO 8601). Takes precedence over `days` and `range`; pair with `until` to scope aggregates to an exact span (e.g. start-of-today for a calendar-day view).
+         */
+        since?: Date;
+        /**
+         * Custom window end (ISO 8601). Defaults to the request time. Only meaningful alongside `since`.
+         */
+        until?: Date;
+        /**
+         * Rolling window of the last N days. Overrides `range`; ignored when `since` is given.
+         */
+        days?: number;
+        /**
+         * IANA timezone (e.g. Asia/Shanghai) used to align day/hour/week buckets to the user's local schedule. Defaults to UTC.
+         */
+        tz?: string;
     };
     url: '/v3/agent/dashboard';
 };
@@ -660,6 +713,80 @@ export type PostV3AuthAppleResponses = {
 
 export type PostV3AuthAppleResponse = PostV3AuthAppleResponses[keyof PostV3AuthAppleResponses];
 
+export type DeleteV3AuthAppleLinkData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v3/auth/apple/link';
+};
+
+export type DeleteV3AuthAppleLinkErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+};
+
+export type DeleteV3AuthAppleLinkError = DeleteV3AuthAppleLinkErrors[keyof DeleteV3AuthAppleLinkErrors];
+
+export type DeleteV3AuthAppleLinkResponses = {
+    /**
+     * Disconnected (or wasn't linked).
+     */
+    200: {
+        success: boolean;
+        outcome: 'unlinked' | 'not-linked';
+    };
+};
+
+export type DeleteV3AuthAppleLinkResponse = DeleteV3AuthAppleLinkResponses[keyof DeleteV3AuthAppleLinkResponses];
+
+export type PostV3AuthAppleLinkData = {
+    body: {
+        identity_token: string;
+        /**
+         * Raw nonce passed to AppleID.auth.init.
+         */
+        nonce: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/auth/apple/link';
+};
+
+export type PostV3AuthAppleLinkErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+    /**
+     * Request conflicts with current state
+     */
+    409: PyError;
+};
+
+export type PostV3AuthAppleLinkError = PostV3AuthAppleLinkErrors[keyof PostV3AuthAppleLinkErrors];
+
+export type PostV3AuthAppleLinkResponses = {
+    /**
+     * Linked (or already linked to the same Apple identity).
+     */
+    200: {
+        success: boolean;
+        outcome: 'linked' | 'already-yours';
+    };
+};
+
+export type PostV3AuthAppleLinkResponse = PostV3AuthAppleLinkResponses[keyof PostV3AuthAppleLinkResponses];
+
 export type PostV3AuthAppleNativeData = {
     body: {
         identity_token: string;
@@ -705,6 +832,38 @@ export type GetV3AuthGithubData = {
     url: '/v3/auth/github';
 };
 
+export type DeleteV3AuthGithubLinkData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v3/auth/github/link';
+};
+
+export type DeleteV3AuthGithubLinkErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+};
+
+export type DeleteV3AuthGithubLinkError = DeleteV3AuthGithubLinkErrors[keyof DeleteV3AuthGithubLinkErrors];
+
+export type DeleteV3AuthGithubLinkResponses = {
+    /**
+     * Disconnected (or wasn't linked).
+     */
+    200: {
+        success: boolean;
+        outcome: 'unlinked' | 'not-linked';
+    };
+};
+
+export type DeleteV3AuthGithubLinkResponse = DeleteV3AuthGithubLinkResponses[keyof DeleteV3AuthGithubLinkResponses];
+
 export type GetV3AuthGithubNativeCallbackData = {
     body?: never;
     path?: never;
@@ -718,7 +877,12 @@ export type GetV3AuthGithubNativeCallbackData = {
 export type GetV3AuthGithubStartData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * When `1`, the callback will link the GitHub identity to the currently signed-in user instead of provisioning a new account.
+         */
+        link?: '1';
+    };
     url: '/v3/auth/github/start';
 };
 
@@ -730,6 +894,79 @@ export type PostV3AuthGoogleData = {
     query?: never;
     url: '/v3/auth/google';
 };
+
+export type DeleteV3AuthGoogleLinkData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v3/auth/google/link';
+};
+
+export type DeleteV3AuthGoogleLinkErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+};
+
+export type DeleteV3AuthGoogleLinkError = DeleteV3AuthGoogleLinkErrors[keyof DeleteV3AuthGoogleLinkErrors];
+
+export type DeleteV3AuthGoogleLinkResponses = {
+    /**
+     * Disconnected (or wasn't linked).
+     */
+    200: {
+        success: boolean;
+        outcome: 'unlinked' | 'not-linked';
+    };
+};
+
+export type DeleteV3AuthGoogleLinkResponse = DeleteV3AuthGoogleLinkResponses[keyof DeleteV3AuthGoogleLinkResponses];
+
+export type PostV3AuthGoogleLinkData = {
+    body: {
+        /**
+         * Google ID token (same JWT as /v3/auth/google).
+         */
+        credential: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/auth/google/link';
+};
+
+export type PostV3AuthGoogleLinkErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+    /**
+     * Request conflicts with current state
+     */
+    409: PyError;
+};
+
+export type PostV3AuthGoogleLinkError = PostV3AuthGoogleLinkErrors[keyof PostV3AuthGoogleLinkErrors];
+
+export type PostV3AuthGoogleLinkResponses = {
+    /**
+     * Linked (or already linked to the same Google identity).
+     */
+    200: {
+        success: boolean;
+        outcome: 'linked' | 'already-yours';
+    };
+};
+
+export type PostV3AuthGoogleLinkResponse = PostV3AuthGoogleLinkResponses[keyof PostV3AuthGoogleLinkResponses];
 
 export type PostV3AuthGoogleNativeData = {
     body: {
@@ -765,6 +1002,45 @@ export type PostV3AuthGoogleNativeResponses = {
 };
 
 export type PostV3AuthGoogleNativeResponse = PostV3AuthGoogleNativeResponses[keyof PostV3AuthGoogleNativeResponses];
+
+export type PostV3AuthLoginData = {
+    body: {
+        email: string;
+        password: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/auth/login';
+};
+
+export type PostV3AuthLoginErrors = {
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+    /**
+     * Endpoint not configured
+     */
+    404: unknown;
+    /**
+     * Too many attempts
+     */
+    429: unknown;
+};
+
+export type PostV3AuthLoginError = PostV3AuthLoginErrors[keyof PostV3AuthLoginErrors];
+
+export type PostV3AuthLoginResponses = {
+    /**
+     * Session token issued
+     */
+    200: {
+        token: string;
+        user_id: number;
+    };
+};
+
+export type PostV3AuthLoginResponse = PostV3AuthLoginResponses[keyof PostV3AuthLoginResponses];
 
 export type PostV3AuthLogoutData = {
     body?: never;
@@ -1708,6 +1984,38 @@ export type GetV3UsersByUserIdPublicTopLanguagesResponses = {
 
 export type GetV3UsersByUserIdPublicTopLanguagesResponse = GetV3UsersByUserIdPublicTopLanguagesResponses[keyof GetV3UsersByUserIdPublicTopLanguagesResponses];
 
+export type GetV3UsersByUserIdPublicUsageData = {
+    body?: never;
+    path: {
+        user_id: number;
+    };
+    query?: {
+        /**
+         * Calendar-aligned window in the user's timezone; `all` covers full history.
+         */
+        range?: never;
+    };
+    url: '/v3/users/{user_id}/public/usage';
+};
+
+export type GetV3UsersByUserIdPublicUsageErrors = {
+    /**
+     * Not found
+     */
+    404: PyError;
+};
+
+export type GetV3UsersByUserIdPublicUsageError = GetV3UsersByUserIdPublicUsageErrors[keyof GetV3UsersByUserIdPublicUsageErrors];
+
+export type GetV3UsersByUserIdPublicUsageResponses = {
+    /**
+     * Usage snapshot payload
+     */
+    200: WidgetUsageResponse;
+};
+
+export type GetV3UsersByUserIdPublicUsageResponse = GetV3UsersByUserIdPublicUsageResponses[keyof GetV3UsersByUserIdPublicUsageResponses];
+
 export type PostV3UsersEventLogData = {
     body: EventLogRequest;
     path?: never;
@@ -2081,9 +2389,7 @@ export type GetV3UsersSelfPrivacyResponses = {
 export type GetV3UsersSelfPrivacyResponse = GetV3UsersSelfPrivacyResponses[keyof GetV3UsersSelfPrivacyResponses];
 
 export type PostV3UsersSelfPrivacyData = {
-    body: {
-        showGithub: boolean;
-    };
+    body: PrivacySettings;
     path?: never;
     query?: never;
     url: '/v3/users/self/privacy';
