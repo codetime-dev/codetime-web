@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
 
   let payload: UsagePayload
   try {
-    payload = await fetchWidgetJson<UsagePayload>(event, `/v3/users/${uid}/public/usage?range=${range}`)
+    payload = await fetchWidgetJson<UsagePayload>(event, `/v3/users/${uid}/public/usage?range=${range}&widget=1`)
   }
   catch (error: unknown) {
     const err = error as { statusCode?: number }

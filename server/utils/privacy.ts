@@ -114,6 +114,25 @@ export function canShowProfileIdentity(p: UserPrivacy, field: keyof UserPrivacy[
   return p.profilePublic && p.identity[field] === 'public'
 }
 
+// Gate a shared public DATA endpoint that feeds BOTH the profile page and a
+// widget (e.g. coding-history backs both the profile heatmap and the
+// calendar/trend SVGs). `dataPublic` says the data category itself is public
+// (a history facet, or leaderboardListed for ranks). The surface master
+// applied depends on the caller: widget SVGs pass `?widget=1` and are gated
+// by widgetsEnabled; the profile page / direct access is gated by
+// profilePublic. One endpoint, two surfaces, two independent masters.
+export function canExposePublicData(p: UserPrivacy, dataPublic: boolean, widgetCaller: boolean): boolean {
+  if (!dataPublic) {
+    return false
+  }
+  return widgetCaller ? p.widgetsEnabled : p.profilePublic
+}
+
+// True when a request originated from a widget SVG (which appends ?widget=1).
+export function isWidgetCaller(v: unknown): boolean {
+  return v === '1' || v === 'true' || v === true
+}
+
 // ---- Update path ------------------------------------------------------------
 // Deep-merge a (possibly partial) patch onto the current privacy, then
 // re-validate. Powers both the settings page (sends the full object) and the

@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
 
   let payload: DonutPayload
   try {
-    const raw = await fetchWidgetJson<DonutResponse>(event, `/v3/users/${uid}/public/top-languages?days=${days}&limit=${limit}`)
+    const raw = await fetchWidgetJson<DonutResponse>(event, `/v3/users/${uid}/public/top-languages?days=${days}&limit=${limit}&widget=1`)
     payload = Array.isArray(raw) ? { items: raw } : raw
   }
   catch (error: unknown) {

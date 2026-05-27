@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
   try {
     payload = await fetchWidgetJson<CodingHistoryResponse>(
       event,
-      `/v3/public/users/${uid}/coding-history?days=${days}`,
+      `/v3/public/users/${uid}/coding-history?days=${days}&widget=1`,
     )
   }
   catch (error: unknown) {

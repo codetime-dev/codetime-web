@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { defineEventHandler, getQuery, getRouterParam, setHeader } from 'h3'
 import { users } from '../../../../../db/schema'
 import { useDb } from '../../../../../utils/db'
+import { canExposePublicData, isWidgetCaller, resolveUserPrivacy } from '../../../../../utils/privacy'
 import { sendPyError, sendPyValidationError } from '../../../../../utils/py-error'
 import { fetchUserCodingHistory } from '../../../../../utils/ranking'
 
@@ -59,7 +60,7 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb()
   const [user] = await db
-    .select({ username: users.username, plan: users.plan, timezone: users.timezone })
+    .select({ username: users.username, plan: users.plan, timezone: users.timezone, privacy: users.privacy })
     .from(users)
     .where(eq(users.id, uid))
     .limit(1)
@@ -68,6 +69,14 @@ export default defineEventHandler(async (event) => {
 }
 
   const q = getQuery(event)
+
+  // Privacy ceiling: the coding calendar/heatmap is the `history.calendar`
+  // facet. Widget callers (?widget=1) gated by widgetsEnabled, profile/direct
+  // by profilePublic.
+  const privacy = resolveUserPrivacy(user.privacy)
+  if (!canExposePublicData(privacy, privacy.history.calendar === 'public', isWidgetCaller(q.widget))) {
+    return sendPyError(event, 403, 'Hidden by privacy settings')
+  }
   const rawDays = Math.trunc(Number(q.days) || 30)
   if (!Number.isFinite(rawDays) || rawDays < 1 || rawDays > 365) {
     return sendPyValidationError(event, 'GET', `/v3/public/users/${uid}/coding-history`, [

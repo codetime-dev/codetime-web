@@ -5,6 +5,7 @@ import languageIdentifiers from '../../../assets/LanguageIdentifiers.json'
 import { tags, users, workspaceMetaV2, workspaceMinutesV2 } from '../../../db/schema'
 import { useDb } from '../../../utils/db'
 import { getShieldMessage } from '../../../utils/duration'
+import { resolveUserPrivacy } from '../../../utils/privacy'
 import { sendPyError } from '../../../utils/py-error'
 import { findMetaHashesMatchingRules } from '../../../utils/tag-meta-hash'
 
@@ -104,13 +105,22 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb()
   const [user] = await db
-    .select({ id: users.id })
+    .select({ id: users.id, privacy: users.privacy })
     .from(users)
     .where(eq(users.id, uid))
     .limit(1)
   if (!user) {
  return sendPyError(event, 404, 'User not found')
 }
+
+  // Privacy ceiling: the total-time badge is a widget surfacing the
+  // `history.totalTime` facet. When widgets are off or the facet is private,
+  // return a valid (greyed) shield rather than an error so shields.io still
+  // renders something coherent.
+  const privacy = resolveUserPrivacy(user.privacy)
+  if (!privacy.widgetsEnabled || privacy.history.totalTime !== 'public') {
+    return { schemaVersion: 1, logoSvg: LOGO_SVG, label: 'CodeTime', message: 'private', color: 'lightgrey' }
+  }
 
   const minutes = Math.max(0, intOr(q.minutes, 0))
   const project = strOr(q.project)

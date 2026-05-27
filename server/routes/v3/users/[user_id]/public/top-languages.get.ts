@@ -2,6 +2,7 @@ import { and, count, desc, eq, gte, lte } from 'drizzle-orm'
 import { defineEventHandler, getQuery, getRouterParam } from 'h3'
 import { users, workspaceMetaV2, workspaceMinutesV2 } from '../../../../../db/schema'
 import { useDb } from '../../../../../utils/db'
+import { canExposePublicData, isWidgetCaller, resolveUserPrivacy } from '../../../../../utils/privacy'
 import { sendPyError } from '../../../../../utils/py-error'
 
 // Mirrors GET /v3/users/{user_id}/public/top-languages. Plan-gated
@@ -79,13 +80,21 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb()
   const [userRow] = await db
-    .select({ plan: users.plan })
+    .select({ plan: users.plan, privacy: users.privacy })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
   if (!userRow) {
  return sendPyError(event, 404, 'User not found')
 }
+
+  // Privacy ceiling: language breakdown is the `history.languages` facet.
+  // Widget callers (?widget=1) are gated by widgetsEnabled, the profile/
+  // direct path by profilePublic.
+  const privacy = resolveUserPrivacy(userRow.privacy)
+  if (!canExposePublicData(privacy, privacy.history.languages === 'public', isWidgetCaller(getQuery(event).widget))) {
+    return sendPyError(event, 403, 'Hidden by privacy settings')
+  }
 
   const plan = (userRow.plan || 'free').toLowerCase()
   const isPro = plan === 'pro'

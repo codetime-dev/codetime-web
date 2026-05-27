@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { defineEventHandler, getQuery, getRouterParam, setHeader } from 'h3'
 import { users } from '../../../../../db/schema'
 import { useDb } from '../../../../../utils/db'
+import { canExposePublicData, isWidgetCaller, resolveUserPrivacy } from '../../../../../utils/privacy'
 import { sendPyError } from '../../../../../utils/py-error'
 import { fetchUserTopLanguagesRank } from '../../../../../utils/ranking'
 
@@ -34,12 +35,19 @@ export default defineEventHandler(async (event) => {
 }
 
   const db = useDb()
-  const [user] = await db.select({ username: users.username }).from(users).where(eq(users.id, uid)).limit(1)
+  const [user] = await db.select({ username: users.username, leaderboardListed: users.leaderboardListed, privacy: users.privacy }).from(users).where(eq(users.id, uid)).limit(1)
   if (!user) {
  return sendPyError(event, 404, 'User not found')
 }
 
   const q = getQuery(event)
+
+  // Privacy ceiling: rank data is gated by the leaderboard opt-out plus the
+  // caller's surface master.
+  const privacy = resolveUserPrivacy(user.privacy)
+  if (!canExposePublicData(privacy, user.leaderboardListed, isWidgetCaller(q.widget))) {
+    return sendPyError(event, 403, 'Hidden by privacy settings')
+  }
   const topN = Math.min(20, Math.max(1, Math.trunc(Number(q.top_n) || 5)))
   const days = q.days !== undefined && q.days !== null && q.days !== '' ? Math.max(1, Math.trunc(Number(q.days))) : 30
   const now = new Date()

@@ -3,6 +3,7 @@ import { defineEventHandler, getQuery, getRouterParam } from 'h3'
 import { ensurePricingLoaded, estimateCostUsd } from '../../../../../utils/agent-pricing'
 import { useDb } from '../../../../../utils/db'
 import { agentVisibilityCutoff } from '../../../../../utils/plan-limits'
+import { canExposePublicData, isWidgetCaller, resolveUserPrivacy } from '../../../../../utils/privacy'
 import { sendPyError } from '../../../../../utils/py-error'
 import { parseUsageRange, USAGE_RANGES, usageRangeStart } from '../../../../../utils/usage-range'
 
@@ -126,16 +127,23 @@ export default defineEventHandler(async (event) => {
   // behind a tiny indexed lookup.
   const [userRows] = await Promise.all([
     db.execute(sql`
-      select plan, timezone
+      select plan, timezone, privacy
       from users
       where id = ${userId}
       limit 1
-    `) as unknown as Promise<{ plan: string | null, timezone: string | null }[]>,
+    `) as unknown as Promise<{ plan: string | null, timezone: string | null, privacy: unknown }[]>,
     ensurePricingLoaded(),
   ])
   const user = userRows[0]
   if (!user) {
     return sendPyError(event, 404, 'User not found')
+  }
+
+  // Privacy ceiling: usage timing is the `history.calendar` facet. Widget
+  // callers (?widget=1) gated by widgetsEnabled, profile/direct by profilePublic.
+  const privacy = resolveUserPrivacy(user.privacy)
+  if (!canExposePublicData(privacy, privacy.history.calendar === 'public', isWidgetCaller(getQuery(event).widget))) {
+    return sendPyError(event, 403, 'Hidden by privacy settings')
   }
 
   const plan = (user.plan || 'free').toLowerCase()
