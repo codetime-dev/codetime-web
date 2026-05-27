@@ -357,6 +357,17 @@ export default defineEventHandler(async (event) => {
   const bSourceClause = source ? sql`and b.source = ${source}` : sql``
   const sessSourceClause = source ? sql`and s.source = ${source}` : sql``
   const mSourceClause = source ? sql`and m.source = ${source}` : sql``
+  // Turn-level clauses (alias t = agent_turns). Active-time totals are summed
+  // from per-turn durations rather than agent_sessions.duration_ms: a session's
+  // duration_ms is the wall-clock span first→last event, so it counts the idle
+  // gaps between turns (reading, AFK) as active time. Per-turn durations exclude
+  // those gaps. Turns are attributed to the range by last_event_at, mirroring
+  // how sessions are filtered above.
+  const turnSinceClause = sinceIso
+    ? sql`and t.last_event_at >= ${sinceIso}::timestamptz and t.last_event_at < ${untilIso}::timestamptz`
+    : sql`and t.last_event_at < ${untilIso}::timestamptz`
+  const turnMachineClause = machineId ? sql`and t.machine_id = ${machineId}::uuid` : sql``
+  const turnSourceClause = source ? sql`and t.source = ${source}` : sql``
 
   // --- summary --------------------------------------------------------
   const summaryRows = await db.execute(sql`
@@ -369,7 +380,6 @@ export default defineEventHandler(async (event) => {
       coalesce(sum(s.output_tokens), 0)::bigint      as total_output_tokens,
       coalesce(sum(s.reasoning_output_tokens), 0)::bigint as total_reasoning_output_tokens,
       coalesce(sum(s.total_tokens), 0)::bigint       as total_tokens,
-      coalesce(sum(s.duration_ms), 0)::bigint        as total_duration_ms,
       coalesce(sum(s.lines_added), 0)::bigint        as total_lines_added,
       coalesce(sum(s.lines_removed), 0)::bigint      as total_lines_removed,
       count(*)::bigint                               as total_sessions,
@@ -521,32 +531,49 @@ export default defineEventHandler(async (event) => {
     group by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
 
-  // Per-project agent wall-clock duration — joined separately because
-  // agent_session_models has no duration column and JOIN-then-SUM on
-  // s.duration_ms would multiply-count when a session has more than
-  // one model.
+  // Per-project active time, summed from per-turn durations so between-turn
+  // idle is excluded (see turnSinceClause). Summing every bucket of this map
+  // also yields the headline totalDurationMs below.
   const durationRows = await db.execute(sql`
     select
-      coalesce(nullif(s.project, ''), 'unknown') as project,
-      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms
-    from agent_sessions s
-    where s.user_id = ${userId}
-    ${sessSinceClause}
-    ${sessMachineClause}
-    ${sessSourceClause}
+      coalesce(nullif(t.project, ''), 'unknown') as project,
+      coalesce(sum(t.duration_ms), 0)::bigint as duration_ms
+    from agent_turns t
+    where t.user_id = ${userId}
+    ${turnSinceClause}
+    ${turnMachineClause}
+    ${turnSourceClause}
     group by 1
   `) as unknown as Record<string, unknown>[]
   const durationByProject = new Map<string, number>()
   for (const r of durationRows) {
     durationByProject.set(String(r.project ?? 'unknown'), toN(r.duration_ms))
   }
+  // Headline active time = sum of per-turn durations across the range.
+  const totalDurationMs = [...durationByProject.values()].reduce((a, b) => a + b, 0)
 
-  // Per-source agent wall-clock duration, mirroring durationByProject.
-  // Same caveat about joining session_models vs sessions for duration.
+  // Per-source active time from per-turn durations, mirroring durationByProject.
   const sourceDurationRows = await db.execute(sql`
     select
+      coalesce(nullif(t.source, ''), 'unknown') as source,
+      coalesce(sum(t.duration_ms), 0)::bigint as duration_ms
+    from agent_turns t
+    where t.user_id = ${userId}
+    ${turnSinceClause}
+    ${turnMachineClause}
+    ${turnSourceClause}
+    group by 1
+  `) as unknown as Record<string, unknown>[]
+  const durationBySource = new Map<string, number>()
+  for (const r of sourceDurationRows) {
+    durationBySource.set(String(r.source ?? 'unknown'), toN(r.duration_ms))
+  }
+
+  // Per-source session counts stay on agent_sessions — counting turn rows would
+  // over-count, since one session has many turns.
+  const sourceSessionRows = await db.execute(sql`
+    select
       coalesce(nullif(s.source, ''), 'unknown') as source,
-      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms,
       count(*)::bigint as sessions
     from agent_sessions s
     where s.user_id = ${userId}
@@ -555,12 +582,9 @@ export default defineEventHandler(async (event) => {
     ${sessSourceClause}
     group by 1
   `) as unknown as Record<string, unknown>[]
-  const durationBySource = new Map<string, number>()
   const sessionsBySource = new Map<string, number>()
-  for (const r of sourceDurationRows) {
-    const key = String(r.source ?? 'unknown')
-    durationBySource.set(key, toN(r.duration_ms))
-    sessionsBySource.set(key, toN(r.sessions))
+  for (const r of sourceSessionRows) {
+    sessionsBySource.set(String(r.source ?? 'unknown'), toN(r.sessions))
   }
 
   // --- fold breakdown → model leaderboard -----------------------------
@@ -967,7 +991,7 @@ export default defineEventHandler(async (event) => {
       totalOutputTokens: toN(summaryRow.total_output_tokens),
       totalReasoningOutputTokens: toN(summaryRow.total_reasoning_output_tokens),
       totalTokens: toN(summaryRow.total_tokens),
-      totalDurationMs: toN(summaryRow.total_duration_ms),
+      totalDurationMs,
       totalLinesAdded: toN(summaryRow.total_lines_added),
       totalLinesRemoved: toN(summaryRow.total_lines_removed),
     },
