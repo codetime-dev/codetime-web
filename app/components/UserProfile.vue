@@ -5,6 +5,7 @@ import ActivityCalendar from './UserProfile/ActivityCalendar.vue'
 import ActivityTrend from './UserProfile/ActivityTrend.vue'
 import Bio from './UserProfile/Bio.vue'
 import Languages from './UserProfile/Languages.vue'
+import Projects from './UserProfile/Projects.vue'
 import Stats from './UserProfile/Stats.vue'
 
 const props = defineProps<{
@@ -56,12 +57,24 @@ const { data: codingHistoryData, pending: historyPending } = await useAsyncData(
   { watch: [uid] },
 )
 
+const { data: topProjectsData, pending: projectsPending } = await useAsyncData(
+  () => `up-top-projects-${uid.value}`,
+  () => fetchUserTopProjects(uid.value),
+  { watch: [uid] },
+)
+
 const topLanguages = computed(() => topLanguagesData.value?.entries || [])
 const codingHistory = computed(() => codingHistoryData.value?.data || [])
 const overallRank = computed(() => overallRankData.value)
+const topProjects = computed(() => topProjectsData.value?.items || [])
 
-const totalMinutes = computed(() => overallRank.value?.totalMinutes ?? 0)
+// `totalMinutes` / `percentile` are null when the target hides the
+// corresponding facet (history.totalTime / leaderboardListed). Keep them
+// distinguishable from "zero" so the KPI cards render "—" instead of 0.
+const totalMinutes = computed(() => overallRank.value?.totalMinutes ?? null)
+const percentile = computed(() => overallRank.value?.percentile ?? null)
 const totalLanguages = computed(() => topLanguagesData.value?.entries.length ?? 0)
+const totalProjects = computed(() => topProjects.value.length)
 
 function compactNum(value: number): { value: string, unit?: string } {
   const abs = Math.abs(value)
@@ -114,20 +127,20 @@ const activeDays = computed(() => processedHistory.value.filter(d => d.duration 
 const topLanguageEntry = computed(() => topLanguages.value[0] ?? null)
 
 const kpis = computed(() => {
-  const totalH = fmtHoursDisplay(totalMinutes.value)
+  const totalH = totalMinutes.value == null ? null : fmtHoursDisplay(totalMinutes.value)
   const recent7 = fmtHoursDisplay(last7DayMinutes.value)
-  const percentile = overallRank.value
-    ? Math.max(1, Math.round(overallRank.value.percentile * 100))
-    : null
+  const pct = percentile.value == null
+    ? null
+    : Math.max(1, Math.round(percentile.value * 100))
   const topLang = topLanguageEntry.value
   return [
     {
       index: '01',
       label: 'TOTAL',
       icon: 'i-tabler-clock-hour-4',
-      value: totalH.value,
-      unit: totalH.unit,
-      caption: 'cumulative coding',
+      value: totalH ? totalH.value : '—',
+      unit: totalH?.unit,
+      caption: totalH ? 'cumulative coding' : 'hidden',
       accent: true,
     },
     {
@@ -142,9 +155,9 @@ const kpis = computed(() => {
       index: '03',
       label: 'PERCENTILE',
       icon: 'i-tabler-trending-up',
-      value: percentile === null ? '—' : `${percentile}`,
-      unit: percentile === null ? undefined : '%',
-      caption: percentile === null ? 'no rank yet' : `top ${percentile}% of devs`,
+      value: pct === null ? '—' : `${pct}`,
+      unit: pct === null ? undefined : '%',
+      caption: pct === null ? 'hidden' : `top ${pct}% of devs`,
       accent: true,
     },
     {
@@ -153,7 +166,9 @@ const kpis = computed(() => {
       icon: 'i-tabler-code',
       value: topLang ? getLanguageName(topLang.language || 'Unknown') : '—',
       caption: topLang
-        ? `${(topLang.totalMinutes / 60).toFixed(1)}h · top ${Math.max(1, Math.round(topLang.percentile * 100))}%`
+        ? (topLang.percentile == null
+            ? `${(topLang.totalMinutes / 60).toFixed(1)}h`
+            : `${(topLang.totalMinutes / 60).toFixed(1)}h · top ${Math.max(1, Math.round(topLang.percentile * 100))}%`)
         : '—',
     },
     {
@@ -328,6 +343,19 @@ const lastUpdatedLabel = computed(() => {
     </div>
 
     <template v-else>
+      <div v-if="user?.githubLogin" class="px-5.5 pb-1 pt-3 flex flex-wrap gap-2">
+        <a
+          :href="`https://github.com/${user.githubLogin}`"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-ct-fg-muted px-2.5 py-1.5 border border-ct-border bg-ct-surface-1 inline-flex gap-1.5 transition-colors items-center hover:text-ct-fg hover:bg-ct-surface-2"
+          :title="`@${user.githubLogin} on GitHub`"
+        >
+          <i class="i-tabler-brand-github text-[15px]" />
+          <span class="text-[12.5px] font-mono">@{{ user.githubLogin }}</span>
+        </a>
+      </div>
+
       <PanelSection
         num="01"
         :title="t.dashboard.profile.bio.title"
@@ -366,6 +394,7 @@ const lastUpdatedLabel = computed(() => {
       </PanelSection>
 
       <PanelSection
+        v-if="languagesPending || topLanguages.length > 0"
         num="03"
         :title="t.dashboard.profile.languages.title"
         :meta="`${topLanguages.length} tracked`"
@@ -377,7 +406,19 @@ const lastUpdatedLabel = computed(() => {
       </PanelSection>
 
       <PanelSection
+        v-if="projectsPending || topProjects.length > 0"
         num="04"
+        title="Top projects"
+        :meta="`${totalProjects} tracked`"
+      >
+        <template #icon>
+          <i class="i-tabler-folder text-[15px] text-ct-fg-muted" />
+        </template>
+        <Projects :entries="topProjects" :pending="projectsPending" />
+      </PanelSection>
+
+      <PanelSection
+        num="05"
         :title="t.dashboard.profile.activity.title"
         meta="365d · calendar"
       >
@@ -388,7 +429,7 @@ const lastUpdatedLabel = computed(() => {
       </PanelSection>
 
       <PanelSection
-        num="05"
+        num="06"
         :title="t.dashboard.profile.activity.title"
         :meta="`${HISTORY_DAYS}d · ${activeDays} active · trend`"
       >

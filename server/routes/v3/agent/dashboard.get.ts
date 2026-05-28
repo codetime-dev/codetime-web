@@ -351,14 +351,41 @@ export default defineEventHandler(async (event) => {
   const bMachineClause = machineId ? sql`and b.machine_id = ${machineId}::uuid` : sql``
   const sessMachineClause = machineId ? sql`and s.machine_id = ${machineId}::uuid` : sql``
   const mMachineClause = machineId ? sql`and m.machine_id = ${machineId}::uuid` : sql``
+  const tMachineClause = machineId ? sql`and t.machine_id = ${machineId}::uuid` : sql``
   // Source clauses mirror the machine ones: every query already has a
   // `source` column on the relevant table, so we filter wherever the
   // join naturally exposes it.
   const bSourceClause = source ? sql`and b.source = ${source}` : sql``
   const sessSourceClause = source ? sql`and s.source = ${source}` : sql``
   const mSourceClause = source ? sql`and m.source = ${source}` : sql``
+  const tSourceClause = source ? sql`and t.source = ${source}` : sql``
+  // Turn-scoped time clause for the duration KPI. agent_turns is the
+  // only table with per-turn timing the user actually perceives; the
+  // session-level duration_ms column is unusable (open-window span; see
+  // comment by the summaryRows query below). We filter on the turn's
+  // own started_at so a long session straddling a day boundary
+  // contributes only the turns that actually fired inside the window.
+  const turnSinceClause = sinceIso
+    ? sql`and t.started_at >= ${sinceIso}::timestamptz and t.started_at < ${untilIso}::timestamptz`
+    : sql`and t.started_at < ${untilIso}::timestamptz`
+  // Per-turn cap on duration_ms. Several agents (notably codex, also
+  // some claude-code versions) stamp `completed_at` lazily — when the
+  // user submits the next prompt or closes the session — so a single
+  // recorded turn can span hours or days of pure idle. Empirically
+  // (see distribution work that produced this cap): p95 turn duration
+  // sits around 25-35 minutes for the noisy agents and 8-15 minutes
+  // for the well-behaved ones (opencode, pi), so anything past 15
+  // minutes is far more likely to be idle pollution than a legitimate
+  // long agentic loop. Capping individual turns at 15 min keeps the
+  // well-behaved agents untouched while clipping the long tail.
+  const TURN_CAP_MS = 15 * 60 * 1000
 
   // --- summary --------------------------------------------------------
+  // `duration_ms` deliberately not pulled from agent_sessions — that
+  // column stores the open-window span (last_event_at − started_at)
+  // which inflates hard when terminals sit idle or sessions overlap.
+  // totalDurationMs is derived below from `turnDurationRows`, summing
+  // capped per-turn duration over the window.
   const summaryRows = await db.execute(sql`
     select
       coalesce(sum(s.event_count), 0)::bigint        as total_events,
@@ -369,7 +396,6 @@ export default defineEventHandler(async (event) => {
       coalesce(sum(s.output_tokens), 0)::bigint      as total_output_tokens,
       coalesce(sum(s.reasoning_output_tokens), 0)::bigint as total_reasoning_output_tokens,
       coalesce(sum(s.total_tokens), 0)::bigint       as total_tokens,
-      coalesce(sum(s.duration_ms), 0)::bigint        as total_duration_ms,
       coalesce(sum(s.lines_added), 0)::bigint        as total_lines_added,
       coalesce(sum(s.lines_removed), 0)::bigint      as total_lines_removed,
       count(*)::bigint                               as total_sessions,
@@ -521,32 +547,46 @@ export default defineEventHandler(async (event) => {
     group by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
 
-  // Per-project agent wall-clock duration — joined separately because
-  // agent_session_models has no duration column and JOIN-then-SUM on
-  // s.duration_ms would multiply-count when a session has more than
-  // one model.
-  const durationRows = await db.execute(sql`
+  // Per-(project, source) agent active time. Sum of `agent_turns.duration_ms`
+  // capped per turn at TURN_CAP_MS to throw out idle-polluted long turns
+  // (some agents stamp `completed_at` on the next user prompt rather
+  // than on actual completion, so a single recorded turn can span
+  // hours of idle). Filtered by the turn's own `started_at` so a long
+  // session crossing a day boundary contributes only the turns inside
+  // the requested window. Tool execution time is already included in
+  // each turn's wall clock — no need to add agent_tool_calls separately.
+  const turnDurationRows = await db.execute(sql`
     select
-      coalesce(nullif(s.project, ''), 'unknown') as project,
-      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms
-    from agent_sessions s
-    where s.user_id = ${userId}
-    ${sessSinceClause}
-    ${sessMachineClause}
-    ${sessSourceClause}
-    group by 1
+      coalesce(nullif(t.project, ''), 'unknown') as project,
+      coalesce(nullif(t.source, ''), 'unknown') as source,
+      coalesce(sum(least(t.duration_ms, ${TURN_CAP_MS})), 0)::bigint as duration_ms
+    from agent_turns t
+    where t.user_id = ${userId}
+      and t.duration_ms > 0
+    ${turnSinceClause}
+    ${tMachineClause}
+    ${tSourceClause}
+    group by 1, 2
   `) as unknown as Record<string, unknown>[]
   const durationByProject = new Map<string, number>()
-  for (const r of durationRows) {
-    durationByProject.set(String(r.project ?? 'unknown'), toN(r.duration_ms))
+  const durationBySource = new Map<string, number>()
+  let totalDurationMs = 0
+  for (const r of turnDurationRows) {
+    const ms = toN(r.duration_ms)
+    const project = String(r.project ?? 'unknown')
+    const sourceKey = String(r.source ?? 'unknown')
+    durationByProject.set(project, (durationByProject.get(project) ?? 0) + ms)
+    durationBySource.set(sourceKey, (durationBySource.get(sourceKey) ?? 0) + ms)
+    totalDurationMs += ms
   }
 
-  // Per-source agent wall-clock duration, mirroring durationByProject.
-  // Same caveat about joining session_models vs sessions for duration.
-  const sourceDurationRows = await db.execute(sql`
+  // Per-source session count, fed into the agent leaderboard. Counted
+  // off agent_sessions because the breakdown table (agent_session_models)
+  // can have multiple rows per session.
+  const sessionsBySource = new Map<string, number>()
+  const sourceSessionRows = await db.execute(sql`
     select
       coalesce(nullif(s.source, ''), 'unknown') as source,
-      coalesce(sum(s.duration_ms), 0)::bigint as duration_ms,
       count(*)::bigint as sessions
     from agent_sessions s
     where s.user_id = ${userId}
@@ -555,12 +595,8 @@ export default defineEventHandler(async (event) => {
     ${sessSourceClause}
     group by 1
   `) as unknown as Record<string, unknown>[]
-  const durationBySource = new Map<string, number>()
-  const sessionsBySource = new Map<string, number>()
-  for (const r of sourceDurationRows) {
-    const key = String(r.source ?? 'unknown')
-    durationBySource.set(key, toN(r.duration_ms))
-    sessionsBySource.set(key, toN(r.sessions))
+  for (const r of sourceSessionRows) {
+    sessionsBySource.set(String(r.source ?? 'unknown'), toN(r.sessions))
   }
 
   // --- fold breakdown → model leaderboard -----------------------------
@@ -967,7 +1003,7 @@ export default defineEventHandler(async (event) => {
       totalOutputTokens: toN(summaryRow.total_output_tokens),
       totalReasoningOutputTokens: toN(summaryRow.total_reasoning_output_tokens),
       totalTokens: toN(summaryRow.total_tokens),
-      totalDurationMs: toN(summaryRow.total_duration_ms),
+      totalDurationMs,
       totalLinesAdded: toN(summaryRow.total_lines_added),
       totalLinesRemoved: toN(summaryRow.total_lines_removed),
     },

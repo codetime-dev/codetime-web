@@ -31,12 +31,15 @@ defineRouteMeta({
         schemas: {
           UserOverallRankResponse: {
             type: 'object',
-            required: ['userId', 'username', 'totalMinutes', 'percentile', 'updatedAt'],
+            required: ['userId', 'username', 'updatedAt'],
+            // Public path: totalMinutes is nulled when the target user keeps
+            // history.totalTime private; percentile/rank are nulled when they
+            // opt out of the leaderboard. Self path always returns both.
             properties: {
               userId: { type: 'integer' },
               username: { type: 'string' },
-              totalMinutes: { type: 'integer' },
-              percentile: { type: 'number' },
+              totalMinutes: { type: 'integer', nullable: true },
+              percentile: { type: 'number', nullable: true },
               timeRangeDays: { type: 'integer', nullable: true },
               updatedAt: { type: 'string', format: 'date-time' },
             },

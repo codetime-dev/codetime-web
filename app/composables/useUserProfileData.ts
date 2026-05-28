@@ -3,6 +3,7 @@ import {
   getV3PublicUsersByUserIdOverallRank,
   getV3PublicUsersByUserIdTopLanguagesRank,
   getV3UsersByUserId,
+  getV3UsersByUserIdPublicTopProjects,
 } from '~/api/v3'
 
 // Handlers extracted to module scope so their `.toString()` is identical at
@@ -43,6 +44,16 @@ export async function fetchUserOverallRank(userId: number) {
 export async function fetchUserTopLanguages(userId: number) {
   try {
     const response = await getV3PublicUsersByUserIdTopLanguagesRank({ path: { user_id: userId } })
+    return response.data ?? null
+  }
+  catch {
+    return null
+  }
+}
+
+export async function fetchUserTopProjects(userId: number) {
+  try {
+    const response = await getV3UsersByUserIdPublicTopProjects({ path: { user_id: userId } })
     return response.data ?? null
   }
   catch {

@@ -42,10 +42,15 @@ export default defineEventHandler(async (event) => {
 
   const q = getQuery(event)
 
-  // Privacy ceiling: rank data is gated by the leaderboard opt-out plus the
-  // caller's surface master.
+  // Two facets gate this endpoint independently:
+  //   * history.languages → the language list itself (entries)
+  //   * leaderboardListed → each entry's `percentile` rank field
+  // Both share the caller's surface master (widgetsEnabled vs profilePublic).
   const privacy = resolveUserPrivacy(user.privacy)
-  if (!canExposePublicData(privacy, user.leaderboardListed, isWidgetCaller(q.widget))) {
+  const widgetCaller = isWidgetCaller(q.widget)
+  const showEntries = canExposePublicData(privacy, privacy.history.languages === 'public', widgetCaller)
+  const showPercentile = canExposePublicData(privacy, user.leaderboardListed, widgetCaller)
+  if (!showEntries) {
     return sendPyError(event, 403, 'Hidden by privacy settings')
   }
   const topN = Math.min(20, Math.max(1, Math.trunc(Number(q.top_n) || 5)))
@@ -57,7 +62,11 @@ export default defineEventHandler(async (event) => {
   return {
     userId: uid,
     username: user.username,
-    entries: rows.map(r => ({ language: r.language, totalMinutes: r.totalMinutes, percentile: r.percentile })),
+    entries: rows.map(r => ({
+      language: r.language,
+      totalMinutes: r.totalMinutes,
+      percentile: showPercentile ? r.percentile : null,
+    })),
     timeRangeDays: days,
     updatedAt: now.toISOString(),
   }

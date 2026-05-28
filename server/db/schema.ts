@@ -29,6 +29,10 @@ export const users = pgTable('users', {
   hideCurrentWorkspace: boolean('hide_current_workspace').notNull().default(false),
   hideCurrentLanguage: boolean('hide_current_language').notNull().default(false),
   githubId: bigint('github_id', { mode: 'number' }),
+  // GitHub username (the `login` field from api.github.com/user). Stored so
+  // we can render `https://github.com/<login>` on the public profile —
+  // there is no stable public URL keyed on the numeric `github_id`.
+  githubLogin: text('github_login'),
   // Apple's stable per-team user identifier (`sub` claim from the Apple
   // identity token). Opaque string, distinct from githubId/googleId.
   appleId: text('apple_id'),

@@ -186,6 +186,7 @@ export type UserPublic = {
     username: string;
     avatar?: string;
     githubId?: number;
+    githubLogin?: string;
     bio?: string;
     googleId?: string;
     plan: string;
@@ -213,6 +214,14 @@ export type TopPublic = {
 };
 
 export type WidgetTopLanguagesResponse = {
+    plan: string;
+    days: number;
+    limit: number;
+    capped: boolean;
+    items: Array<TopPublic>;
+};
+
+export type WidgetTopProjectsResponse = {
     plan: string;
     days: number;
     limit: number;
@@ -259,6 +268,7 @@ export type UserSelfPublic = {
     username: string;
     avatar?: string;
     githubId?: number;
+    githubLogin?: string;
     bio?: string;
     googleId?: string;
     appleId?: string;
@@ -295,8 +305,8 @@ export type SimpleMinutes = {
 export type UserOverallRankResponse = {
     userId: number;
     username: string;
-    totalMinutes: number;
-    percentile: number;
+    totalMinutes?: number;
+    percentile?: number;
     timeRangeDays?: number;
     updatedAt: Date;
 };
@@ -353,7 +363,7 @@ export type TimeDistributionResponse = {
 export type UserTopLanguageRankEntry = {
     language: string;
     totalMinutes: number;
-    percentile: number;
+    percentile?: number;
 };
 
 export type UserTopLanguagesRankResponse = {
@@ -1984,6 +1994,36 @@ export type GetV3UsersByUserIdPublicTopLanguagesResponses = {
 
 export type GetV3UsersByUserIdPublicTopLanguagesResponse = GetV3UsersByUserIdPublicTopLanguagesResponses[keyof GetV3UsersByUserIdPublicTopLanguagesResponses];
 
+export type GetV3UsersByUserIdPublicTopProjectsData = {
+    body?: never;
+    path: {
+        user_id: number;
+    };
+    query?: {
+        days?: number;
+        limit?: number;
+    };
+    url: '/v3/users/{user_id}/public/top-projects';
+};
+
+export type GetV3UsersByUserIdPublicTopProjectsErrors = {
+    /**
+     * Not found
+     */
+    404: PyError;
+};
+
+export type GetV3UsersByUserIdPublicTopProjectsError = GetV3UsersByUserIdPublicTopProjectsErrors[keyof GetV3UsersByUserIdPublicTopProjectsErrors];
+
+export type GetV3UsersByUserIdPublicTopProjectsResponses = {
+    /**
+     * Top projects by minutes
+     */
+    200: WidgetTopProjectsResponse;
+};
+
+export type GetV3UsersByUserIdPublicTopProjectsResponse = GetV3UsersByUserIdPublicTopProjectsResponses[keyof GetV3UsersByUserIdPublicTopProjectsResponses];
+
 export type GetV3UsersByUserIdPublicUsageData = {
     body?: never;
     path: {
@@ -1991,7 +2031,7 @@ export type GetV3UsersByUserIdPublicUsageData = {
     };
     query?: {
         /**
-         * Calendar-aligned window in the user's timezone; `all` covers full history.
+         * Window: calendar-aligned `today`/`week`/`month`/`year` (anchored to the user's timezone), rolling `24h`/`7d`/`30d`/`365d` (now − N days), or `all` for full history. Free plan is capped to the last 30 days regardless.
          */
         range?: never;
     };

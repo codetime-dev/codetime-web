@@ -32,11 +32,13 @@ defineRouteMeta({
         schemas: {
           UserTopLanguageRankEntry: {
             type: 'object',
-            required: ['language', 'totalMinutes', 'percentile'],
+            required: ['language', 'totalMinutes'],
+            // `percentile` is nulled on the public path when the target user
+            // is opted out of the leaderboard; always present for self.
             properties: {
               language: { type: 'string' },
               totalMinutes: { type: 'integer' },
-              percentile: { type: 'number' },
+              percentile: { type: 'number', nullable: true },
             },
           },
           UserTopLanguagesRankResponse: {

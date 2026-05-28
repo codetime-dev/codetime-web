@@ -31,8 +31,13 @@ const { data: topLanguages } = await useAsyncData(
   { watch: [uid] },
 )
 
-const totalHours = computed(() => Math.round((overallRank.value?.totalMinutes ?? 0) / 60))
-const languagesCount = computed(() => topLanguages.value?.entries?.length ?? 0)
+// Pass through null when the target hides the facet — the OG image template
+// renders "—" instead of a misleading 0.
+const totalHours = computed(() => {
+  const m = overallRank.value?.totalMinutes
+  return m == null ? null : Math.round(m / 60)
+})
+const languagesCount = computed(() => topLanguages.value?.entries?.length ?? null)
 
 watchEffect(() => {
   if (!user.value || userHidden.value) {
@@ -54,8 +59,8 @@ if (user.value && !userHidden.value) {
     username: user.value.username,
     avatar: user.value.avatar ?? '',
     bio: (user.value.bio ?? '').slice(0, 140),
-    totalHours: totalHours.value,
-    languages: languagesCount.value,
+    totalHours: totalHours.value ?? undefined,
+    languages: languagesCount.value ?? undefined,
     plan: String(user.value.plan ?? 'free'),
     locale: locale.value,
   }, {

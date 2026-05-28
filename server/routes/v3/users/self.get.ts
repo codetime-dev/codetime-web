@@ -48,6 +48,7 @@ defineRouteMeta({
               username: { type: 'string' },
               avatar: { type: 'string', nullable: true },
               githubId: { type: 'integer', nullable: true },
+              githubLogin: { type: 'string', nullable: true },
               bio: { type: 'string', nullable: true },
               googleId: { type: 'string', nullable: true },
               appleId: { type: 'string', nullable: true },

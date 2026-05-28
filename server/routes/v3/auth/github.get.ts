@@ -1,7 +1,7 @@
 import { defineEventHandler, deleteCookie, getCookie, getHeader, getQuery, getRequestURL, sendRedirect } from 'h3'
 import { tryUser } from '../../../utils/auth'
 import { setAuthCookies } from '../../../utils/auth-cookie'
-import { exchangeGithubCode, fetchGithubUser, frontendUrl, GITHUB_LINK_COOKIE, GITHUB_STATE_COOKIE, linkProviderIdentity, upsertGithubUser } from '../../../utils/oauth'
+import { exchangeGithubCode, fetchGithubUser, frontendUrl, GITHUB_LINK_COOKIE, GITHUB_STATE_COOKIE, linkProviderIdentity, setGithubLogin, upsertGithubUser } from '../../../utils/oauth'
 
 // Mirrors GET /v3/auth/github. Receives ?code= from the OAuth provider,
 // exchanges it for an access token, fetches the GitHub profile,
@@ -121,6 +121,11 @@ export default defineEventHandler(async (event) => {
       // refetches /v3/users/self to surface the new connection state.
       const outcome = await linkProviderIdentity(linkSession.id, 'githubId', ghUser.id)
       const settingsUrl = `${fe}/dashboard/settings`
+      // Mirror upsertGithubUser: persist the GitHub username alongside the
+      // numeric id so the public profile can render a github.com link.
+      if (outcome === 'linked' || outcome === 'already-yours') {
+        await setGithubLogin(linkSession.id, ghUser.login)
+      }
       switch (outcome) {
         case 'linked':
         case 'already-yours': {

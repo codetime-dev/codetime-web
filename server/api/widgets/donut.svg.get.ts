@@ -52,10 +52,19 @@ export default defineEventHandler(async (event) => {
   const days = Math.max(1, Math.min(365, Number(q.days ?? 30) || 30))
   const limit = Math.max(2, Math.min(12, Number(q.limit ?? 6) || 6))
   const theme = getTheme(typeof q.theme === 'string' ? q.theme : 'light')
+  // Two donut flavors share the same chart layout: top languages and top
+  // projects. The mode picks the upstream endpoint (each gated by its own
+  // privacy facet) and the legend header.
+  const mode = q.mode === 'projects' ? 'projects' : 'languages'
+  const upstream = mode === 'projects'
+    ? `/v3/users/${uid}/public/top-projects?days=${days}&limit=${limit}&widget=1`
+    : `/v3/users/${uid}/public/top-languages?days=${days}&limit=${limit}&widget=1`
+  const legendHeader = mode === 'projects' ? 'PROJECTS' : 'LANGUAGES'
+  const ariaLabel = mode === 'projects' ? 'Top projects' : 'Top languages'
 
   let payload: DonutPayload
   try {
-    const raw = await fetchWidgetJson<DonutResponse>(event, `/v3/users/${uid}/public/top-languages?days=${days}&limit=${limit}&widget=1`)
+    const raw = await fetchWidgetJson<DonutResponse>(event, upstream)
     payload = Array.isArray(raw) ? { items: raw } : raw
   }
   catch (error: unknown) {
@@ -113,12 +122,12 @@ export default defineEventHandler(async (event) => {
     .join('')
 
   const totalText = formatMinutes(total)
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Top languages, last ${effectiveDays} days">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${ariaLabel}, last ${effectiveDays} days">
   <rect width="${W}" height="${H}" rx="10" fill="${theme.bg}" stroke="${theme.border}"/>
   <g>${slicePaths}</g>
   <text x="${CX}" y="${CY - 8}" text-anchor="middle" dominant-baseline="central" font-family="${FONT_MONO}" font-size="14" fill="${theme.fg}" font-weight="600">${totalText}</text>
   <text x="${CX}" y="${CY + 9}" text-anchor="middle" dominant-baseline="central" font-family="${FONT_SANS}" font-size="9.5" fill="${theme.fgSubtle}">last ${effectiveDays}d</text>
-  <text x="${legendX}" y="${legendHeaderY}" dominant-baseline="central" font-family="${FONT_SANS}" font-size="10" fill="${theme.fgSubtle}" letter-spacing="0.08em">LANGUAGES</text>
+  <text x="${legendX}" y="${legendHeaderY}" dominant-baseline="central" font-family="${FONT_SANS}" font-size="10" fill="${theme.fgSubtle}" letter-spacing="0.08em">${legendHeader}</text>
   ${legend}
   <text x="${W - 10}" y="${H - 12}" text-anchor="end" dominant-baseline="central" font-family="${FONT_MONO}" font-size="9" fill="${theme.fgSubtle}">codetime.dev</text>
 </svg>`

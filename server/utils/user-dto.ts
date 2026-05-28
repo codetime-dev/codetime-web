@@ -14,6 +14,7 @@ export type UserSelfPublic = {
   username: string
   avatar: string | null
   githubId: number | null
+  githubLogin: string | null
   bio: string | null
   googleId: string | null
   appleId: string | null
@@ -33,6 +34,7 @@ export function toUserSelfPublic(row: typeof users.$inferSelect): UserSelfPublic
     username: row.username,
     avatar: row.avatar,
     githubId: row.githubId,
+    githubLogin: row.githubLogin,
     bio: row.bio,
     googleId: row.googleId,
     appleId: row.appleId,

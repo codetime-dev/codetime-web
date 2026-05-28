@@ -2,13 +2,16 @@
 // OG image for the public user profile page.
 // Rendered at 1200x630 by satori — keep styles inline.
 
+// `totalHours` / `languages` are nullable so the OG image renders "—" when
+// the target user has hidden the corresponding facet, rather than leaking
+// a misleading 0.
 withDefaults(
   defineProps<{
     username?: string
     avatar?: string
     bio?: string
-    totalHours?: number
-    languages?: number
+    totalHours?: number | null
+    languages?: number | null
     plan?: string
     locale?: string
   }>(),
@@ -16,8 +19,8 @@ withDefaults(
     username: '',
     avatar: '',
     bio: '',
-    totalHours: 0,
-    languages: 0,
+    totalHours: null,
+    languages: null,
     plan: 'free',
     locale: 'en',
   },
@@ -82,11 +85,11 @@ withDefaults(
       <div style="display: flex; gap: 36px;">
         <div style="display: flex; flex-direction: column; align-items: flex-end;">
           <span style="font-size: 14px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.1em;">Hours</span>
-          <span style="font-size: 40px; font-weight: 700;">{{ totalHours }}</span>
+          <span style="font-size: 40px; font-weight: 700;">{{ totalHours ?? '—' }}</span>
         </div>
         <div style="display: flex; flex-direction: column; align-items: flex-end;">
           <span style="font-size: 14px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.1em;">Languages</span>
-          <span style="font-size: 40px; font-weight: 700;">{{ languages }}</span>
+          <span style="font-size: 40px; font-weight: 700;">{{ languages ?? '—' }}</span>
         </div>
       </div>
     </div>

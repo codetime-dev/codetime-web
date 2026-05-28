@@ -634,6 +634,10 @@ export const UserPublicSchema = {
             type: 'integer',
             nullable: true
         },
+        githubLogin: {
+            type: 'string',
+            nullable: true
+        },
         bio: {
             type: 'string',
             nullable: true
@@ -714,6 +718,37 @@ export const TopPublicSchema = {
 } as const;
 
 export const WidgetTopLanguagesResponseSchema = {
+    type: 'object',
+    required: [
+        'plan',
+        'days',
+        'limit',
+        'capped',
+        'items'
+    ],
+    properties: {
+        plan: {
+            type: 'string'
+        },
+        days: {
+            type: 'integer'
+        },
+        limit: {
+            type: 'integer'
+        },
+        capped: {
+            type: 'boolean'
+        },
+        items: {
+            type: 'array',
+            items: {
+                $ref: '#/components/schemas/TopPublic'
+            }
+        }
+    }
+} as const;
+
+export const WidgetTopProjectsResponseSchema = {
     type: 'object',
     required: [
         'plan',
@@ -885,6 +920,10 @@ export const UserSelfPublicSchema = {
             type: 'integer',
             nullable: true
         },
+        githubLogin: {
+            type: 'string',
+            nullable: true
+        },
         bio: {
             type: 'string',
             nullable: true
@@ -1004,8 +1043,6 @@ export const UserOverallRankResponseSchema = {
     required: [
         'userId',
         'username',
-        'totalMinutes',
-        'percentile',
         'updatedAt'
     ],
     properties: {
@@ -1016,10 +1053,12 @@ export const UserOverallRankResponseSchema = {
             type: 'string'
         },
         totalMinutes: {
-            type: 'integer'
+            type: 'integer',
+            nullable: true
         },
         percentile: {
-            type: 'number'
+            type: 'number',
+            nullable: true
         },
         timeRangeDays: {
             type: 'integer',
@@ -1217,8 +1256,7 @@ export const UserTopLanguageRankEntrySchema = {
     type: 'object',
     required: [
         'language',
-        'totalMinutes',
-        'percentile'
+        'totalMinutes'
     ],
     properties: {
         language: {
@@ -1228,7 +1266,8 @@ export const UserTopLanguageRankEntrySchema = {
             type: 'integer'
         },
         percentile: {
-            type: 'number'
+            type: 'number',
+            nullable: true
         }
     }
 } as const;

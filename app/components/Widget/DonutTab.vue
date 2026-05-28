@@ -1,7 +1,10 @@
 <script setup lang="ts">
+type DonutMode = 'languages' | 'projects'
+
 const t = useI18N()
 const user = useUser()
 
+const mode = ref<DonutMode>('languages')
 const days = ref<number>(30)
 const limit = ref<number>(6)
 const theme = ref<'light' | 'dark'>('light')
@@ -14,9 +17,14 @@ const themeOptions = computed(() => [
   { id: 'light' as const, label: w.value?.theme.light ?? 'Light' },
   { id: 'dark' as const, label: w.value?.theme.dark ?? 'Dark' },
 ])
+const modeOptions = computed(() => [
+  { id: 'languages' as const, label: w.value?.donut.modeLanguages ?? 'Languages' },
+  { id: 'projects' as const, label: w.value?.donut.modeProjects ?? 'Projects' },
+])
 
 const rawParams = computed(() => ({
   uid: user.value?.id,
+  mode: mode.value,
   days: days.value,
   limit: limit.value,
   theme: theme.value,
@@ -28,15 +36,27 @@ const qs = computed(() => {
   if (!p.uid) {
     return ''
   }
-  return new URLSearchParams({
+  const params: Record<string, string> = {
     uid: String(p.uid),
     days: String(p.days),
     limit: String(p.limit),
     theme: p.theme,
-  }).toString()
+  }
+  // Keep the default URL clean for the languages mode — appending `mode=`
+  // only when needed avoids invalidating already-embedded share links.
+  if (p.mode === 'projects') {
+    params.mode = 'projects'
+  }
+  return new URLSearchParams(params).toString()
 })
 const previewLink = computed(() => qs.value ? `/api/widgets/donut.svg?${qs.value}` : '')
 const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/donut.svg?${qs.value}` : '')
+const previewTitle = computed(() => mode.value === 'projects'
+  ? (w.value?.donut.titleProjects ?? 'Top projects')
+  : (w.value?.donut.title ?? 'Top languages'))
+const limitLabel = computed(() => mode.value === 'projects'
+  ? (w.value?.donut.limitProjects ?? 'Projects')
+  : (w.value?.donut.limit ?? 'Languages'))
 </script>
 
 <template>
@@ -52,16 +72,19 @@ const embedLink = computed(() => qs.value ? `https://codetime.dev/api/widgets/do
     :cta-text="w?.limit.upgrade ?? 'Upgrade'"
   />
 
-  <WidgetPreviewCard :link="previewLink" :title="w?.donut.title ?? 'Top languages'" :height="180" />
+  <WidgetPreviewCard :link="previewLink" :title="previewTitle" :height="180" />
 
-  <PanelSection num="02" :title="t.dashboard.badge.configure" meta="window · count · theme" flush>
+  <PanelSection num="02" :title="t.dashboard.badge.configure" meta="mode · window · count · theme" flush>
     <template #icon>
       <i class="i-tabler-adjustments-horizontal text-[15px] text-ct-fg-muted" />
     </template>
+    <WidgetFormRow :label="w?.donut.mode ?? 'Mode'">
+      <WidgetFormSeg v-model="mode" :options="modeOptions" />
+    </WidgetFormRow>
     <WidgetFormRow :label="w?.donut.days ?? 'Days'">
       <WidgetFormNumberInput v-model="days" :min="1" :max="365" />
     </WidgetFormRow>
-    <WidgetFormRow :label="w?.donut.limit ?? 'Languages'">
+    <WidgetFormRow :label="limitLabel">
       <WidgetFormNumberInput v-model="limit" :min="2" :max="12" />
     </WidgetFormRow>
     <WidgetFormRow :label="w?.theme.label ?? 'Theme'">

@@ -12,7 +12,11 @@ await load()
 
 const savedTick = autoResetRef(false, 1800)
 
-type Item = { key: string, label: string, locked?: () => boolean }
+// `surface` names the exact place(s) the toggle controls — surfaced in the
+// UI as a small subtitle so users see "what flipping this hides" without
+// reading the docs. Keep names short; "profile"/"widget"/"badge" map 1:1
+// to user-visible pages.
+type Item = { key: string, label: string, surface: string, locked?: () => boolean }
 type Group = { label: string, hint?: () => string, items: Item[] }
 
 const widgetsOff = () => !privacy.value?.widgetsEnabled
@@ -23,36 +27,36 @@ const groups: Group[] = [
   {
     label: 'Discovery',
     items: [
-      { key: 'profilePublic', label: 'Public profile' },
-      { key: 'leaderboardListed', label: 'Leaderboards' },
-      { key: 'widgetsEnabled', label: 'Embeddable widgets' },
+      { key: 'profilePublic', label: 'Public profile', surface: '/user/<id> page' },
+      { key: 'leaderboardListed', label: 'Leaderboards', surface: 'rank · percentile' },
+      { key: 'widgetsEnabled', label: 'Embeddable widgets', surface: 'every SVG widget' },
     ],
   },
   {
     label: 'Identity',
     items: [
-      { key: 'identity.email', label: 'Email' },
-      { key: 'identity.github', label: 'GitHub' },
+      { key: 'identity.email', label: 'Email', surface: 'profile header' },
+      { key: 'identity.github', label: 'GitHub', surface: 'profile header · github.com link' },
     ],
   },
   {
     label: 'Live status',
     hint: () => (widgetsOff() ? 'widgets off' : ''),
     items: [
-      { key: 'status.coding', label: 'Currently coding', locked: widgetsOff },
-      { key: 'status.project', label: 'Project', locked: () => widgetsOff() || codingOff() },
-      { key: 'status.language', label: 'Language', locked: () => widgetsOff() || codingOff() },
-      { key: 'status.editor', label: 'Editor', locked: () => widgetsOff() || codingOff() },
+      { key: 'status.coding', label: 'Currently coding', surface: 'status widget', locked: widgetsOff },
+      { key: 'status.project', label: 'Project', surface: 'status widget', locked: () => widgetsOff() || codingOff() },
+      { key: 'status.language', label: 'Language', surface: 'status widget', locked: () => widgetsOff() || codingOff() },
+      { key: 'status.editor', label: 'Editor', surface: 'status widget', locked: () => widgetsOff() || codingOff() },
     ],
   },
   {
     label: 'History',
     hint: () => (allSurfacesOff() ? 'no surface' : ''),
     items: [
-      { key: 'history.totalTime', label: 'Total time', locked: allSurfacesOff },
-      { key: 'history.languages', label: 'Languages', locked: allSurfacesOff },
-      { key: 'history.projects', label: 'Projects', locked: allSurfacesOff },
-      { key: 'history.calendar', label: 'Calendar', locked: allSurfacesOff },
+      { key: 'history.totalTime', label: 'Total time', surface: 'profile · shield badge · OG image', locked: allSurfacesOff },
+      { key: 'history.languages', label: 'Languages', surface: 'profile · donut widget', locked: allSurfacesOff },
+      { key: 'history.projects', label: 'Projects', surface: 'profile · donut widget', locked: allSurfacesOff },
+      { key: 'history.calendar', label: 'Calendar', surface: 'profile · calendar/trend/usage widgets', locked: allSurfacesOff },
     ],
   },
 ]
@@ -121,7 +125,10 @@ async function toggle(item: Item) {
               @click="toggle(it)"
             >
               <i v-if="it.locked?.()" class="i-tabler-lock pv-item-lock" />
-              <span class="pv-item-label">{{ it.label }}</span>
+              <span class="pv-item-text">
+                <span class="pv-item-label">{{ it.label }}</span>
+                <span class="pv-item-surface">{{ it.surface }}</span>
+              </span>
               <span class="pv-sw" :class="{ 'pv-sw-on': getOn(it.key) }">
                 <span class="pv-sw-knob" />
               </span>
@@ -190,14 +197,28 @@ async function toggle(item: Item) {
 .pv-item:hover:not(:disabled) { background: var(--ct-surface-1); }
 .pv-item-locked { cursor: not-allowed; opacity: 0.5; }
 .pv-item-lock { font-size: 11px; color: var(--ct-fg-subtle); flex-shrink: 0; }
-.pv-item-label {
+.pv-item-text {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pv-item-label {
   font-size: 12.5px;
   color: var(--ct-fg);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.pv-item-surface {
+  font-family: var(--ct-font-mono);
+  font-size: 10px;
+  color: var(--ct-fg-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.78;
 }
 
 /* compact switch — ON = visible */

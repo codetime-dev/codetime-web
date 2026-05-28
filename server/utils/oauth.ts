@@ -103,6 +103,9 @@ export async function upsertGithubUser(gh: GithubUser): Promise<{ id: number, to
     if (gh.avatar_url) {
       patch.avatar = gh.avatar_url
     }
+    if (gh.login && existing.githubLogin !== gh.login) {
+      patch.githubLogin = gh.login
+    }
     // Some legacy rows (carried over from the Vue/Next-era backends) have
     // `token_v1 = ''` / `upload_token = ''` even though the columns are
     // NOT NULL. The cookie pair / Bearer header we mint then carries an
@@ -129,6 +132,7 @@ export async function upsertGithubUser(gh: GithubUser): Promise<{ id: number, to
   const now = new Date()
   const [created] = await db.insert(users).values({
     githubId: gh.id,
+    githubLogin: gh.login,
     email: gh.email,
     username: gh.login,
     avatar: gh.avatar_url,
@@ -595,6 +599,20 @@ export async function linkProviderIdentity(
   return 'linked'
 }
 
+// Persist a fresh GitHub `login` for an already-linked user. Used by the
+// /v3/auth/github link branch (which only patches github_id) and any future
+// re-link path — kept idempotent so callers don't need to read first.
+export async function setGithubLogin(userId: number, login: string): Promise<void> {
+  if (!login) {
+    return
+  }
+  const db = useDb()
+  await db
+    .update(users)
+    .set({ githubLogin: login, updatedAt: new Date() })
+    .where(eq(users.id, userId))
+}
+
 export type UnlinkOutcome = 'unlinked' | 'not-linked' | 'last-one'
 
 // Refuses to remove the LAST connected provider — once all three OAuth
@@ -613,9 +631,16 @@ export async function unlinkProviderIdentity(
   if (!hasAnother) {
     return 'last-one'
   }
+  // Clear github_login alongside github_id — without the numeric id the
+  // login is dangling and the public profile would still try to render the
+  // link icon.
+  const patch: Record<string, any> = { [field]: null, updatedAt: new Date() }
+  if (field === 'githubId') {
+    patch.githubLogin = null
+  }
   await db
     .update(users)
-    .set({ [field]: null as any, updatedAt: new Date() })
+    .set(patch)
     .where(eq(users.id, userId))
   return 'unlinked'
 }

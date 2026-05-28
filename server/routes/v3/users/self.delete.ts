@@ -77,6 +77,7 @@ export default defineEventHandler(async (event) => {
         paypalSubscriptionId: null,
         googleId: null,
         githubId: null,
+        githubLogin: null,
         appleId: null,
         username: `deleted_${uid}`,
         uploadToken: randomBytes(24).toString('hex'),
