@@ -258,7 +258,11 @@ export function compact(value: number): string {
 // agent-time/utils/format.ts so renames in their special-case table
 // are easy to mirror here.
 export function formatModelName(model: string): string {
-  const name = model.includes('/') ? model.split('/').pop()! : model
+  const bare = model.includes('/') ? model.split('/').pop()! : model
+  // Collapse dashes *between version digits* into dots so `claude-opus-4-8`
+  // renders as `Claude Opus 4.8` rather than `Claude Opus 4 8`. The
+  // lookahead keeps an 8-digit release date (`...-4-5-20251001`) intact.
+  const name = bare.replaceAll(/(\d+)-(\d+)(?=-|$)/g, '$1.$2')
 
   const special: Record<string, string> = {
     gpt: 'GPT',

@@ -45,6 +45,7 @@ const FALLBACK: Record<string, ModelPrice> = {
   'claude-sonnet-4-6': fbPrice('Claude Sonnet 4.6', 3e-6, 3e-7, 1.5e-5, 3.75e-6),
   'claude-opus-4-6': fbPrice('Claude Opus 4.6', 5e-6, 5e-7, 25e-6, 6.25e-6),
   'claude-opus-4-7': fbPrice('Claude Opus 4.7', 5e-6, 5e-7, 25e-6, 6.25e-6),
+  'claude-opus-4-8': fbPrice('Claude Opus 4.8', 5e-6, 5e-7, 25e-6, 6.25e-6),
   'claude-haiku-4-5': fbPrice('Claude Haiku 4.5', 1e-6, 1e-7, 5e-6, 1.25e-6),
   'deepseek-chat': fbPrice('DeepSeek Chat', 2.8e-7, 2.8e-8, 4.2e-7),
   'deepseek-reasoner': fbPrice('DeepSeek Reasoner', 2.8e-7, 2.8e-8, 4.2e-7),
@@ -61,7 +62,7 @@ const FALLBACK: Record<string, ModelPrice> = {
 //   Sonnet and Haiku have no fast variant — do not synthesize one.
 // - OpenAI Codex: `service_tier = fast | priority` maps to ×2 across
 //   the board (matches ccusage's CODEX_FAST_FALLBACK_MULTIPLIER).
-addFastVariants(FALLBACK, ['claude-opus-4-6', 'claude-opus-4-7'], 6)
+addFastVariants(FALLBACK, ['claude-opus-4-6', 'claude-opus-4-7', 'claude-opus-4-8'], 6)
 addFastVariants(FALLBACK, [
   'gpt-5',
   'gpt-5-codex',
