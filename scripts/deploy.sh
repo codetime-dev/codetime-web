@@ -57,8 +57,11 @@ if [[ -d "$SNAPSHOT_DIR" ]]; then
 fi
 
 log "Reloading PM2"
+# Reload via the ecosystem file (not the app name) so loadDotEnv() in
+# ecosystem.config.cjs re-runs and picks up any .env changes. Reloading by
+# name reuses PM2's saved process config and silently keeps the stale env.
 if pm2 describe CodetimeWebV3 >/dev/null 2>&1; then
-  pm2 reload CodetimeWebV3 --update-env
+  pm2 reload ecosystem.config.cjs --update-env
 else
   pm2 start ecosystem.config.cjs
 fi
