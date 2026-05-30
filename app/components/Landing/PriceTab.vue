@@ -3,11 +3,12 @@ type Variant = 'monthly' | 'one-time' | 'annual'
 
 const variant = defineModel<Variant>()
 const t = useI18N()
+const { annualDiscountPercent } = useProPricing()
 
 const items = computed(() => [
   { id: 'monthly' as Variant, label: t.value.plan.monthly, meta: t.value.plan.mostFlexible },
   { id: 'one-time' as Variant, label: t.value.plan.oneTime, meta: 'icons', metaClass: 'pt-tab-icons' },
-  { id: 'annual' as Variant, label: t.value.plan.yearly, meta: t.value.plan.save25 },
+  { id: 'annual' as Variant, label: t.value.plan.yearly, meta: t.value.plan.savePercent(annualDiscountPercent.value) },
 ])
 </script>
 

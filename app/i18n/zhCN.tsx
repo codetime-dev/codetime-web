@@ -117,7 +117,7 @@ export const zhCN: Partial<Translation> = {
   plan: {
     monthly: '月付',
     yearly: '年付',
-    save25: '省 25%',
+    savePercent: (p: number) => `省 ${p}%`,
     oneTime: '一次性',
     mostFlexible: '最灵活',
     mostPopular: '最受欢迎',

@@ -1,4 +1,3 @@
-import process from 'node:process'
 import { createCheckout } from '@lemonsqueezy/lemonsqueezy.js'
 import { eq } from 'drizzle-orm'
 import { defineEventHandler, readBody } from 'h3'
@@ -7,6 +6,7 @@ import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { isProduction } from '../../../utils/env'
 import { useLemonSqueezy } from '../../../utils/lemonsqueezy'
+import { resolveVariantId } from '../../../utils/lemonsqueezy-variants'
 import { sendPyError } from '../../../utils/py-error'
 
 // Mirrors POST /v3/payments/checkout. Resolves variant id from
@@ -60,11 +60,6 @@ defineRouteMeta({
     },
   },
 })
-
-function resolveVariantId(billingType: string, product: string): string | null {
-  const key = `LEMONSQUEEZY_${product.toUpperCase()}_ID_${billingType.toUpperCase()}`
-  return process.env[key] || null
-}
 
 const isDev = !isProduction() || !!import.meta.dev
 

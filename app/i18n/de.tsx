@@ -102,7 +102,7 @@ export const de: Partial<Translation> = {
   plan: {
     monthly: 'Monatlich',
     yearly: 'Jährlich',
-    save25: '25% sparen',
+    savePercent: (p: number) => `${p}% sparen`,
     oneTime: 'Einmalig',
     mostFlexible: 'Am flexibelsten',
     mostPopular: 'Am beliebtesten',

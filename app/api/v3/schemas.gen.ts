@@ -134,6 +134,48 @@ export const CheckoutResponseSchema = {
     }
 } as const;
 
+export const PricingPublicSchema = {
+    type: 'object',
+    required: [
+        'currency',
+        'subscriptionMonthly',
+        'subscriptionYearly',
+        'onetimeMonthly',
+        'onetimeYearly',
+        'annualDiscountPercent'
+    ],
+    properties: {
+        currency: {
+            type: 'string'
+        },
+        subscriptionMonthly: {
+            type: 'integer',
+            nullable: true,
+            description: 'Price in cents'
+        },
+        subscriptionYearly: {
+            type: 'integer',
+            nullable: true,
+            description: 'Price in cents'
+        },
+        onetimeMonthly: {
+            type: 'integer',
+            nullable: true,
+            description: 'Price in cents'
+        },
+        onetimeYearly: {
+            type: 'integer',
+            nullable: true,
+            description: 'Price in cents'
+        },
+        annualDiscountPercent: {
+            type: 'integer',
+            nullable: true,
+            description: 'Yearly vs monthly×12 saving, in percent'
+        }
+    }
+} as const;
+
 export const ProductPublicSchema = {
     type: 'object',
     required: [

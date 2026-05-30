@@ -102,7 +102,7 @@ export const ja: Partial<Translation> = {
   plan: {
     monthly: '月額',
     yearly: '年額',
-    save25: '25% オフ',
+    savePercent: (p: number) => `${p}% オフ`,
     oneTime: '一度きり',
     mostFlexible: '最も柔軟',
     mostPopular: '最も人気',

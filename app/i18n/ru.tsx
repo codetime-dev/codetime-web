@@ -111,7 +111,7 @@ export const ru: Partial<Translation> = {
   plan: {
     monthly: 'Ежемесячно',
     yearly: 'Ежегодно',
-    save25: 'Сэкономьте 25%',
+    savePercent: (p: number) => `Сэкономьте ${p}%`,
     oneTime: 'Единоразово',
     mostFlexible: 'Самый гибкий',
     mostPopular: 'Самый популярный',

@@ -116,7 +116,7 @@ export const en: Translation = {
   plan: {
     monthly: 'Monthly',
     yearly: 'Yearly',
-    save25: 'Save 25%',
+    savePercent: (p: number) => `Save ${p}%`,
     oneTime: 'One-time',
     mostFlexible: 'Most Flexible',
     mostPopular: 'Most Popular',

@@ -22,19 +22,18 @@ const isAnnual = computed(() => variant.value === 'annual')
 const isOneTime = computed(() => variant.value === 'one-time')
 
 const { getCheckoutLink } = useCheckoutLink(isAnnual, isOneTime)
+const { formatVariantPrice, annualDiscountPercent } = useProPricing()
 
 const tabs = computed<{ id: Variant, label: string, meta?: string }[]>(() => [
   { id: 'monthly', label: t.value.plan.monthly },
   { id: 'one-time', label: t.value.plan.oneTime },
-  { id: 'annual', label: t.value.plan.yearly, meta: t.value.plan.save25 },
+  { id: 'annual', label: t.value.plan.yearly, meta: t.value.plan.savePercent(annualDiscountPercent.value) },
 ])
 
-const price = computed(() => {
-  if (isAnnual.value) {
-    return { amount: '$36', unit: t.value.plan.pro.preYear }
-  }
-  return { amount: '$4', unit: t.value.plan.pro.preMonth }
-})
+const price = computed(() => ({
+  amount: formatVariantPrice(variant.value),
+  unit: isAnnual.value ? t.value.plan.pro.preYear : t.value.plan.pro.preMonth,
+}))
 
 const features = computed(() => [
   t.value.plan.pro.features.item.include,

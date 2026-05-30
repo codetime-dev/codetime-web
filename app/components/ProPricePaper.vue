@@ -21,6 +21,7 @@ function onLogin() {
 }
 
 const { getCheckoutLink } = useCheckoutLink(isAnuual, isOneTime)
+const { formatVariantPrice } = useProPricing()
 const locale = useLocale()
 const discountRef = ref()
 watchEffect(() => {
@@ -346,7 +347,7 @@ async function toCheckoutLink() {
             'ppp-price-monthly': !isAnuual,
           }"
         >
-          {{ isAnuual ? '$36' : '$4' }}
+          {{ formatVariantPrice(variant) }}
         </div>
         <div class="ppp-price-unit">
           {{ isAnuual ? t.plan.pro.preYear : t.plan.pro.preMonth }}

@@ -46,6 +46,30 @@ export type CheckoutResponse = {
     expiresAt: Date;
 };
 
+export type PricingPublic = {
+    currency: string;
+    /**
+     * Price in cents
+     */
+    subscriptionMonthly: number;
+    /**
+     * Price in cents
+     */
+    subscriptionYearly: number;
+    /**
+     * Price in cents
+     */
+    onetimeMonthly: number;
+    /**
+     * Price in cents
+     */
+    onetimeYearly: number;
+    /**
+     * Yearly vs monthly×12 saving, in percent
+     */
+    annualDiscountPercent: number;
+};
+
 export type ProductPublic = {
     id: string;
     name: string;
@@ -1406,6 +1430,22 @@ export type PostV3PaymentsCheckoutResponses = {
 };
 
 export type PostV3PaymentsCheckoutResponse = PostV3PaymentsCheckoutResponses[keyof PostV3PaymentsCheckoutResponses];
+
+export type GetV3PaymentsPricingData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v3/payments/pricing';
+};
+
+export type GetV3PaymentsPricingResponses = {
+    /**
+     * Pricing
+     */
+    200: PricingPublic;
+};
+
+export type GetV3PaymentsPricingResponse = GetV3PaymentsPricingResponses[keyof GetV3PaymentsPricingResponses];
 
 export type GetV3PaymentsProductsData = {
     body?: never;

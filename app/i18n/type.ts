@@ -116,7 +116,7 @@ export type Translation = {
   plan: {
     monthly: string
     yearly: string
-    save25: string
+    savePercent: (p: number) => string
     oneTime: string
     mostFlexible: string
     mostPopular: string

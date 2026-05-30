@@ -7,6 +7,7 @@ const isAnuual = computed({
   },
 })
 const t = useI18N()
+const { formatVariantPrice } = useProPricing()
 </script>
 
 <template>
@@ -73,7 +74,7 @@ const t = useI18N()
                 class="text-5xl leading-none tracking-tight font-light"
                 :class="isAnuual ? 'text-error' : 'text-primary'"
               >
-                {{ isAnuual ? '$36' : '$4' }}
+                {{ formatVariantPrice(variant) }}
               </span>
               <span class="text-sm text-ct-fg-muted mb-1">{{ isAnuual ? t.plan.pro.preYear : t.plan.pro.preMonth }}</span>
             </div>
