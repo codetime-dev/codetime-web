@@ -23,6 +23,8 @@ const isOneTime = computed(() => variant.value === 'one-time')
 
 const { getCheckoutLink } = useCheckoutLink(isAnnual, isOneTime)
 const { formatVariantPrice, annualDiscountPercent } = useProPricing()
+// Same active-discount source as the landing banner; rendered inline here.
+const { discountText } = useActiveDiscount()
 
 const tabs = computed<{ id: Variant, label: string, meta?: string }[]>(() => [
   { id: 'monthly', label: t.value.plan.monthly },
@@ -173,6 +175,14 @@ onBeforeUnmount(() => {
                 <span>{{ f }}</span>
               </li>
             </ul>
+
+            <div
+              v-if="user && user.plan !== 'pro' && discountText"
+              class="pum-discount"
+            >
+              <i class="i-tabler-discount-2 pum-discount-icon" />
+              <span>{{ discountText }}</span>
+            </div>
 
             <ClientOnly>
               <button
@@ -436,6 +446,24 @@ onBeforeUnmount(() => {
   width: 14px;
   height: 14px;
   color: var(--ct-primary);
+}
+
+.pum-discount {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: var(--ct-text-xs);
+  line-height: 1.5;
+  color: var(--ct-primary);
+  background: var(--ct-primary-soft);
+  border-radius: var(--ct-radius-lg);
+}
+.pum-discount-icon {
+  margin-top: 1px;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .pum-cta {

@@ -192,6 +192,11 @@ useHead({
 </script>
 
 <template>
+  <!-- Promo banner: mounted at the page root (outside the OnVisible-gated
+       pricing table) so the active discount is fetched on page load, not on
+       scroll. Renders a Teleport into <body>. -->
+  <DiscountBanner />
+
   <!-- HERO -->
   <section class="hero relative overflow-hidden">
     <div class="hero-grid" aria-hidden="true" />
