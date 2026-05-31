@@ -113,6 +113,9 @@ export const CheckoutRequestSchema = {
                 'subscription',
                 'onetime'
             ]
+        },
+        locale: {
+            type: 'string'
         }
     }
 } as const;

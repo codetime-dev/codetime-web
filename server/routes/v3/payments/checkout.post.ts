@@ -5,7 +5,7 @@ import { users } from '../../../db/schema'
 import { tryUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { isProduction } from '../../../utils/env'
-import { useLemonSqueezy } from '../../../utils/lemonsqueezy'
+import { siteLocaleToLemonSqueezy, useLemonSqueezy } from '../../../utils/lemonsqueezy'
 import { resolveVariantId } from '../../../utils/lemonsqueezy-variants'
 import { sendPyError } from '../../../utils/py-error'
 
@@ -45,6 +45,10 @@ defineRouteMeta({
             properties: {
               type: { type: 'string', enum: ['monthly', 'yearly'] },
               product: { type: 'string', enum: ['subscription', 'onetime'] },
+              // Optional site UI locale (the `[locale]` route param). Mapped to a
+              // LemonSqueezy checkout language so the hosted page matches the
+              // language the user is browsing in. Unknown values are ignored.
+              locale: { type: 'string' },
             },
           },
           CheckoutResponse: {
@@ -69,7 +73,7 @@ export default defineEventHandler(async (event) => {
  return sendPyError(event, 401, 'Not authenticated')
 }
 
-  const body = await readBody<{ type?: string, product?: string }>(event).catch(() => null)
+  const body = await readBody<{ type?: string, product?: string, locale?: string }>(event).catch(() => null)
   const type = (body?.type ?? '').toLowerCase()
   const product = (body?.product ?? '').toLowerCase()
   if (!ALLOWED_TYPES.has(type) || !ALLOWED_PRODUCTS.has(product)) {
@@ -97,14 +101,25 @@ export default defineEventHandler(async (event) => {
 
   const { storeId } = useLemonSqueezy()
   const email = user.email?.trim()
-  const { data, error, statusCode: lsStatus } = await createCheckout(storeId, variantId, {
+  const newCheckout: Parameters<typeof createCheckout>[2] = {
     testMode: isDev,
     checkoutData: {
       name: user.username || '',
       ...(email ? { email } : {}),
       custom: { uid: String(user.id) },
     },
-  })
+  }
+
+  // Force the checkout language to match the site UI locale. The SDK's v4
+  // CheckoutOptions type predates LemonSqueezy's `locale` field, but the SDK
+  // forwards unknown keys verbatim (deep snake_case conversion) and the API
+  // honours `checkout_options.locale` above store/browser defaults.
+  const lsLocale = siteLocaleToLemonSqueezy(body?.locale)
+  if (lsLocale) {
+    ;(newCheckout as { checkoutOptions?: Record<string, unknown> }).checkoutOptions = { locale: lsLocale }
+  }
+
+  const { data, error, statusCode: lsStatus } = await createCheckout(storeId, variantId, newCheckout)
 
   if (error || !data?.data?.attributes?.url) {
     // Forward LemonSqueezy's HTTP status so callers can distinguish

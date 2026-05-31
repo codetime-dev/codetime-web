@@ -2,6 +2,9 @@ import { postV3PaymentsCheckout } from '~/api/v3'
 
 export function useCheckoutLink(isAnuual: Ref<boolean>, isOneTime: Ref<boolean>) {
   const user = useUser()
+  // Current site UI locale, forwarded so the hosted checkout renders in the
+  // same language instead of LemonSqueezy's flaky browser/IP detection.
+  const locale = useLocale()
 
   // Errors are swallowed deliberately: the SDK is configured with
   // throwOnError, but this helper is awaited at the top of User.vue's
@@ -22,6 +25,7 @@ export function useCheckoutLink(isAnuual: Ref<boolean>, isOneTime: Ref<boolean>)
         body: {
           type: isAnuual.value ? 'yearly' : 'monthly',
           product: isOneTime.value ? 'onetime' : 'subscription',
+          locale: locale.value,
         },
       })
       return resp.data?.checkoutUrl ?? null

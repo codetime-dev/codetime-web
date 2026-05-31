@@ -39,6 +39,7 @@ export type YearlyReportDataPublic = {
 export type CheckoutRequest = {
     type: 'monthly' | 'yearly';
     product: 'subscription' | 'onetime';
+    locale?: string;
 };
 
 export type CheckoutResponse = {
