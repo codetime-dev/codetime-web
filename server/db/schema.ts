@@ -378,3 +378,22 @@ export const agentTimeBuckets = pgTable('agent_time_buckets', {
 }))
 
 export type AgentTimeBucketRow = typeof agentTimeBuckets.$inferSelect
+
+// Rendezvous rows for the browser-based `codetime login` (device-code
+// flow). The CLI starts a row, the user approves it from a signed-in
+// browser tab, and the CLI polls until `approved_at` is set. Rows are
+// short-lived (see CLI_LINK_TTL_SECONDS) and deleted on the first
+// successful poll — they never store the upload token itself, only the
+// user id to resolve it at poll time. `device_code` is the secret the
+// CLI polls with; `user_code` is the public value carried in the
+// /cli/auth?code=… URL the browser opens.
+export const cliLinkCodes = pgTable('cli_link_codes', {
+  deviceCode: text('device_code').primaryKey(),
+  userCode: text('user_code').notNull().unique(),
+  userId: bigint('user_id', { mode: 'number' }),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+})
+
+export type CliLinkCodeRow = typeof cliLinkCodes.$inferSelect

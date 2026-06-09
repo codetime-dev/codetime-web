@@ -26,6 +26,12 @@ const LIMITS: Record<string, Limit> = {
   '/v3/auth/github/native-callback': { capacity: 30, refillPerSec: 30 / 60 },
   '/v3/auth/refresh-token': { capacity: 10, refillPerSec: 10 / 60 },
   '/v3/users/self/delete-challenge': { capacity: 10, refillPerSec: 10 / 60 },
+  // Device-code login. `poll` is hit repeatedly (every few seconds for up
+  // to 10 min) so it gets a roomier sustained rate; start/approve are
+  // one-shot per login.
+  '/v3/agent/cli/link/start': { capacity: 20, refillPerSec: 20 / 60 },
+  '/v3/agent/cli/link/poll': { capacity: 60, refillPerSec: 1 },
+  '/v3/agent/cli/link/approve': { capacity: 20, refillPerSec: 20 / 60 },
 }
 
 function clientIp(event: H3Event): string {

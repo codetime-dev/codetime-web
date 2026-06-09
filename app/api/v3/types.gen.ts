@@ -423,6 +423,97 @@ export type ShieldResponse = {
     color: string;
 };
 
+export type PostV3AgentCliLinkApproveData = {
+    body: {
+        userCode: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/agent/cli/link/approve';
+};
+
+export type PostV3AgentCliLinkApproveErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+    /**
+     * Not authenticated
+     */
+    401: PyError;
+    /**
+     * Not found
+     */
+    404: PyError;
+};
+
+export type PostV3AgentCliLinkApproveError = PostV3AgentCliLinkApproveErrors[keyof PostV3AgentCliLinkApproveErrors];
+
+export type PostV3AgentCliLinkApproveResponses = {
+    /**
+     * Approved
+     */
+    200: {
+        ok: boolean;
+    };
+};
+
+export type PostV3AgentCliLinkApproveResponse = PostV3AgentCliLinkApproveResponses[keyof PostV3AgentCliLinkApproveResponses];
+
+export type PostV3AgentCliLinkPollData = {
+    body: {
+        deviceCode: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v3/agent/cli/link/poll';
+};
+
+export type PostV3AgentCliLinkPollErrors = {
+    /**
+     * Invalid request
+     */
+    400: PyError;
+};
+
+export type PostV3AgentCliLinkPollError = PostV3AgentCliLinkPollErrors[keyof PostV3AgentCliLinkPollErrors];
+
+export type PostV3AgentCliLinkPollResponses = {
+    /**
+     * Current status of the login
+     */
+    200: {
+        status: 'pending' | 'approved' | 'expired';
+        token?: string;
+        userId?: number;
+    };
+};
+
+export type PostV3AgentCliLinkPollResponse = PostV3AgentCliLinkPollResponses[keyof PostV3AgentCliLinkPollResponses];
+
+export type PostV3AgentCliLinkStartData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v3/agent/cli/link/start';
+};
+
+export type PostV3AgentCliLinkStartResponses = {
+    /**
+     * A pending link code pair
+     */
+    200: {
+        deviceCode: string;
+        userCode: string;
+        verificationUri: string;
+        verificationUriComplete: string;
+        interval: number;
+        expiresIn: number;
+    };
+};
+
+export type PostV3AgentCliLinkStartResponse = PostV3AgentCliLinkStartResponses[keyof PostV3AgentCliLinkStartResponses];
+
 export type GetV3AgentDashboardData = {
     body?: never;
     path?: never;
