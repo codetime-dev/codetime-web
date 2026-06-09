@@ -18,6 +18,11 @@ type RangeState
 const days = defineModel<number>('days', { default: 28 })
 const startTime = defineModel<Date | null>('startTime', { default: null })
 const endTime = defineModel<Date | null>('endTime', { default: null })
+// Serialized preset intent ('ytd', 'week:0', 'rolling:28', …) for
+// callers that persist the picker across reloads. Without it, semantic
+// picks like "year to date" can only be restored from their concrete
+// start/end pair and degrade to a custom date label.
+const preset = defineModel<string | null>('preset', { default: null })
 
 const t = useI18N()
 const user = useUser()
@@ -56,9 +61,64 @@ function addDays(d: Date, n: number): Date {
   return x
 }
 
+function serializeState(s: RangeState): string {
+  switch (s.kind) {
+    case 'today': { return 'today'
+    }
+    case 'rolling': { return `rolling:${s.days}`
+    }
+    case 'week': { return `week:${s.offset}`
+    }
+    case 'month': { return `month:${s.offset}`
+    }
+    case 'ytd': { return 'ytd'
+    }
+    case 'all': { return 'all'
+    }
+    case 'custom': { return 'custom'
+    }
+  }
+}
+
+function parsePreset(raw: string): RangeState | null {
+  if (raw === 'today' || raw === 'ytd' || raw === 'all') {
+    return { kind: raw }
+  }
+  if (raw === 'custom') {
+    // Concrete bounds live in the start/end models; without them a
+    // bare 'custom' marker is unusable.
+    return startTime.value && endTime.value
+      ? { kind: 'custom', start: startTime.value, end: endTime.value }
+      : null
+  }
+  const m = /^(rolling|week|month):(-?\d+)$/.exec(raw)
+  if (!m) {
+    return null
+  }
+  const n = Number(m[2])
+  if (!Number.isFinite(n)) {
+    return null
+  }
+  if (m[1] === 'rolling') {
+    return n >= 1 ? { kind: 'rolling', days: n } : null
+  }
+  if (m[1] === 'week') {
+    return n <= 0 ? { kind: 'week', offset: n } : null
+  }
+  return n <= 0 ? { kind: 'month', offset: n } : null
+}
+
 // Reconstruct the preset from the inbound v-models on mount so deep
-// links / SSR-restored URLs still pick the right label.
+// links / SSR-restored URLs still pick the right label. A persisted
+// `preset` model wins when parseable — it carries the user's intent,
+// which a concrete start/end pair alone can't recover.
 function inferInitial(): RangeState {
+  if (preset.value) {
+    const restored = parsePreset(preset.value)
+    if (restored && !gated(restored)) {
+      return restored
+    }
+  }
   if (startTime.value && endTime.value) {
     // Recognise the today preset by its exact bounds so deep links /
     // SSR-restored URLs keep the right label.
@@ -75,6 +135,13 @@ function inferInitial(): RangeState {
   return { kind: 'rolling', days: days.value }
 }
 const state = ref<RangeState>(inferInitial())
+
+// Now-relative presets restored from a previous visit must re-anchor:
+// a "year to date" persisted yesterday extends to today on reload
+// instead of staying frozen at yesterday's bounds.
+if (preset.value && state.value.kind !== 'custom') {
+  pushModels(state.value)
+}
 
 function isPro(): boolean {
   return user.value?.plan !== 'free'
@@ -99,6 +166,7 @@ function applyState(s: RangeState) {
     return
   }
   state.value = s
+  preset.value = serializeState(s)
   pushModels(s)
 }
 

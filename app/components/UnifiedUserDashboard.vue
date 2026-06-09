@@ -65,6 +65,17 @@ const customEndTime = props.demoMode
         write: (v: Date | null) => v ? v.toISOString() : '',
       },
     })
+// Semantic preset id ('ytd', 'week:0', …) persisted alongside the
+// concrete dates so reloads restore the user's intent — "year to date"
+// stays "year to date" instead of degrading to a custom date label.
+const rangePreset = props.demoMode
+  ? ref<string | null>('ytd')
+  : useLocalStorage<string | null>('range-preset', null, {
+      serializer: {
+        read: (v: string) => v || null,
+        write: (v: string | null) => v ?? '',
+      },
+    })
 const segments = ref(5)
 
 const isCustomRange = computed(() => !!customStartTime.value && !!customEndTime.value)
@@ -502,6 +513,7 @@ watchEffect(() => {
             v-model:days="days"
             v-model:start-time="customStartTime"
             v-model:end-time="customEndTime"
+            v-model:preset="rangePreset"
           />
         </PanelSection>
 
