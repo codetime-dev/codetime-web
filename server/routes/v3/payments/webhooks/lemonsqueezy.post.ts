@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import process from 'node:process'
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import { defineEventHandler, getHeader, readRawBody } from 'h3'
 import { lemonsqueezyRawWebhooks, users } from '../../../../db/schema'
 import { useDb } from '../../../../utils/db'
@@ -96,12 +96,56 @@ async function loadUser(db: ReturnType<typeof useDb>, uid: number) {
   return user ?? null
 }
 
-async function handleSubscriptionCreated(db: ReturnType<typeof useDb>, w: Webhook) {
-  const uid = uidOf(w)
-  if (!uid) {
- return
+function userEmailOf(webhook: Webhook): string | null {
+  const raw = webhook.data?.attributes?.user_email
+  if (typeof raw !== 'string') {
+    return null
+  }
+  const trimmed = raw.trim()
+  return trimmed.length > 0 ? trimmed : null
 }
-  const user = await loadUser(db, uid)
+
+// Resolve the paying user for an activation event (order_created /
+// subscription_created). The happy path is `meta.custom_data.uid`, which we
+// attach when *we* create the checkout (/checkout/custom/...). But orders
+// placed through the public storefront or a /buy/<slug> direct link arrive
+// with NO custom_data — so fall back to matching LemonSqueezy's `user_email`
+// against a single non-deleted account. If nothing resolves (or the email is
+// ambiguous), log loudly instead of silently dropping the sale; the raw
+// payload is always persisted in lemonsqueezy_raw_webhooks for manual triage.
+async function resolveActivationUser(db: ReturnType<typeof useDb>, w: Webhook) {
+  const uid = uidOf(w)
+  if (uid) {
+    const user = await loadUser(db, uid)
+    if (user) {
+      return user
+    }
+  }
+
+  const event = w.meta?.event_name
+  const orderId = w.data?.id
+  const email = userEmailOf(w)
+  if (email) {
+    const matches = await db
+      .select()
+      .from(users)
+      .where(and(sql`lower(${users.email}) = lower(${email})`, isNull(users.deletedAt)))
+      .limit(2)
+    if (matches.length === 1) {
+      return matches[0]
+    }
+    if (matches.length > 1) {
+      console.error(`[ls-webhook] ${event}: user_email ${email} matches multiple accounts; NOT auto-activating order ${orderId}`)
+      return null
+    }
+  }
+
+  console.error(`[ls-webhook] ${event}: could not resolve user (uid=${uid ?? 'none'}, email=${email ?? 'none'}, order=${orderId}); payment NOT activated`)
+  return null
+}
+
+async function handleSubscriptionCreated(db: ReturnType<typeof useDb>, w: Webhook) {
+  const user = await resolveActivationUser(db, w)
   if (!user) {
  return
 }
@@ -123,7 +167,7 @@ async function handleSubscriptionCreated(db: ReturnType<typeof useDb>, w: Webhoo
   }
   await db.update(users)
     .set({ plan: 'pro', planStatus: PlanStatus.ACTIVE, planExpiresAt: expires })
-    .where(eq(users.id, uid))
+    .where(eq(users.id, user.id))
 }
 
 async function handleSubscriptionUpdated(db: ReturnType<typeof useDb>, w: Webhook) {
@@ -227,15 +271,6 @@ async function handleSubscriptionPaymentSuccess(db: ReturnType<typeof useDb>, w:
 }
 
 async function handleOrderCreated(db: ReturnType<typeof useDb>, w: Webhook) {
-  const uid = uidOf(w)
-  if (!uid) {
- return
-}
-  const user = await loadUser(db, uid)
-  if (!user) {
- return
-}
-
   // Subscription orders are handled by subscription_created — avoid
   // double-counting by short-circuiting here.
   if (isSubscriptionOrder(w)) {
@@ -247,11 +282,19 @@ async function handleOrderCreated(db: ReturnType<typeof useDb>, w: Webhook) {
  return
 }
 
+  // Only resolve the user (and alert on failure) for genuine paid one-time
+  // orders — skipping the lookup for subscription/unpaid orders above keeps
+  // the no-match alert meaningful instead of noisy.
+  const user = await resolveActivationUser(db, w)
+  if (!user) {
+ return
+}
+
   const variantId = w.data?.relationships?.variant?.data?.id
   const expires = calcExpirationFromVariant(variantId ? String(variantId) : null, user.planExpiresAt)
   await db.update(users)
     .set({ plan: 'pro', planStatus: PlanStatus.ACTIVE, planExpiresAt: expires })
-    .where(eq(users.id, uid))
+    .where(eq(users.id, user.id))
 }
 
 async function handleOrderRefunded(db: ReturnType<typeof useDb>, w: Webhook) {
