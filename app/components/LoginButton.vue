@@ -192,7 +192,12 @@ async function handleAppleLogin() {
 // hitting the callback to silently bind to the attacker's account.
 function handleGitHubLogin() {
   isGitHubLoading.value = true
-  globalThis.location.href = '/v3/auth/github/start'
+  // Unlike Google/Apple (which reload in place), GitHub leaves the page
+  // for github.com, so pass the current path+query as return_to to land
+  // back here afterwards — keeps flows like /cli/auth?port=&state= intact.
+  // The server validates it to a root-relative path before honouring it.
+  const returnTo = globalThis.location.pathname + globalThis.location.search
+  globalThis.location.href = `/v3/auth/github/start?return_to=${encodeURIComponent(returnTo)}`
 }
 </script>
 

@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import process from 'node:process'
 import { defineEventHandler, getQuery, sendRedirect, setCookie } from 'h3'
 import { isProduction } from '../../../../utils/env'
-import { frontendUrl, GITHUB_LINK_COOKIE, GITHUB_STATE_COOKIE, GITHUB_STATE_TTL_SECONDS } from '../../../../utils/oauth'
+import { frontendUrl, GITHUB_LINK_COOKIE, GITHUB_RETURN_COOKIE, GITHUB_STATE_COOKIE, GITHUB_STATE_TTL_SECONDS, safeReturnPath } from '../../../../utils/oauth'
 
 // Server-initiated GitHub OAuth handshake. The browser hits this route
 // instead of building the /authorize URL client-side; we mint a random
@@ -61,6 +61,21 @@ export default defineEventHandler((event) => {
   // expire together; callback unconditionally deletes it.
   if (getQuery(event).link === '1') {
     setCookie(event, GITHUB_LINK_COOKIE, '1', {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: GITHUB_STATE_TTL_SECONDS,
+      path: '/',
+    })
+  }
+
+  // Optional post-login destination (e.g. /cli/auth?port=&state=). Pinned
+  // into an HttpOnly cookie so the callback can return the freshly
+  // authenticated user there. Validated to a root-relative path to avoid
+  // an open redirect; ignored otherwise.
+  const returnTo = safeReturnPath(getQuery(event).return_to)
+  if (returnTo) {
+    setCookie(event, GITHUB_RETURN_COOKIE, returnTo, {
       httpOnly: true,
       secure: isProd,
       sameSite: 'lax',

@@ -1,7 +1,7 @@
 import { defineEventHandler, deleteCookie, getCookie, getHeader, getQuery, getRequestURL, sendRedirect } from 'h3'
 import { tryUser } from '../../../utils/auth'
 import { setAuthCookies } from '../../../utils/auth-cookie'
-import { exchangeGithubCode, fetchGithubUser, frontendUrl, GITHUB_LINK_COOKIE, GITHUB_STATE_COOKIE, linkProviderIdentity, setGithubLogin, upsertGithubUser } from '../../../utils/oauth'
+import { exchangeGithubCode, fetchGithubUser, frontendUrl, GITHUB_LINK_COOKIE, GITHUB_RETURN_COOKIE, GITHUB_STATE_COOKIE, linkProviderIdentity, safeReturnPath, setGithubLogin, upsertGithubUser } from '../../../utils/oauth'
 
 // Mirrors GET /v3/auth/github. Receives ?code= from the OAuth provider,
 // exchanges it for an access token, fetches the GitHub profile,
@@ -95,6 +95,13 @@ export default defineEventHandler(async (event) => {
   deleteCookie(event, GITHUB_LINK_COOKIE, { path: '/' })
   const linkSession = linkIntent ? await tryUser(event) : null
 
+  // Post-login destination planted by /start?return_to=…. Single-use:
+  // delete it now and re-validate before trusting it (defence in depth
+  // against a tampered cookie). Only used on the sign-in path below;
+  // link mode always returns to the settings page.
+  const returnTo = safeReturnPath(getCookie(event, GITHUB_RETURN_COOKIE))
+  deleteCookie(event, GITHUB_RETURN_COOKIE, { path: '/' })
+
   try {
     // Mirror the redirect_uri the browser used at /authorize. The OAuth
     // app has multiple callbacks registered (codetime.dev + api.codetime.dev),
@@ -142,7 +149,7 @@ export default defineEventHandler(async (event) => {
 
     const { id, tokenV1 } = await upsertGithubUser(ghUser)
     setAuthCookies(event, id, tokenV1)
-    return sendRedirect(event, fe, 302)
+    return sendRedirect(event, `${fe}${returnTo ?? ''}`, 302)
   }
   catch (error) {
     console.error('[auth.github]', error)

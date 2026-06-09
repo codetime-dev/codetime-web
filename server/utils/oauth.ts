@@ -27,7 +27,32 @@ export function frontendUrl(): string {
 // signed-in user instead of upsert). See server/routes/v3/auth/github/start.get.ts.
 export const GITHUB_STATE_COOKIE = 'gh_oauth_state'
 export const GITHUB_LINK_COOKIE = 'gh_link_intent'
+// Bridges /v3/auth/github/start?return_to=… → callback so a logged-out
+// user who signs in from e.g. /cli/auth lands back there (with its
+// ?port=&state= intact) instead of the homepage. See safeReturnPath.
+export const GITHUB_RETURN_COOKIE = 'gh_return_to'
 export const GITHUB_STATE_TTL_SECONDS = 10 * 60
+
+// Validate a post-login redirect target. We only ever redirect within
+// our own site, so the value must be a root-relative path. Rejecting
+// anything that isn't `/<path>` — and specifically `//` or `/\`, which
+// browsers treat as protocol-relative — closes the open-redirect hole
+// where an attacker crafts ?return_to=//evil.com to bounce a freshly
+// authenticated user off-site. Returns the safe path, or null.
+export function safeReturnPath(raw: unknown): string | null {
+  if (typeof raw !== 'string' || raw.length === 0 || raw.length > 512) {
+    return null
+  }
+  // Must be root-relative and not protocol-relative / backslash-tricked.
+  if (raw[0] !== '/' || raw[1] === '/' || raw[1] === '\\') {
+    return null
+  }
+  // No control characters (incl. CR/LF) that could split headers.
+  if (/[\u0000-\u001F\u007F]/.test(raw)) {
+    return null
+  }
+  return raw
+}
 
 export async function exchangeGithubCode(code: string, redirectUri?: string): Promise<{ accessToken: string }> {
   const clientId = process.env.GITHUB_CLIENT_ID
