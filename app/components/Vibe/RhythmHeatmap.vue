@@ -4,11 +4,14 @@ import { computed } from 'vue'
 import { useExchangeRate } from '~/composables/useExchangeRate'
 import { compact } from './types'
 
-// Hour × weekday heatmap of estimated agent cost. Color intensity is
-// log-scaled so a few high-spend cells don't flatten the rest of the
-// grid to invisibility. Adapted from agent-time/RhythmHeatmap.vue with
-// the same four summary tiles (peak hour, peak day, active slots,
-// avg/slot) below the grid.
+// Hour × weekday heatmap of agent activity. Color intensity is
+// quantile-ranked (ECDF) and quantized into discrete levels, GitHub
+// contribution-graph style: occupied cells always spread across the
+// full ramp no matter how tightly the values cluster. (A previous
+// log scale collapsed typical single-order-of-magnitude data into
+// near-identical shades.) Adapted from agent-time/RhythmHeatmap.vue
+// with the same four summary tiles (peak hour, peak day, active
+// slots, avg/slot) below the grid.
 
 const props = defineProps<{ cells: VibeHeatmapCell[] }>()
 
@@ -165,15 +168,51 @@ const avgPerActiveSlot = computed(() => {
   return activeSlots === 0 ? 0 : built.value.total / activeSlots
 })
 
+// Number of discrete color steps for occupied cells. Matches the
+// legend's scale-bar segment count below.
+const LEVELS = 8
+
+// Non-zero cell values, ascending — the ECDF lookup table.
+const sortedNonZero = computed<number[]>(() => {
+  const values: number[] = []
+  for (const row of built.value.grid) {
+    for (const value of row) {
+      if (value > 0) {
+        values.push(value)
+      }
+    }
+  }
+  values.sort((a, b) => a - b)
+  return values
+})
+
+// Maps a cell value to one of LEVELS discrete intensities by its rank
+// among occupied cells (fraction of cells with value <= this one).
+// Rank-based coloring trades absolute proportionality for contrast:
+// equal values share a shade, distinct values get distinct shades.
+// Exact numbers stay available in the tooltip.
 function intensity(value: number): number {
   if (value === 0) {
- return 0
-}
-  const max = built.value.max
-  if (max <= 1) {
- return value > 0 ? 1 : 0
-}
-  return Math.min(1, Math.log10(value + 1) / Math.log10(max + 1))
+    return 0
+  }
+  const values = sortedNonZero.value
+  if (values.length === 0) {
+    return 0
+  }
+  // Binary search for the upper-bound rank of `value`.
+  let lo = 0
+  let hi = values.length
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1
+    if ((values[mid] ?? 0) <= value) {
+      lo = mid + 1
+    }
+    else {
+      hi = mid
+    }
+  }
+  const ecdf = lo / values.length
+  return Math.max(1, Math.ceil(ecdf * LEVELS)) / LEVELS
 }
 
 const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
@@ -237,10 +276,10 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
       <span class="lbl">{{ L?.scaleLabel ?? 'cost' }}</span>
       <span class="scale-bar">
         <span
-          v-for="step in 8"
+          v-for="step in LEVELS"
           :key="step"
           class="scale-step"
-          :style="{ '--i': step / 8 }"
+          :style="{ '--i': step / LEVELS }"
         />
       </span>
       <span class="lbl">{{ L?.scaleLow ?? 'low → high' }}</span>
@@ -287,7 +326,9 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
 .cell {
   height: 22px;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--ct-primary) calc(8% + var(--i, 0) * 80%), transparent);
+  /* Full 0–100% ramp: discrete LEVELS steps land ~12.5% apart, so
+     adjacent ranks stay visually distinct. */
+  background: color-mix(in srgb, var(--ct-primary) calc(var(--i, 0) * 100%), transparent);
   transition: transform 80ms ease;
 }
 
@@ -358,6 +399,6 @@ const HOUR_LABELS = Array.from({ length: HOURS }, (_, hour) => hour)
 .scale-step {
   width: 18px;
   height: 10px;
-  background: color-mix(in srgb, var(--ct-primary) calc(8% + var(--i, 0) * 80%), transparent);
+  background: color-mix(in srgb, var(--ct-primary) calc(var(--i, 0) * 100%), transparent);
 }
 </style>
