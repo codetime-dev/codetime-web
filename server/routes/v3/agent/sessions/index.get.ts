@@ -74,7 +74,7 @@ defineRouteMeta({
                       totalTokens: { type: 'integer' },
                       linesAdded: { type: 'integer' },
                       linesRemoved: { type: 'integer' },
-                      durationMs: { type: 'integer' },
+                      durationMs: { type: 'integer', description: 'Wall-clock session span in ms (first event to last event). This differs from the dashboard active-time metric, which sums per-turn active durations.' },
                     },
                   },
                 },
@@ -180,6 +180,8 @@ export default defineEventHandler(async (event) => {
       totalTokens: r.totalTokens,
       linesAdded: r.linesAdded,
       linesRemoved: r.linesRemoved,
+      // Wall-clock session span (first event → last event), not the
+      // dashboard's per-turn active-time metric.
       durationMs: r.durationMs,
     })),
     nextCursor,

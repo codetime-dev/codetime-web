@@ -368,16 +368,19 @@ export default defineEventHandler(async (event) => {
   const turnSinceClause = sinceIso
     ? sql`and t.started_at >= ${sinceIso}::timestamptz and t.started_at < ${untilIso}::timestamptz`
     : sql`and t.started_at < ${untilIso}::timestamptz`
-  // Per-turn cap on duration_ms. Several agents (notably codex, also
-  // some claude-code versions) stamp `completed_at` lazily — when the
-  // user submits the next prompt or closes the session — so a single
-  // recorded turn can span hours or days of pure idle. Empirically
-  // (see distribution work that produced this cap): p95 turn duration
-  // sits around 25-35 minutes for the noisy agents and 8-15 minutes
-  // for the well-behaved ones (opencode, pi), so anything past 15
-  // minutes is far more likely to be idle pollution than a legitimate
-  // long agentic loop. Capping individual turns at 15 min keeps the
-  // well-behaved agents untouched while clipping the long tail.
+  // Per-turn cap on duration_ms — applied ONLY to v1 (schema_version < 2)
+  // sessions. In the v1 era several agents (notably codex, also some
+  // claude-code versions) stamped `completed_at` lazily — when the user
+  // submitted the next prompt or closed the session — so a single recorded
+  // turn could span hours or days of pure idle. Empirically (see the
+  // distribution work that produced this cap): p95 turn duration sat around
+  // 25-35 minutes for the noisy agents and 8-15 minutes for the well-behaved
+  // ones (opencode, pi), so anything past 15 minutes was far more likely to
+  // be idle pollution than a legitimate long agentic loop. Capping v1 turns
+  // at 15 min keeps the well-behaved agents untouched while clipping the
+  // long tail. From v2 onward the CLI ships turn duration as gap-clamped
+  // active time, so v2 rows are trusted as-is and bypass the cap (the
+  // query below branches on s.schema_version).
   const TURN_CAP_MS = 15 * 60 * 1000
 
   // --- summary --------------------------------------------------------
@@ -547,20 +550,25 @@ export default defineEventHandler(async (event) => {
     group by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
 
-  // Per-(project, source) agent active time. Sum of `agent_turns.duration_ms`
-  // capped per turn at TURN_CAP_MS to throw out idle-polluted long turns
-  // (some agents stamp `completed_at` on the next user prompt rather
-  // than on actual completion, so a single recorded turn can span
-  // hours of idle). Filtered by the turn's own `started_at` so a long
-  // session crossing a day boundary contributes only the turns inside
-  // the requested window. Tool execution time is already included in
-  // each turn's wall clock — no need to add agent_tool_calls separately.
+  // Per-(project, source) agent active time. Sum of `agent_turns.duration_ms`,
+  // but the per-turn TURN_CAP_MS only applies to v1 sessions: those may have
+  // idle-polluted long turns (some agents stamped `completed_at` on the next
+  // user prompt rather than on actual completion, so a single recorded turn
+  // could span hours of idle). v2+ sessions ship gap-clamped active time and
+  // are summed uncapped — hence the join to agent_sessions for schema_version.
+  // Filtered by the turn's own `started_at` so a long session crossing a day
+  // boundary contributes only the turns inside the requested window. Tool
+  // execution time is already included in each turn's wall clock — no need to
+  // add agent_tool_calls separately. The machine/source filters stay on the
+  // turn alias (tMachineClause / tSourceClause) so the join can't introduce
+  // column ambiguity.
   const turnDurationRows = await db.execute(sql`
     select
       coalesce(nullif(t.project, ''), 'unknown') as project,
       coalesce(nullif(t.source, ''), 'unknown') as source,
-      coalesce(sum(least(t.duration_ms, ${TURN_CAP_MS})), 0)::bigint as duration_ms
+      coalesce(sum(case when s.schema_version >= 2 then t.duration_ms else least(t.duration_ms, ${TURN_CAP_MS}) end), 0)::bigint as duration_ms
     from agent_turns t
+    join agent_sessions s on s.rollup_key = t.rollup_key
     where t.user_id = ${userId}
       and t.duration_ms > 0
     ${turnSinceClause}

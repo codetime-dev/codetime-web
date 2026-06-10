@@ -282,6 +282,13 @@ export function estimateCostUsd(args: {
   cacheCreationInputTokens?: number
   cacheReadInputTokens?: number
   outputTokens: number
+  // reasoning is an informational subset of outputTokens under the v2
+  // token convention — it is NOT added to the billed output. OpenAI/Codex
+  // already fold reasoning into output_tokens, and the v2 CLI does the same
+  // for Gemini/OpenCode (v1-era Gemini/OpenCode rows under-count slightly
+  // until re-ingested). This matches ccusage's calculate_codex_model_cost,
+  // which multiplies output_tokens only. Kept as a parameter so callers can
+  // keep passing it as an informational field.
   reasoningOutputTokens: number
 }): { cost: number, pricing: ModelPrice | null } {
   const pricing = getPriceFor(args.model)
@@ -305,7 +312,9 @@ export function estimateCostUsd(args: {
     = fresh * pricing.inputCostPerToken
     + cacheCreation * pricing.cacheCreationInputCostPerToken
     + cacheRead * pricing.cacheReadInputCostPerToken
-    + (args.outputTokens + args.reasoningOutputTokens) * pricing.outputCostPerToken
+    // outputTokens already includes reasoning under the v2 convention; do
+    // not add reasoningOutputTokens here (ccusage parity).
+    + args.outputTokens * pricing.outputCostPerToken
   return { cost, pricing }
 }
 

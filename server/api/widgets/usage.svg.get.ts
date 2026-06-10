@@ -131,7 +131,9 @@ function renderDetailed({ theme, bg, accent, payload }: RenderArgs): string {
   // Cache-read tokens are charged at a fraction of the prompt rate;
   // subtract them so the displayed "in" matches the cost calculation.
   const fresh = Math.max(0, payload.inputTokens - payload.cachedInputTokens)
-  const output = payload.outputTokens + payload.reasoningOutputTokens
+  // outputTokens already includes reasoning under the v2 token convention;
+  // do not add reasoningOutputTokens (it would double-count the same tokens).
+  const output = payload.outputTokens
   const cx = W / 2
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Token usage, ${escapeXml(rangeLabel)}">

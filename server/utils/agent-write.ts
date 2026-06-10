@@ -10,7 +10,7 @@ import {
   machines,
   projects,
 } from '../db/schema'
-import { usdToMicros } from './agent-types'
+import { normalizeSchemaVersion, usdToMicros } from './agent-types'
 import { useDb } from './db'
 
 // Resolve (or create) the project_id for a (userId, project-string).
@@ -146,6 +146,8 @@ export async function ingestRollups(
         rollupKey: r.rollupKey,
         ...baseFk,
         payloadHash: r.payloadHash,
+        // Defaults to 1 for legacy CLIs that don't send schemaVersion.
+        schemaVersion: normalizeSchemaVersion(r.schemaVersion),
         agent: r.agent ?? null,
         startedAt: new Date(r.startedAt),
         lastEventAt: new Date(r.lastEventAt),

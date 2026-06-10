@@ -77,6 +77,10 @@ export type SessionTurnRollup = {
 export type SessionRollup = {
   rollupKey: string
   payloadHash: string
+  // Rollup wire-format version. Absent on legacy CLIs (treated as 1).
+  // v2 semantics: turn durationMs is gap-clamped active time (trusted,
+  // no read-time cap) and outputTokens already includes reasoning tokens.
+  schemaVersion?: number
   source: AgentSource
   project?: string
   sessionId: string
@@ -116,6 +120,18 @@ export type IngestResponseBody = {
   skipped: number
   conflicts: number
   conflictIds: string[]
+}
+
+// Normalize a rollup's wire schemaVersion to a stored integer. Missing,
+// non-numeric, or below-1 values fall back to 1 (legacy CLI). Fractional
+// values are floored. This is the lower-bound protection the ingest path
+// relies on so a malformed `schemaVersion` can never disable the v1 cap.
+export function normalizeSchemaVersion(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value)
+  if (!Number.isFinite(n) || n < 1) {
+    return 1
+  }
+  return Math.floor(n)
 }
 
 // Convert a float USD value to integer micro-USD. Rounds to nearest.

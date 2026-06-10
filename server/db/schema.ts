@@ -228,6 +228,10 @@ export const agentSessions = pgTable('agent_sessions', {
   linesAdded: integer('lines_added').notNull().default(0),
   linesRemoved: integer('lines_removed').notNull().default(0),
   durationMs: bigint('duration_ms', { mode: 'number' }).notNull().default(0),
+  // Rollup wire-format version. 1 = legacy CLI (turn durationMs may be
+  // lazy-stamp polluted; cap on read). 2+ = turn durationMs is already
+  // gap-clamped active time and tokensOutput already includes reasoning.
+  schemaVersion: integer('schema_version').notNull().default(1),
 }, t => ({
   tenantIdx: index('agent_sessions_tenant_idx').on(t.userId, t.machineId, t.lastEventAt),
   projectIdx: index('agent_sessions_project_idx').on(t.userId, t.projectId, t.lastEventAt),

@@ -26,11 +26,12 @@ const maxCost = computed(() => Math.max(1, ...props.rows.map(r => r.estimatedCos
 
 const view = computed(() => {
   return props.rows.slice(0, TOP).map((row, index) => {
-    // Match agent-time's totals exactly: fresh = inputTokens - cached;
-    // outputTotal = output + reasoning; totalTokens = fresh + cached
-    // + outputTotal. Pricing rows pull from the same numbers.
+    // fresh = inputTokens - cached; outputTotal = output; totalTokens =
+    // fresh + cached + outputTotal. Under the v2 token convention
+    // outputTokens already includes reasoning, so reasoningOutputTokens is
+    // not added here (it would double-count the same tokens).
     const freshInput = Math.max(0, row.inputTokens - row.cachedInputTokens)
-    const outputTotal = row.outputTokens + row.reasoningOutputTokens
+    const outputTotal = row.outputTokens
     const totalTokens = freshInput + row.cachedInputTokens + outputTotal
     const denom = Math.max(1, totalTokens)
     const cachePct = (row.cachedInputTokens / denom) * 100

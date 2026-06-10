@@ -88,6 +88,8 @@ export default defineEventHandler(async (event) => {
       totalTokens: session.totalTokens,
       linesAdded: session.linesAdded,
       linesRemoved: session.linesRemoved,
+      // Wall-clock session span (first event → last event), not the
+      // dashboard's per-turn active-time metric.
       durationMs: session.durationMs,
     },
     models,
