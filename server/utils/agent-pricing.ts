@@ -275,11 +275,24 @@ export function getPriceFor(model: string): ModelPrice | null {
   return null
 }
 
+// Anthropic prices a 1-hour ephemeral cache write at 2× input, vs the
+// default 5-minute write at 1.25× input (the latter is what
+// cacheCreationInputCostPerToken already encodes). Mirrors ccusage's
+// CACHE_CREATE_1H_INPUT_MULTIPLIER — see
+// /root/codetime/ccusage/rust/crates/ccusage/src/cost.rs
+// (cache_create_1h_cost = pricing.input * CACHE_CREATE_1H_INPUT_MULTIPLIER).
+const CACHE_CREATE_1H_INPUT_MULTIPLIER = 2
+
 export function estimateCostUsd(args: {
   model: string
   inputTokens: number
   cachedInputTokens: number
   cacheCreationInputTokens?: number
+  // TTL split subsets of cacheCreationInputTokens. Optional; absent on
+  // legacy CLIs. When both are 0 the cost is identical to the pre-split
+  // behaviour (everything charged at cacheCreationInputCostPerToken).
+  cacheCreation5mInputTokens?: number
+  cacheCreation1hInputTokens?: number
   cacheReadInputTokens?: number
   outputTokens: number
   // reasoning is an informational subset of outputTokens under the v2
@@ -296,6 +309,15 @@ export function estimateCostUsd(args: {
     return { cost: 0, pricing: null }
   }
   const cacheCreation = Math.max(0, args.cacheCreationInputTokens ?? 0)
+  // Split the cache-creation total by ephemeral TTL. `known1h` is clamped
+  // to the total so a malformed/over-counted 1h split can never bill more
+  // creation tokens than were actually written. Everything else (the 5m
+  // split plus any unsplit remainder) bills at the default creation rate;
+  // only the 1h portion takes the 2× input rate. When the 1h split is 0
+  // (legacy / split-unknown), this collapses to the original single-rate
+  // formula exactly.
+  const known1h = Math.min(Math.max(0, args.cacheCreation1hInputTokens ?? 0), cacheCreation)
+  const creationDefaultRate = Math.max(0, cacheCreation - known1h)
   // Codex / OpenAI emit only `cachedInputTokens` (a subset of input) and
   // never split it into cache_read vs cache_creation. The CLI therefore
   // writes 0 (not NULL) into the cache_read_input_tokens column, so a
@@ -310,7 +332,8 @@ export function estimateCostUsd(args: {
   const fresh = Math.max(0, args.inputTokens - cacheCreation - cacheRead)
   const cost
     = fresh * pricing.inputCostPerToken
-    + cacheCreation * pricing.cacheCreationInputCostPerToken
+    + creationDefaultRate * pricing.cacheCreationInputCostPerToken
+    + known1h * pricing.inputCostPerToken * CACHE_CREATE_1H_INPUT_MULTIPLIER
     + cacheRead * pricing.cacheReadInputCostPerToken
     // outputTokens already includes reasoning under the v2 convention; do
     // not add reasoningOutputTokens here (ccusage parity).
@@ -336,6 +359,8 @@ export function estimateCostFromRow(r: Record<string, unknown>): { cost: number,
     inputTokens: rowNum(r.input_tokens),
     cachedInputTokens: rowNum(r.cached_input_tokens),
     cacheCreationInputTokens: rowNum(r.cache_creation_input_tokens),
+    cacheCreation5mInputTokens: rowNum(r.cache_creation_5m_input_tokens),
+    cacheCreation1hInputTokens: rowNum(r.cache_creation_1h_input_tokens),
     cacheReadInputTokens: rowNum(r.cache_read_input_tokens),
     outputTokens: rowNum(r.output_tokens),
     reasoningOutputTokens: rowNum(r.reasoning_output_tokens),

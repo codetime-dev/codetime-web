@@ -306,6 +306,10 @@ export const agentSessionModels = pgTable('agent_session_models', {
   inputTokens: bigint('input_tokens', { mode: 'number' }).notNull().default(0),
   cachedInputTokens: bigint('cached_input_tokens', { mode: 'number' }).notNull().default(0),
   cacheCreationInputTokens: bigint('cache_creation_input_tokens', { mode: 'number' }).notNull().default(0),
+  // TTL split subsets of cache_creation_input_tokens. 0 = split unknown
+  // (legacy CLI that does not break creation down by ephemeral TTL).
+  cacheCreation5mInputTokens: bigint('cache_creation_5m_input_tokens', { mode: 'number' }).notNull().default(0),
+  cacheCreation1hInputTokens: bigint('cache_creation_1h_input_tokens', { mode: 'number' }).notNull().default(0),
   cacheReadInputTokens: bigint('cache_read_input_tokens', { mode: 'number' }).notNull().default(0),
   outputTokens: bigint('output_tokens', { mode: 'number' }).notNull().default(0),
   reasoningOutputTokens: bigint('reasoning_output_tokens', { mode: 'number' }).notNull().default(0),
@@ -382,6 +386,40 @@ export const agentTimeBuckets = pgTable('agent_time_buckets', {
 }))
 
 export type AgentTimeBucketRow = typeof agentTimeBuckets.$inferSelect
+
+// Per-(model, 15-min bucket) token rollups for the cost timeline. Unlike
+// agent_session_models (one row per session, with no intra-session time
+// axis), each row here is anchored to the real activity time `ts`, so a
+// session that spans midnight contributes cost to each day it actually
+// ran in — rather than dumping the whole session onto last_event_at's
+// bucket. CLI-stamped (schema v3+); v2 / legacy sessions have no rows here
+// and the dashboard falls back to the agent_session_models / last_event_at
+// path for them.
+export const agentModelBuckets = pgTable('agent_model_buckets', {
+  bucketKey: text('bucket_key').primaryKey(),
+  rollupKey: text('rollup_key').notNull().references(() => agentSessions.rollupKey, { onDelete: 'cascade' }),
+  userId: bigint('user_id', { mode: 'number' }).notNull(),
+  machineId: uuid('machine_id').notNull(),
+  source: text('source').notNull(),
+  ts: timestamp('ts', { withTimezone: true }).notNull(),
+  model: text('model').notNull(),
+  callCount: integer('call_count').notNull().default(0),
+  inputTokens: bigint('input_tokens', { mode: 'number' }).notNull().default(0),
+  cachedInputTokens: bigint('cached_input_tokens', { mode: 'number' }).notNull().default(0),
+  cacheCreationInputTokens: bigint('cache_creation_input_tokens', { mode: 'number' }).notNull().default(0),
+  // TTL split subsets of cache_creation_input_tokens (0 = split unknown).
+  cacheCreation5mInputTokens: bigint('cache_creation_5m_input_tokens', { mode: 'number' }).notNull().default(0),
+  cacheCreation1hInputTokens: bigint('cache_creation_1h_input_tokens', { mode: 'number' }).notNull().default(0),
+  cacheReadInputTokens: bigint('cache_read_input_tokens', { mode: 'number' }).notNull().default(0),
+  outputTokens: bigint('output_tokens', { mode: 'number' }).notNull().default(0),
+  reasoningOutputTokens: bigint('reasoning_output_tokens', { mode: 'number' }).notNull().default(0),
+  totalTokens: bigint('total_tokens', { mode: 'number' }).notNull().default(0),
+}, t => ({
+  tenantIdx: index('agent_model_buckets_tenant_idx').on(t.userId, t.machineId, t.ts),
+  rollupIdx: index('agent_model_buckets_rollup_idx').on(t.rollupKey),
+}))
+
+export type AgentModelBucketRow = typeof agentModelBuckets.$inferSelect
 
 // Rendezvous rows for the browser-based `codetime login` (device-code
 // flow). The CLI starts a row, the user approves it from a signed-in

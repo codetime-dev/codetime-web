@@ -66,6 +66,8 @@ type ModelRow = {
   input_tokens: number | string | null
   cached_input_tokens: number | string | null
   cache_creation_input_tokens: number | string | null
+  cache_creation_5m_input_tokens: number | string | null
+  cache_creation_1h_input_tokens: number | string | null
   cache_read_input_tokens: number | string | null
   output_tokens: number | string | null
   reasoning_output_tokens: number | string | null
@@ -91,6 +93,8 @@ function summarize(rows: ModelRow[]) {
     const inT = toN(r.input_tokens)
     const cachedT = toN(r.cached_input_tokens)
     const cacheCreationT = toN(r.cache_creation_input_tokens)
+    const cacheCreation5mT = toN(r.cache_creation_5m_input_tokens)
+    const cacheCreation1hT = toN(r.cache_creation_1h_input_tokens)
     const cacheReadT = toN(r.cache_read_input_tokens)
     const outT = toN(r.output_tokens)
     const reasoningT = toN(r.reasoning_output_tokens)
@@ -100,6 +104,8 @@ function summarize(rows: ModelRow[]) {
       inputTokens: inT,
       cachedInputTokens: cachedT,
       cacheCreationInputTokens: cacheCreationT,
+      cacheCreation5mInputTokens: cacheCreation5mT,
+      cacheCreation1hInputTokens: cacheCreation1hT,
       cacheReadInputTokens: cacheReadT,
       outputTokens: outT,
       reasoningOutputTokens: reasoningT,
@@ -172,6 +178,8 @@ export default defineEventHandler(async (event) => {
       coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
       coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
       coalesce(sum(m.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(m.cache_creation_5m_input_tokens), 0)::bigint as cache_creation_5m_input_tokens,
+      coalesce(sum(m.cache_creation_1h_input_tokens), 0)::bigint as cache_creation_1h_input_tokens,
       coalesce(sum(m.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
       coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
       coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,

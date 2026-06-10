@@ -1,6 +1,7 @@
 import type { SessionRollup } from './agent-types'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import {
+  agentModelBuckets,
   agentSessionFiles,
   agentSessionModels,
   agentSessions,
@@ -127,6 +128,7 @@ export async function ingestRollups(
     await tx.delete(agentTurns).where(inArray(agentTurns.rollupKey, writeKeys))
     await tx.delete(agentToolCalls).where(inArray(agentToolCalls.rollupKey, writeKeys))
     await tx.delete(agentSessionModels).where(inArray(agentSessionModels.rollupKey, writeKeys))
+    await tx.delete(agentModelBuckets).where(inArray(agentModelBuckets.rollupKey, writeKeys))
     await tx.delete(agentSessionFiles).where(inArray(agentSessionFiles.rollupKey, writeKeys))
     await tx.delete(agentTimeBuckets).where(inArray(agentTimeBuckets.rollupKey, writeKeys))
     await tx.delete(agentSessions).where(inArray(agentSessions.rollupKey, writeKeys))
@@ -204,11 +206,39 @@ export async function ingestRollups(
           inputTokens: m.inputTokens,
           cachedInputTokens: m.cachedInputTokens,
           cacheCreationInputTokens: m.cacheCreationInputTokens,
+          // TTL split subsets; default to 0 for legacy CLIs (schema < 3).
+          cacheCreation5mInputTokens: m.cacheCreation5mInputTokens ?? 0,
+          cacheCreation1hInputTokens: m.cacheCreation1hInputTokens ?? 0,
           cacheReadInputTokens: m.cacheReadInputTokens,
           outputTokens: m.outputTokens,
           reasoningOutputTokens: m.reasoningOutputTokens,
           totalTokens: m.totalTokens,
           estimatedCostMicros: usdToMicros(m.estimatedCostUsd),
+        })))
+      }
+
+      // Per-(model, 15-min bucket) rows. Only schema v3+ CLIs send these;
+      // older CLIs omit the field entirely, so an empty/absent array
+      // safely skips this block.
+      if (r.modelBuckets && r.modelBuckets.length > 0) {
+        await tx.insert(agentModelBuckets).values(r.modelBuckets.map((mb, i) => ({
+          bucketKey: `${r.rollupKey}:mb:${i}`,
+          rollupKey: r.rollupKey,
+          userId: ctx.userId,
+          machineId: ctx.machineId,
+          source: r.source,
+          ts: new Date(mb.ts),
+          model: mb.model,
+          callCount: mb.callCount,
+          inputTokens: mb.inputTokens,
+          cachedInputTokens: mb.cachedInputTokens,
+          cacheCreationInputTokens: mb.cacheCreationInputTokens,
+          cacheCreation5mInputTokens: mb.cacheCreation5mInputTokens,
+          cacheCreation1hInputTokens: mb.cacheCreation1hInputTokens,
+          cacheReadInputTokens: mb.cacheReadInputTokens,
+          outputTokens: mb.outputTokens,
+          reasoningOutputTokens: mb.reasoningOutputTokens,
+          totalTokens: mb.totalTokens,
         })))
       }
 

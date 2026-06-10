@@ -341,6 +341,12 @@ export default defineEventHandler(async (event) => {
   const sinceClause = sinceIso
     ? sql`and b.ts >= ${sinceIso}::timestamptz and b.ts < ${untilIso}::timestamptz`
     : sql`and b.ts < ${untilIso}::timestamptz`
+  // agent_model_buckets time clause — filters on the bucket's own `ts`
+  // (real activity time), which is the whole point of the v3 model-bucket
+  // path: cost lands on the day it actually happened, not last_event_at.
+  const mbSinceClause = sinceIso
+    ? sql`and mb.ts >= ${sinceIso}::timestamptz and mb.ts < ${untilIso}::timestamptz`
+    : sql`and mb.ts < ${untilIso}::timestamptz`
   const sessSinceClause = sinceIso
     ? sql`and s.last_event_at >= ${sinceIso}::timestamptz and s.last_event_at < ${untilIso}::timestamptz`
     : sql`and s.last_event_at < ${untilIso}::timestamptz`
@@ -351,6 +357,7 @@ export default defineEventHandler(async (event) => {
   const bMachineClause = machineId ? sql`and b.machine_id = ${machineId}::uuid` : sql``
   const sessMachineClause = machineId ? sql`and s.machine_id = ${machineId}::uuid` : sql``
   const mMachineClause = machineId ? sql`and m.machine_id = ${machineId}::uuid` : sql``
+  const mbMachineClause = machineId ? sql`and mb.machine_id = ${machineId}::uuid` : sql``
   const tMachineClause = machineId ? sql`and t.machine_id = ${machineId}::uuid` : sql``
   // Source clauses mirror the machine ones: every query already has a
   // `source` column on the relevant table, so we filter wherever the
@@ -358,6 +365,7 @@ export default defineEventHandler(async (event) => {
   const bSourceClause = source ? sql`and b.source = ${source}` : sql``
   const sessSourceClause = source ? sql`and s.source = ${source}` : sql``
   const mSourceClause = source ? sql`and m.source = ${source}` : sql``
+  const mbSourceClause = source ? sql`and mb.source = ${source}` : sql``
   const tSourceClause = source ? sql`and t.source = ${source}` : sql``
   // Turn-scoped time clause for the duration KPI. agent_turns is the
   // only table with per-turn timing the user actually perceives; the
@@ -443,14 +451,45 @@ export default defineEventHandler(async (event) => {
   // Group by (bucket, source, model) so the frontend can stack the cost
   // timeline by agent source (codex / claude-code / opencode / pi) and
   // we can recompute cost via the live OpenRouter pricing catalogue —
-  // matches agent-time's stacked bar chart. We pull from
-  // agent_session_models (not agent_time_buckets) because the bucket
-  // table's estimated_cost_micros is CLI-stamped and often 0 for codex
-  // / claude-code sessions, which would otherwise hide entire stacks.
-  // The bucket axis is derived from agent_sessions.last_event_at, which
-  // is the closest proxy to "when this model usage happened" available
-  // at the per-model granularity.
-  const tokenRows = await db.execute(sql`
+  // matches agent-time's stacked bar chart. We recompute cost from token
+  // columns (not the CLI-stamped estimated_cost_micros, which is often 0
+  // for codex / claude-code sessions, hiding entire stacks).
+  //
+  // Two sources are merged here:
+  //   v3+: agent_model_buckets — per-(model, 15-min bucket) rows anchored
+  //        to the bucket's own real activity time `ts`. This is the
+  //        accurate path: a session spanning midnight contributes cost to
+  //        each day it actually ran in. Filtered by mb.ts.
+  //   v2 / legacy: agent_session_models — one row per session with no
+  //        intra-session time axis, so its tokens are placed on the
+  //        session's last_event_at bucket (the closest proxy available).
+  //        Restricted to schema_version < 3 so v3 sessions aren't
+  //        double-counted (they live in agent_model_buckets instead).
+  // The two results are merged in JS on (ts, source, model) below.
+  const tokenRowsNew = await db.execute(sql`
+    select
+      timezone(${tz}, date_trunc(${bucketTrunc}, timezone(${tz}, mb.ts))) as ts,
+      coalesce(nullif(mb.source, ''), 'unknown') as source,
+      coalesce(mb.model, 'unknown') as model,
+      coalesce(sum(mb.input_tokens), 0)::bigint as input_tokens,
+      coalesce(sum(mb.cached_input_tokens), 0)::bigint as cached_input_tokens,
+      coalesce(sum(mb.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(mb.cache_creation_5m_input_tokens), 0)::bigint as cache_creation_5m_input_tokens,
+      coalesce(sum(mb.cache_creation_1h_input_tokens), 0)::bigint as cache_creation_1h_input_tokens,
+      coalesce(sum(mb.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
+      coalesce(sum(mb.output_tokens), 0)::bigint as output_tokens,
+      coalesce(sum(mb.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,
+      coalesce(sum(mb.call_count), 0)::bigint as model_calls
+    from agent_model_buckets mb
+    join agent_sessions s on s.rollup_key = mb.rollup_key
+    where mb.user_id = ${userId}
+      and s.schema_version >= 3
+    ${mbSinceClause}
+    ${mbMachineClause}
+    ${mbSourceClause}
+    group by 1, 2, 3
+  `) as unknown as Record<string, unknown>[]
+  const tokenRowsOld = await db.execute(sql`
     select
       timezone(${tz}, date_trunc(${bucketTrunc}, timezone(${tz}, s.last_event_at))) as ts,
       coalesce(nullif(s.source, ''), 'unknown') as source,
@@ -458,6 +497,8 @@ export default defineEventHandler(async (event) => {
       coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
       coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
       coalesce(sum(m.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(m.cache_creation_5m_input_tokens), 0)::bigint as cache_creation_5m_input_tokens,
+      coalesce(sum(m.cache_creation_1h_input_tokens), 0)::bigint as cache_creation_1h_input_tokens,
       coalesce(sum(m.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
       coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
       coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,
@@ -465,12 +506,48 @@ export default defineEventHandler(async (event) => {
     from agent_session_models m
     join agent_sessions s on s.rollup_key = m.rollup_key
     where m.user_id = ${userId}
+      and s.schema_version < 3
     ${sessSinceClause}
     ${mMachineClause}
     ${mSourceClause}
     group by 1, 2, 3
-    order by 1, 2, 3
   `) as unknown as Record<string, unknown>[]
+
+  // Merge the v3 (real-time-bucketed) and pre-v3 (last_event_at-bucketed)
+  // model token rows on (ts, source, model), summing every token column.
+  // The merged rows then feed the same fold/pricing logic as before.
+  const tokenAccCols = [
+    'input_tokens',
+    'cached_input_tokens',
+    'cache_creation_input_tokens',
+    'cache_creation_5m_input_tokens',
+    'cache_creation_1h_input_tokens',
+    'cache_read_input_tokens',
+    'output_tokens',
+    'reasoning_output_tokens',
+    'model_calls',
+  ] as const
+  const tokenMergeMap = new Map<string, Record<string, unknown>>()
+  for (const r of [...tokenRowsNew, ...tokenRowsOld]) {
+    const ts = tsToIso(r.ts)
+    const rowSource = String(r.source ?? 'unknown')
+    const model = String(r.model ?? 'unknown')
+    const key = `${ts}\u0000${rowSource}\u0000${model}`
+    const existing = tokenMergeMap.get(key)
+    if (existing) {
+      for (const col of tokenAccCols) {
+        existing[col] = toN(existing[col]) + toN(r[col])
+      }
+    }
+    else {
+      const merged: Record<string, unknown> = { ts, source: rowSource, model }
+      for (const col of tokenAccCols) {
+        merged[col] = toN(r[col])
+      }
+      tokenMergeMap.set(key, merged)
+    }
+  }
+  const tokenRows = [...tokenMergeMap.values()]
 
   // --- heatmap (hour × weekday) --------------------------------------
   // Postgres: extract(dow) returns 0=Sun..6=Sat. We want Mon=0..Sun=6
@@ -503,6 +580,8 @@ export default defineEventHandler(async (event) => {
       coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
       coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
       coalesce(sum(m.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(m.cache_creation_5m_input_tokens), 0)::bigint as cache_creation_5m_input_tokens,
+      coalesce(sum(m.cache_creation_1h_input_tokens), 0)::bigint as cache_creation_1h_input_tokens,
       coalesce(sum(m.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
       coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
       coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens
@@ -535,6 +614,8 @@ export default defineEventHandler(async (event) => {
       coalesce(sum(m.input_tokens), 0)::bigint as input_tokens,
       coalesce(sum(m.cached_input_tokens), 0)::bigint as cached_input_tokens,
       coalesce(sum(m.cache_creation_input_tokens), 0)::bigint as cache_creation_input_tokens,
+      coalesce(sum(m.cache_creation_5m_input_tokens), 0)::bigint as cache_creation_5m_input_tokens,
+      coalesce(sum(m.cache_creation_1h_input_tokens), 0)::bigint as cache_creation_1h_input_tokens,
       coalesce(sum(m.cache_read_input_tokens), 0)::bigint as cache_read_input_tokens,
       coalesce(sum(m.output_tokens), 0)::bigint as output_tokens,
       coalesce(sum(m.reasoning_output_tokens), 0)::bigint as reasoning_output_tokens,

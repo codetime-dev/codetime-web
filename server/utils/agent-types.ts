@@ -35,11 +35,34 @@ export type SessionModelRollup = {
   inputTokens: number
   cachedInputTokens: number
   cacheCreationInputTokens: number
+  // TTL split subsets of cacheCreationInputTokens. Optional; absent on
+  // legacy CLIs (schema < 3) that don't break creation down by ephemeral TTL.
+  cacheCreation5mInputTokens?: number
+  cacheCreation1hInputTokens?: number
   cacheReadInputTokens: number
   outputTokens: number
   reasoningOutputTokens: number
   totalTokens: number
   estimatedCostUsd: number
+}
+
+// Per-(model, 15-min bucket) token rollup. `ts` is aligned to a 15-min
+// boundary. Carried only by schema v3+ CLIs so the dashboard can place
+// model cost on the real activity time instead of the session's
+// last_event_at. Optional on SessionRollup — older CLIs never send it.
+export type SessionModelBucketRollup = {
+  ts: string
+  model: string
+  callCount: number
+  inputTokens: number
+  cachedInputTokens: number
+  cacheCreationInputTokens: number
+  cacheCreation5mInputTokens: number
+  cacheCreation1hInputTokens: number
+  cacheReadInputTokens: number
+  outputTokens: number
+  reasoningOutputTokens: number
+  totalTokens: number
 }
 
 export type SessionToolRollup = {
@@ -107,6 +130,8 @@ export type SessionRollup = {
   toolRollups: SessionToolRollup[]
   fileRollups: SessionFileRollup[]
   turnRollups?: SessionTurnRollup[]
+  // Per-(model, 15-min bucket) token rollups. Absent on schema < 3 CLIs.
+  modelBuckets?: SessionModelBucketRollup[]
 }
 
 export type IngestRequestBody = {

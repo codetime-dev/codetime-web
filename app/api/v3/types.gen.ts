@@ -796,6 +796,9 @@ export type GetV3AgentSessionsResponses = {
             totalTokens: number;
             linesAdded: number;
             linesRemoved: number;
+            /**
+             * Wall-clock session span in ms (first event to last event). This differs from the dashboard active-time metric, which sums per-turn active durations.
+             */
             durationMs: number;
         }>;
         nextCursor: string;
